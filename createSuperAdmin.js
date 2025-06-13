@@ -15,8 +15,8 @@ mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/avaliafeira
 
 async function createInitialSuperAdmin() {
     try {
-        const emailSuperAdmin = 'email@email.com'; // ALtere para o E-MAIL que você deseja usar para o Super Admin
-        const senhaSuperAdmin = 'senha123'; // ALtere para a SENHA FORTE que você deseja usar!
+        const emailSuperAdmin = 'docsrosas@gmail.com';
+        const senhaSuperAdmin = 'senha123';
 
         const existingSuperAdmin = await SuperAdmin.findOne({ email: emailSuperAdmin });
         if (existingSuperAdmin) {

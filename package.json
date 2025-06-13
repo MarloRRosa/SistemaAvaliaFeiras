@@ -27,5 +27,16 @@
     "autoprefixer": "^10.4.21",
     "postcss": "^8.5.5",
     "tailwindcss": "^4.1.10"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MarloRRosa/SistemaAvaliaFeiras.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MarloRRosa/SistemaAvaliaFeiras/issues"
+  },
+  "homepage": "https://github.com/MarloRRosa/SistemaAvaliaFeiras#readme"
 }
