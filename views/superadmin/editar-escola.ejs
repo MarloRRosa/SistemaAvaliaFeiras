@@ -1,0 +1,92 @@
+<div class="p-6 md:p-8 bg-gray-50 min-h-screen">
+    <div class="max-w-xl mx-auto bg-white rounded-xl shadow-md p-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Editar Escola: <%= escola.nome %></h2>
+
+        <% if (success_msg && success_msg.length > 0) { %>
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+                <strong class="font-bold">Sucesso!</strong>
+                <span class="block sm:inline"><%= success_msg %></span>
+            </div>
+        <% } %>
+        <% if (error_msg && error_msg.length > 0) { %>
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                <strong class="font-bold">Erro!</strong>
+                <span class="block sm:inline"><%= error_msg %></span>
+            </div>
+        <% } %>
+
+        <form action="/superadmin/escolas/<%= escola._id %>/editar" method="POST" class="space-y-5">
+            <!-- Campos da Escola -->
+            <div>
+                <label for="nome" class="block text-sm font-medium text-gray-700 mb-1">Nome da Escola</label>
+                <input type="text" id="nome" name="nome" value="<%= escola.nome %>" placeholder="Nome da Escola" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" required>
+            </div>
+            <div>
+                <label for="cnpj" class="block text-sm font-medium text-gray-700 mb-1">CNPJ (Opcional)</label>
+                <input type="text" id="cnpj" name="cnpj" value="<%= escola.cnpj || '' %>" placeholder="CNPJ da Escola" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+                <label for="endereco" class="block text-sm font-medium text-gray-700 mb-1">Endereço (Opcional)</label>
+                <input type="text" id="endereco" name="endereco" value="<%= escola.endereco || '' %>" placeholder="Endereço da Escola" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+                <label for="telefone" class="block text-sm font-medium text-gray-700 mb-1">Telefone (Opcional)</label>
+                <input type="text" id="telefone" name="telefone" value="<%= escola.telefone || '' %>" placeholder="Telefone da Escola" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">E-mail da Escola (Opcional)</label>
+                <input type="email" id="email" name="email" value="<%= escola.email || '' %>" placeholder="E-mail de Contato da Escola" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+                <label for="descricao" class="block text-sm font-medium text-gray-700 mb-1">Descrição (Opcional)</label>
+                <textarea id="descricao" name="descricao" rows="3" placeholder="Breve descrição da escola" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"><%= escola.descricao || '' %></textarea>
+            </div>
+            <div>
+                <label for="diretor" class="block text-sm font-medium text-gray-700 mb-1">Diretor (Opcional)</label>
+                <input type="text" id="diretor" name="diretor" value="<%= escola.diretor || '' %>" placeholder="Nome do Diretor" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+                <label for="responsavel" class="block text-sm font-medium text-gray-700 mb-1">Responsável (Opcional)</label>
+                <input type="text" id="responsavel" name="responsavel" value="<%= escola.responsavel || '' %>" placeholder="Nome do Responsável pela Feira" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <hr class="my-6 border-gray-300">
+
+            <!-- Campos do Administrador Principal -->
+            <h3 class="text-xl font-bold text-gray-800 mb-4">Informações do Administrador Principal</h3>
+            <div>
+                <label for="adminNome" class="block text-sm font-medium text-gray-700 mb-1">Nome do Admin</label>
+                <input type="text" id="adminNome" name="adminNome" value="<%= admin.nome || '' %>" placeholder="Nome Completo do Administrador" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" required>
+            </div>
+            <div>
+                <label for="adminEmail" class="block text-sm font-medium text-gray-700 mb-1">E-mail do Admin</label>
+                <input type="email" id="adminEmail" name="adminEmail" value="<%= admin.email || '' %>" placeholder="E-mail do Administrador" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" required>
+            </div>
+            <div>
+                <label for="adminCargo" class="block text-sm font-medium text-gray-700 mb-1">Cargo do Admin (Opcional)</label>
+                <input type="text" id="adminCargo" name="adminCargo" value="<%= admin.cargo || '' %>" placeholder="Cargo do Administrador (ex: Coordenador)" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+                <label for="adminTelefone" class="block text-sm font-medium text-gray-700 mb-1">Telefone do Admin (Opcional)</label>
+                <input type="text" id="adminTelefone" name="adminTelefone" value="<%= admin.telefone || '' %>" placeholder="Telefone de Contato do Administrador" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <h4 class="text-lg font-semibold text-gray-800 mt-6 mb-2">Redefinir Senha do Admin (Opcional)</h4>
+            <p class="text-sm text-gray-600 mb-4">Preencha os campos abaixo SOMENTE se desejar alterar a senha do administrador.</p>
+            <div>
+                <label for="novaSenhaAdmin" class="block text-sm font-medium text-gray-700 mb-1">Nova Senha do Admin</label>
+                <input type="password" id="novaSenhaAdmin" name="novaSenhaAdmin" placeholder="Deixe em branco para não alterar" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+                <label for="confirmarSenhaAdmin" class="block text-sm font-medium text-gray-700 mb-1">Confirmar Nova Senha do Admin</label>
+                <input type="password" id="confirmarSenhaAdmin" name="confirmarSenhaAdmin" placeholder="Confirme a nova senha" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2 rounded-lg shadow-sm transition-colors duration-200">
+                Salvar Alterações
+            </button>
+        </form>
+
+        <a href="/superadmin/dashboard" class="inline-block mt-6 text-sm text-gray-600 underline hover:text-gray-900">← Voltar ao painel</a>
+    </div>
+</div>

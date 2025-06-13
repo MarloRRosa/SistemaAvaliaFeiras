@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= titulo || 'Painel' %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+</head>
+<body class="bg-gray-50 text-gray-800">
+  <!-- Topo com links -->
+  <header class="bg-white shadow flex justify-between items-center px-6 py-3">
+    <div class="flex items-center space-x-4">
+      <h1 class="text-xl font-semibold text-blue-700">Painel Administrativo</h1>
+      <a href="/" class="text-sm text-blue-600 hover:underline">Início</a>
+    </div>
+    <a href="/superadmin/logout" class="text-sm text-red-600 hover:underline">Sair</a>
+  </header>
+
+  <main class="max-w-6xl mx-auto p-6 pt-4">
+    <% if (success_msg) { %>
+      <div class="bg-green-200 p-2 mb-4 rounded"><%= success_msg %></div>
+    <% } %>
+    <% if (error_msg) { %>
+      <div class="bg-red-200 p-2 mb-4 rounded"><%= error_msg %></div>
+    <% } %>
+    <%- body %>
+  </main>
+</body>
+</html>

@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= titulo %></title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Estilos para a navegação de abas */
+        .tab-button {
+            /* Adicionado padding, arredondamento, sombra e transições */
+            @apply px-6 py-3 text-sm font-semibold text-gray-700 bg-white rounded-lg shadow-sm border border-gray-200 
+                   hover:text-blue-600 hover:border-blue-400 hover:bg-blue-50 transition-all duration-300 ease-in-out;
+            white-space: nowrap; /* Evita que o texto quebre */
+            margin-right: 0.75rem; /* Espaçamento maior entre os botões */
+            margin-bottom: 0.5rem; /* Margem inferior para espaçamento vertical em telas menores */
+            display: inline-flex; /* Para alinhar melhor o conteúdo */
+            align-items: center;
+            justify-content: center;
+            flex-grow: 1; /* Permite que os botões cresçam para preencher o espaço */
+            text-align: center; /* Centraliza o texto dentro do botão */
+        }
+        .tab-button.active {
+            @apply text-blue-800 bg-blue-100 border-blue-600 shadow-md;
+        }
+        .tab-content {
+            /* Base para o conteúdo das abas */
+            @apply p-6 rounded-b-lg shadow-md;
+            /* Cor de fundo padrão, será sobrescrita pelas classes específicas */
+            background-color: #fcfcfc; 
+        }
+        .tab-content.hidden {
+            display: none;
+        }
+        /* Cores de fundo específicas para cada aba */
+        #visao-geral-tab { background-color: #e0f2fe; /* blue-50 */ }
+        #gerenciar-escolas-tab { background-color: #ecfdf5; /* green-50 */ }
+        #solicitacoes-tab { background-color: #fefce8; /* yellow-50 */ }
+        #projetos-sem-avaliacao-tab { background-color: #fee2e2; /* red-50 */ }
+        #ranking-projetos-tab { background-color: #ede9fe; /* purple-50 */ }
+        #resumo-avaliadores-tab { background-color: #e0f7fa; /* cyan-50 */ }
+
+        /* Estilos personalizados para tabelas de relatório */
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            border-radius: 0.5rem;
+            overflow: hidden; /* Garante que os cantos arredondados se apliquem ao conteúdo */
+        }
+        .report-table th, .report-table td {
+            padding: 0.75rem 1.5rem;
+            text-align: left;
+            vertical-align: top;
+            border-bottom: 1px solid #e5e7eb; /* gray-200 */
+        }
+        .report-table th {
+            font-weight: 600;
+            background-color: #f3f4f6; /* gray-100 */
+            color: #374151; /* gray-700 */
+            text-transform: uppercase;
+            font-size: 0.75rem;
+        }
+        .report-table tbody tr:nth-child(even) {
+            background-color: #f9fafb; /* faixa cinza clara */
+        }
+        .report-table tbody tr:hover {
+            background-color: #f3f4f6; /* gray-100 ao passar o mouse */
+        }
+        .report-table td.text-center {
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 flex flex-col min-h-screen">
+    <!-- Não incluir navbar aqui conforme solicitado -->
+
+    <main class="flex-grow p-6 md:p-8">
+        <div class="max-w-7xl mx-auto bg-white rounded-xl shadow-md p-6">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4 md:mb-0">Painel Super Admin</h2>
+                <a href="/superadmin/escolas/nova" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2 rounded-lg shadow-sm transition-colors duration-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                    </svg>
+                    Nova Escola
+                </a>
+            </div>
+
+            <!-- Mensagens Flash -->
+            <% if (success_msg && success_msg.length > 0) { %>
+                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+                    <strong class="font-bold">Sucesso!</strong>
+                    <span class="block sm:inline"><%= success_msg %></span>
+                </div>
+            <% } %>
+            <% if (error_msg && error_msg.length > 0) { %>
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                    <strong class="font-bold">Erro!</strong>
+                    <span class="block sm:inline"><%= error_msg %></span>
+                </div>
+            <% } %>
+
+            <!-- Navegação por Abas -->
+            <div class="flex flex-wrap border-b border-gray-200 mb-6 -mt-6 pb-2">
+                <button class="tab-button <%= activeTab === 'visao-geral' ? 'active' : '' %>" onclick="showTab(event, 'visao-geral')">Visão Geral</button>
+                <button class="tab-button <%= activeTab === 'gerenciar-escolas' ? 'active' : '' %>" onclick="showTab(event, 'gerenciar-escolas')">Gerenciar Escolas</button>
+                <button class="tab-button <%= activeTab === 'solicitacoes' ? 'active' : '' %>" onclick="showTab(event, 'solicitacoes')">Gerenciar Solicitações</button>
+                <button class="tab-button <%= activeTab === 'projetos-sem-avaliacao' ? 'active' : '' %>" onclick="showTab(event, 'projetos-sem-avaliacao')">Projetos Pendentes</button>
+                <button class="tab-button <%= activeTab === 'ranking-projetos' ? 'active' : '' %>" onclick="showTab(event, 'ranking-projetos')">Ranking de Projetos</button>
+                <button class="tab-button <%= activeTab === 'resumo-avaliadores' ? 'active' : '' %>" onclick="showTab(event, 'resumo-avaliadores')">Resumo de Avaliadores</button>
+            </div>
+
+            <!-- Conteúdo da Aba: Visão Geral -->
+            <div id="visao-geral-tab" class="tab-content <%= activeTab === 'visao-geral' ? '' : 'hidden' %>">
+                <h3 class="text-2xl font-bold text-gray-800 mb-4">Visão Geral do Sistema</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="bg-blue-50 p-6 rounded-lg shadow-sm">
+                        <p class="text-gray-600">Total de Escolas</p>
+                        <p class="text-3xl font-bold text-blue-800"><%= typeof totalEscolas !== 'undefined' ? totalEscolas : 'N/A' %></p>
+                    </div>
+                    <div class="bg-green-50 p-6 rounded-lg shadow-sm">
+                        <p class="text-gray-600">Total de Administradores</p>
+                        <p class="text-3xl font-bold text-green-800"><%= typeof totalAdmins !== 'undefined' ? totalAdmins : 'N/A' %></p>
+                    </div>
+                    <div class="bg-yellow-50 p-6 rounded-lg shadow-sm">
+                        <p class="text-gray-600">Total de Avaliadores</p>
+                        <p class="text-3xl font-bold text-yellow-800"><%= typeof totalAvaliadores !== 'undefined' ? totalAvaliadores : 'N/A' %></p>
+                    </div>
+                    <div class="bg-purple-50 p-6 rounded-lg shadow-sm">
+                        <p class="text-gray-600">Total de Projetos</p>
+                        <p class="text-3xl font-bold text-purple-800"><%= typeof totalProjetos !== 'undefined' ? totalProjetos : 'N/A' %></p>
+                    </div>
+                    <div class="bg-indigo-50 p-6 rounded-lg shadow-sm">
+                        <p class="text-gray-600">Total de Avaliações</p>
+                        <p class="text-3xl font-bold text-indigo-800"><%= typeof totalAvaliacoes !== 'undefined' ? totalAvaliacoes : 'N/A' %></p>
+                    </div>
+                    <div class="bg-red-50 p-6 rounded-lg shadow-sm">
+                        <p class="text-gray-600">Solicitações Pendentes</p>
+                        <p class="text-3xl font-bold text-red-800"><%= typeof totalSolicitacoesPendentes !== 'undefined' ? totalSolicitacoesPendentes : 'N/A' %></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Conteúdo da Aba: Gerenciar Escolas -->
+            <div id="gerenciar-escolas-tab" class="tab-content <%= activeTab === 'gerenciar-escolas' ? '' : 'hidden' %>">
+                <h3 class="text-2xl font-bold text-gray-800 mb-4">Gerenciar Escolas</h3>
+                
+                <% if (typeof escolasDetalhes !== 'undefined' && escolasDetalhes.length > 0) { %>
+                    <div class="overflow-x-auto bg-white rounded-lg shadow-md">
+                        <table class="min-w-full text-sm text-left text-gray-700 divide-y divide-gray-200 report-table">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3">Nome da Escola</th>
+                                    <th scope="col" class="px-6 py-3">Admin Principal</th>
+                                    <th scope="col" class="px-6 py-3 text-center">Projetos</th>
+                                    <th scope="col" class="px-6 py-3 text-center">Avaliadores</th>
+                                    <th scope="col" class="px-6 py-3 text-center">Avaliações</th>
+                                    <th scope="col" class="px-6 py-3 text-center">Status</th>
+                                    <th scope="col" class="px-6 py-3 text-center">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <% escolasDetalhes.forEach(escola => { %>
+                                    <tr class="bg-white hover:bg-gray-50 transition-colors duration-150">
+                                        <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"><%= escola.nome %></td>
+                                        <td class="px-6 py-4"><%= escola.adminEmail %></td>
+                                        <td class="px-6 py-4 text-center"><%= escola.numProjetos %></td>
+                                        <td class="px-6 py-4 text-center"><%= escola.numAvaliadores %></td>
+                                        <td class="px-6 py-4 text-center"><%= escola.numAvaliacoes %></td>
+                                        <td class="px-6 py-4 text-center">
+                                            <% if (escola.ativa) { %>
+                                                <span class="px-3 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">Ativa</span>
+                                            <% } else { %>
+                                                <span class="px-3 py-1 text-xs font-semibold text-red-800 bg-red-100 rounded-full">Inativa</span>
+                                            <% } %>
+                                        </td>
+                                        <td class="px-6 py-4 flex items-center justify-center gap-4">
+                                            <a href="/superadmin/escolas/<%= escola._id %>/editar" title="Editar" class="font-medium text-blue-600 hover:text-blue-800 transition-colors">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
+                                                    <path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" />
+                                                </svg>
+                                            </a>
+                                            
+                                            <% if (escola.ativa) { %>
+                                                <a href="/superadmin/escolas/<%= escola._id %>/inativar" title="Inativar" class="font-medium text-yellow-600 hover:text-yellow-800 transition-colors"
+                                                    onclick="return confirm('Tem certeza que deseja INATIVAR esta escola?');">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 000 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />
+                                                    </svg>
+                                                </a>
+                                            <% } else { %>
+                                                <a href="/superadmin/escolas/<%= escola._id %>/ativar" title="Ativar" class="font-medium text-green-600 hover:text-green-800 transition-colors"
+                                                    onclick="return confirm('Tem certeza que deseja ATIVAR esta escola?');">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
+                                                    </svg>
+                                                </a>
+                                            <% } %>
+
+                                            <!-- Botão: Redefinir Senha do Admin -->
+                                            <button type="button" 
+                                                    onclick="confirmResetAdminPassword('<%= escola._id %>', '<%= escola.nome %>', '<%= escola.adminEmail %>');" 
+                                                    title="Redefinir Senha do Admin" 
+                                                    class="font-medium text-red-600 hover:text-red-800 transition-colors">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+                                                </svg>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                <% } else { %>
+                    <p class="text-gray-600 text-lg text-center mt-8">Nenhuma escola cadastrada ainda.</p>
+                <% } %>
+            </div>
+
+            <!-- Conteúdo da Aba: Gerenciar Solicitações -->
+            <div id="solicitacoes-tab" class="tab-content <%= activeTab === 'solicitacoes' ? '' : 'hidden' %>">
+                <h3 class="text-2xl font-bold text-gray-800 mb-4">Gerenciar Solicitações de Acesso</h3>
+                <% if (typeof solicitacoes !== 'undefined' && solicitacoes.length > 0) { %>
+                    <div class="overflow-x-auto bg-white rounded-lg shadow-md">
+                        <table class="min-w-full text-sm text-left text-gray-700 divide-y divide-gray-200 report-table">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3">Nome da Escola</th>
+                                    <th scope="col" class="px-6 py-3">Admin Solicitante</th>
+                                    <th scope="col" class="px-6 py-3">E-mail</th>
+                                    <th scope="col" class="px-6 py-3">Data da Solicitação</th>
+                                    <th scope="col" class="px-6 py-3 text-center">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <% solicitacoes.forEach(solicitacao => { %>
+                                    <tr class="bg-white hover:bg-gray-50 transition-colors duration-150">
+                                        <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"><%= solicitacao.nomeEscola %></td>
+                                        <td class="px-6 py-4"><%= solicitacao.nomeResponsavel %></td>
+                                        <td class="px-6 py-4"><%= solicitacao.emailContato %></td>
+                                        <td class="px-6 py-4"><%= new Date(solicitacao.dataSolicitacao).toLocaleDateString('pt-BR') %></td>
+                                        <td class="px-6 py-4 flex items-center justify-center gap-2">
+                                            <a href="/superadmin/solicitacoes/<%= solicitacao._id %>/editar" title="Ver Detalhes" class="font-medium text-blue-600 hover:text-blue-800 transition-colors">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                                                    <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+                                                </svg>
+                                            </a>
+                                            <form action="/superadmin/solicitacoes/<%= solicitacao._id %>/aprovar" method="POST" class="inline">
+                                                <button type="submit" title="Aprovar" class="font-medium text-green-600 hover:text-green-800 transition-colors"
+                                                    onclick="return confirm('Tem certeza que deseja APROVAR esta solicitação? Uma nova senha será gerada para o admin.');">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                                    </svg>
+                                                </button>
+                                            </form>
+                                            <form action="/superadmin/solicitacoes/<%= solicitacao._id %>/rejeitar" method="POST" class="inline">
+                                                <button type="submit" title="Rejeitar" class="font-medium text-red-600 hover:text-red-800 transition-colors"
+                                                    onclick="return confirm('Tem certeza que deseja REJEITAR esta solicitação?');">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                                    </svg>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                <% } else { %>
+                    <p class="text-gray-600 text-lg text-center mt-8">Nenhuma solicitação de acesso pendente.</p>
+                <% } %>
+            </div>
+
+            <!-- Conteúdo da Aba: Projetos Sem Avaliação -->
+            <div id="projetos-sem-avaliacao-tab" class="tab-content <%= activeTab === 'projetos-sem-avaliacao' ? '' : 'hidden' %>">
+                <h3 class="text-2xl font-bold text-gray-800 mb-4">Projetos Pendentes de Avaliação por Escola</h3>
+                
+                <div class="mb-6">
+                    <form action="/superadmin/dashboard" method="GET" class="flex items-center space-x-4">
+                        <input type="hidden" name="tab" value="projetos-sem-avaliacao">
+                        <label for="filterEscola" class="text-gray-700">Filtrar por Escola:</label>
+                        <select id="filterEscola" name="escolaId" onchange="this.form.submit()" class="block w-auto px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            <option value="">-- Selecione uma Escola --</option>
+                            <% if (typeof todasEscolas !== 'undefined' && todasEscolas.length > 0) { %>
+                                <% todasEscolas.forEach(escola => { %>
+                                    <option value="<%= escola._id %>" <%= selectedEscolaId === String(escola._id) ? 'selected' : '' %>>
+                                        <%= escola.nome %>
+                                    </option>
+                                <% }) %>
+                            <% } %>
+                        </select>
+                    </form>
+                </div>
+
+                <% if (typeof selectedEscolaId !== 'undefined' && selectedEscolaId) { %>
+                    <% if (typeof projetosNaoAvaliados !== 'undefined' && projetosNaoAvaliados.length > 0) { %>
+                        <div class="overflow-x-auto bg-white rounded-lg shadow-md">
+                            <table class="min-w-full text-sm text-left text-gray-700 divide-y divide-gray-200 report-table">
+                                <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3">Título do Projeto</th>
+                                        <th scope="col" class="px-6 py-3">Turma</th>
+                                        <th scope="col" class="px-6 py-3">Avaliadores Designados</th>
+                                        <th scope="col" class="px-6 py-3 text-center">Avaliações Recebidas</th>
+                                        <th scope="col" class="px-6 py-3 text-center">Critérios Necessários</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200">
+                                    <% projetosNaoAvaliados.forEach(projeto => { %>
+                                        <tr class="bg-white hover:bg-gray-50 transition-colors duration-150">
+                                            <td class="px-6 py-4 font-medium text-gray-900"><%= projeto.titulo %></td>
+                                            <td class="px-6 py-4"><%= projeto.turma %></td>
+                                            <td class="px-6 py-4"><%= projeto.avaliadoresDesignados %></td>
+                                            <td class="px-6 py-4 text-center"><%= projeto.numAvaliacoesRecebidas %></td>
+                                            <td class="px-6 py-4 text-center"><%= projeto.totalCriteriosNecessarios %></td>
+                                        </tr>
+                                    <% }) %>
+                                </tbody>
+                            </table>
+                        </div>
+                    <% } else { %>
+                        <p class="text-gray-600 text-lg text-center mt-8">Todos os projetos desta escola foram avaliados ou não há projetos.</p>
+                    <% } %>
+                <% } else { %>
+                    <p class="text-gray-600 text-lg text-center mt-8">Selecione uma escola acima para ver os projetos pendentes de avaliação.</p>
+                <% } %>
+            </div>
+
+            <!-- Conteúdo da Aba: Ranking de Projetos por Categoria -->
+            <div id="ranking-projetos-tab" class="tab-content <%= activeTab === 'ranking-projetos' ? '' : 'hidden' %>">
+                <h3 class="text-2xl font-bold text-gray-800 mb-4">Ranking de Projetos por Categoria</h3>
+                <% if (typeof rankingProjetosPorCategoria !== 'undefined' && Object.keys(rankingProjetosPorCategoria).length > 0) { %>
+                    <% for (const categoriaNome in rankingProjetosPorCategoria) { %>
+                        <% const projetosNaCategoria = rankingProjetosPorCategoria[categoriaNome]; %>
+                        <div class="mb-8 p-4 border border-gray-200 rounded-lg shadow-sm bg-gray-50">
+                            <h4 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">Categoria: <%= categoriaNome %></h4>
+                            <% if (projetosNaCategoria.length > 0) { %>
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full text-sm text-left text-gray-700 report-table">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col" class="px-6 py-3">Posição</th>
+                                                <th scope="col" class="px-6 py-3">Título do Projeto</th>
+                                                <th scope="col" class="px-6 py-3 text-center">Média Geral</th>
+                                                <th scope="col" class="px-6 py-3 text-center">Nº Avaliações</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% projetosNaCategoria.forEach((projeto, index) => { %>
+                                                <tr>
+                                                    <td class="px-6 py-4 font-bold text-center"><%= index + 1 %></td>
+                                                    <td class="px-6 py-4"><%= projeto.titulo %></td>
+                                                    <td class="px-6 py-4 text-center"><%= projeto.mediaGeral %></td>
+                                                    <td class="px-6 py-4 text-center"><%= projeto.numAvaliacoes %></td>
+                                                </tr>
+                                            <% }) %>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            <% } else { %>
+                                <p class="text-gray-600 text-center mt-4">Nenhum projeto avaliado nesta categoria.</p>
+                            <% } %>
+                        </div>
+                    <% } %>
+                <% } else { %>
+                    <p class="text-gray-600 text-lg text-center mt-8">Nenhum projeto avaliado para exibir o ranking.</p>
+                <% } %>
+            </div>
+
+            <!-- Conteúdo da Aba: Resumo de Avaliadores por Escola -->
+            <div id="resumo-avaliadores-tab" class="tab-content <%= activeTab === 'resumo-avaliadores' ? '' : 'hidden' %>">
+                <h3 class="text-2xl font-bold text-gray-800 mb-4">Resumo de Avaliadores por Escola</h3>
+                <% if (typeof resumoAvaliadoresPorEscola !== 'undefined' && resumoAvaliadoresPorEscola.length > 0) { %>
+                    <% resumoAvaliadoresPorEscola.forEach(escolaInfo => { %>
+                        <div class="mb-8 p-4 border border-gray-200 rounded-lg shadow-sm bg-gray-50">
+                            <h4 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">Escola: <%= escolaInfo.escolaNome %></h4>
+                            <% if (escolaInfo.avaliadores && escolaInfo.avaliadores.length > 0) { %>
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full text-sm text-left text-gray-700 report-table">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col" class="px-6 py-3">Nome do Avaliador</th>
+                                                <th scope="col" class="px-6 py-3">E-mail</th>
+                                                <th scope="col" class="px-6 py-3 text-center">Status</th>
+                                                <th scope="col" class="px-6 py-3 text-center">Projetos Atribuídos</th>
+                                                <th scope="col" class="px-6 py-3 text-center">Projetos Avaliados</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% escolaInfo.avaliadores.forEach(avaliador => { %>
+                                                <tr>
+                                                    <td class="px-6 py-4"><%= avaliador.nome %></td>
+                                                    <td class="px-6 py-4"><%= avaliador.email %></td>
+                                                    <td class="px-6 py-4 text-center"><%= avaliador.status %></td>
+                                                    <td class="px-6 py-4 text-center"><%= avaliador.totalAtribuidos %></td>
+                                                    <td class="px-6 py-4 text-center"><%= avaliador.totalAvaliados %></td>
+                                                </tr>
+                                            <% }) %>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            <% } else { %>
+                                <p class="text-gray-600 text-center mt-4">Nenhum avaliador cadastrado para esta escola.</p>
+                            <% } %>
+                        </div>
+                    <% }) %>
+                <% } else { %>
+                    <p class="text-gray-600 text-lg text-center mt-8">Nenhuma escola com avaliadores para exibir o resumo.</p>
+                <% } %>
+            </div>
+
+
+        </div>
+    </main>
+
+    <!-- Modal para Confirmação de Redefinição de Senha -->
+    <div id="resetAdminPasswordModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+            <h3 class="text-xl font-semibold mb-4 text-gray-800">Redefinir Senha do Admin</h3>
+            <p class="text-gray-700 mb-6">Tem certeza que deseja redefinir a senha do administrador principal da escola <strong id="escolaNomeReset"></strong> (<span id="adminEmailReset"></span>)?</p>
+            <p class="text-sm text-gray-600 mb-4">Uma nova senha provisória será gerada e exibida para você. Você deve passá-la ao administrador.</p>
+            <div class="flex justify-end gap-3">
+                <button type="button" onclick="closeResetAdminPasswordModal();" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors">Cancelar</button>
+                <form id="resetAdminPasswordForm" method="POST" class="inline">
+                    <input type="hidden" name="_method" value="POST">
+                    <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">Redefinir Senha</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showTab(event, tabName) {
+            // Verifica se o evento existe antes de chamar preventDefault
+            if (event) {
+                event.preventDefault(); // Impede o comportamento padrão do link/botão
+            }
+            
+            console.log(`[showTab] Mudando para a aba: ${tabName}`); 
+
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            document.getElementById(`${tabName}-tab`).classList.remove('hidden');
+
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            // O event.currentTarget pode ser nulo se showTab for chamado diretamente (sem um evento de clique)
+            const clickedButton = event ? event.currentTarget : document.querySelector(`.tab-button[onclick*="'${tabName}'"]`);
+            if (clickedButton) {
+                clickedButton.classList.add('active');
+            }
+
+            const url = new URL(window.location);
+            url.searchParams.set('tab', tabName);
+            window.history.pushState({}, '', url);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('[DOMContentLoaded] DOM completamente carregado. Inicializando abas.');
+            const urlParams = new URLSearchParams(window.location.search);
+            const initialTab = urlParams.get('tab') || 'visao-geral';
+            console.log(`[DOMContentLoaded] Aba inicial detectada: ${initialTab}`);
+
+            // Chama showTab com a aba inicial, passando null para o evento já que não é um clique real do usuário.
+            showTab(null, initialTab);
+        });
+
+        function confirmResetAdminPassword(escolaId, escolaNome, adminEmail) {
+            const modal = document.getElementById('resetAdminPasswordModal');
+            const escolaNomeDisplay = document.getElementById('escolaNomeReset');
+            const adminEmailDisplay = document.getElementById('adminEmailReset');
+            const form = document.getElementById('resetAdminPasswordForm');
+
+            escolaNomeDisplay.innerText = escolaNome;
+            adminEmailDisplay.innerText = adminEmail;
+            form.action = `/superadmin/escolas/${escolaId}/reset-admin-password`;
+            modal.classList.remove('hidden');
+        }
+
+        function closeResetAdminPasswordModal() {
+            document.getElementById('resetAdminPasswordModal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>

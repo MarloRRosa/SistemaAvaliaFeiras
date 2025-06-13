@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= titulo || 'Sistema AvaliaFeiras' %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" crossorigin="anonymous" />
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .hover-scale {
+      transition: transform 0.3s ease-in-out;
+    }
+    .hover-scale:hover {
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+  <!-- Header -->
+  <header class="bg-white shadow-md fixed w-full z-10">
+    <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+      <h1 class="text-2xl font-bold text-blue-700">Sistema de Avaliação</h1>
+      <div class="space-x-4">
+        <a href="/admin/login" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded">Entrar</a>
+        <a href="#funcionalidades" class="text-blue-600 font-semibold hover:underline">Conhecer</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="pt-24">
+    <%- body %>
+  </main>
+
+</body>
+</html>

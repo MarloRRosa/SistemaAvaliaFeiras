@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title><%= titulo %></title>
+    <style>
+        /* Estilos Gerais do Corpo e Fonte */
+        body {
+            font-family: 'Arial', sans-serif;
+            font-size: 11px; /* Tamanho de fonte um pouco menor para PDFs */
+            margin: 25px; /* Margens maiores para o PDF, para cabeçalho/rodapé do Puppeteer */
+            color: #333;
+        }
+
+        /* Estilos do Cabeçalho Principal */
+        h1 {
+            font-size: 20px;
+            color: #0056b3; /* Um tom de azul para o título principal */
+            text-align: center;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #0056b3;
+            padding-bottom: 10px;
+        }
+
+        /* Estilos das Seções de Categoria */
+        .categoria-section {
+            margin-bottom: 30px; /* Espaço maior entre os blocos de categorias */
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.05); /* Sutil sombra para destacar */
+            page-break-inside: avoid; /* Evita quebra de página dentro de uma categoria */
+        }
+
+        .categoria-header {
+            font-size: 16px;
+            color: #007bff; /* Azul um pouco mais claro para o nome da categoria */
+            margin-top: 0;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #e0e0e0; /* Linha sutil sob o nome da categoria */
+            padding-bottom: 5px;
+        }
+
+        /* Estilos da Tabela de Projetos */
+        .projetos-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            table-layout: auto; /* Permite ajuste automático das colunas */
+        }
+
+        .projetos-table th,
+        .projetos-table td {
+            border: 1px solid #e0e0e0;
+            padding: 4px 6px; /* Padding ainda menor para caber mais colunas */
+            text-align: left;
+        }
+
+        .projetos-table thead th {
+            background-color: #e6f2ff; /* Fundo azul claro para o cabeçalho da tabela */
+            color: #0056b3;
+            font-weight: bold;
+            font-size: 9px; /* Fonte menor para cabeçalhos de critério */
+            text-transform: uppercase;
+            vertical-align: top; /* Alinha texto do cabeçalho no topo, se quebrar */
+        }
+
+        .projetos-table tbody tr:nth-child(even) {
+            background-color: #f6f6f6; /* Listras zebradas para facilitar a leitura */
+        }
+        
+        .projetos-table td {
+            font-size: 9px; /* Fonte ainda menor para células da tabela */
+        }
+
+        /* Alinhamentos específicos */
+        .text-center {
+            text-align: center;
+        }
+
+        .media-geral {
+            font-weight: bold;
+            color: #0056b3;
+        }
+
+        /* Estilo para "Nenhum projeto avaliado" */
+        .no-data-message {
+            text-align: center;
+            margin-top: 50px;
+            color: #666;
+            font-style: italic;
+            padding: 20px;
+            background-color: #f2f2f2;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <h1>Relatório Consolidado da Feira: <%= nomeFeira %></h1>
+
+    <%
+      const sortedCategories = Object.keys(relatorioFinalPorProjeto).sort();
+    %>
+
+    <% if (sortedCategories.length > 0) { %>
+        <% sortedCategories.forEach(categoria => { %>
+            <div class="categoria-section">
+                <h2 class="categoria-header"><%= categoria %></h2>
+                <table class="projetos-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 30%;">PROJETO</th>
+                            <th class="text-center" style="width: 8%;">Nº AVALIAÇÕES</th>
+                            <% criteriosOficiais.forEach(criterio => { %>
+                                <th class="text-center"><%= criterio.nome.toUpperCase() %></th>
+                            <% }) %>
+                            <th class="text-center" style="width: 12%;">MÉDIA GERAL</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% 
+                            if (relatorioFinalPorProjeto.hasOwnProperty(categoria)) {
+                                relatorioFinalPorProjeto[categoria].forEach(projeto => { 
+                        %>
+                            <tr>
+                                <td><%= projeto.titulo %></td>
+                                <td class="text-center"><%= projeto.numAvaliacoes %></td>
+                                <% criteriosOficiais.forEach(criterio => { %>
+                                    <td class="text-center">
+                                        <%= projeto.mediasCriterios[criterio._id.toString()] %>
+                                    </td>
+                                <% }) %>
+                                <td class="text-center media-geral">
+                                    <%= projeto.mediaGeral %>
+                                </td>
+                            </tr>
+                        <% 
+                                }); // Fim do forEach de projetos
+                            } // Fim do if hasOwnProperty
+                        %>
+                    </tbody>
+                </table>
+            </div>
+        <% }) %>
+    <% } else { %>
+        <p class="no-data-message">Nenhum projeto avaliado para gerar o relatório consolidado.</p>
+    <% } %>
+</body>
+</html>

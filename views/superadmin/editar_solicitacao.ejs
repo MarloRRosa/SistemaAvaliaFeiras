@@ -1,0 +1,105 @@
+<div class="p-6 md:p-8 bg-gray-50 min-h-screen">
+    <div class="max-w-7xl mx-auto bg-white rounded-xl shadow-md p-6">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4 md:mb-0">Detalhes da Solicitação de Acesso</h2>
+            <a href="/superadmin/solicitacoes" class="flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold px-5 py-2 rounded-lg shadow-sm transition-colors duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+                Voltar para Solicitações
+            </a>
+        </div>
+
+        <% if (typeof success_msg !== 'undefined' && success_msg) { %>
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg relative mb-4" role="alert">
+                <span class="block sm:inline"><%- success_msg %></span>
+            </div>
+        <% } %>
+        <% if (typeof error_msg !== 'undefined' && error_msg) { %>
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative mb-4" role="alert">
+                <span class="block sm:inline"><%- error_msg %></span>
+            </div>
+        <% } %>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-gray-50 p-6 rounded-lg shadow-inner">
+                <h3 class="text-xl font-semibold text-gray-700 mb-4">Dados da Escola</h3>
+                <form action="/superadmin/solicitacoes/<%= solicitacao._id %>/atualizar" method="POST">
+                    <div class="mb-4">
+                        <label for="nomeEscola" class="block text-gray-700 text-sm font-bold mb-2">Nome da Escola:</label>
+                        <input type="text" id="nomeEscola" name="nomeEscola" value="<%= solicitacao.nomeEscola %>" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="cnpj" class="block text-gray-700 text-sm font-bold mb-2">CNPJ:</label>
+                        <input type="text" id="cnpj" name="cnpj" value="<%= solicitacao.cnpj || '' %>" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <div class="mb-4">
+                        <label for="endereco" class="block text-gray-700 text-sm font-bold mb-2">Endereço:</label>
+                        <input type="text" id="endereco" name="endereco" value="<%= solicitacao.endereco || '' %>" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <div class="mb-4">
+                        <label for="telefoneEscola" class="block text-gray-700 text-sm font-bold mb-2">Telefone da Escola:</label>
+                        <input type="text" id="telefoneEscola" name="telefoneEscola" value="<%= solicitacao.telefoneEscola || '' %>" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-sm transition-colors duration-200 focus:outline-none focus:shadow-outline">
+                        Salvar Alterações da Escola
+                    </button>
+                </form>
+            </div>
+
+            <div class="bg-gray-50 p-6 rounded-lg shadow-inner">
+                <h3 class="text-xl font-semibold text-gray-700 mb-4">Dados do Responsável</h3>
+                <form action="/superadmin/solicitacoes/<%= solicitacao._id %>/atualizar" method="POST">
+                    <div class="mb-4">
+                        <label for="nomeResponsavel" class="block text-gray-700 text-sm font-bold mb-2">Nome do Responsável:</label>
+                        <input type="text" id="nomeResponsavel" name="nomeResponsavel" value="<%= solicitacao.nomeResponsavel %>" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="cargoResponsavel" class="block text-gray-700 text-sm font-bold mb-2">Cargo do Responsável:</label>
+                        <input type="text" id="cargoResponsavel" name="cargoResponsavel" value="<%= solicitacao.cargoResponsavel || '' %>" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <div class="mb-4">
+                        <label for="emailContato" class="block text-gray-700 text-sm font-bold mb-2">E-mail de Contato:</label>
+                        <input type="email" id="emailContato" name="emailContato" value="<%= solicitacao.emailContato %>" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="telefoneContato" class="block text-gray-700 text-sm font-bold mb-2">Telefone de Contato:</label>
+                        <input type="text" id="telefoneContato" name="telefoneContato" value="<%= solicitacao.telefoneContato || '' %>" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-sm transition-colors duration-200 focus:outline-none focus:shadow-outline">
+                        Salvar Alterações do Responsável
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="mt-8 pt-6 border-t border-gray-200 flex flex-col md:flex-row justify-between items-center">
+            <p class="text-gray-700 text-lg font-semibold mb-4 md:mb-0">Status Atual: 
+                <% if (solicitacao.status === 'Pendente') { %>
+                    <span class="px-3 py-1 text-base font-semibold text-yellow-800 bg-yellow-100 rounded-full">Pendente</span>
+                <% } else if (solicitacao.status === 'Aprovada') { %>
+                    <span class="px-3 py-1 text-base font-semibold text-green-800 bg-green-100 rounded-full">Aprovada em: <%= new Date(solicitacao.dataProcessamento).toLocaleDateString('pt-BR') %></span>
+                <% } else if (solicitacao.status === 'Rejeitada') { %>
+                    <span class="px-3 py-1 text-base font-semibold text-red-800 bg-red-100 rounded-full">Rejeitada em: <%= new Date(solicitacao.dataProcessamento).toLocaleDateString('pt-BR') %></span>
+                <% } %>
+            </p>
+
+            <% if (solicitacao.status === 'Pendente') { %>
+                <div class="flex gap-4">
+                    <form action="/superadmin/solicitacoes/<%= solicitacao._id %>/aprovar" method="POST" onsubmit="return confirm('Tem certeza que deseja APROVAR esta solicitação?');">
+                        <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-colors duration-200 focus:outline-none focus:shadow-outline">
+                            Aprovar Solicitação
+                        </button>
+                    </form>
+                    <form action="/superadmin/solicitacoes/<%= solicitacao._id %>/rejeitar" method="POST" onsubmit="return confirm('Tem certeza que deseja REJEITAR esta solicitação?');">
+                        <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-colors duration-200 focus:outline-none focus:shadow-outline">
+                            Rejeitar Solicitação
+                        </button>
+                    </form>
+                </div>
+            <% } else { %>
+                <p class="text-gray-500 italic">Esta solicitação já foi processada.</p>
+            <% } %>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,36 @@
+// models/SolicitacaoEscola.js
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+
+const SolicitacaoEscolaSchema = new Schema({
+    nomeEscola: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    emailAdmin: { // Email do futuro admin da escola
+        type: String,
+        required: true,
+        unique: true, // Cada email de solicitação deve ser único
+        lowercase: true,
+        trim: true
+    },
+    status: {
+        type: String,
+        enum: ['pendente', 'aprovada', 'rejeitada'],
+        default: 'pendente'
+    },
+    mensagemRejeicao: { // Opcional, para caso a solicitação seja rejeitada
+        type: String,
+        trim: true
+    },
+    dataSolicitacao: {
+        type: Date,
+        default: Date.now
+    },
+    dataProcessamento: { // Data em que a solicitação foi aprovada/rejeitada
+        type: Date
+    }
+});
+
+module.exports = mongoose.model('SolicitacaoEscola', SolicitacaoEscolaSchema);

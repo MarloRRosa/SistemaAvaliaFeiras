@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Projetos Sem Avaliação</title>
+  <style>
+    /* Estilos Gerais do Corpo e Fonte - Consistente com outros relatórios */
+    body {
+      font-family: 'Arial', sans-serif;
+      font-size: 11px; /* Tamanho de fonte consistente para PDFs */
+      margin: 25px; /* Margens consistentes para PDF com cabeçalho/rodapé */
+      color: #333;
+    }
+
+    /* Estilos do Cabeçalho Principal */
+    h1 {
+      font-size: 20px;
+      color: #0056b3;
+      text-align: center;
+      padding-bottom: 10px;
+    }
+
+    /* Classe auxiliar para a linha inferior e margem do H1 */
+    .h1-bottom-line {
+      margin-bottom: 25px; /* Espaço após o título principal */
+      border-bottom: 2px solid #0056b3;
+    }
+
+    /* Estilos para a mensagem de total */
+    .total-info {
+      font-size: 12px;
+      margin-bottom: 20px;
+      text-align: center;
+      color: #555;
+    }
+
+    /* Estilos da Tabela de Projetos - Consistente com outros relatórios */
+    .projetos-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      background-color: #fff;
+      box-shadow: 0 0 5px rgba(0,0,0,0.05); /* Sombra suave para a tabela */
+      page-break-inside: avoid; /* Para tentar manter a tabela inteira na página */
+      
+      /* --- ADIÇÕES IMPORTANTES AQUI --- */
+      table-layout: fixed; /* Força as larguras das colunas */
+      /* -------------------------------- */
+    }
+
+    .projetos-table th,
+    .projetos-table td {
+      border: 1px solid #e0e0e0;
+      padding: 8px 12px;
+      text-align: left;
+      
+      /* --- ADIÇÕES IMPORTANTES AQUI --- */
+      word-wrap: break-word; /* Quebra palavras longas */
+      overflow-wrap: break-word; /* Suporte para browsers modernos */
+      /* -------------------------------- */
+    }
+
+    .projetos-table thead th {
+      background-color: #e6f2ff;
+      color: #0056b3;
+      font-weight: bold;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    .projetos-table tbody tr:nth-child(even) {
+      background-color: #f6f6f6;
+    }
+    
+    .projetos-table td {
+        font-size: 10px; /* Reduzi para 10px para dar mais espaço, pode ajustar */
+    }
+
+    /* Ajuste de largura das colunas */
+    .projetos-table th:nth-child(1),
+    .projetos-table td:nth-child(1) { /* Coluna Título do Projeto */
+        width: 40%; /* Reduzido levemente para dar mais espaço */
+    }
+
+    .projetos-table th:nth-child(2),
+    .projetos-table td:nth-child(2) { /* Coluna Turma */
+        width: 15%;
+        text-align: center;
+    }
+
+    .projetos-table th:nth-child(3),
+    .projetos-table td:nth-child(3) { /* Coluna Avaliadores Designados */
+        width: 45%; /* Aumentado para dar mais espaço aos nomes longos */
+    }
+
+    /* Estilo para "Nenhum projeto sem avaliação" */
+    .no-data-message {
+        text-align: center;
+        margin-top: 50px;
+        color: #666;
+        font-style: italic;
+        padding: 20px;
+        background-color: #f2f2f2;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+  <h1 class="h1-bottom-line">Projetos Sem Avaliação da Feira: <%= nomeFeira %></h1>
+  
+  <p class="total-info">Total de Projetos Sem Avaliação: <strong><%= projetosNaoAvaliados.length %></strong></p>
+
+  <% if (projetosNaoAvaliados.length > 0) { %>
+    <table class="projetos-table">
+      <thead>
+        <tr>
+          <th>Título do Projeto</th>
+          <th>Turma</th>
+          <th>Avaliadores Designados</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% projetosNaoAvaliados.forEach(p => { %>
+          <tr>
+            <td><%= p.titulo %></td>
+            <td><%= p.turma %></td>
+            <td><%= p.avaliadoresDesignados %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } else { %>
+    <p class="no-data-message">Nenhum projeto sem avaliação encontrado para esta feira.</p>
+  <% } %>
+
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title><%= titulo %></title>
+  <style>
+    /* Estilos Gerais do Corpo e Fonte */
+    body {
+      font-family: 'Arial', sans-serif;
+      font-size: 11px; /* Tamanho de fonte um pouco menor para PDFs */
+      margin: 25px; /* Margens maiores para o PDF */
+      color: #333;
+    }
+
+    /* Estilos do Cabeçalho Principal */
+    h1 {
+      font-size: 20px;
+      color: #0056b3; /* Um tom de azul para o título principal */
+      text-align: center;
+      margin-bottom: 25px;
+      border-bottom: 2px solid #0056b3;
+      padding-bottom: 10px;
+    }
+
+    /* Informações da Feira/Escola */
+    .info-header {
+      font-size: 14px;
+      text-align: center;
+      margin-bottom: 20px;
+      color: #555;
+    }
+
+    /* Estilos da Tabela de Projetos */
+    .projetos-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    .projetos-table th, .projetos-table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+
+    .projetos-table th {
+      background-color: #f2f2f2;
+      color: #444;
+      font-weight: bold;
+    }
+
+    .projetos-table tbody tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    /* Colunas Específicas */
+    .projetos-table th:nth-child(1),
+    .projetos-table td:nth-child(1) { /* Posição */
+        width: 8%;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    .projetos-table th:nth-child(3),
+    .projetos-table td:nth-child(3) { /* Média Geral */
+        width: 15%;
+        text-align: center;
+        font-weight: bold;
+        color: #0056b3;
+    }
+
+    /* Mensagem de "Nenhum dado" */
+    .no-data-message {
+      text-align: center;
+      margin-top: 50px;
+      color: #666;
+      font-style: italic;
+      padding: 20px;
+      background-color: #f2f2f2;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+  <h1><%= titulo %> da Feira: <%= nomeFeira %></h1>
+  <p class="info-header">Escola: <%= escola.nome %> | Diretor: <%= escola.diretor %></p>
+
+  <% if (projetos && projetos.length > 0) { %>
+    <table class="projetos-table">
+      <thead>
+        <tr>
+          <th>Posição</th>
+          <th>Título do Projeto</th>
+          <th>Média Final</th>
+          <th>Categoria</th>
+          <th>Turma</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% projetos.forEach((projeto, index) => { %>
+          <tr>
+            <td class="text-center"><%= index + 1 %></td>
+            <td><%= projeto.titulo %></td>
+            <td class="text-center"><%= projeto.notaFinal %></td>
+            <td><%= projeto.categoria ? projeto.categoria.nome : 'Sem Categoria' %></td>
+            <td><%= projeto.turma || 'N/A' %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } else { %>
+    <p class="no-data-message">Nenhum projeto com resultado final para exibir.</p>
+  <% } %>
+</body>
+</html>
