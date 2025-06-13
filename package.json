@@ -1,4 +1,14 @@
 {
+  "name": "avaliafeiras",
+  "version": "1.0.0",
+  "description": "Sistema de avaliação de feiras escolares",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
   "dependencies": {
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.2",
