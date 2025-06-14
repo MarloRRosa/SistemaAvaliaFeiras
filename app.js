@@ -7,7 +7,7 @@ const flash = require('connect-flash');
 const path = require('path');
 const MongoDBStore = require('connect-mongodb-session')(session);
 const methodOverride = require('method-override');
-require('dotenv').config();
+//require('dotenv').config();
 
 // Importa a função auxiliar
 const { formatarDatasParaInput } = require('./utils/helpers');
