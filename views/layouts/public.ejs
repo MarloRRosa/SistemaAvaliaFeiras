@@ -1,46 +1,64 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title><%= titulo || 'Sistema AvaliaFeiras' %></title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" crossorigin="anonymous" />
-  <style>
-    body {
-      font-family: 'Inter', sans-serif;
-    }
-    .hover-scale {
-      transition: transform 0.3s ease-in-out;
-    }
-    .hover-scale:hover {
-      transform: scale(1.05);
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= titulo || 'Sistema AvaliaFeiras' %></title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" crossorigin="anonymous" />
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            display: flex; /* Para flexbox para o layout sticky footer */
+            flex-direction: column; /* Para empilhar o header, main e footer */
+            min-height: 100vh; /* Garante que o body ocupe a altura total da viewport */
+        }
+        .hover-scale {
+            transition: transform 0.3s ease-in-out;
+        }
+        .hover-scale:hover {
+            transform: scale(1.05);
+        }
+    </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
 
-  <!-- Cabeçalho institucional -->
-  <header class="bg-white shadow-md fixed w-full z-10">
-    <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-      <h1 class="text-2xl font-bold text-blue-700">Sistema de Avaliação</h1>
-      <div class="space-x-4">
-        <a href="/admin/login" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded">Entrar</a>
-        <a href="#funcionalidades" class="text-blue-600 font-semibold hover:underline">Conhecer</a>
-      </div>
-    </div>
-  </header>
+    <!-- Cabeçalho institucional -->
+    <header class="bg-white shadow-md fixed w-full z-10">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-blue-700">Sistema de Avaliação</h1>
+            <div class="space-x-4">
+                <a href="/admin/login" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded">Entrar</a>
+                <a href="#funcionalidades" class="text-blue-600 font-semibold hover:underline">Conhecer</a>
+            </div>
+        </div>
+    </header>
 
-  <main class="pt-24 max-w-6xl mx-auto p-6">
-    <% if (success_msg) { %>
-      <div class="bg-green-200 p-2 mb-4 rounded"><%= success_msg %></div>
-    <% } %>
-    <% if (error_msg) { %>
-      <div class="bg-red-200 p-2 mb-4 rounded"><%= error_msg %></div>
-    <% } %>
-    <%- body %>
-  </main>
+    <main class="pt-24 max-w-6xl mx-auto p-6 flex-grow"> <!-- Adicionado flex-grow para empurrar o footer para baixo -->
+        <% if (success_msg) { %>
+            <div class="bg-green-200 p-2 mb-4 rounded"><%= success_msg %></div>
+        <% } %>
+        <% if (error_msg) { %>
+            <div class="bg-red-200 p-2 mb-4 rounded"><%= error_msg %></div>
+        <% } %>
+        <%- body %> <!-- Conteúdo da view específica será injetado aqui -->
+    </main>
+
+    <!-- Footer movido para o layout para ser consistente em todas as páginas -->
+    <footer class="bg-gray-800 text-white py-10 text-center">
+        <div class="container mx-auto px-6">
+            <p>&copy; 2025 Sistema de Avaliação de Projetos Escolares. Todos os direitos reservados.</p>
+            <div class="mt-4 text-sm">
+                <a href="/politica-privacidade" class="text-gray-400 hover:text-white mx-2">Política de Privacidade</a> |
+                <a href="/termos-de-uso" class="text-gray-400 hover:text-white mx-2">Termos de Uso</a>
+                <span class="mx-2">|</span> 
+                <a href="/superadmin/login" class="text-gray-400 hover:text-white text-sm">
+                    Acesso Super Admin
+                </a>
+            </div>
+        </div>
+    </footer>
 
 </body>
 </html>
