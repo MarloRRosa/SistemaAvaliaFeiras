@@ -19,12 +19,22 @@ require('dotenv').config();
 // Funções Auxiliares e Configurações
 // ========================================================================
 
+/**
+ * Hashes uma senha usando bcrypt.
+ * @param {string} password A senha em texto plano.
+ * @returns {Promise<string>} A senha hashed.
+ */
 async function hashPassword(password) {
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(password, salt);
     return hash;
 }
 
+/**
+ * Gera uma senha temporária aleatória.
+ * @param {number} length O comprimento da senha (padrão: 8).
+ * @returns {string} A senha temporária.
+ */
 function generateTemporaryPassword(length = 8) {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+';
     let password = '';
@@ -34,111 +44,131 @@ function generateTemporaryPassword(length = 8) {
     return password;
 }
 
-async function sendAdminTemporaryPasswordEmail(admin, temporaryPassword, appUrl) {
+/**
+ * Envia um e-mail com a senha temporária do administrador.
+ * @param {string} email O endereço de e-mail do administrador.
+ * @param {string} temporaryPassword A senha temporária gerada.
+ * @param {string} escolaNome O nome da escola associada ao administrador.
+ */
+async function sendAdminTemporaryPasswordEmail(email, temporaryPassword, escolaNome) {
+    const transporter = nodemailer.createTransport({
+        host: process.env.EMAIL_HOST,
+        port: process.env.EMAIL_PORT,
+        secure: process.env.EMAIL_PORT == 465, // true for 465, false for other ports
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS,
+        },
+        tls: {
+            rejectUnauthorized: false // Aceitar certificados autoassinados ou inválidos, útil para dev
+        }
+    });
+
     const mailOptions = {
-        from: `"AvaliaFeiras" <${process.env.EMAIL_USER}>`,
-        to: admin.email,
-        subject: 'Sua Senha de Administrador do AvaliaFeiras foi Redefinida',
+        from: `AvaliaFeiras <${process.env.EMAIL_USER}>`,
+        to: email,
+        subject: 'Sua Senha Temporária - AvaliaFeiras',
         html: `
-            <p>Olá, ${admin.nome},</p>
-            <p>Sua senha de administrador da escola no sistema AvaliaFeiras foi redefinida pelo Super Admin.</p>
-            <p>Sua nova senha provisória é: <strong>${temporaryPassword}</strong></p>
-            <p>Recomendamos fortemente que você altere sua senha imediatamente após o login para garantir a segurança da sua conta.</p>
-            <p>Clique aqui para fazer login: <a href="${appUrl}/admin/login">${appUrl}/admin/login</a></p>
+            <p>Olá,</p>
+            <p>Sua conta de administrador para a escola <strong>${escolaNome}</strong> no sistema AvaliaFeiras foi criada com sucesso.</p>
+            <p>Sua senha temporária é: <strong>${temporaryPassword}</strong></p>
+            <p>Por favor, faça login em ${process.env.APP_BASE_URL}/admin/login e altere sua senha assim que possível.</p>
             <p>Atenciosamente,<br>Equipe AvaliaFeiras</p>
             <hr>
             <p style="font-size: 10px; color: #777;">Este é um e-mail automático, por favor, não responda.</p>
         `
     };
 
-    try {
-        if (process.env.EMAIL_USER && process.env.EMAIL_HOST && process.env.EMAIL_PASS) {
-            await transporter.sendMail(mailOptions);
-            console.log(`E-mail com senha provisória enviado para ${admin.email}`);
-            return true;
-        } else {
-            console.warn('Variáveis de ambiente de e-mail não configuradas. E-mail de senha provisória para admin não será enviado.');
-            return false;
-        }
-    } catch (error) {
-        console.error(`Erro ao enviar e-mail de senha provisória para ${admin.email}:`, error);
-        return false;
+    if (process.env.EMAIL_USER && process.env.EMAIL_HOST && process.env.EMAIL_PASS) {
+        await transporter.sendMail(mailOptions);
+        console.log(`E-mail de senha temporária enviado para ${email}`);
+    } else {
+        console.warn('Variáveis de ambiente de e-mail não configuradas. E-mail de senha temporária não será enviado.');
     }
 }
 
-function verificarSuperAdmin(req, res, next) {
-    if (res.headersSent) {
-        console.warn('Headers já enviados em verificarSuperAdmin, abortando.');
-        return;
-    }
-    if (req.session && req.session.superAdminId) {
+/**
+ * Middleware para verificar se o usuário é um Super Admin e está autenticado.
+ * @param {object} req Objeto de requisição.
+ * @param {object} res Objeto de resposta.
+ * @param {function} next Próxima função middleware.
+ */
+function isSuperAdminAuthenticated(req, res, next) {
+    if (req.session.superAdminId) {
         return next();
     }
-    req.flash('error_msg', 'Você precisa estar logado como Super Admin para acessar esta área.');
+    req.flash('error_msg', 'Acesso negado. Por favor, faça login como Super Admin.');
     res.redirect('/superadmin/login');
 }
 
-const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,
-    port: parseInt(process.env.EMAIL_PORT, 10),
-    secure: process.env.EMAIL_SECURE === 'true',
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    },
-    tls: {
-        rejectUnauthorized: false
-    }
-});
-
-
 // ========================================================================
-// ROTAS DE AUTENTICAÇÃO DO SUPER ADMIN
+// Rotas de Autenticação
 // ========================================================================
 
+// Rota para o formulário de login do Super Admin
 router.get('/login', (req, res) => {
     if (req.session.superAdminId) {
-        return res.redirect('/superadmin/dashboard');
+        return res.redirect('/superadmin/dashboard'); // Redireciona se já estiver logado
     }
     res.render('superadmin/login', {
-        titulo: 'Login Super Admin',
-        layout: 'layouts/public',
-        error_msg: req.flash('error_msg'),
-        success_msg: req.flash('success_msg')
+        layout: 'layout_login'
     });
 });
 
+// Rota para lidar com o login do Super Admin
 router.post('/login', async (req, res) => {
     const { email, senha } = req.body;
 
+    console.log('--- Tentativa de Login Super Admin ---');
+    console.log('E-mail recebido:', email);
+
     if (!email || !senha) {
+        console.log('Campos vazios.');
         req.flash('error_msg', 'Por favor, preencha todos os campos.');
         return res.redirect('/superadmin/login');
     }
 
     try {
-        // --- CORREÇÃO AQUI: Converte o email para minúsculas antes da busca ---
-        const emailLowerCase = email.toLowerCase(); 
+        const emailLowerCase = email.toLowerCase();
+        console.log('E-mail para busca no BD (lowercase):', emailLowerCase);
+
         const superAdmin = await SuperAdmin.findOne({ email: emailLowerCase });
+        console.log('Super Admin encontrado:', superAdmin ? superAdmin.email : 'Nenhum');
 
         if (!superAdmin) {
+            console.log('Super Admin não encontrado.');
             req.flash('error_msg', 'Credenciais inválidas.');
             return res.redirect('/superadmin/login');
         }
 
         const isMatch = await bcrypt.compare(senha, superAdmin.senha);
+        console.log('Comparação de senha (isMatch):', isMatch);
 
         if (!isMatch) {
+            console.log('Senha incorreta.');
             req.flash('error_msg', 'Credenciais inválidas.');
             return res.redirect('/superadmin/login');
         }
 
+        // Atribui o ID do Super Admin à sessão
         req.session.superAdminId = superAdmin._id;
-        req.flash('success_msg', 'Bem-vindo ao Painel Super Admin!');
-        res.redirect('/superadmin/dashboard');
+        console.log('ID do Super Admin atribuído à sessão:', req.session.superAdminId);
+
+        // Força o salvamento da sessão antes de redirecionar para garantir persistência
+        req.session.save(err => {
+            if (err) {
+                console.error('Erro ao salvar a sessão após login:', err);
+                req.flash('error_msg', 'Ocorreu um erro ao persistir a sessão. Tente novamente.');
+                return res.redirect('/superadmin/login');
+            }
+            console.log('Sessão salva com sucesso. Redirecionando para dashboard.');
+            req.flash('success_msg', 'Bem-vindo ao Painel Super Admin!');
+            res.redirect('/superadmin/dashboard');
+        });
 
     } catch (err) {
-        console.error('Erro no login do Super Admin:', err);
+        console.error('Erro no login do Super Admin (catch geral):', err);
+        // Garante que o redirecionamento ocorre se req.session.save falhar ou outros erros acontecerem
         if (!res.headersSent) {
             req.flash('error_msg', 'Ocorreu um erro ao tentar fazer login. Tente novamente.');
             res.redirect('/superadmin/login');
@@ -146,808 +176,607 @@ router.post('/login', async (req, res) => {
     }
 });
 
-router.get('/logout', verificarSuperAdmin, (req, res) => {
+// Rota para logout do Super Admin
+router.get('/logout', isSuperAdminAuthenticated, (req, res) => {
     req.session.destroy(err => {
         if (err) {
-            console.error("Erro ao fazer logout do Super Admin:", err);
-            if (!res.headersSent) {
-                req.flash('error_msg', 'Ocorreu um erro ao sair. Tente novamente.');
-                return res.redirect('/superadmin/dashboard');
-            }
-            return;
+            console.error('Erro ao destruir sessão:', err);
+            req.flash('error_msg', 'Erro ao fazer logout.');
+            return res.redirect('/superadmin/dashboard');
         }
-        if (!res.headersSent) {
-            res.clearCookie('connect.sid');
-            req.flash('success_msg', 'Você saiu da sua conta de Super Admin.');
-            res.redirect('/superadmin/login');
-        }
+        res.clearCookie('connect.sid'); // Limpa o cookie da sessão
+        req.flash('success_msg', 'Você foi desconectado com sucesso.');
+        res.redirect('/superadmin/login');
     });
 });
 
 // ========================================================================
-// ROTAS DO DASHBOARD E GESTÃO DE ESCOLAS (AGORA COM ABAS E RELATÓRIOS)
+// Rotas do Dashboard
 // ========================================================================
 
-router.get('/dashboard', verificarSuperAdmin, async (req, res) => {
-    if (res.headersSent) {
-        console.warn('Headers já enviados na rota do dashboard do Super Admin, abortando renderização.');
-        return;
-    }
+// Dashboard do Super Admin
+router.get('/dashboard', isSuperAdminAuthenticated, async (req, res) => {
     try {
-        const activeTab = req.query.tab || 'visao-geral';
-
-        // Inicializa todas as variáveis que podem ser passadas para a view
-        let dataForTab = {
-            totalEscolas: 0,
-            totalAdmins: 0,
-            totalAvaliadores: 0,
-            totalProjetos: 0,
-            totalAvaliacoes: 0,
-            totalSolicitacoesPendentes: 0,
-            escolasDetalhes: [],
-            solicitacoes: [],
-            projetosNaoAvaliados: [],
-            todasEscolas: [], // Usado para o filtro de escolas
-            selectedEscolaId: '',
-            rankingProjetosPorCategoria: {}, // Novo
-            resumoAvaliadoresPorEscola: [] // Novo
-        };
-
-        // Carrega dados base (se necessário em múltiplas abas, ou carregados on-demand)
-        const escolasCadastradas = await Escola.find().sort({ nome: 1 }).lean();
-        dataForTab.todasEscolas = escolasCadastradas; // Para o dropdown de filtro em "Projetos Pendentes"
-
-        if (activeTab === 'visao-geral') {
-            dataForTab.totalEscolas = await Escola.countDocuments();
-            dataForTab.totalAdmins = await Admin.countDocuments();
-            dataForTab.totalAvaliadores = await Avaliador.countDocuments();
-            dataForTab.totalProjetos = await Projeto.countDocuments();
-            dataForTab.totalAvaliacoes = await Avaliacao.countDocuments();
-            dataForTab.totalSolicitacoesPendentes = await SolicitacaoAcesso.countDocuments({ status: 'Pendente' });
-
-        } else if (activeTab === 'gerenciar-escolas') {
-            const escolasComDetalhes = await Promise.all(escolasCadastradas.map(async (escola) => {
-                const adminPrincipal = await Admin.findOne({ escolaId: escola._id });
-                const numProjetos = await Projeto.countDocuments({ escolaId: escola._id });
-                const numAvaliadores = await Avaliador.countDocuments({ escolaId: escola._id });
-                const numAvaliacoes = await Avaliacao.countDocuments({ escolaId: escola._id });
-
-                return {
-                    ...escola, // Usar o objeto escola.lean() diretamente
-                    adminEmail: adminPrincipal ? adminPrincipal.email : 'N/A',
-                    numProjetos,
-                    numAvaliadores,
-                    numAvaliacoes
-                };
-            }));
-            dataForTab.escolasDetalhes = escolasComDetalhes;
-
-        } else if (activeTab === 'solicitacoes') {
-            dataForTab.solicitacoes = await SolicitacaoAcesso.find({ status: 'Pendente' }).sort({ dataSolicitacao: 'asc' }).lean();
-
-        } else if (activeTab === 'projetos-sem-avaliacao') {
-            const selectedEscolaId = req.query.escolaId;
-            dataForTab.selectedEscolaId = selectedEscolaId;
-
-            if (selectedEscolaId && mongoose.Types.ObjectId.isValid(selectedEscolaId)) {
-                const feiraAtual = await Feira.findOne({ status: 'ativa', escola: selectedEscolaId });
-
-                if (feiraAtual) {
-                    const projetos = await Projeto.find({ feira: feiraAtual._id, escolaId: selectedEscolaId }).lean();
-                    const avaliacoes = await Avaliacao.find({ feira: feiraAtual._id, escola: selectedEscolaId }).lean();
-                    const avaliadores = await Avaliador.find({ feira: feiraAtual._id, escolaId: selectedEscolaId }).lean();
-                    const criteriosDaFeira = await Criterio.find({ feira: feiraAtual._id, escolaId: selectedEscolaId }).lean();
-                    const totalCriteriosFeira = criteriosDaFeira.length;
-
-                    for (const projeto of projetos) {
-                        const avaliacoesDoProjeto = avaliacoes.filter(a => a.projeto && String(a.projeto) === String(projeto._id));
-                        
-                        let isCompleta = true;
-                        if (totalCriteriosFeira > 0) {
-                            for (const criterio of criteriosDaFeira) {
-                                const temNotaParaCriterio = avaliacoesDoProjeto.some(aval => 
-                                    aval.itens.some(item => 
-                                        String(item.criterio) === String(criterio._id) && 
-                                        item.nota !== undefined && item.nota !== null
-                                    )
-                                );
-                                if (!temNotaParaCriterio) {
-                                    isCompleta = false;
-                                    break;
-                                }
-                            }
-                        } else {
-                            if (!avaliacoesDoProjeto || avaliacoesDoProjeto.length === 0) {
-                                isCompleta = false;
-                            }
-                        }
-
-                        if (!isCompleta) {
-                            const assignedEvaluators = avaliadores
-                                .filter(av => av.projetosAtribuidos && av.projetosAtribuidos.some(pa => String(pa) === String(projeto._id)))
-                                .map(av => av.nome)
-                                .join(', ');
-
-                            dataForTab.projetosNaoAvaliados.push({
-                                titulo: projeto.titulo,
-                                turma: projeto.turma,
-                                avaliadoresDesignados: assignedEvaluators || 'Nenhum avaliador atribuído',
-                                numAvaliacoesRecebidas: avaliacoesDoProjeto.length,
-                                totalCriteriosNecessarios: totalCriteriosFeira
-                            });
-                        }
-                    }
-                }
-            }
-        } else if (activeTab === 'ranking-projetos') {
-            const categorias = await Criterio.aggregate([ // Usar Criterio para obter categorias únicas e seus nomes
-                { $match: { feira: { $ne: null } } }, // Apenas critérios associados a feiras
-                { $group: { _id: "$categoriaId", nome: { $first: "$categoria.nome" } } },
-                { $lookup: { from: 'categorias', localField: '_id', foreignField: '_id', as: 'categoriaInfo' } },
-                { $unwind: { path: '$categoriaInfo', preserveNullAndEmptyArrays: true } },
-                { $project: { _id: 1, nome: '$categoriaInfo.nome' } } // Usa o nome da categoria do lookup
-            ]);
-
-            let rankingPorCategoria = {};
-
-            for (const categoria of categorias) {
-                const projetosDaCategoria = await Projeto.find({ categoria: categoria._id }).lean();
-                let projetosComRanking = [];
-
-                for (const projeto of projetosDaCategoria) {
-                    const avaliacoesDoProjeto = await Avaliacao.find({ projeto: projeto._id }).lean();
-                    
-                    if (avaliacoesDoProjeto.length > 0) {
-                        let totalPontuacao = 0;
-                        let totalPesos = 0;
-
-                        const criteriosOficiaisProjeto = await Criterio.find({ _id: { $in: projeto.criterios } }).lean();
-                        
-                        // Mapeia notas para cada critério para este projeto
-                        let notasPorCriterio = {};
-                        criteriosOficiaisProjeto.forEach(crit => {
-                            notasPorCriterio[crit._id.toString()] = [];
-                        });
-
-                        avaliacoesDoProjeto.forEach(aval => {
-                            aval.itens.forEach(item => {
-                                if (item.nota !== undefined && item.nota !== null && notasPorCriterio[String(item.criterio)]) {
-                                    notasPorCriterio[String(item.criterio)].push(item.nota);
-                                }
-                            });
-                        });
-
-                        // Calcula a média ponderada para o projeto
-                        criteriosOficiaisProjeto.forEach(crit => {
-                            const notasDoCriterio = notasPorCriterio[String(crit._id)];
-                            if (notasDoCriterio.length > 0) {
-                                const mediaCriterio = notasDoCriterio.reduce((sum, current) => sum + current, 0) / notasDoCriterio.length;
-                                totalPontuacao += mediaCriterio * crit.peso;
-                                totalPesos += crit.peso;
-                            }
-                        });
-
-                        let mediaGeral = 0;
-                        if (totalPesos > 0) {
-                            mediaGeral = (totalPontuacao / totalPesos).toFixed(2);
-                        }
-                        
-                        projetosComRanking.push({
-                            titulo: projeto.titulo,
-                            mediaGeral: parseFloat(mediaGeral), // Converte de volta para número para ordenação
-                            numAvaliacoes: avaliacoesDoProjeto.length
-                        });
-                    }
-                }
-                // Ordena os projetos dentro da categoria pela média geral (maior para menor)
-                projetosComRanking.sort((a, b) => b.mediaGeral - a.mediaGeral);
-                rankingPorCategoria[categoria.nome || 'Sem Categoria'] = projetosComRanking; // Use o nome da categoria ou 'Sem Categoria'
-            }
-            dataForTab.rankingProjetosPorCategoria = rankingPorCategoria;
-
-        } else if (activeTab === 'resumo-avaliadores') {
-            let resumoAvaliadores = [];
-            for (const escola of escolasCadastradas) {
-                const avaliadoresDaEscola = await Avaliador.find({ escolaId: escola._id }).lean();
-                
-                let avaliadoresFormatados = [];
-                for (const avaliador of avaliadoresDaEscola) {
-                    const numProjetosAtribuidos = avaliador.projetosAtribuidos ? avaliador.projetosAtribuidos.length : 0;
-                    
-                    let numAvaliacoesCompletas = 0;
-                    if (numProjetosAtribuidos > 0) {
-                        for (const projetoId of avaliador.projetosAtribuidos) {
-                            const avaliacao = await Avaliacao.findOne({ avaliador: avaliador._id, projeto: projetoId }).lean();
-                            if (avaliacao && avaliacao.itens.length > 0) {
-                                const projetoDetalhes = await Projeto.findById(projetoId).lean();
-                                if (projetoDetalhes && projetoDetalhes.feira) {
-                                    const criteriosDaFeira = await Criterio.find({ feira: projetoDetalhes.feira, escolaId: escola._id }).lean();
-                                    const totalCriteriosFeira = criteriosDaFeira.length;
-                                    const criteriosAvaliadosComNota = avaliacao.itens.filter(item => item.nota !== undefined && item.nota !== null && item.nota >= 5 && item.nota <= 10).length;
-                                    
-                                    if (totalCriteriosFeira > 0 && criteriosAvaliadosComNota === totalCriteriosFeira) {
-                                        numAvaliacoesCompletas++;
-                                    } else if (totalCriteriosFeira === 0 && avaliacao.itens.length > 0) { // Se não há critérios mas tem itens avaliados
-                                        numAvaliacoesCompletas++;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    avaliadoresFormatados.push({
-                        nome: avaliador.nome,
-                        email: avaliador.email,
-                        status: avaliador.ativo ? 'Ativo' : 'Inativo',
-                        totalAtribuidos: numProjetosAtribuidos,
-                        totalAvaliados: numAvaliacoesCompletas
-                    });
-                }
-                resumoAvaliadores.push({
-                    escolaNome: escola.nome,
-                    avaliadores: avaliadoresFormatados
-                });
-            }
-            dataForTab.resumoAvaliadoresPorEscola = resumoAvaliadores;
-        }
+        const totalEscolas = await Escola.countDocuments();
+        const totalAdmins = await Admin.countDocuments();
+        const totalAvaliadores = await Avaliador.countDocuments();
+        const totalProjetos = await Projeto.countDocuments();
+        const totalFeiras = await Feira.countDocuments();
+        const solicitacoesPendentes = await SolicitacaoAcesso.countDocuments({ status: 'pendente' });
 
         res.render('superadmin/dashboard', {
-            titulo: 'Painel Super Admin',
-            layout: 'layouts/superadmin',
-            activeTab: activeTab,
-            error_msg: req.flash('error_msg'),
-            success_msg: req.flash('success_msg'),
-            ...dataForTab
+            layout: 'layout_superadmin',
+            totalEscolas,
+            totalAdmins,
+            totalAvaliadores,
+            totalProjetos,
+            totalFeiras,
+            solicitacoesPendentes
         });
-
     } catch (err) {
         console.error('Erro ao carregar dashboard do Super Admin:', err);
-        if (!res.headersSent) {
-            req.flash('error_msg', 'Erro ao carregar o dashboard. Detalhes: ' + err.message);
-            res.redirect('/superadmin/login');
-        }
+        req.flash('error_msg', 'Erro ao carregar os dados do dashboard.');
+        res.redirect('/superadmin/login'); // ou outra rota de erro
     }
 });
 
-router.get('/escolas/nova', verificarSuperAdmin, (req, res) => {
-    if (res.headersSent) return;
-    res.render('superadmin/nova-escola', {
-        titulo: 'Nova Escola',
-        layout: 'layouts/superadmin',
-        escola: {},
-        errors: [],
-        error_msg: req.flash('error_msg'),
-        success_msg: req.flash('success_msg')
-    });
+// ========================================================================
+// Rotas de Gerenciamento de Escolas
+// ========================================================================
+
+// Listar escolas
+router.get('/escolas', isSuperAdminAuthenticated, async (req, res) => {
+    try {
+        const escolas = await Escola.find().sort({ nome: 'asc' }).lean();
+        res.render('superadmin/escolas/index', { layout: 'layout_superadmin', escolas });
+    } catch (err) {
+        console.error('Erro ao listar escolas:', err);
+        req.flash('error_msg', 'Erro ao carregar escolas.');
+        res.redirect('/superadmin/dashboard');
+    }
 });
 
-router.post('/escolas/nova', verificarSuperAdmin, async (req, res) => {
-    const { nome, emailAdmin, senhaAdmin } = req.body;
+// Formulário para adicionar nova escola
+router.get('/escolas/nova', isSuperAdminAuthenticated, (req, res) => {
+    res.render('superadmin/escolas/nova', { layout: 'layout_superadmin' });
+});
+
+// Adicionar nova escola (POST)
+router.post('/escolas/nova', isSuperAdminAuthenticated, async (req, res) => {
+    const { nome, endereco, telefone, emailContato } = req.body;
     let errors = [];
 
-    if (!nome || nome.trim() === '') {
-        errors.push({ text: "Nome da escola inválido." });
-    }
-    if (!emailAdmin || emailAdmin.trim() === '') {
-        errors.push({ text: "E-mail do administrador da escola inválido." });
-    } else {
-        const existingAdmin = await Admin.findOne({ email: emailAdmin });
-        if (existingAdmin) {
-            errors.push({ text: "Já existe um administrador com este e-mail." });
-        }
-    }
-    if (!senhaAdmin || senhaAdmin.length < 6) {
-        errors.push({ text: "A senha do administrador da escola deve ter pelo menos 6 caracteres." });
+    if (!nome || !endereco || !telefone || !emailContato) {
+        errors.push({ text: 'Por favor, preencha todos os campos.' });
     }
 
     if (errors.length > 0) {
-        req.flash('error_msg', errors.map(e => e.text).join(', '));
-        if (!res.headersSent) {
-            return res.render('superadmin/nova-escola', {
-                titulo: 'Nova Escola',
-                layout: 'layouts/superadmin',
-                escola: { nome, emailAdmin },
-                errors: errors,
-                error_msg: req.flash('error_msg')
+        res.render('superadmin/escolas/nova', {
+            layout: 'layout_superadmin',
+            errors: errors,
+            nome,
+            endereco,
+            telefone,
+            emailContato
+        });
+    } else {
+        try {
+            const novaEscola = new Escola({
+                nome: nome,
+                endereco: endereco,
+                telefone: telefone,
+                emailContato: emailContato.toLowerCase()
             });
-        }
-        return;
-    }
 
-    try {
-        const novaEscola = new Escola({
-            nome: nome.trim(),
-            ativa: true,
-            criadaEm: Date.now()
-        });
-        await novaEscola.save();
-
-        const hashedPasswordAdmin = await hashPassword(senhaAdmin);
-
-        const novoAdmin = new Admin({
-            nome: `Admin ${nome.trim()}`,
-            email: emailAdmin.trim(),
-            senha: hashedPasswordAdmin,
-            escolaId: novaEscola._id,
-            cargo: 'Administrador Principal',
-            telefone: ''
-        });
-        await novoAdmin.save();
-
-        req.flash('success_msg', 'Escola e administrador inicial criados com sucesso!');
-        res.redirect('/superadmin/dashboard?tab=gerenciar-escolas'); // Redireciona para a aba de gerenciar escolas
-
-    } catch (err) {
-        console.error('Erro ao adicionar nova escola:', err);
-        if (!res.headersSent) {
-            if (err.code === 11000 && err.keyPattern && err.keyPattern.nome) {
-                req.flash('error_msg', `Erro: Já existe uma escola com o nome "${err.keyValue.nome}". Por favor, use um nome diferente.`);
-            } else {
-                req.flash('error_msg', 'Erro interno ao adicionar escola. Tente novamente. Detalhes: ' + err.message);
-            }
-            res.redirect('/superadmin/escolas/nova');
+            await novaEscola.save();
+            req.flash('success_msg', 'Escola adicionada com sucesso!');
+            res.redirect('/superadmin/escolas');
+        } catch (err) {
+            console.error('Erro ao salvar escola:', err);
+            req.flash('error_msg', 'Erro ao adicionar escola. Tente novamente.');
+            res.redirect('/superadmin/escolas');
         }
     }
 });
 
-router.get('/escolas/:id/editar', verificarSuperAdmin, async (req, res) => {
-    if (res.headersSent) return;
+// Formulário de edição de escola
+router.get('/escolas/editar/:id', isSuperAdminAuthenticated, async (req, res) => {
     try {
         const escola = await Escola.findById(req.params.id).lean();
         if (!escola) {
             req.flash('error_msg', 'Escola não encontrada.');
-            return res.redirect('/superadmin/dashboard');
+            return res.redirect('/superadmin/escolas');
         }
-
-        const admin = await Admin.findOne({ escolaId: escola._id }).lean();
-        if (!admin) {
-            req.flash('error_msg', 'Administrador principal não encontrado para esta escola. Você pode criar um ao salvar as edições.');
-        }
-
-        res.render('superadmin/editar-escola', {
-            titulo: 'Editar Escola',
-            escola: escola,
-            admin: admin || {},
-            layout: 'layouts/superadmin',
-            error_msg: req.flash('error_msg'),
-            success_msg: req.flash('success_msg')
-        });
+        res.render('superadmin/escolas/editar', { layout: 'layout_superadmin', escola });
     } catch (err) {
         console.error('Erro ao carregar escola para edição:', err);
-        if (!res.headersSent) {
-            req.flash('error_msg', 'Erro ao carregar escola para edição. Detalhes: ' + err.message);
-            res.redirect('/superadmin/dashboard');
-        }
+        req.flash('error_msg', 'Erro ao carregar escola para edição.');
+        res.redirect('/superadmin/escolas');
     }
 });
 
-router.post('/escolas/:id/editar', verificarSuperAdmin, async (req, res) => {
-    const { 
-        nome, cnpj, endereco, telefone, email, descricao, diretor, responsavel,
-        adminNome, adminEmail, adminCargo, adminTelefone,
-        novaSenhaAdmin, confirmarSenhaAdmin
-    } = req.body;
-
+// Editar escola (POST)
+router.post('/escolas/editar/:id', isSuperAdminAuthenticated, async (req, res) => {
+    const { nome, endereco, telefone, emailContato } = req.body;
     let errors = [];
 
-    if (!nome || nome.trim() === '') {
-        errors.push('Nome da escola não pode ser vazio.');
-    }
-
-    if (!adminNome || adminNome.trim() === '') {
-        errors.push('Nome do administrador não pode ser vazio.');
-    }
-    if (!adminEmail || adminEmail.trim() === '') {
-        errors.push('E-mail do administrador não pode ser vazio.');
-    } else {
-        const existingAdmin = await Admin.findOne({ 
-            email: adminEmail.trim(), 
-            escolaId: { $ne: req.params.id }
-        });
-        if (existingAdmin) {
-            errors.push('Já existe um administrador com este e-mail.');
-        }
-    }
-
-    if (novaSenhaAdmin) {
-        if (novaSenhaAdmin.length < 6) {
-            errors.push('A nova senha do admin deve ter pelo menos 6 caracteres.');
-        }
-        if (novaSenhaAdmin !== confirmarSenhaAdmin) {
-            errors.push('A nova senha e a confirmação de senha do admin não coincidem.');
-        }
+    if (!nome || !endereco || !telefone || !emailContato) {
+        errors.push({ text: 'Por favor, preencha todos os campos.' });
     }
 
     if (errors.length > 0) {
-        req.flash('error_msg', errors.join(', '));
-        const escola = await Escola.findById(req.params.id).lean();
-        const admin = await Admin.findOne({ escolaId: req.params.id }).lean();
-        if (!res.headersSent) {
-            return res.render('superadmin/editar-escola', {
-                titulo: 'Editar Escola',
-                escola: escola,
-                admin: admin || {},
-                layout: 'layouts/superadmin',
-                error_msg: req.flash('error_msg'),
-                success_msg: req.flash('success_msg')
-            });
+        res.render('superadmin/escolas/editar', {
+            layout: 'layout_superadmin',
+            errors: errors,
+            escola: { _id: req.params.id, nome, endereco, telefone, emailContato } // Para manter os dados no formulário
+        });
+    } else {
+        try {
+            const escola = await Escola.findById(req.params.id);
+            if (!escola) {
+                req.flash('error_msg', 'Escola não encontrada.');
+                return res.redirect('/superadmin/escolas');
+            }
+
+            escola.nome = nome;
+            escola.endereco = endereco;
+            escola.telefone = telefone;
+            escola.emailContato = emailContato.toLowerCase();
+
+            await escola.save();
+            req.flash('success_msg', 'Escola atualizada com sucesso!');
+            res.redirect('/superadmin/escolas');
+        } catch (err) {
+            console.error('Erro ao atualizar escola:', err);
+            req.flash('error_msg', 'Erro ao atualizar escola. Tente novamente.');
+            res.redirect('/superadmin/escolas');
         }
-        return;
+    }
+});
+
+// Deletar escola
+router.post('/escolas/deletar/:id', isSuperAdminAuthenticated, async (req, res) => {
+    try {
+        const escola = await Escola.findById(req.params.id);
+        if (!escola) {
+            req.flash('error_msg', 'Escola não encontrada.');
+            return res.redirect('/superadmin/escolas');
+        }
+
+        // Verifica e impede a exclusão se houver administradores ou feiras associadas
+        const adminsAssociados = await Admin.countDocuments({ escola: escola._id });
+        const feirasAssociadas = await Feira.countDocuments({ escola: escola._id });
+
+        if (adminsAssociados > 0) {
+            req.flash('error_msg', `Não é possível excluir a escola "${escola.nome}" porque ela possui ${adminsAssociados} administrador(es) associado(s).`);
+            return res.redirect('/superadmin/escolas');
+        }
+        if (feirasAssociadas > 0) {
+            req.flash('error_msg', `Não é possível excluir a escola "${escola.nome}" porque ela possui ${feirasAssociadas} feira(s) associada(s).`);
+            return res.redirect('/superadmin/escolas');
+        }
+
+        await Escola.deleteOne({ _id: req.params.id });
+        req.flash('success_msg', 'Escola deletada com sucesso!');
+        res.redirect('/superadmin/escolas');
+    } catch (err) {
+        console.error('Erro ao deletar escola:', err);
+        req.flash('error_msg', 'Erro ao deletar escola. Tente novamente.');
+        res.redirect('/superadmin/escolas');
+    }
+});
+
+
+// ========================================================================
+// Rotas de Gerenciamento de Administradores
+// ========================================================================
+
+// Listar administradores
+router.get('/admins', isSuperAdminAuthenticated, async (req, res) => {
+    try {
+        const admins = await Admin.find().populate('escola').sort({ nome: 'asc' }).lean();
+        res.render('superadmin/admins/index', { layout: 'layout_superadmin', admins });
+    } catch (err) {
+        console.error('Erro ao listar administradores:', err);
+        req.flash('error_msg', 'Erro ao carregar administradores.');
+        res.redirect('/superadmin/dashboard');
+    }
+});
+
+// Formulário para adicionar novo administrador
+router.get('/admins/novo', isSuperAdminAuthenticated, async (req, res) => {
+    try {
+        const escolas = await Escola.find().sort({ nome: 'asc' }).lean();
+        res.render('superadmin/admins/novo', { layout: 'layout_superadmin', escolas });
+    } catch (err) {
+        console.error('Erro ao carregar escolas para novo admin:', err);
+        req.flash('error_msg', 'Erro ao carregar escolas.');
+        res.redirect('/superadmin/admins');
+    }
+});
+
+// Adicionar novo administrador (POST)
+router.post('/admins/novo', isSuperAdminAuthenticated, async (req, res) => {
+    const { nome, email, escolaId } = req.body;
+    let errors = [];
+
+    if (!nome || !email || !escolaId) {
+        errors.push({ text: 'Por favor, preencha todos os campos.' });
     }
 
-    try {
-        const updatedEscola = await Escola.findByIdAndUpdate(
-            req.params.id,
-            { 
-                nome: nome.trim(), 
-                cnpj: cnpj || null,
-                endereco: endereco || null,
-                telefone: telefone || null,
-                email: email || null,
-                descricao: descricao || null,
-                diretor: diretor || null,
-                responsavel: responsavel || null
-            },
-            { new: true, runValidators: true }
-        );
-
-        if (!updatedEscola) {
-            req.flash('error_msg', 'Escola não encontrada ou erro na atualização.');
-            return res.redirect('/superadmin/dashboard');
+    if (errors.length > 0) {
+        try {
+            const escolas = await Escola.find().sort({ nome: 'asc' }).lean();
+            res.render('superadmin/admins/novo', {
+                layout: 'layout_superadmin',
+                errors: errors,
+                nome,
+                email,
+                escolaId,
+                escolas
+            });
+        } catch (err) {
+            console.error('Erro ao renderizar formulário com erros:', err);
+            req.flash('error_msg', 'Ocorreu um erro ao processar sua solicitação.');
+            res.redirect('/superadmin/admins');
         }
+    } else {
+        try {
+            const existingAdmin = await Admin.findOne({ email: email.toLowerCase() });
+            if (existingAdmin) {
+                errors.push({ text: 'Já existe um administrador com este e-mail.' });
+                const escolas = await Escola.find().sort({ nome: 'asc' }).lean();
+                return res.render('superadmin/admins/novo', {
+                    layout: 'layout_superadmin',
+                    errors: errors,
+                    nome,
+                    email,
+                    escolaId,
+                    escolas
+                });
+            }
 
-        let adminEscola = await Admin.findOne({ escolaId: req.params.id });
+            const temporaryPassword = generateTemporaryPassword();
+            const hashedPassword = await hashPassword(temporaryPassword);
 
-        if (!adminEscola) {
-            const hashedPassword = novaSenhaAdmin ? await hashPassword(novaSenhaAdmin) : await hashPassword(generateTemporaryPassword());
-            adminEscola = new Admin({
-                nome: adminNome.trim(),
-                email: adminEmail.trim(),
+            const novaAdmin = new Admin({
+                nome: nome,
+                email: email.toLowerCase(),
                 senha: hashedPassword,
-                escolaId: req.params.id,
-                cargo: adminCargo || null,
-                telefone: adminTelefone || null
+                escola: escolaId
             });
-            await adminEscola.save();
-            req.flash('success_msg', `Escola atualizada e novo administrador principal (${adminEmail.trim()}) criado com sucesso!`);
-            if (!novaSenhaAdmin) {
-                 req.flash('success_msg', req.flash('success_msg') + ` Uma senha temporária foi gerada e deverá ser comunicada.`);
-            }
-        } else {
-            adminEscola.nome = adminNome.trim();
-            adminEscola.email = adminEmail.trim();
-            adminEscola.cargo = adminCargo || null;
-            adminEscola.telefone = adminTelefone || null;
 
-            if (novaSenhaAdmin) {
-                adminEscola.senha = await hashPassword(novaSenhaAdmin);
+            await novaAdmin.save();
+
+            const escola = await Escola.findById(escolaId);
+            if (escola) {
+                await sendAdminTemporaryPasswordEmail(email, temporaryPassword, escola.nome);
+            } else {
+                console.warn(`Escola com ID ${escolaId} não encontrada para enviar e-mail ao admin.`);
             }
-            await adminEscola.save();
-            req.flash('success_msg', 'Escola e administrador atualizados com sucesso!');
+
+            req.flash('success_msg', 'Administrador adicionado com sucesso! Uma senha temporária foi enviada para o e-mail cadastrado.');
+            res.redirect('/superadmin/admins');
+        } catch (err) {
+            console.error('Erro ao adicionar administrador:', err);
+            req.flash('error_msg', 'Erro ao adicionar administrador. Tente novamente.');
+            res.redirect('/superadmin/admins');
         }
-        
-        res.redirect('/superadmin/dashboard?tab=gerenciar-escolas'); // Redireciona para a aba de gerenciar escolas
+    }
+});
 
+// Formulário de edição de administrador
+router.get('/admins/editar/:id', isSuperAdminAuthenticated, async (req, res) => {
+    try {
+        const admin = await Admin.findById(req.params.id).lean();
+        if (!admin) {
+            req.flash('error_msg', 'Administrador não encontrado.');
+            return res.redirect('/superadmin/admins');
+        }
+        const escolas = await Escola.find().sort({ nome: 'asc' }).lean();
+        res.render('superadmin/admins/editar', { layout: 'layout_superadmin', admin, escolas });
     } catch (err) {
-        console.error('Erro ao atualizar escola ou admin:', err);
-        if (!res.headersSent) {
-            let errorMessages = [];
-            if (err.name === 'ValidationError') {
-                for (let field in err.errors) {
-                    errorMessages.push(err.errors[field].message);
+        console.error('Erro ao carregar admin para edição:', err);
+        req.flash('error_msg', 'Erro ao carregar administrador para edição.');
+        res.redirect('/superadmin/admins');
+    }
+});
+
+// Editar administrador (POST)
+router.post('/admins/editar/:id', isSuperAdminAuthenticated, async (req, res) => {
+    const { nome, email, escolaId } = req.body;
+    let errors = [];
+
+    if (!nome || !email || !escolaId) {
+        errors.push({ text: 'Por favor, preencha todos os campos.' });
+    }
+
+    if (errors.length > 0) {
+        try {
+            const escolas = await Escola.find().sort({ nome: 'asc' }).lean();
+            res.render('superadmin/admins/editar', {
+                layout: 'layout_superadmin',
+                errors: errors,
+                admin: { _id: req.params.id, nome, email, escola: escolaId },
+                escolas
+            });
+        } catch (err) {
+            console.error('Erro ao renderizar formulário com erros:', err);
+            req.flash('error_msg', 'Ocorreu um erro ao processar sua solicitação.');
+            res.redirect('/superadmin/admins');
+        }
+    } else {
+        try {
+            const admin = await Admin.findById(req.params.id);
+            if (!admin) {
+                req.flash('error_msg', 'Administrador não encontrado.');
+                return res.redirect('/superadmin/admins');
+            }
+
+            // Verifica se o email já existe para outro admin (se for alterado)
+            if (admin.email.toLowerCase() !== email.toLowerCase()) {
+                const existingAdmin = await Admin.findOne({ email: email.toLowerCase() });
+                if (existingAdmin) {
+                    errors.push({ text: 'Já existe outro administrador com este e-mail.' });
+                    const escolas = await Escola.find().sort({ nome: 'asc' }).lean();
+                    return res.render('superadmin/admins/editar', {
+                        layout: 'layout_superadmin',
+                        errors: errors,
+                        admin: { _id: req.params.id, nome, email, escola: escolaId },
+                        escolas
+                    });
                 }
-            } else if (err.code === 11000) {
-                const fieldName = Object.keys(err.keyPattern)[0];
-                const fieldValue = err.keyValue[fieldName];
-                errorMessages.push(`O valor "${fieldValue}" para o campo "${fieldName}" já existe. Por favor, insira um valor único.`);
-            } else {
-                errorMessages.push('Erro ao atualizar escola/admin. Verifique os dados. Detalhes: ' + err.message);
             }
-            req.flash('error_msg', errorMessages.join(', '));
-            res.redirect(`/superadmin/escolas/${req.params.id}/editar`);
+
+            admin.nome = nome;
+            admin.email = email.toLowerCase();
+            admin.escola = escolaId;
+
+            await admin.save();
+            req.flash('success_msg', 'Administrador atualizado com sucesso!');
+            res.redirect('/superadmin/admins');
+        } catch (err) {
+            console.error('Erro ao atualizar administrador:', err);
+            req.flash('error_msg', 'Erro ao atualizar administrador. Tente novamente.');
+            res.redirect('/superadmin/admins');
         }
     }
 });
 
-router.get('/escolas/:id/inativar', verificarSuperAdmin, async (req, res) => {
+// Resetar senha do administrador
+router.post('/admins/resetar-senha/:id', isSuperAdminAuthenticated, async (req, res) => {
     try {
-        const escola = await Escola.findByIdAndUpdate(req.params.id, { ativa: false }, { new: true });
-        if (!escola) {
-            req.flash('error_msg', 'Escola não encontrada.');
-            return res.redirect('/superadmin/dashboard?tab=gerenciar-escolas');
+        const admin = await Admin.findById(req.params.id);
+        if (!admin) {
+            req.flash('error_msg', 'Administrador não encontrado.');
+            return res.redirect('/superadmin/admins');
         }
-        req.flash('success_msg', `Escola "${escola.nome}" inativada com sucesso!`);
-        res.redirect('/superadmin/dashboard?tab=gerenciar-escolas');
+
+        const temporaryPassword = generateTemporaryPassword();
+        admin.senha = await hashPassword(temporaryPassword); // Hash the new temporary password
+        await admin.save();
+
+        const escola = await Escola.findById(admin.escola);
+        const escolaNome = escola ? escola.nome : 'N/A';
+
+        await sendAdminTemporaryPasswordEmail(admin.email, temporaryPassword, escolaNome);
+
+        req.flash('success_msg', `Senha do administrador ${admin.nome} resetada com sucesso! Uma nova senha temporária foi enviada para ${admin.email}.`);
+        res.redirect('/superadmin/admins');
     } catch (err) {
-        console.error('Erro ao inativar escola:', err);
-        if (!res.headersSent) {
-            req.flash('error_msg', 'Erro ao inativar escola. Detalhes: ' + err.message);
-            res.redirect('/superadmin/dashboard?tab=gerenciar-escolas');
-        }
+        console.error('Erro ao resetar senha do administrador:', err);
+        req.flash('error_msg', 'Erro ao resetar senha do administrador. Tente novamente.');
+        res.redirect('/superadmin/admins');
     }
 });
 
-router.get('/escolas/:id/ativar', verificarSuperAdmin, async (req, res) => {
+
+// Deletar administrador
+router.post('/admins/deletar/:id', isSuperAdminAuthenticated, async (req, res) => {
     try {
-        const escola = await Escola.findByIdAndUpdate(req.params.id, { ativa: true }, { new: true });
-        if (!escola) {
-            req.flash('error_msg', 'Escola não encontrada.');
-            return res.redirect('/superadmin/dashboard?tab=gerenciar-escolas');
+        const admin = await Admin.findById(req.params.id);
+        if (!admin) {
+            req.flash('error_msg', 'Administrador não encontrado.');
+            return res.redirect('/superadmin/admins');
         }
-        req.flash('success_msg', `Escola "${escola.nome}" ativada com sucesso!`);
-        res.redirect('/superadmin/dashboard?tab=gerenciar-escolas');
+
+        // Verifica se há feiras criadas por este admin (feitas antes de vincular admin a feira)
+        // Por enquanto, não há uma ligação direta forte entre admin e feira/projeto/avaliacao
+        // Se houvesse, você precisaria verificar e talvez impedir a exclusão ou reatribuir.
+        // const feirasCriadas = await Feira.countDocuments({ adminCriador: admin._id });
+        // if (feirasCriadas > 0) { ... }
+
+        await Admin.deleteOne({ _id: req.params.id });
+        req.flash('success_msg', 'Administrador deletado com sucesso!');
+        res.redirect('/superadmin/admins');
     } catch (err) {
-        console.error('Erro ao ativar escola:', err);
-        if (!res.headersSent) {
-            req.flash('error_msg', 'Erro ao ativar escola. Detalhes: ' + err.message);
-            res.redirect('/superadmin/dashboard?tab=gerenciar-escolas');
-        }
-    }
-});
-
-router.post('/escolas/:escolaId/reset-admin-password', verificarSuperAdmin, async (req, res) => {
-    const { escolaId } = req.params;
-
-    if (!escolaId || !mongoose.Types.ObjectId.isValid(escolaId)) {
-        req.flash('error_msg', 'ID da escola inválido para redefinição de senha do admin.');
-        return res.redirect('/superadmin/dashboard?tab=gerenciar-escolas');
-    }
-
-    try {
-        const escola = await Escola.findById(escolaId);
-        if (!escola) {
-            req.flash('error_msg', 'Escola não encontrada.');
-            return res.redirect('/superadmin/dashboard?tab=gerenciar-escolas');
-        }
-
-        const adminEscola = await Admin.findOne({ escolaId: escolaId });
-        if (!adminEscola) {
-            req.flash('error_msg', 'Nenhum administrador encontrado para esta escola.');
-            return res.redirect('/superadmin/dashboard?tab=gerenciar-escolas');
-        }
-
-        const novaSenhaProvisoria = generateTemporaryPassword();
-        const senhaHasheada = await hashPassword(novaSenhaProvisoria);
-
-        adminEscola.senha = senhaHasheada;
-        await adminEscola.save();
-
-        const appUrl = process.env.APP_URL || 'http://localhost:3000';
-        const emailSent = await sendAdminTemporaryPasswordEmail(adminEscola, novaSenhaProvisoria, appUrl);
-
-        let successMessage = `Senha do admin da escola "${escola.nome}" redefinida com sucesso! A nova senha provisória para <strong>${adminEscola.email}</strong> é: <strong>${novaSenhaProvisoria}</strong>.`;
-        if (!emailSent) {
-            successMessage += ' <em>(Não foi possível enviar o e-mail de notificação. Verifique as configurações de e-mail.)</em>';
-        }
-        
-        req.flash('success_msg', successMessage);
-        res.redirect('/superadmin/dashboard?tab=gerenciar-escolas');
-
-    } catch (err) {
-        console.error('Erro ao redefinir senha do admin da escola:', err);
-        if (!res.headersSent) {
-            req.flash('error_msg', 'Erro ao redefinir senha do admin da escola. Detalhes: ' + err.message);
-            res.redirect('/superadmin/dashboard?tab=gerenciar-escolas');
-        }
+        console.error('Erro ao deletar administrador:', err);
+        req.flash('error_msg', 'Erro ao deletar administrador. Tente novamente.');
+        res.redirect('/superadmin/admins');
     }
 });
 
 
 // ========================================================================
-// ROTAS PARA GERENCIAR SOLICITAÇÕES DE ACESSO
+// Rotas de Gerenciamento de Solicitações de Acesso
 // ========================================================================
 
-router.get('/solicitacoes', verificarSuperAdmin, async (req, res) => {
-    if (res.headersSent) return;
-    try {
-        const solicitacoes = await SolicitacaoAcesso.find({ status: 'Pendente' }).sort({ dataSolicitacao: 'asc' }).lean();
-
-        res.render('superadmin/solicitacoes', {
-            titulo: 'Gerenciar Solicitações de Acesso',
-            layout: 'layouts/superadmin',
-            solicitacoes: solicitacoes,
-            error_msg: req.flash('error_msg'),
-            success_msg: req.flash('success_msg')
-        });
-    } catch (err) {
-        console.error('Erro ao buscar solicitações de acesso:', err);
-        if (!res.headersSent) {
-            req.flash('error_msg', 'Erro ao carregar as solicitações de acesso. Detalhes: ' + err.message);
-            res.redirect('/superadmin/dashboard?tab=solicitacoes'); // Redireciona para a aba de solicitações
+// Envia e-mail de aprovação para solicitação de acesso
+async function sendApprovalEmail(solicitacao, temporaryPassword) {
+    const transporter = nodemailer.createTransport({
+        host: process.env.EMAIL_HOST,
+        port: process.env.EMAIL_PORT,
+        secure: process.env.EMAIL_PORT == 465,
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS,
+        },
+        tls: {
+            rejectUnauthorized: false
         }
+    });
+
+    const mailOptions = {
+        from: `AvaliaFeiras <${process.env.EMAIL_USER}>`,
+        to: solicitacao.emailContato,
+        subject: 'Sua Solicitação de Acesso foi Aprovada - AvaliaFeiras',
+        html: `
+            <p>Prezado(a) ${solicitacao.nomeContato},</p>
+            <p>Sua solicitação de acesso para a escola <strong>${solicitacao.nomeEscola}</strong> no sistema AvaliaFeiras foi aprovada!</p>
+            <p>Uma conta de administrador foi criada para você. Seus dados de acesso são:</p>
+            <ul>
+                <li><strong>E-mail:</strong> ${solicitacao.emailContato}</li>
+                <li><strong>Senha Temporária:</strong> <strong>${temporaryPassword}</strong></li>
+            </ul>
+            <p>Por favor, faça login em ${process.env.APP_BASE_URL}/admin/login e altere sua senha assim que possível.</p>
+            <p>Atenciosamente,<br>Equipe AvaliaFeiras</p>
+            <hr>
+            <p style="font-size: 10px; color: #777;">Este é um e-mail automático, por favor, não responda.</p>
+        `
+    };
+
+    if (process.env.EMAIL_USER && process.env.EMAIL_HOST && process.env.EMAIL_PASS) {
+        await transporter.sendMail(mailOptions);
+        console.log(`E-mail de aprovação enviado para ${solicitacao.emailContato}`);
+    } else {
+        console.warn('Variáveis de ambiente de e-mail não configuradas. E-mail de aprovação não será enviado.');
+    }
+}
+
+// Envia e-mail de rejeição para solicitação de acesso
+async function sendRejectionEmail(solicitacao, motivo) {
+    const transporter = nodemailer.createTransport({
+        host: process.env.EMAIL_HOST,
+        port: process.env.EMAIL_PORT,
+        secure: process.env.EMAIL_PORT == 465,
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS,
+        },
+        tls: {
+            rejectUnauthorized: false
+        }
+    });
+
+    const mailOptionsRejeicao = {
+        from: `AvaliaFeiras <${process.env.EMAIL_USER}>`,
+        to: solicitacao.emailContato,
+        subject: 'Atualização sobre sua Solicitação de Acesso - AvaliaFeiras',
+        html: `
+            <p>Prezado(a) ${solicitacao.nomeContato},</p>
+            <p>Informamos que sua solicitação de acesso para a escola <strong>${solicitacao.nomeEscola}</strong> no sistema AvaliaFeiras foi revisada e, infelizmente, não pôde ser aprovada neste momento.</p>
+            <p><strong>Motivo:</strong> ${motivo || 'Motivo não especificado.'}</p>
+            <p>Se tiver alguma dúvida ou desejar mais informações, por favor, entre em contato conosco.</p>
+            <p>Atenciosamente,<br>Equipe AvaliaFeiras</p>
+            <hr>
+            <p style="font-size: 10px; color: #777;">Este é um e-mail automático, por favor, não responda.</p>
+        `
+    };
+
+    if (process.env.EMAIL_USER && process.env.EMAIL_HOST && process.env.EMAIL_PASS) {
+        await transporter.sendMail(mailOptionsRejeicao);
+        console.log(`E-mail de rejeição enviado para ${solicitacao.emailContato}`);
+    } else {
+        console.warn('Variáveis de ambiente de e-mail não configuradas. E-mail de rejeição não será enviado.');
+    }
+}
+
+
+// Listar solicitações de acesso (pendentes e outras)
+router.get('/solicitacoes', isSuperAdminAuthenticated, async (req, res) => {
+    try {
+        const solicitacoes = await SolicitacaoAcesso.find().sort({ dataCriacao: 'desc' }).lean();
+        res.render('superadmin/solicitacoes/index', { layout: 'layout_superadmin', solicitacoes });
+    } catch (err) {
+        console.error('Erro ao listar solicitações:', err);
+        req.flash('error_msg', 'Erro ao carregar solicitações de acesso.');
+        res.redirect('/superadmin/dashboard');
     }
 });
 
-router.get('/solicitacoes/:id/editar', verificarSuperAdmin, async (req, res) => {
-    if (res.headersSent) return;
-    try {
-        const solicitacao = await SolicitacaoAcesso.findById(req.params.id).lean();
-        if (!solicitacao) {
-            req.flash('error_msg', 'Solicitação de acesso não encontrada.');
-            return res.redirect('/superadmin/solicitacoes');
-        }
-
-        res.render('superadmin/editar_solicitacao', {
-            solicitacao,
-            titulo: 'Detalhes da Solicitação',
-            layout: 'layouts/superadmin',
-            error_msg: req.flash('error_msg'),
-            success_msg: req.flash('success_msg')
-        });
-    } catch (err) {
-        console.error('Erro ao buscar solicitação para edição:', err);
-        if (!res.headersSent) {
-            req.flash('error_msg', 'Erro ao carregar detalhes da solicitação. Detalhes: ' + err.message);
-            res.redirect('/superadmin/solicitacoes');
-        }
-    }
-});
-
-router.post('/solicitacoes/:id/atualizar', verificarSuperAdmin, async (req, res) => {
-    try {
-        const { nomeEscola, cnpj, endereco, telefoneEscola, nomeResponsavel, cargoResponsavel, emailContato, telefoneContato } = req.body;
-
-        await SolicitacaoAcesso.findByIdAndUpdate(req.params.id, {
-            nomeEscola,
-            cnpj,
-            endereco,
-            telefoneEscola,
-            nomeResponsavel,
-            cargoResponsavel,
-            emailContato,
-            telefoneContato
-        }, { new: true, runValidators: true });
-
-        req.flash('success_msg', 'Dados da solicitação atualizados com sucesso!');
-        res.redirect('/superadmin/solicitacoes/' + req.params.id + '/editar');
-    } catch (err) {
-        console.error('Erro ao atualizar solicitação:', err);
-        if (!res.headersSent) {
-            if (err.name === 'ValidationError') {
-                let errors = Object.values(err.errors).map(el => el.message);
-                req.flash('error_msg', errors.join(', '));
-            } else if (err.code === 11000) {
-                req.flash('error_msg', 'Erro: Dados duplicados (e-mail ou CNPJ) já cadastrados. Por favor, verifique.');
-            } else {
-                req.flash('error_msg', 'Erro ao atualizar a solicitação. Tente novamente. Detalhes: ' + err.message);
-            }
-            res.redirect('/superadmin/solicitacoes/' + req.params.id + '/editar');
-        }
-    }
-});
-
-
-router.post('/solicitacoes/:id/aprovar', verificarSuperAdmin, async (req, res) => {
+// Aprovar solicitação de acesso
+router.post('/solicitacoes/aprovar/:id', isSuperAdminAuthenticated, async (req, res) => {
     try {
         const solicitacao = await SolicitacaoAcesso.findById(req.params.id);
-
         if (!solicitacao) {
             req.flash('error_msg', 'Solicitação não encontrada.');
             return res.redirect('/superadmin/solicitacoes');
         }
 
-        if (solicitacao.status !== 'Pendente') {
+        if (solicitacao.status !== 'pendente') {
             req.flash('error_msg', 'Esta solicitação já foi processada.');
             return res.redirect('/superadmin/solicitacoes');
         }
 
+        // 1. Criar a Escola
         const novaEscola = new Escola({
             nome: solicitacao.nomeEscola,
-            cnpj: solicitacao.cnpj,
-            endereco: solicitacao.endereco,
+            endereco: solicitacao.enderecoEscola,
             telefone: solicitacao.telefoneEscola,
+            emailContato: solicitacao.emailContatoEscola.toLowerCase() // Usa o email de contato da escola se disponível, senão o do contato principal
         });
         await novaEscola.save();
 
-        const senhaProvisoria = generateTemporaryPassword();
-        const senhaHasheada = await hashPassword(senhaProvisoria);
+        // 2. Gerar senha temporária e hash
+        const temporaryPassword = generateTemporaryPassword();
+        const hashedPassword = await hashPassword(temporaryPassword);
 
+        // 3. Criar o Administrador
         const novoAdmin = new Admin({
-            nome: solicitacao.nomeResponsavel,
-            email: solicitacao.emailContato,
-            senha: senhaHasheada,
-            escolaId: novaEscola._id,
-            cargo: solicitacao.cargoResponsavel,
-            telefone: solicitacao.telefoneContato,
+            nome: solicitacao.nomeContato,
+            email: solicitacao.emailContato.toLowerCase(),
+            senha: hashedPassword,
+            escola: novaEscola._id // Vincula ao ID da escola recém-criada
         });
         await novoAdmin.save();
 
-        solicitacao.status = 'Aprovada';
+        // 4. Atualizar o status da solicitação
+        solicitacao.status = 'aprovada';
         solicitacao.dataProcessamento = Date.now();
-        solicitacao.processadoPor = req.session.superAdminId;
         await solicitacao.save();
 
-        console.log(`Solicitação APROVADA: Senha Provisória para ${solicitacao.emailContato}: ${senhaProvisoria}`);
-        req.flash('success_msg', `Solicitação de acesso aprovada com sucesso! Uma escola (${novaEscola.nome}) e um administrador foram criados. A senha provisória do administrador (${solicitacao.emailContato}) é: <strong>${senhaProvisoria}</strong>. NOTA: Em produção, essa senha seria enviada por e-mail ou o usuário seria instruído a redefinir.`);
+        // 5. Enviar e-mail de aprovação com senha temporária
+        await sendApprovalEmail(solicitacao, temporaryPassword);
 
-        const appUrl = process.env.APP_URL || 'http://localhost:3000';
-        const mailOptionsAprovacao = {
-            from: process.env.EMAIL_USER,
-            to: solicitacao.emailContato,
-            subject: 'Sua Solicitação de Acesso ao AvaliaFeiras foi Aprovada!',
-            html: `
-                <p>Olá, ${solicitacao.nomeResponsavel},</p>
-                <p>Sua solicitação de acesso para a escola <strong>${solicitacao.nomeEscola}</strong> no sistema AvaliaFeiras foi aprovada!</p>
-                <p>Você pode acessar sua conta de administrador usando as seguintes credenciais:</p>
-                <p><strong>E-mail:</strong> ${solicitacao.emailContato}</p>
-                <p><strong>Senha Provisória:</strong> ${senhaProvisoria}</p>
-                <p>Recomendamos que você altere sua senha no primeiro login para garantir a segurança da sua conta.</p>
-                <p>Clique aqui para fazer login: <a href="${appUrl}/admin/login">${appUrl}/admin/login</a></p>
-                <p>Atenciosamente,<br>Equipe AvaliaFeiras</p>
-                <hr>
-                <p style="font-size: 10px; color: #777;">Este é um e-mail automático, por favor, não responda.</p>
-            `
-        };
-
-        if (process.env.EMAIL_USER && process.env.EMAIL_HOST && process.env.EMAIL_PASS) {
-            await transporter.sendMail(mailOptionsAprovacao);
-            console.log(`E-mail de aprovação enviado para ${solicitacao.emailContato}`);
-        } else {
-            console.warn('Variáveis de ambiente de e-mail não configuradas. E-mail de aprovação não será enviado.');
-        }
-        
+        req.flash('success_msg', `Solicitação de "${solicitacao.nomeEscola}" aprovada e administrador criado com sucesso.`);
         res.redirect('/superadmin/solicitacoes');
 
     } catch (err) {
         console.error('Erro ao aprovar solicitação:', err);
+        // Verifica se o erro é devido a um email de admin duplicado
+        if (err.code === 11000 && err.keyPattern && err.keyPattern.email) {
+            req.flash('error_msg', `Erro ao aprovar a solicitação: Já existe um administrador com o e-mail "${err.keyValue.email}".`);
+        } else {
+            req.flash('error_msg', `Erro ao aprovar a solicitação: ${err.message || err}.`);
+        }
         if (!res.headersSent) {
-            if (err.code === 11000) {
-                let errorMessage = 'Erro: E-mail ou CNPJ já cadastrado para outra escola/administrador.';
-                if (err.keyPattern && err.keyPattern.nome) {
-                    errorMessage = `Erro: Já existe uma escola com o nome "${err.keyValue.nome}". Por favor, use um nome diferente para a escola na solicitação.`;
-                }
-                req.flash('error_msg', errorMessage);
-            } else if (err.name === 'ValidationError') {
-                let errors = Object.values(err.errors).map(el => el.message);
-                req.flash('error_msg', 'Erro de validação: ' + errors.join(', '));
-            } else {
-                req.flash('error_msg', 'Erro ao aprovar solicitação: ' + err.message);
-            }
             res.redirect('/superadmin/solicitacoes');
         }
     }
 });
 
-router.post('/solicitacoes/:id/rejeitar', verificarSuperAdmin, async (req, res) => {
+// Rejeitar solicitação de acesso
+router.post('/solicitacoes/rejeitar/:id', isSuperAdminAuthenticated, async (req, res) => {
     try {
+        const { motivo } = req.body; // Campo para o Super Admin digitar o motivo
         const solicitacao = await SolicitacaoAcesso.findById(req.params.id);
-
         if (!solicitacao) {
             req.flash('error_msg', 'Solicitação não encontrada.');
             return res.redirect('/superadmin/solicitacoes');
         }
-        if (solicitacao.status !== 'Pendente') {
+
+        if (solicitacao.status !== 'pendente') {
             req.flash('error_msg', 'Esta solicitação já foi processada.');
             return res.redirect('/superadmin/solicitacoes');
         }
 
-        solicitacao.status = 'Rejeitada';
+        solicitacao.status = 'rejeitada';
         solicitacao.dataProcessamento = Date.now();
-        solicitacao.processadoPor = req.session.superAdminId;
+        solicitacao.motivoRejeicao = motivo; // Salva o motivo
         await solicitacao.save();
 
-        const appUrl = process.env.APP_URL || 'http://localhost:3000';
-        const mailOptionsRejeicao = {
-            from: process.env.EMAIL_USER,
-            to: solicitacao.emailContato,
-            subject: 'Sua Solicitação de Acesso ao AvaliaFeiras foi Rejeitada',
-            html: `
-                <p>Olá, ${solicitacao.nomeResponsavel},</p>
-                <p>Informamos que sua solicitação de cadastro para a escola <strong>${solicitacao.nomeEscola}</strong> no sistema AvaliaFeiras foi revisada e, infelizmente, não pôde ser aprovada neste momento.</p>
-                <p><strong>Motivo:</strong> [Você pode adicionar um campo no front-end para o Super Admin digitar o motivo]</p>
-                <p>Se tiver alguma dúvida ou desejar mais informações, por favor, entre em contato conosco.</p>
-                <p>Atenciosamente,<br>Equipe AvaliaFeiras</p>
-                <hr>
-                <p style="font-size: 10px; color: #777;">Este é um e-mail automático, por favor, não responda.</p>
-            `
-        };
-        
-        if (process.env.EMAIL_USER && process.env.EMAIL_HOST && process.env.EMAIL_PASS) {
-            await transporter.sendMail(mailOptionsRejeicao);
-            console.log(`E-mail de rejeição enviado para ${solicitacao.emailContato}`);
-        } else {
-            console.warn('Variáveis de ambiente de e-mail não configuradas. E-mail de rejeição não será enviado.');
-        }
+        // Enviar e-mail de rejeição
+        await sendRejectionEmail(solicitacao, motivo);
 
         req.flash('success_msg', `Solicitação de "${solicitacao.nomeEscola}" rejeitada com sucesso.`);
         res.redirect('/superadmin/solicitacoes');
@@ -955,9 +784,219 @@ router.post('/solicitacoes/:id/rejeitar', verificarSuperAdmin, async (req, res) 
     } catch (err) {
         console.error('Erro ao rejeitar solicitação:', err);
         if (!res.headersSent) {
-            req.flash('error_msg', `Erro ao rejeitar a solicitação: ${err.message || 'Ocorreu um erro inesperado.'}`);
+            req.flash('error_msg', `Erro ao rejeitar a solicitação: ${err.message || err}.`);
             res.redirect('/superadmin/solicitacoes');
         }
+    }
+});
+
+// Detalhes da solicitação
+router.get('/solicitacoes/detalhes/:id', isSuperAdminAuthenticated, async (req, res) => {
+    try {
+        const solicitacao = await SolicitacaoAcesso.findById(req.params.id).lean();
+        if (!solicitacao) {
+            req.flash('error_msg', 'Solicitação não encontrada.');
+            return res.redirect('/superadmin/solicitacoes');
+        }
+        res.render('superadmin/solicitacoes/detalhes', { layout: 'layout_superadmin', solicitacao });
+    } catch (err) {
+        console.error('Erro ao carregar detalhes da solicitação:', err);
+        req.flash('error_msg', 'Erro ao carregar detalhes da solicitação.');
+        res.redirect('/superadmin/solicitacoes');
+    }
+});
+
+// ========================================================================
+// Rotas de Gerenciamento de Feiras (somente leitura para Super Admin)
+// ========================================================================
+
+// Listar Feiras (Super Admin)
+router.get('/feiras', isSuperAdminAuthenticated, async (req, res) => {
+    try {
+        // Popula o campo 'escola' com o nome da escola
+        const feiras = await Feira.find().populate('escola', 'nome').sort({ dataInicio: 'desc' }).lean();
+        res.render('superadmin/feiras/index', { layout: 'layout_superadmin', feiras });
+    } catch (err) {
+        console.error('Erro ao listar feiras para Super Admin:', err);
+        req.flash('error_msg', 'Erro ao carregar feiras.');
+        res.redirect('/superadmin/dashboard');
+    }
+});
+
+// Detalhes da Feira (Super Admin)
+router.get('/feiras/detalhes/:id', isSuperAdminAuthenticated, async (req, res) => {
+    try {
+        const feira = await Feira.findById(req.params.id)
+            .populate('escola')
+            .populate('criteriosAvaliacao')
+            .lean();
+
+        if (!feira) {
+            req.flash('error_msg', 'Feira não encontrada.');
+            return res.redirect('/superadmin/feiras');
+        }
+
+        const projetos = await Projeto.find({ feira: feira._id })
+            .populate('escola')
+            .lean();
+
+        res.render('superadmin/feiras/detalhes', { layout: 'layout_superadmin', feira, projetos });
+    } catch (err) {
+        console.error('Erro ao carregar detalhes da feira para Super Admin:', err);
+        req.flash('error_msg', 'Erro ao carregar detalhes da feira.');
+        res.redirect('/superadmin/feiras');
+    }
+});
+
+// ========================================================================
+// Rotas de Gerenciamento de Projetos (somente leitura para Super Admin)
+// ========================================================================
+
+// Listar Projetos (Super Admin)
+router.get('/projetos', isSuperAdminAuthenticated, async (req, res) => {
+    try {
+        const projetos = await Projeto.find()
+            .populate('escola')
+            .populate('feira', 'nome') // Popula apenas o nome da feira
+            .sort({ nome: 'asc' })
+            .lean();
+
+        res.render('superadmin/projetos/index', { layout: 'layout_superadmin', projetos });
+    } catch (err) {
+        console.error('Erro ao listar projetos para Super Admin:', err);
+        req.flash('error_msg', 'Erro ao carregar projetos.');
+        res.redirect('/superadmin/dashboard');
+    }
+});
+
+// Detalhes do Projeto (Super Admin)
+router.get('/projetos/detalhes/:id', isSuperAdminAuthenticated, async (req, res) => {
+    try {
+        const projeto = await Projeto.findById(req.params.id)
+            .populate('escola')
+            .populate('feira')
+            .lean();
+
+        if (!projeto) {
+            req.flash('error_msg', 'Projeto não encontrado.');
+            return res.redirect('/superadmin/projetos');
+        }
+
+        // Encontrar as avaliações para este projeto
+        const avaliacoes = await Avaliacao.find({ projeto: projeto._id })
+            .populate('avaliador', 'nome') // Popula o nome do avaliador
+            .populate('criterios.criterioId', 'nome') // Popula o nome do critério
+            .lean();
+
+        res.render('superadmin/projetos/detalhes', { layout: 'layout_superadmin', projeto, avaliacoes });
+    } catch (err) {
+        console.error('Erro ao carregar detalhes do projeto para Super Admin:', err);
+        req.flash('error_msg', 'Erro ao carregar detalhes do projeto.');
+        res.redirect('/superadmin/projetos');
+    }
+});
+
+
+// ========================================================================
+// Rotas de Gerenciamento de Avaliadores (somente leitura para Super Admin)
+// ========================================================================
+
+// Listar Avaliadores (Super Admin)
+router.get('/avaliadores', isSuperAdminAuthenticated, async (req, res) => {
+    try {
+        const avaliadores = await Avaliador.find().sort({ nome: 'asc' }).lean();
+        res.render('superadmin/avaliadores/index', { layout: 'layout_superadmin', avaliadores });
+    } catch (err) {
+        console.error('Erro ao listar avaliadores para Super Admin:', err);
+        req.flash('error_msg', 'Erro ao carregar avaliadores.');
+        res.redirect('/superadmin/dashboard');
+    }
+});
+
+// Detalhes do Avaliador (Super Admin)
+router.get('/avaliadores/detalhes/:id', isSuperAdminAuthenticated, async (req, res) => {
+    try {
+        const avaliador = await Avaliador.findById(req.params.id).lean();
+
+        if (!avaliador) {
+            req.flash('error_msg', 'Avaliador não encontrado.');
+            return res.redirect('/superadmin/avaliadores');
+        }
+
+        // Opcional: Listar avaliações feitas por este avaliador
+        const avaliacoesFeitas = await Avaliacao.find({ avaliador: avaliador._id })
+            .populate('projeto', 'nome') // Popula o nome do projeto
+            .populate('feira', 'nome')   // Popula o nome da feira
+            .lean();
+
+        res.render('superadmin/avaliadores/detalhes', { layout: 'layout_superadmin', avaliador, avaliacoesFeitas });
+    } catch (err) {
+        console.error('Erro ao carregar detalhes do avaliador para Super Admin:', err);
+        req.flash('error_msg', 'Erro ao carregar detalhes do avaliador.');
+        res.redirect('/superadmin/avaliadores');
+    }
+});
+
+// ========================================================================
+// Rotas de Gerenciamento de Critérios de Avaliação (somente leitura para Super Admin)
+// ========================================================================
+
+// Listar Critérios (Super Admin)
+router.get('/criterios', isSuperAdminAuthenticated, async (req, res) => {
+    try {
+        const criterios = await Criterio.find().sort({ nome: 'asc' }).lean();
+        res.render('superadmin/criterios/index', { layout: 'layout_superadmin', criterios });
+    } catch (err) {
+        console.error('Erro ao listar critérios para Super Admin:', err);
+        req.flash('error_msg', 'Erro ao carregar critérios de avaliação.');
+        res.redirect('/superadmin/dashboard');
+    }
+});
+
+// ========================================================================
+// Rotas de Gerenciamento de Avaliações (somente leitura para Super Admin)
+// ========================================================================
+
+// Listar Avaliações (Super Admin)
+router.get('/avaliacoes', isSuperAdminAuthenticated, async (req, res) => {
+    try {
+        const avaliacoes = await Avaliacao.find()
+            .populate('projeto', 'nome')
+            .populate('avaliador', 'nome')
+            .populate('feira', 'nome')
+            .lean();
+
+        res.render('superadmin/avaliacoes/index', { layout: 'layout_superadmin', avaliacoes });
+    } catch (err) {
+        console.error('Erro ao listar avaliações para Super Admin:', err);
+        req.flash('error_msg', 'Erro ao carregar avaliações.');
+        res.redirect('/superadmin/dashboard');
+    }
+});
+
+// Detalhes da Avaliação (Super Admin)
+router.get('/avaliacoes/detalhes/:id', isSuperAdminAuthenticated, async (req, res) => {
+    try {
+        const avaliacao = await Avaliacao.findById(req.params.id)
+            .populate('projeto')
+            .populate('avaliador')
+            .populate('feira')
+            .populate('criterios.criterioId', 'nome descricao') // Popula nome e descrição dos critérios
+            .lean();
+
+        if (!avaliacao) {
+            req.flash('error_msg', 'Avaliação não encontrada.');
+            return res.redirect('/superadmin/avaliacoes');
+        }
+
+        // Calcula a pontuação total da avaliação
+        avaliacao.pontuacaoTotal = avaliacao.criterios.reduce((acc, c) => acc + (c.pontuacao || 0), 0);
+
+        res.render('superadmin/avaliacoes/detalhes', { layout: 'layout_superadmin', avaliacao });
+    } catch (err) {
+        console.error('Erro ao carregar detalhes da avaliação para Super Admin:', err);
+        req.flash('error_msg', 'Erro ao carregar detalhes da avaliação.');
+        res.redirect('/superadmin/avaliacoes');
     }
 });
 
