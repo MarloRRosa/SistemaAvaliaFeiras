@@ -261,16 +261,19 @@ router.post('/login', async (req, res) => {
 
 // Rota de Logout (POST)
 router.post('/logout', verificarAdminEscola, (req, res, next) => {
+    // MOVER O FLASH PARA ANTES
+    req.flash('success_msg', 'Você saiu da sua conta de administrador.');
+
     req.session.destroy(err => {
         if (err) {
             console.error('Erro ao destruir sessão:', err);
             return next(err);
         }
         res.clearCookie('connect.sid');
-        req.flash('success_msg', 'Você saiu da sua conta de administrador.');
         res.redirect('/admin/login');
     });
 });
+
 
 // ===================================
 // ROTAS DE RECUPERAÇÃO DE SENHA
