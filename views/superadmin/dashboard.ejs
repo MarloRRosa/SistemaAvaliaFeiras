@@ -80,12 +80,20 @@
         <div class="max-w-7xl mx-auto bg-white rounded-xl shadow-md p-6">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
                 <h2 class="text-3xl font-bold text-gray-800 mb-4 md:mb-0">Painel Super Admin</h2>
-                <a href="/superadmin/escolas/nova" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2 rounded-lg shadow-sm transition-colors duration-200">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-                    </svg>
-                    Nova Escola
-                </a>
+                <div class="flex flex-col md:flex-row items-center gap-4">
+                    <a href="/superadmin/escolas/nova" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2 rounded-lg shadow-sm transition-colors duration-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                        </svg>
+                        Nova Escola
+                    </a>
+                    
+                    <!-- NOVO LINK DE LOGOUT -->
+                    <a href="/superadmin/logout" class="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-5 py-2 rounded-lg shadow-sm transition-colors duration-200">
+                        <i class="fas fa-sign-out-alt"></i> <!-- Ícone de saída do Font Awesome -->
+                        Sair
+                    </a>
+                </div>
             </div>
 
             <!-- Mensagens Flash -->
@@ -441,7 +449,7 @@
                 event.preventDefault(); // Impede o comportamento padrão do link/botão
             }
             
-            console.log(`[showTab] Mudando para a aba: ${tabName}`); 
+            // console.log(`[showTab] Mudando para a aba: ${tabName}`); // Removido log excessivo
 
             document.querySelectorAll('.tab-content').forEach(content => {
                 content.classList.add('hidden');
@@ -463,10 +471,10 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('[DOMContentLoaded] DOM completamente carregado. Inicializando abas.');
+            // console.log('[DOMContentLoaded] DOM completamente carregado. Inicializando abas.'); // Removido log excessivo
             const urlParams = new URLSearchParams(window.location.search);
             const initialTab = urlParams.get('tab') || 'visao-geral';
-            console.log(`[DOMContentLoaded] Aba inicial detectada: ${initialTab}`);
+            // console.log(`[DOMContentLoaded] Aba inicial detectada: ${initialTab}`); // Removido log excessivo
 
             // Chama showTab com a aba inicial, passando null para o evento já que não é um clique real do usuário.
             showTab(null, initialTab);

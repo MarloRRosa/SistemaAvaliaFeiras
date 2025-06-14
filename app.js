@@ -59,7 +59,7 @@ app.use(session({
     cookie: {
         maxAge: 24 * 60 * 60 * 1000,
         httpOnly: true,
-        secure: false, // <<<<< FORÇADO A FALSE PARA TESTE
+        secure:  process.env.COOKIE_SECURE === 'true',
         sameSite: 'lax'
     }
 }));

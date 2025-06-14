@@ -106,15 +106,15 @@ function verificarSuperAdmin(req, res, next) {
         console.warn('Headers já enviados em verificarSuperAdmin, abortando.');
         return;
     }
-    console.log('--- Executando verificarSuperAdmin ---');
-    console.log('Conteúdo completo de req.session:', req.session); 
-    console.log('Valor de req.session.superAdminId:', req.session ? req.session.superAdminId : 'Sessão não existe');
+    // console.log('--- Executando verificarSuperAdmin ---'); // Remover este log excessivo
+    // console.log('Conteúdo completo de req.session:', req.session); // Remover este log excessivo
+    // console.log('Valor de req.session.superAdminId:', req.session ? req.session.superAdminId : 'Sessão não existe'); // Remover este log excessivo
 
     if (req.session && req.session.superAdminId) {
-        console.log('Super Admin ID encontrado na sessão. Acesso permitido.');
+        // console.log('Super Admin ID encontrado na sessão. Acesso permitido.'); // Remover este log excessivo
         return next();
     }
-    console.log('Super Admin ID NÃO encontrado na sessão. Redirecionando para login.');
+    // console.log('Super Admin ID NÃO encontrado na sessão. Redirecionando para login.'); // Remover este log excessivo
     req.flash('error_msg', 'Você precisa estar logado como Super Admin para acessar esta área.');
     res.redirect('/superadmin/login');
 }
@@ -161,14 +161,13 @@ router.post('/login', async (req, res) => {
     if (!email || !senha) {
         console.log('Campos vazios.');
         req.flash('error_msg', 'Por favor, preencha todos os campos.');
-        // Não usar return res.redirect, mas sim render
         res.render('superadmin/login', { 
             titulo: 'Login Super Admin', 
             layout: 'layouts/public', 
             error_msg: req.flash('error_msg'),
             success_msg: req.flash('success_msg') 
         });
-        return; // Adicionar o return depois do render
+        return; 
     }
 
     try {
@@ -205,16 +204,9 @@ router.post('/login', async (req, res) => {
             return;
         }
 
-        // --- CORREÇÃO MAIS UMA VEZ: Convertendo para string e forçando modificação ---
         req.session.superAdminId = superAdmin._id.toString(); 
-        // Esta linha é crucial para garantir que o express-session marque a sessão como "modificada"
-        // e o connect-mongodb-session persista a alteração.
-        // req.session.touch(); // Alternativa se a de baixo não funcionar
-        
         console.log('ID do Super Admin atribuído à sessão (string):', req.session.superAdminId);
 
-        // Força o salvamento da sessão antes de redirecionar para garantir persistência
-        // e passa para o próximo middleware para o express-session finalizar a resposta.
         req.session.save(err => {
             if (err) {
                 console.error('Erro ao salvar a sessão após login:', err);
@@ -246,7 +238,8 @@ router.get('/logout', verificarSuperAdmin, (req, res) => {
         if (err) {
             console.error('Erro ao destruir sessão:', err);
             req.flash('error_msg', 'Erro ao fazer logout.');
-            return res.render('superadmin/dashboard', { 
+            // Se houver um erro ao destruir a sessão, ainda precisamos passar o título
+            return res.render('superadmin/dashboard', { // Pode ser um redirect para /superadmin/login
                 titulo: 'Erro no Logout', 
                 layout: 'layouts/public', 
                 error_msg: req.flash('error_msg'),
