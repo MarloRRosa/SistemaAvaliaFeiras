@@ -150,13 +150,20 @@ router.get('/login', (req, res) => {
         req.flash('error_msg', error);
     }
     
-    // Limpa os query parameters da URL para que não reapareçam no refresh
-    const url = new URL(req.originalUrl, `http://${req.headers.host}`);
-    url.searchParams.delete('message');
-    url.searchParams.delete('error');
-    if (url.search !== req.originalUrl.split('?')[1]) { // Se houve alteração, faz o pushState
-        res.redirect(url.pathname + url.search);
-        return; // Retorna para evitar dupla resposta
+    // --- CORREÇÃO DO LOOP DE REDIRECIONAMENTO AQUI ---
+    // Verifica se há query parameters na URL para limpar
+    if (req.originalUrl.includes('?')) {
+        const url = new URL(req.originalUrl, `http://${req.headers.host}`); // Cria uma URL completa para manipulação
+        const hasParamsToClear = url.searchParams.has('message') || url.searchParams.has('error');
+
+        url.searchParams.delete('message');
+        url.searchParams.delete('error');
+
+        // Redireciona APENAS se havia parâmetros para limpar e a URL mudou
+        if (hasParamsToClear) {
+            res.redirect(url.pathname + url.search);
+            return; 
+        }
     }
 
     if (req.session.superAdminId) {
@@ -256,11 +263,9 @@ router.get('/logout', verificarSuperAdmin, (req, res) => {
     req.session.destroy(err => {
         if (err) {
             console.error('Erro ao destruir sessão:', err);
-            // Redireciona com um parâmetro de erro na URL
             return res.redirect('/superadmin/login?error=logout_failed');
         }
         res.clearCookie('connect.sid'); 
-        // Redireciona com um parâmetro de sucesso na URL
         res.redirect('/superadmin/login?message=logout_success');
     });
 });
