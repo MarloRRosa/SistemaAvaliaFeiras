@@ -12,7 +12,7 @@ const SuperAdmin = require('./models/SuperAdmin');
 
 // --- CONFIGURAÇÃO ---
 // E-mail do Super Admin cuja senha você quer alterar
-const superAdminEmail = 'docsrosas@gmail.com.br'; 
+const superAdminEmail = 'docsrosas@gmail.com'; 
 // A NOVA senha que você deseja definir
 const novaSenha = 'Senh@302630'; 
 // URL de conexão com o MongoDB. Use a variável de ambiente (recomendado)

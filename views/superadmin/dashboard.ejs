@@ -444,13 +444,10 @@
 
     <script>
         function showTab(event, tabName) {
-            // Verifica se o evento existe antes de chamar preventDefault
             if (event) {
-                event.preventDefault(); // Impede o comportamento padrão do link/botão
+                event.preventDefault(); 
             }
             
-            // console.log(`[showTab] Mudando para a aba: ${tabName}`); // Removido log excessivo
-
             document.querySelectorAll('.tab-content').forEach(content => {
                 content.classList.add('hidden');
             });
@@ -459,7 +456,6 @@
             document.querySelectorAll('.tab-button').forEach(button => {
                 button.classList.remove('active');
             });
-            // O event.currentTarget pode ser nulo se showTab for chamado diretamente (sem um evento de clique)
             const clickedButton = event ? event.currentTarget : document.querySelector(`.tab-button[onclick*="'${tabName}'"]`);
             if (clickedButton) {
                 clickedButton.classList.add('active');
@@ -471,12 +467,8 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            // console.log('[DOMContentLoaded] DOM completamente carregado. Inicializando abas.'); // Removido log excessivo
             const urlParams = new URLSearchParams(window.location.search);
             const initialTab = urlParams.get('tab') || 'visao-geral';
-            // console.log(`[DOMContentLoaded] Aba inicial detectada: ${initialTab}`); // Removido log excessivo
-
-            // Chama showTab com a aba inicial, passando null para o evento já que não é um clique real do usuário.
             showTab(null, initialTab);
         });
 

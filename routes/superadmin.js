@@ -106,15 +106,9 @@ function verificarSuperAdmin(req, res, next) {
         console.warn('Headers já enviados em verificarSuperAdmin, abortando.');
         return;
     }
-    // console.log('--- Executando verificarSuperAdmin ---'); // Remover este log excessivo
-    // console.log('Conteúdo completo de req.session:', req.session); // Remover este log excessivo
-    // console.log('Valor de req.session.superAdminId:', req.session ? req.session.superAdminId : 'Sessão não existe'); // Remover este log excessivo
-
     if (req.session && req.session.superAdminId) {
-        // console.log('Super Admin ID encontrado na sessão. Acesso permitido.'); // Remover este log excessivo
         return next();
     }
-    // console.log('Super Admin ID NÃO encontrado na sessão. Redirecionando para login.'); // Remover este log excessivo
     req.flash('error_msg', 'Você precisa estar logado como Super Admin para acessar esta área.');
     res.redirect('/superadmin/login');
 }
@@ -140,14 +134,39 @@ const transporter = nodemailer.createTransport({
 
 // Rota para o formulário de login do Super Admin
 router.get('/login', (req, res) => {
+    // Coleta mensagens da URL, se existirem, e as adiciona ao flash
+    const message = req.query.message;
+    const error = req.query.error;
+
+    if (message === 'logout_success') {
+        req.flash('success_msg', 'Você foi desconectado com sucesso.');
+    } else if (message) {
+        req.flash('success_msg', message);
+    }
+
+    if (error === 'logout_failed') {
+        req.flash('error_msg', 'Erro ao fazer logout.');
+    } else if (error) {
+        req.flash('error_msg', error);
+    }
+    
+    // Limpa os query parameters da URL para que não reapareçam no refresh
+    const url = new URL(req.originalUrl, `http://${req.headers.host}`);
+    url.searchParams.delete('message');
+    url.searchParams.delete('error');
+    if (url.search !== req.originalUrl.split('?')[1]) { // Se houve alteração, faz o pushState
+        res.redirect(url.pathname + url.search);
+        return; // Retorna para evitar dupla resposta
+    }
+
     if (req.session.superAdminId) {
         return res.redirect('/superadmin/dashboard');
     }
     res.render('superadmin/login', {
         titulo: 'Login Super Admin', 
         layout: 'layouts/public', 
-        error_msg: req.flash('error_msg'),
-        success_msg: req.flash('success_msg')
+        error_msg: req.flash('error_msg'), // Exibe as mensagens flash
+        success_msg: req.flash('success_msg') // Exibe as mensagens flash
     });
 });
 
@@ -237,18 +256,12 @@ router.get('/logout', verificarSuperAdmin, (req, res) => {
     req.session.destroy(err => {
         if (err) {
             console.error('Erro ao destruir sessão:', err);
-            req.flash('error_msg', 'Erro ao fazer logout.');
-            // Se houver um erro ao destruir a sessão, ainda precisamos passar o título
-            return res.render('superadmin/dashboard', { // Pode ser um redirect para /superadmin/login
-                titulo: 'Erro no Logout', 
-                layout: 'layouts/public', 
-                error_msg: req.flash('error_msg'),
-                success_msg: req.flash('success_msg')
-            });
+            // Redireciona com um parâmetro de erro na URL
+            return res.redirect('/superadmin/login?error=logout_failed');
         }
         res.clearCookie('connect.sid'); 
-        req.flash('success_msg', 'Você foi desconectado com sucesso.');
-        res.redirect('/superadmin/login');
+        // Redireciona com um parâmetro de sucesso na URL
+        res.redirect('/superadmin/login?message=logout_success');
     });
 });
 
