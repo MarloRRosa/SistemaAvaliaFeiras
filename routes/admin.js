@@ -324,7 +324,11 @@ router.post('/recuperar-senha', async (req, res) => {
         });
 
         const mailOptions = {
-            from: `"AvaliaFeiras" <${process.env.EMAIL_USER}>`,
+            from: {
+  name: 'AvaliaFeiras',
+  address: process.env.EMAIL_SENDER_ADDRESS
+},
+
             to: admin.email,
             subject: 'Redefinição de Senha - Sistema AvaliaFeiras',
             html: `
