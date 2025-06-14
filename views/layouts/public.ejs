@@ -27,15 +27,6 @@
     <!-- Cabeçalho institucional -->
     
 
-    <main class="pt-24 max-w-6xl mx-auto p-6 flex-grow"> <!-- Adicionado flex-grow para empurrar o footer para baixo -->
-        <% if (success_msg) { %>
-            <div class="bg-green-200 p-2 mb-4 rounded"><%= success_msg %></div>
-        <% } %>
-        <% if (error_msg) { %>
-            <div class="bg-red-200 p-2 mb-4 rounded"><%= error_msg %></div>
-        <% } %>
-        <%- body %> <!-- Conteúdo da view específica será injetado aqui -->
-    </main>
 
     <!-- Footer movido para o layout para ser consistente em todas as páginas -->
    
