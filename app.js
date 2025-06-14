@@ -7,7 +7,7 @@ const flash = require('connect-flash');
 const path = require('path');
 const MongoDBStore = require('connect-mongodb-session')(session);
 const methodOverride = require('method-override');
-//require('dotenv').config();
+const isProduction = process.env.NODE_ENV === 'production';
 
 // Importa a função auxiliar
 const { formatarDatasParaInput } = require('./utils/helpers');
@@ -40,6 +40,7 @@ store.on('error', function(error) {
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.set('layout', 'layouts/public');
+app.set('trust proxy', 1);
 
 // =====================
 // Middlewares Essenciais
@@ -57,10 +58,10 @@ app.use(session({
     saveUninitialized: false,
     store: store,
     cookie: {
-        maxAge: 24 * 60 * 60 * 1000,
+        maxAge: 24 * 60 * 60 * 1000,  // 1 dia
         httpOnly: true,
-        secure:  process.env.COOKIE_SECURE === 'true',
-        sameSite: 'lax'
+        secure: isProduction,         // true em produção
+        sameSite: isProduction ? 'none' : 'lax' // none com secure para evitar bloqueio do cookie
     }
 }));
 
