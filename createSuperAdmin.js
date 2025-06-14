@@ -10,11 +10,7 @@ require('dotenv').config();
 
 // *** AQUI VAI A SUA URI COMPLETA E CORRETA DO MONGODB ATLAS, AGORA COM '/avaliacoes'! ***
 // IMPORTANTE: REMOVA ESTA LINHA COM A URI DIRETA APÓS A EXECUÇÃO BEM-SUCEDIDA POR SEGURANÇA!
-const mongoAtlasURI = 'mongodb+srv://marlorosa:Smgd2BOswZg1w1e0@cluster0.2t2gywk.mongodb.net/avaliacoes?retryWrites=true&w=majority&appName=Cluster0';
-
-// 3. Conecta ao banco de dados ANTES da função principal
-// O `.then()` e `.catch()` são para a conexão inicial do script
-mongoose.connect(mongoAtlasURI, {
+mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/avaliafeiras', {
     useNewUrlParser: true,
     useUnifiedTopology: true
 })
@@ -34,11 +30,6 @@ async function createInitialSuperAdmin() {
     try {
         // E-mail do seu Super Admin (use o que você quer no Atlas)
         const emailSuperAdmin = 'marlo.rodrigo.rosa@gmail.com'; 
-        // Você pode mudar o e-mail para algo como 'superadmin.teste.novo@gmail.com'
-        // se quiser garantir que uma nova entrada seja criada, mesmo que 'docsrosas@gmail.com'
-        // já esteja em outra base de dados (ex: 'test')
-
-        // *** MUITO IMPORTANTE: Mude esta senha para uma SENHA FORTE e ANOTE-A! ***
         const senhaSuperAdmin = 'S123456'; 
         
         // Verifica se o Super Admin já existe na base de dados 'avaliacoes'
