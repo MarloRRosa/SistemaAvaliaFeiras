@@ -46,9 +46,8 @@ function generateTemporaryPassword(length = 8) {
 
 /**
  * Envia um e-mail com a senha temporária do administrador.
- * @param {string} adminEmail O endereço de e-mail do administrador.
+ * @param {object} admin Objeto do administrador com nome e email.
  * @param {string} temporaryPassword A senha temporária gerada.
- * @param {string} escolaNome O nome da escola associada ao administrador.
  * @param {string} appUrl A URL base da aplicação para links.
  * @returns {Promise<boolean>} True se o e-mail foi enviado, false caso contrário.
  */
@@ -136,11 +135,11 @@ const transporter = nodemailer.createTransport({
 // Rota para o formulário de login do Super Admin
 router.get('/login', (req, res) => {
     if (req.session.superAdminId) {
-        return res.redirect('/superadmin/dashboard'); // Redireciona se já estiver logado
+        return res.redirect('/superadmin/dashboard');
     }
     res.render('superadmin/login', {
-        // --- CORREÇÃO AQUI: Usando o layout correto 'layouts/public' ---
-        layout: 'layouts/public', 
+        titulo: 'Login Super Admin', // Garantindo que 'titulo' é sempre passado
+        layout: 'layouts/public',
         error_msg: req.flash('error_msg'),
         success_msg: req.flash('success_msg')
     });
@@ -156,7 +155,12 @@ router.post('/login', async (req, res) => {
     if (!email || !senha) {
         console.log('Campos vazios.');
         req.flash('error_msg', 'Por favor, preencha todos os campos.');
-        return res.redirect('/superadmin/login');
+        // Passa o título ao redirecionar com render
+        return res.render('superadmin/login', { 
+            titulo: 'Login Super Admin', 
+            layout: 'layouts/public', 
+            error_msg: req.flash('error_msg') 
+        });
     }
 
     try {
@@ -169,7 +173,12 @@ router.post('/login', async (req, res) => {
         if (!superAdmin) {
             console.log('Super Admin não encontrado.');
             req.flash('error_msg', 'Credenciais inválidas.');
-            return res.redirect('/superadmin/login');
+            // Passa o título ao redirecionar com render
+            return res.render('superadmin/login', { 
+                titulo: 'Login Super Admin', 
+                layout: 'layouts/public', 
+                error_msg: req.flash('error_msg') 
+            });
         }
 
         const isMatch = await bcrypt.compare(senha, superAdmin.senha);
@@ -178,7 +187,12 @@ router.post('/login', async (req, res) => {
         if (!isMatch) {
             console.log('Senha incorreta.');
             req.flash('error_msg', 'Credenciais inválidas.');
-            return res.redirect('/superadmin/login');
+            // Passa o título ao redirecionar com render
+            return res.render('superadmin/login', { 
+                titulo: 'Login Super Admin', 
+                layout: 'layouts/public', 
+                error_msg: req.flash('error_msg') 
+            });
         }
 
         // Atribui o ID do Super Admin à sessão
@@ -202,7 +216,12 @@ router.post('/login', async (req, res) => {
         // Garante que o redirecionamento ocorre se req.session.save falhar ou outros erros acontecerem
         if (!res.headersSent) { 
             req.flash('error_msg', 'Ocorreu um erro ao tentar fazer login. Tente novamente.');
-            res.redirect('/superadmin/login');
+            // Passa o título ao redirecionar com render
+            res.render('superadmin/login', { 
+                titulo: 'Login Super Admin', 
+                layout: 'layouts/public', 
+                error_msg: req.flash('error_msg') 
+            });
         }
     }
 });
@@ -213,7 +232,12 @@ router.get('/logout', verificarSuperAdmin, (req, res) => {
         if (err) {
             console.error('Erro ao destruir sessão:', err);
             req.flash('error_msg', 'Erro ao fazer logout.');
-            return res.redirect('/superadmin/dashboard');
+            // Passa o título ao redirecionar com render
+            return res.render('superadmin/dashboard', { 
+                titulo: 'Painel Super Admin', 
+                layout: 'layouts/public', // Assumindo public como layout padrão
+                error_msg: req.flash('error_msg') 
+            });
         }
         res.clearCookie('connect.sid'); // Limpa o cookie da sessão
         req.flash('success_msg', 'Você foi desconectado com sucesso.');
@@ -449,8 +473,8 @@ router.get('/dashboard', verificarSuperAdmin, async (req, res) => {
         }
 
         res.render('superadmin/dashboard', {
-            // --- CORREÇÃO AQUI: Usando o layout correto para o dashboard ---
-            layout: 'layouts/superadmin', 
+            titulo: 'Painel Super Admin', // Garantindo que 'titulo' é sempre passado
+            layout: 'layouts/superadmin',
             activeTab: activeTab,
             error_msg: req.flash('error_msg'),
             success_msg: req.flash('success_msg'),
@@ -469,7 +493,7 @@ router.get('/dashboard', verificarSuperAdmin, async (req, res) => {
 router.get('/escolas/nova', verificarSuperAdmin, (req, res) => {
     if (res.headersSent) return;
     res.render('superadmin/nova-escola', {
-        titulo: 'Nova Escola',
+        titulo: 'Nova Escola', // Garantindo que 'titulo' é sempre passado
         layout: 'layouts/superadmin',
         escola: {},
         errors: [],
@@ -501,7 +525,7 @@ router.post('/escolas/nova', verificarSuperAdmin, async (req, res) => {
         req.flash('error_msg', errors.map(e => e.text).join(', '));
         if (!res.headersSent) {
             return res.render('superadmin/nova-escola', {
-                titulo: 'Nova Escola',
+                titulo: 'Nova Escola', // Garantindo que 'titulo' é sempre passado
                 layout: 'layouts/superadmin',
                 escola: { nome, emailAdmin },
                 errors: errors,
@@ -562,7 +586,7 @@ router.get('/escolas/:id/editar', verificarSuperAdmin, async (req, res) => {
         }
 
         res.render('superadmin/editar-escola', {
-            titulo: 'Editar Escola',
+            titulo: 'Editar Escola', // Garantindo que 'titulo' é sempre passado
             escola: escola,
             admin: admin || {},
             layout: 'layouts/superadmin',
@@ -621,7 +645,7 @@ router.post('/escolas/:id/editar', verificarSuperAdmin, async (req, res) => {
         const admin = await Admin.findOne({ escolaId: req.params.id }).lean();
         if (!res.headersSent) {
             return res.render('superadmin/editar-escola', {
-                titulo: 'Editar Escola',
+                titulo: 'Editar Escola', // Garantindo que 'titulo' é sempre passado
                 escola: escola,
                 admin: admin || {},
                 layout: 'layouts/superadmin',
@@ -800,8 +824,8 @@ router.get('/solicitacoes', verificarSuperAdmin, async (req, res) => {
         const solicitacoes = await SolicitacaoAcesso.find({ status: 'Pendente' }).sort({ dataSolicitacao: 'asc' }).lean();
 
         res.render('superadmin/solicitacoes', {
-            titulo: 'Gerenciar Solicitações de Acesso',
-            layout: 'layouts/superadmin', // Usando layout_superadmin
+            titulo: 'Gerenciar Solicitações de Acesso', // Garantindo que 'titulo' é sempre passado
+            layout: 'layouts/superadmin',
             solicitacoes: solicitacoes,
             error_msg: req.flash('error_msg'),
             success_msg: req.flash('success_msg')
@@ -826,8 +850,8 @@ router.get('/solicitacoes/:id/editar', verificarSuperAdmin, async (req, res) => 
 
         res.render('superadmin/editar_solicitacao', {
             solicitacao,
-            titulo: 'Detalhes da Solicitação',
-            layout: 'layouts/superadmin', // Usando layout_superadmin
+            titulo: 'Detalhes da Solicitação', // Garantindo que 'titulo' é sempre passado
+            layout: 'layouts/superadmin',
             error_msg: req.flash('error_msg'),
             success_msg: req.flash('success_msg')
         });
