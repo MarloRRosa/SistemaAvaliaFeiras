@@ -84,7 +84,10 @@ async function sendResetPinEmail(avaliador) {
     });
 
     const mailOptions = {
-        from: `"AvaliaFeiras" <${process.env.EMAIL_USER}>`,
+        from: {
+            name: 'AvaliaFeiras',
+            address: process.env.EMAIL_SENDER_ADDRESS || 'docsrosas@gmail.com'
+            },
         to: avaliador.email,
         subject: 'Redefinição de PIN do Avaliador - AvaliaFeiras',
         html: `
