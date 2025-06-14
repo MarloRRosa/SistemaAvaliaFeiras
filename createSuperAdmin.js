@@ -33,13 +33,13 @@ mongoose.connect(mongoAtlasURI, {
 async function createInitialSuperAdmin() {
     try {
         // E-mail do seu Super Admin (use o que você quer no Atlas)
-        const emailSuperAdmin = 'docsrosas@gmail.com'; 
+        const emailSuperAdmin = 'marlo.rodrigo.rosa@gmail.com'; 
         // Você pode mudar o e-mail para algo como 'superadmin.teste.novo@gmail.com'
         // se quiser garantir que uma nova entrada seja criada, mesmo que 'docsrosas@gmail.com'
         // já esteja em outra base de dados (ex: 'test')
 
         // *** MUITO IMPORTANTE: Mude esta senha para uma SENHA FORTE e ANOTE-A! ***
-        const senhaSuperAdmin = 'Senh@302630'; 
+        const senhaSuperAdmin = 'S123456'; 
         
         // Verifica se o Super Admin já existe na base de dados 'avaliacoes'
         const existingSuperAdmin = await SuperAdmin.findOne({ email: emailSuperAdmin });
