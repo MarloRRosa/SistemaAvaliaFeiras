@@ -57,12 +57,13 @@ app.use(session({
     saveUninitialized: false,
     store: store,
     cookie: {
-        maxAge: 24 * 60 * 60 * 1000, // 1 dia
+        maxAge: 24 * 60 * 60 * 1000,
         httpOnly: true,
         secure: process.env.RENDER_EXTERNAL_URL ? true : false,
         sameSite: 'lax'
     }
 }));
+
 
 // =====================
 // Flash messages e variáveis globais
