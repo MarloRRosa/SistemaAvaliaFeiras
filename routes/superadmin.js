@@ -117,7 +117,9 @@ router.post('/login', async (req, res) => {
     }
 
     try {
-        const superAdmin = await SuperAdmin.findOne({ email: email });
+        // --- CORREÇÃO AQUI: Converte o email para minúsculas antes da busca ---
+        const emailLowerCase = email.toLowerCase(); 
+        const superAdmin = await SuperAdmin.findOne({ email: emailLowerCase });
 
         if (!superAdmin) {
             req.flash('error_msg', 'Credenciais inválidas.');
