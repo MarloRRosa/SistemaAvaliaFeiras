@@ -1,3 +1,4 @@
+// routes/superadmin.js
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
@@ -101,7 +102,6 @@ async function sendAdminTemporaryPasswordEmail(admin, temporaryPassword, appUrl)
  * @param {function} next Próxima função middleware.
  */
 function verificarSuperAdmin(req, res, next) {
-    // Apenas redireciona se os headers não foram enviados
     if (res.headersSent) {
         console.warn('Headers já enviados em verificarSuperAdmin, abortando.');
         return;
@@ -139,7 +139,7 @@ router.get('/login', (req, res) => {
     }
     res.render('superadmin/login', {
         titulo: 'Login Super Admin', 
-        layout: 'layouts/public', // Padronizado para layouts/public
+        layout: 'layouts/public', 
         error_msg: req.flash('error_msg'),
         success_msg: req.flash('success_msg')
     });
@@ -159,7 +159,7 @@ router.post('/login', async (req, res) => {
             titulo: 'Login Super Admin', 
             layout: 'layouts/public', 
             error_msg: req.flash('error_msg'),
-            success_msg: req.flash('success_msg') // Garante que success_msg também é passado
+            success_msg: req.flash('success_msg') 
         });
     }
 
@@ -177,7 +177,7 @@ router.post('/login', async (req, res) => {
                 titulo: 'Login Super Admin', 
                 layout: 'layouts/public', 
                 error_msg: req.flash('error_msg'),
-                success_msg: req.flash('success_msg') // Garante que success_msg também é passado
+                success_msg: req.flash('success_msg') 
             });
         }
 
@@ -191,7 +191,7 @@ router.post('/login', async (req, res) => {
                 titulo: 'Login Super Admin', 
                 layout: 'layouts/public', 
                 error_msg: req.flash('error_msg'),
-                success_msg: req.flash('success_msg') // Garante que success_msg também é passado
+                success_msg: req.flash('success_msg') 
             });
         }
 
@@ -219,7 +219,7 @@ router.post('/login', async (req, res) => {
                 titulo: 'Login Super Admin', 
                 layout: 'layouts/public', 
                 error_msg: req.flash('error_msg'),
-                success_msg: req.flash('success_msg') // Garante que success_msg também é passado
+                success_msg: req.flash('success_msg') 
             });
         }
     }
@@ -231,15 +231,14 @@ router.get('/logout', verificarSuperAdmin, (req, res) => {
         if (err) {
             console.error('Erro ao destruir sessão:', err);
             req.flash('error_msg', 'Erro ao fazer logout.');
-            // Se houver um erro ao destruir a sessão, ainda precisamos passar o título
             return res.render('superadmin/dashboard', { 
-                titulo: 'Erro no Logout', // Título para esta situação de erro
-                layout: 'layouts/public', // Padronizado para layouts/public
+                titulo: 'Erro no Logout', 
+                layout: 'layouts/public', 
                 error_msg: req.flash('error_msg'),
                 success_msg: req.flash('success_msg')
             });
         }
-        res.clearCookie('connect.sid'); // Limpa o cookie da sessão
+        res.clearCookie('connect.sid'); 
         req.flash('success_msg', 'Você foi desconectado com sucesso.');
         res.redirect('/superadmin/login');
     });
@@ -250,11 +249,9 @@ router.get('/logout', verificarSuperAdmin, (req, res) => {
 // ========================================================================
 
 router.get('/dashboard', verificarSuperAdmin, async (req, res) => {
-    // Removido if (res.headersSent) return; daqui
     try {
         const activeTab = req.query.tab || 'visao-geral';
 
-        // Inicializa todas as variáveis que podem ser passadas para a view
         let dataForTab = {
             totalEscolas: 0,
             totalAdmins: 0,
@@ -265,15 +262,14 @@ router.get('/dashboard', verificarSuperAdmin, async (req, res) => {
             escolasDetalhes: [],
             solicitacoes: [],
             projetosNaoAvaliados: [],
-            todasEscolas: [], // Usado para o filtro de escolas
+            todasEscolas: [], 
             selectedEscolaId: '',
-            rankingProjetosPorCategoria: {}, // Novo
-            resumoAvaliadoresPorEscola: [] // Novo
+            rankingProjetosPorCategoria: {}, 
+            resumoAvaliadoresPorEscola: [] 
         };
 
-        // Carrega dados base (se necessário em múltiplas abas, ou carregados on-demand)
         const escolasCadastradas = await Escola.find().sort({ nome: 1 }).lean();
-        dataForTab.todasEscolas = escolasCadastradas; // Para o dropdown de filtro em "Projetos Pendentes"
+        dataForTab.todasEscolas = escolasCadastradas; 
 
         if (activeTab === 'visao-geral') {
             dataForTab.totalEscolas = await Escola.countDocuments();
@@ -291,7 +287,7 @@ router.get('/dashboard', verificarSuperAdmin, async (req, res) => {
                 const numAvaliacoes = await Avaliacao.countDocuments({ escolaId: escola._id });
 
                 return {
-                    ...escola, // Usar o objeto escola.lean() diretamente
+                    ...escola, 
                     adminEmail: adminPrincipal ? adminPrincipal.email : 'N/A',
                     numProjetos,
                     numAvaliadores,
@@ -358,12 +354,12 @@ router.get('/dashboard', verificarSuperAdmin, async (req, res) => {
                 }
             }
         } else if (activeTab === 'ranking-projetos') {
-            const categorias = await Criterio.aggregate([ // Usar Criterio para obter categorias únicas e seus nomes
-                { $match: { feira: { $ne: null } } }, // Apenas critérios associados a feiras
+            const categorias = await Criterio.aggregate([ 
+                { $match: { feira: { $ne: null } } }, 
                 { $group: { _id: "$categoriaId", nome: { $first: "$categoria.nome" } } },
                 { $lookup: { from: 'categorias', localField: '_id', foreignField: '_id', as: 'categoriaInfo' } },
                 { $unwind: { path: '$categoriaInfo', preserveNullAndEmptyArrays: true } },
-                { $project: { _id: 1, nome: '$categoriaInfo.nome' } } // Usa o nome da categoria do lookup
+                { $project: { _id: 1, nome: '$categoriaInfo.nome' } } 
             ]);
 
             let rankingPorCategoria = {};
@@ -381,7 +377,6 @@ router.get('/dashboard', verificarSuperAdmin, async (req, res) => {
 
                         const criteriosOficiaisProjeto = await Criterio.find({ _id: { $in: projeto.criterios } }).lean();
                         
-                        // Mapeia notas para cada critério para este projeto
                         let notasPorCriterio = {};
                         criteriosOficiaisProjeto.forEach(crit => {
                             notasPorCriterio[crit._id.toString()] = [];
@@ -395,7 +390,6 @@ router.get('/dashboard', verificarSuperAdmin, async (req, res) => {
                             });
                         });
 
-                        // Calcula a média ponderada para o projeto
                         criteriosOficiaisProjeto.forEach(crit => {
                             const notasDoCriterio = notasPorCriterio[String(crit._id)];
                             if (notasDoCriterio.length > 0) {
@@ -412,14 +406,12 @@ router.get('/dashboard', verificarSuperAdmin, async (req, res) => {
                         
                         projetosComRanking.push({
                             titulo: projeto.titulo,
-                            mediaGeral: parseFloat(mediaGeral), // Converte de volta para número para ordenação
+                            mediaGeral: parseFloat(mediaGeral), 
                             numAvaliacoes: avaliacoesDoProjeto.length
                         });
                     }
                 }
-                // Ordena os projetos dentro da categoria pela média geral (maior para menor)
-                projetosComRanking.sort((a, b) => b.mediaGeral - a.mediaGeral);
-                rankingPorCategoria[categoria.nome || 'Sem Categoria'] = projetosComRanking; // Use o nome da categoria ou 'Sem Categoria'
+                rankingPorCategoria[categoria.nome || 'Sem Categoria'] = projetosComRanking; 
             }
             dataForTab.rankingProjetosPorCategoria = rankingPorCategoria;
 
@@ -445,7 +437,7 @@ router.get('/dashboard', verificarSuperAdmin, async (req, res) => {
                                     
                                     if (totalCriteriosFeira > 0 && criteriosAvaliadosComNota === totalCriteriosFeira) {
                                         numAvaliacoesCompletas++;
-                                    } else if (totalCriteriosFeira === 0 && avaliacao.itens.length > 0) { // Se não há critérios mas tem itens avaliados
+                                    } else if (totalCriteriosFeira === 0 && avaliacao.itens.length > 0) { 
                                         numAvaliacoesCompletas++;
                                     }
                                 }
@@ -471,7 +463,7 @@ router.get('/dashboard', verificarSuperAdmin, async (req, res) => {
 
         res.render('superadmin/dashboard', {
             titulo: 'Painel Super Admin', 
-            layout: 'layouts/public', // Padronizado para layouts/public
+            layout: 'layouts/public', 
             activeTab: activeTab,
             error_msg: req.flash('error_msg'),
             success_msg: req.flash('success_msg'),
@@ -488,10 +480,9 @@ router.get('/dashboard', verificarSuperAdmin, async (req, res) => {
 });
 
 router.get('/escolas/nova', verificarSuperAdmin, (req, res) => {
-    // Removido if (res.headersSent) return; daqui
     res.render('superadmin/nova-escola', {
         titulo: 'Nova Escola', 
-        layout: 'layouts/public', // Padronizado para layouts/public
+        layout: 'layouts/public', 
         escola: {},
         errors: [],
         error_msg: req.flash('error_msg'),
@@ -520,10 +511,9 @@ router.post('/escolas/nova', verificarSuperAdmin, async (req, res) => {
 
     if (errors.length > 0) {
         req.flash('error_msg', errors.map(e => e.text).join(', '));
-        // Removido if (!res.headersSent) aqui
         return res.render('superadmin/nova-escola', {
             titulo: 'Nova Escola', 
-            layout: 'layouts/public', // Padronizado para layouts/public
+            layout: 'layouts/public', 
             escola: { nome, emailAdmin },
             errors: errors,
             error_msg: req.flash('error_msg'),
@@ -552,7 +542,7 @@ router.post('/escolas/nova', verificarSuperAdmin, async (req, res) => {
         await novoAdmin.save();
 
         req.flash('success_msg', 'Escola e administrador inicial criados com sucesso!');
-        res.redirect('/superadmin/dashboard?tab=gerenciar-escolas'); // Redireciona para a aba de gerenciar escolas
+        res.redirect('/superadmin/dashboard?tab=gerenciar-escolas'); 
 
     } catch (err) {
         console.error('Erro ao adicionar nova escola:', err);
@@ -568,7 +558,6 @@ router.post('/escolas/nova', verificarSuperAdmin, async (req, res) => {
 });
 
 router.get('/escolas/:id/editar', verificarSuperAdmin, async (req, res) => {
-    // Removido if (res.headersSent) return; daqui
     try {
         const escola = await Escola.findById(req.params.id).lean();
         if (!escola) {
@@ -585,7 +574,7 @@ router.get('/escolas/:id/editar', verificarSuperAdmin, async (req, res) => {
             titulo: 'Editar Escola', 
             escola: escola,
             admin: admin || {},
-            layout: 'layouts/public', // Padronizado para layouts/public
+            layout: 'layouts/public', 
             error_msg: req.flash('error_msg'),
             success_msg: req.flash('success_msg')
         });
@@ -639,12 +628,11 @@ router.post('/escolas/:id/editar', verificarSuperAdmin, async (req, res) => {
         req.flash('error_msg', errors.join(', '));
         const escola = await Escola.findById(req.params.id).lean();
         const admin = await Admin.findOne({ escolaId: req.params.id }).lean();
-        // Removido if (!res.headersSent) aqui
         return res.render('superadmin/editar-escola', {
             titulo: 'Editar Escola', 
             escola: escola,
             admin: admin || {},
-            layout: 'layouts/public', // Padronizado para layouts/public
+            layout: 'layouts/public', 
             error_msg: req.flash('error_msg'),
             success_msg: req.flash('success_msg')
         });
@@ -701,7 +689,7 @@ router.post('/escolas/:id/editar', verificarSuperAdmin, async (req, res) => {
             req.flash('success_msg', 'Escola e administrador atualizados com sucesso!');
         }
         
-        res.redirect('/superadmin/dashboard?tab=gerenciar-escolas'); // Redireciona para a aba de gerenciar escolas
+        res.redirect('/superadmin/dashboard?tab=gerenciar-escolas'); 
 
     } catch (err) {
         console.error('Erro ao atualizar escola ou admin:', err);
@@ -813,13 +801,12 @@ router.post('/escolas/:escolaId/reset-admin-password', verificarSuperAdmin, asyn
 // ========================================================================
 
 router.get('/solicitacoes', verificarSuperAdmin, async (req, res) => {
-    // Removido if (res.headersSent) return; daqui
     try {
         const solicitacoes = await SolicitacaoAcesso.find({ status: 'Pendente' }).sort({ dataSolicitacao: 'asc' }).lean();
 
         res.render('superadmin/solicitacoes', {
             titulo: 'Gerenciar Solicitações de Acesso', 
-            layout: 'layouts/public', // Padronizado para layouts/public
+            layout: 'layouts/public', 
             solicitacoes: solicitacoes,
             error_msg: req.flash('error_msg'),
             success_msg: req.flash('success_msg')
@@ -828,13 +815,12 @@ router.get('/solicitacoes', verificarSuperAdmin, async (req, res) => {
         console.error('Erro ao buscar solicitações de acesso:', err);
         if (!res.headersSent) {
             req.flash('error_msg', 'Erro ao carregar as solicitações de acesso. Detalhes: ' + err.message);
-            res.redirect('/superadmin/dashboard?tab=solicitacoes'); // Redireciona para a aba de solicitações
+            res.redirect('/superadmin/dashboard?tab=solicitacoes'); 
         }
     }
 });
 
 router.get('/solicitacoes/:id/editar', verificarSuperAdmin, async (req, res) => {
-    // Removido if (res.headersSent) return; daqui
     try {
         const solicitacao = await SolicitacaoAcesso.findById(req.params.id).lean();
         if (!solicitacao) {
@@ -845,7 +831,7 @@ router.get('/solicitacoes/:id/editar', verificarSuperAdmin, async (req, res) => 
         res.render('superadmin/editar_solicitacao', {
             solicitacao,
             titulo: 'Detalhes da Solicitação', 
-            layout: 'layouts/public', // Padronizado para layouts/public
+            layout: 'layouts/public', 
             error_msg: req.flash('error_msg'),
             success_msg: req.flash('success_msg')
         });
