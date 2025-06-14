@@ -195,9 +195,9 @@ router.post('/login', async (req, res) => {
             });
         }
 
-        // Atribui o ID do Super Admin à sessão
-        req.session.superAdminId = superAdmin._id; 
-        console.log('ID do Super Admin atribuído à sessão:', req.session.superAdminId);
+        // --- CORREÇÃO FINAL AQUI: Converter superAdmin._id para string ---
+        req.session.superAdminId = superAdmin._id.toString(); 
+        console.log('ID do Super Admin atribuído à sessão (string):', req.session.superAdminId);
 
         // Força o salvamento da sessão antes de redirecionar para garantir persistência
         req.session.save(err => {
