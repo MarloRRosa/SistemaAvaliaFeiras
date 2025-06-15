@@ -2101,7 +2101,7 @@ router.get('/resultados-finais/pdf', verificarAdminEscola, async (req, res) => {
 
         // AQUI ESTÁ A CORREÇÃO: Usando `resultadosFinais` e `criterios` como o template espera
         await generatePdfReport(req, res, 'pdf-resultados', { 
-            resultadosFinais: resultadosFinais, 
+            projetos: resultadosFinais, 
             feiraAtual: feiraAtual, 
             titulo: 'Resultados Finais', 
             nomeFeira: feiraAtual?.nome || 'Feira Atual', 
