@@ -18,7 +18,6 @@ const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 // Alterado para puppeteer-core e chrome-aws-lambda para compatibilidade com Render
 const puppeteer = require('puppeteer');
-const chromium = require('chrome-aws-lambda');
 const fs = require('fs');
 const path = require('path');
 const ejs = require('ejs');
