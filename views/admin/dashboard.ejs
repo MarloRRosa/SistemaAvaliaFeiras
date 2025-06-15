@@ -7,6 +7,86 @@
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="/css/admin-custom.css">
+  <style>
+    /* Estilos para a navegação de abas */
+    .tab-button {
+      /* Adicionado padding, arredondamento, sombra e transições */
+      @apply px-6 py-3 text-sm font-semibold text-gray-700 bg-white rounded-lg shadow-sm border border-gray-200 
+             hover:text-blue-600 hover:border-blue-400 hover:bg-blue-50 transition-all duration-300 ease-in-out;
+      white-space: nowrap; /* Evita que o texto quebre */
+      margin-right: 0.75rem; /* Espaçamento maior entre os botões */
+      margin-bottom: 0.5rem; /* Margem inferior para espaçamento vertical em telas menores */
+      display: inline-flex; /* Para alinhar melhor o conteúdo */
+      align-items: center;
+      justify-content: center;
+    }
+    .sidebar-link {
+        @apply flex items-center p-3 rounded-lg text-gray-300 hover:bg-gray-700 transition-colors duration-200;
+    }
+    .sidebar-link .icon-wrapper {
+        @apply w-8 flex justify-center items-center; /* Garante que os ícones tenham largura fixa */
+    }
+    .sidebar-link .link-text {
+        @apply ml-3;
+    }
+    .sidebar-link.active {
+        @apply bg-blue-600 text-white shadow-lg;
+    }
+    .modal {
+        animation: fadeIn 0.3s ease-out;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .modal-content {
+        animation: slideIn 0.3s ease-out;
+    }
+    @keyframes slideIn {
+        from { transform: translateY(-50px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Estilo para a sidebar em telas pequenas */
+    @media (max-width: 767px) {
+        #sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 256px; /* 64 * 4px = 256px */
+            z-index: 50;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+            padding-top: 4rem; /* Espaço para o botão de toggle */
+        }
+        #sidebar.translate-x-0 {
+            transform: translateX(0%);
+        }
+        #sidebarToggleMobile { /* Alterado ID */
+            display: block; /* Mostrar o botão de toggle */
+        }
+        .main-content {
+            margin-left: 0; /* Remove margem para não ter espaço vazio */
+        }
+    }
+
+    /* Estilo para a sidebar em telas maiores */
+    @media (min-width: 768px) {
+        #sidebar {
+            position: relative;
+            transform: translateX(0%);
+            flex-shrink: 0; /* Não permite que a sidebar encolha */
+            padding-top: 1rem;
+        }
+        #sidebarToggleMobile { /* Alterado ID */
+            display: none; /* Ocultar o botão de toggle */
+        }
+        .main-content {
+            margin-left: 0; /* A sidebar empurra o conteúdo */
+        }
+    }
+  </style>
 </head>
 <body class="bg-gray-50 flex min-h-screen">
     <%
@@ -26,10 +106,20 @@
         if (!mediaGeralAvaliacoes) { mediaGeralAvaliacoes = 'N/A'; }
         if (!projetosPorCategoria) { projetosPorCategoria = {}; }
         if (!relatorioFinalPorProjeto) { relatorioFinalPorProjeto = {}; }
+
+        // Função auxiliar para formatar datas para o input HTML (YYYY-MM-DD)
+        const formatarDatasParaInput = (dateString) => {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
     %>
 
     <!-- BOTÃO MENU HAMBÚRGUER (flutuante para telas pequenas) -->
-            <button id="sidebarToggle" class="fixed top-4 left-4 z-50 text-gray-800 bg-white p-2 rounded-lg shadow-md md:hidden">
+            <button id="sidebarToggleMobile" class="fixed top-4 left-4 z-50 text-gray-800 bg-white p-2 rounded-lg shadow-md md:hidden">
                 <i class="fas fa-bars text-xl"></i>
             </button>
 
@@ -40,8 +130,9 @@
     <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-gray-800 text-gray-300 p-4 shadow-xl transform -translate-x-full transition-transform duration-300 z-50 md:relative md:translate-x-0 md:flex md:flex-col">
         <div class="p-4 text-center border-b border-gray-700 mb-4 flex justify-between items-center">
             <h1 class="text-2xl font-extrabold tracking-tight text-white link-text">Painel Admin</h1>
-            <button id="sidebarToggle" class="text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-gray-600 rounded-md p-1">
-                <i class="fas fa-bars text-xl"></i>
+            <!-- Botão de fechar/esconder para desktop, ou manter para consistência se o sidebarToggle for universal -->
+            <button id="sidebarToggleDesktop" class="text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-gray-600 rounded-md p-1 md:hidden">
+                <i class="fas fa-times text-xl"></i>
             </button>
         </div>
 
@@ -116,7 +207,7 @@
                     Feira Atual: <span class="text-blue-600"><%= feiraAtual.nome || 'Nenhuma Feira Ativa' %></span>
                     <small class="text-gray-500 text-lg ml-2">
                         (<%= feiraAtual.status ? (feiraAtual.status === 'ativa' ? 'Ativa' : 'Arquivada') : 'Não Definida' %>)
-                        <%= feiraAtual.inicioFeira && feiraAtual.fimFeira ? ` (${new Date(feiraAtual.inicioFeira).toLocaleDateString('pt-BR')} - ${new Date(feiraAtual.fimFeira).toLocaleDateString('pt-BR')})` : '' %>
+                        <%= feiraAtual.inicioFeira && feiraAtual.fimFeira ? ` (${formatarDatasParaInput(feiraAtual.inicioFeira)} - ${formatarDatasParaInput(feiraAtual.fimFeira)})` : '' %>
                     </small>
                 </h2>
             </div>
@@ -185,7 +276,8 @@
                                                 data-descricao="<%= projeto.descricao %>"
                                                 data-categoria-id="<%= projeto.categoria ? projeto.categoria._id : '' %>"
                                                 data-criterios="<%= projeto.criterios && projeto.criterios.length > 0 ? projeto.criterios.map(c => c._id).join(',') : '' %>"
-                                                data-turma="<%= projeto.turma %>">
+                                                data-turma="<%= projeto.turma %>"
+                                                data-alunos="<%= projeto.alunos && projeto.alunos.length > 0 ? projeto.alunos.join(',') : '' %>">
                                                 <i class="fas fa-edit mr-1"></i>Editar
                                             </button>
              
@@ -384,7 +476,8 @@
                                             data-id="<%= f._id %>"
                                             data-nome="<%= f.nome %>"
                                             data-inicio="<%= f.inicioFeira ? formatarDatasParaInput(f.inicioFeira) : '' %>"
-                                            data-fim="<%= f.fimFeira ? formatarDatasParaInput(f.fimFeira) : '' %>">
+                                            data-fim="<%= f.fimFeira ? formatarDatasParaInput(f.fimFeira) : '' %>"
+                                            data-status="<%= f.status %>">
                                             <i class="fas fa-edit mr-1"></i>Editar
                                         </button>
                                         <form action="/admin/feiras/<%= f._id %>/excluir" method="POST" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar esta feira e TODOS os seus dados?');">
@@ -481,21 +574,20 @@
                     <h4 class="text-xl font-semibold mb-4 text-gray-700 border-b pb-3">Ações da Feira</h4>
                     <div class="flex flex-col md:flex-row gap-4">
                        <form action="/admin/configuracoes/arquivar" method="POST" onsubmit="return confirm('Tem certeza que deseja ARQUIVAR a feira atual? Isso moverá todos os dados para histórico.');">
-    <button type="submit" class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2.5 px-5 rounded-lg w-full md:w-auto shadow-md transition duration-300 ease-in-out">
-        <i class="fas fa-archive mr-2"></i>Arquivar Feira Atual
-    </button>
-</form>
+                            <button type="submit" class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2.5 px-5 rounded-lg w-full md:w-auto shadow-md transition duration-300 ease-in-out">
+                                <i class="fas fa-archive mr-2"></i>Arquivar Feira Atual
+                            </button>
+                        </form>
 
-<form action="/admin/configuracoes/nova" method="POST" onsubmit="return confirm('Tem certeza que deseja iniciar uma NOVA feira? Isso ARQUIVARÁ a feira atual e APAGARÁ os projetos dela.');">
-    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 px-5 rounded-lg w-full md:w-auto shadow-md transition duration-300 ease-in-out">
-        <i class="fas fa-plus mr-2"></i>Iniciar Nova Feira
-    </button>
-</form>
+                        <form action="/admin/configuracoes/nova" method="POST" onsubmit="return confirm('Tem certeza que deseja iniciar uma NOVA feira? Isso ARQUIVARÁ a feira atual e APAGARÁ os projetos dela.');">
+                            <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 px-5 rounded-lg w-full md:w-auto shadow-md transition duration-300 ease-in-out">
+                                <i class="fas fa-plus mr-2"></i>Iniciar Nova Feira
+                            </button>
+                        </form>
 
-<button id="btnAbrirModalConfiguracoes" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 px-5 rounded-lg w-full md:w-auto shadow-md transition duration-300 ease-in-out">
-    <i class="fas fa-calendar-alt mr-2"></i>Editar Datas da Feira
-</button>
-
+                        <button id="btnAbrirModalConfiguracoes" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 px-5 rounded-lg w-full md:w-auto shadow-md transition duration-300 ease-in-out">
+                            <i class="fas fa-calendar-alt mr-2"></i>Editar Datas da Feira
+                        </button>
                     </div>
                 </div>
             </div>
@@ -503,7 +595,7 @@
         </div>
     </div>
 
-    <!-- Modals (permanecem os mesmos) -->
+    <!-- Modals -->
     <div id="modalProjeto" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden justify-center items-center z-50 p-4">
         <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-2xl relative">
             <h2 id="tituloModalProjeto" class="text-3xl font-extrabold mb-6 text-center text-gray-800">Adicionar Novo Projeto</h2>
@@ -511,6 +603,7 @@
 
             <form id="formProjeto" action="/admin/projetos" method="POST">
                 <input type="hidden" id="projetoId" name="id">
+                <input type="hidden" name="_method" id="projetoMethod" value="POST">
 
                 <div class="mb-4">
                     <label for="titulo" class="block text-gray-700 text-sm font-bold mb-2">Título do Projeto:</label>
@@ -552,6 +645,12 @@
                     <label for="turmaProjeto" class="block text-gray-700 text-sm font-bold mb-2">Turma:</label>
                     <input type="text" id="turmaProjeto" name="turma" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out" required>
                 </div>
+                
+                <div class="mb-4">
+                    <label for="alunosProjeto" class="block text-gray-700 text-sm font-bold mb-2">Alunos (separados por vírgula):</label>
+                    <input type="text" id="alunosProjeto" name="alunos" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out">
+                </div>
+
 
                 <div class="flex items-center justify-end mt-6">
                     <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-5 rounded-lg focus:outline-none focus:shadow-outline shadow-md transition duration-300 ease-in-out">
@@ -568,6 +667,7 @@
             <button id="btnFecharModalCategoria" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-4xl leading-none transition duration-300 ease-in-out">&times;</button>
             <form id="formCategoria" action="/admin/categorias" method="POST">
                 <input type="hidden" id="categoriaId" name="id">
+                <input type="hidden" name="_method" id="categoriaMethod" value="POST">
                 <div class="mb-4">
                     <label for="nomeCategoria" class="block text-gray-700 text-sm font-bold mb-2">Nome da Categoria:</label>
                     <input type="text" id="nomeCategoria" name="nome" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out" required>
@@ -587,6 +687,7 @@
             <button id="btnFecharModalCriterio" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-4xl leading-none transition duration-300 ease-in-out">&times;</button>
             <form id="formCriterio" action="/admin/criterios" method="POST">
                 <input type="hidden" id="criterioId" name="id">
+                <input type="hidden" name="_method" id="criterioMethod" value="POST">
                 <div class="mb-4">
                     <label for="nomeCriterio" class="block text-gray-700 text-sm font-bold mb-2">Nome do Critério:</label>
                     <input type="text" id="nomeCriterio" name="nome" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out" required>
@@ -617,6 +718,7 @@
         <button id="btnFecharAvaliador" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-4xl leading-none transition duration-300 ease-in-out">&times;</button>
         <form id="formAvaliador" action="/admin/avaliadores" method="POST">
             <input type="hidden" id="avaliadorId" name="id">
+            <input type="hidden" name="_method" id="avaliadorMethod" value="POST">
             <div class="mb-4">
                 <label for="nomeAvaliador" class="block text-gray-700 text-sm font-bold mb-2">Nome do Avaliador:</label>
                 <input type="text" id="nomeAvaliador" name="nome" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out" required>
@@ -627,28 +729,23 @@
             </div>
 
             <div class="mb-4">
-    <label for="escolaAvaliador" class="block text-gray-700 text-sm font-bold mb-2">Escola:</label>
-    <select id="escolaAvaliador" name="escolaId" class="shadow-sm border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out">
-        <option value="">Selecione a Escola</option>
-        <% if (escolas && escolas.length > 0) { %>
-            <% escolas.forEach(escola => { %>
-                <option value="<%= escola._id %>"><%= escola.nome %></option>
-            <% }) %>
-        <% } %>
-    </select>
-</div>
+                <label for="escolaAvaliador" class="block text-gray-700 text-sm font-bold mb-2">Escola:</label>
+                <select id="escolaAvaliador" name="escolaId" class="shadow-sm border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out" disabled>
+                    <option value="<%= usuarioLogado.escolaId %>"><%= escola.nome %></option>
+                </select>
+            </div>
 
-<div class="mb-4">
-    <label for="feiraAvaliador" class="block text-gray-700 text-sm font-bold mb-2">Feira:</label>
-    <select id="feiraAvaliador" name="feira" class="shadow-sm border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out">
-        <option value="">Selecione a Feira</option>
-        <% if (feiras && feiras.length > 0) { %>
-            <% feiras.forEach(feira => { %>
-                <option value="<%= feira._id %>"><%= feira.nome %></option>
-            <% }) %>
-        <% } %>
-    </select>
-</div>
+            <div class="mb-4">
+                <label for="feiraAvaliador" class="block text-gray-700 text-sm font-bold mb-2">Feira:</label>
+                <select id="feiraAvaliador" name="feira" class="shadow-sm border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out" required>
+                    <option value="">Selecione a Feira</option>
+                    <% if (feiras && feiras.length > 0) { %>
+                        <% feiras.forEach(feira => { %>
+                            <option value="<%= feira._id %>"><%= feira.nome %></option>
+                        <% }) %>
+                    <% } %>
+                </select>
+            </div>
             <div class="mb-4" id="pinDisplayDiv">
                 <label class="block text-gray-700 text-sm font-bold mb-2">PIN:</label>
                 <span id="avaliadorPinDisplay" class="block bg-gray-100 p-3 rounded-lg text-xl font-mono tracking-wider text-gray-800 border border-gray-200"></span>
@@ -685,8 +782,9 @@
         <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md relative">
             <h2 id="tituloModalFeira" class="text-3xl font-extrabold mb-6 text-center text-gray-800">Adicionar Nova Feira</h2>
             <button id="btnFecharModalFeira" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-4xl leading-none transition duration-300 ease-in-out">&times;</button>
-            <form id="formFeira" action="/admin/feiras/nova" method="POST">
+            <form id="formFeira" action="/admin/feiras" method="POST">
                 <input type="hidden" id="feiraId" name="id">
+                <input type="hidden" name="_method" id="feiraMethod" value="POST">
                 <div class="mb-4">
                     <label for="nomeFeira" class="block text-gray-700 text-sm font-bold mb-2">Nome da Feira:</label>
                     <input type="text" id="nomeFeira" name="nome" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out" required>
@@ -739,77 +837,7 @@
     </div>
 
     <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const sidebar = document.getElementById('sidebar');
-    const sidebarToggle = document.getElementById('sidebarToggle');
-    const overlay = document.getElementById('overlay');
-
-    // Toggle do menu
-    sidebarToggle.addEventListener('click', () => {
-      const isOpen = !sidebar.classList.contains('-translate-x-full');
-      sidebar.classList.toggle('-translate-x-full');
-      overlay.classList.toggle('hidden', isOpen);
-    });
-
-    // Fecha o menu ao clicar fora
-    overlay.addEventListener('click', () => {
-      sidebar.classList.add('-translate-x-full');
-      overlay.classList.add('hidden');
-    });
-
-    // Ajusta automaticamente para desktop (mostrar menu)
-    function applySidebarState() {
-      if (window.innerWidth >= 768) {
-        sidebar.classList.remove('-translate-x-full');
-        overlay.classList.add('hidden');
-      } else {
-        sidebar.classList.add('-translate-x-full');
-        overlay.classList.add('hidden');
-      }
-    }
-
-    window.addEventListener('resize', applySidebarState);
-    applySidebarState();
-
-    // Mantém lógica das abas
-    const tabLinks = document.querySelectorAll('.sidebar-link');
-    const tabContents = document.querySelectorAll('.tab-content');
-
-    const activateTab = (tabId) => {
-      tabLinks.forEach(link => link.classList.remove('active'));
-      tabContents.forEach(content => content.classList.add('hidden'));
-
-      const activeLink = document.querySelector(`.sidebar-link[data-tab="${tabId}"]`);
-      const activeContent = document.getElementById(tabId);
-      if (activeLink) activeLink.classList.add('active');
-      if (activeContent) activeContent.classList.remove('hidden');
-    };
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const initialTab = urlParams.get('tab') || localStorage.getItem('activeTab') || 'dashboard-geral';
-    activateTab(initialTab);
-
-    tabLinks.forEach(link => {
-      link.addEventListener('click', (event) => {
-        event.preventDefault();
-        const tabId = link.dataset.tab;
-        activateTab(tabId);
-        localStorage.setItem('activeTab', tabId);
-        const newUrl = new URL(window.location.href);
-        newUrl.searchParams.set('tab', tabId);
-        window.history.pushState({ path: newUrl.href }, '', newUrl.href);
-
-        // Fecha o menu automaticamente em telas pequenas
-        if (window.innerWidth < 768) {
-          sidebar.classList.add('-translate-x-full');
-          overlay.classList.add('hidden');
-        }
-      });
-    });
-  });
-
-
-   // Função auxiliar para formatar datas (já definida no EJS, mas útil para JS direto)
+        // Função auxiliar para formatar datas (já definida no EJS, mas útil para JS direto)
         function formatarDatasParaInput(dateString) {
             if (!dateString) return '';
             const date = new Date(dateString);
@@ -821,8 +849,8 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             const sidebar = document.getElementById('sidebar');
-            const sidebarToggleBtnMobile = document.getElementById('sidebarToggleBtnMobile');
-            const sidebarToggleDesktop = document.getElementById('sidebarToggleDesktop'); // Para fechar/abrir em desktop, se implementado
+            const sidebarToggleMobile = document.getElementById('sidebarToggleMobile'); // ID correto para o botão mobile
+            const sidebarToggleDesktop = document.getElementById('sidebarToggleDesktop'); // Para fechar/abrir em desktop
             const overlay = document.getElementById('overlay');
 
             // Funções para abrir/fechar o sidebar
@@ -837,19 +865,13 @@
             };
 
             // Event listener para o botão de toggle móvel
-            if (sidebarToggleBtnMobile) {
-                sidebarToggleBtnMobile.addEventListener('click', openSidebar);
+            if (sidebarToggleMobile) {
+                sidebarToggleMobile.addEventListener('click', openSidebar);
             }
 
-            // Event listener para o toggle desktop (opcional, se quiser esconder/mostrar em desktop)
+            // Event listener para o toggle desktop (para fechar/abrir em desktop)
             if (sidebarToggleDesktop) {
-                 sidebarToggleDesktop.addEventListener('click', () => {
-                     if (window.innerWidth >= 768) { // Apenas em desktop
-                        sidebar.classList.toggle('-translate-x-full');
-                     } else { // Em mobile, age como o botão mobile
-                        openSidebar();
-                     }
-                 });
+                 sidebarToggleDesktop.addEventListener('click', closeSidebar); // Agora este botão fecha
             }
 
 
@@ -931,6 +953,7 @@
                 const form = document.getElementById(formId);
                 const titleElement = document.getElementById(titleElementId);
 
+                // Listener para o botão de abrir modal
                 if (openBtn) {
                     openBtn.addEventListener('click', () => {
                         modal.classList.remove('hidden');
@@ -938,13 +961,31 @@
                         // Reseta o formulário para adicionar
                         if (form) {
                             form.reset();
-                            form.querySelector('input[type="hidden"][name="id"]').value = ''; // Limpa ID
-                            form.querySelector('input[type="hidden"][name="_method"]').value = 'POST'; // Define para POST
+                            const idInput = form.querySelector('input[type="hidden"][name="id"]');
+                            if (idInput) idInput.value = ''; // Limpa ID
+                            const methodInput = form.querySelector('input[type="hidden"][name="_method"]');
+                            if (methodInput) methodInput.value = 'POST'; // Define para POST
                         }
-                        if (titleElement) titleElement.innerText = openBtnId.includes('btnAbrirModal') ? openBtn.innerText.replace('Adicionar Novo ', 'Adicionar Nova ') : 'Detalhes'; // Ajusta título
+                        if (titleElement) {
+                            // Ajusta o título para "Adicionar Novo X"
+                            const baseTitle = openBtn.innerText.replace('Adicionar Novo ', ''); // Remove 'Adicionar Novo '
+                            titleElement.innerText = `Adicionar Novo ${baseTitle}`;
+                        }
+                        // Lógica específica para o modal de Avaliador ao adicionar
+                        if (modalId === 'modalAvaliador') {
+                            const pinDisplayDiv = document.getElementById('pinDisplayDiv');
+                            if (pinDisplayDiv) pinDisplayDiv.classList.add('hidden'); // Oculta PIN ao adicionar novo
+                            // Define a feira ativa automaticamente no modal de Avaliador
+                            const feiraAvaliadorSelect = document.getElementById('feiraAvaliador');
+                            const feiraAtualId = "<%= feiraAtual._id %>";
+                            if (feiraAvaliadorSelect && feiraAtualId && feiraAtualId !== "null" && feiraAtualId !== "undefined") {
+                                feiraAvaliadorSelect.value = feiraAtualId;
+                            }
+                        }
                     });
                 }
 
+                // Listener para o botão de fechar modal
                 if (closeBtn) {
                     closeBtn.addEventListener('click', () => {
                         modal.classList.add('hidden');
@@ -952,8 +993,8 @@
                     });
                 }
 
+                // Fechar modal clicando fora do conteúdo
                 if (modal) {
-                    // Fechar modal clicando fora do conteúdo
                     modal.addEventListener('click', (event) => {
                         if (event.target === modal) {
                             closeBtn.click(); // Simula clique no botão de fechar
@@ -1069,6 +1110,7 @@
                     const tituloModal = document.getElementById('tituloAvaliador');
                     const pinDisplayDiv = document.getElementById('pinDisplayDiv');
                     const avaliadorPinDisplay = document.getElementById('avaliadorPinDisplay');
+                    const feiraAvaliadorSelect = document.getElementById('feiraAvaliador'); // Para edição, não muda a feira
 
                     tituloModal.innerText = 'Editar Avaliador';
                     form.action = `/admin/avaliadores/${id}?_method=PUT`; // Define a action e o método
@@ -1079,10 +1121,10 @@
                     document.getElementById('emailAvaliador').value = email;
                     document.getElementById('ativoAvaliador').checked = ativo;
                     
-                    // Exibir PIN e ocultar campos de escola/feira para edição de avaliador
+                    // Exibir PIN para edição
                     if (pin) {
                         avaliadorPinDisplay.innerText = pin;
-                        pinDisplayDiv.classList.remove('hidden');
+                        pinDisplayDiv.classList.remove('hidden'); // Garante que a div do PIN esteja visível
                     } else {
                         pinDisplayDiv.classList.add('hidden');
                     }
@@ -1091,6 +1133,12 @@
                     document.querySelectorAll('#projetosAvaliadorCheckboxes input[type="checkbox"]').forEach(checkbox => {
                         checkbox.checked = projetosAtribuidos.includes(checkbox.value);
                     });
+
+                    // Desabilitar seleção de feira e escola ao editar avaliador (já está associado)
+                    const escolaAvaliadorSelect = document.getElementById('escolaAvaliador');
+                    if (escolaAvaliadorSelect) escolaAvaliadorSelect.disabled = true;
+                    if (feiraAvaliadorSelect) feiraAvaliadorSelect.disabled = true;
+
 
                     modal.classList.remove('hidden');
                     modal.classList.add('flex');
@@ -1128,12 +1176,8 @@
 
             // MODAL DE CONFIGURAÇÕES (EDITAR DATAS DA FEIRA)
             setupModal('modalConfiguracoes', 'btnAbrirModalConfiguracoes', 'btnFecharModalConfiguracoes', 'formConfiguracoesFeiraData', 'tituloModalConfiguracoes');
-            // Não há um botão de "editar" na tabela para este, é apenas um botão para a feira atual.
-            // O formulário já está preenchido pelo EJS com feiraAtual._id e as datas.
-            // Apenas certifique-se de que o id do form no modal é 'formConfiguracoesFeiraData' ou o que você usa para o setupModal.
-            // Eu renomeei o form do modal de configuracoes para 'formConfiguracoesFeiraData' no HTML.
         });
-</script>
+    </script>
 
 </body>
 </html>
