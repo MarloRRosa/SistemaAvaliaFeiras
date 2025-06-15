@@ -17,6 +17,7 @@ const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const puppeteer = require('puppeteer');
+const chromium = require('@sparticuz/chromium');
 const fs = require('fs');
 const path = require('path');
 const ejs = require('ejs');
@@ -1565,7 +1566,21 @@ router.post('/configuracoes/feiradata', verificarAdminEscola, async (req, res) =
 // ===========================================
 
 // Função genérica para renderizar HTML com EJS e gerar PDF
+// No topo do seu arquivo (por exemplo, admin.js, se ainda não estiver lá)
+const puppeteer = require('puppeteer');
+const chromium = require('@sparticuz/chromium'); // <<< ADICIONE ESTA LINHA
+
+// Certifique-se de que 'path' e 'ejs' também estão importados se ainda não estiverem
+const path = require('path');
+const ejs = require('ejs');
+
+// ... (seus modelos Escola e Feira precisam ser importados também)
+const Escola = require('../models/Escola'); // Exemplo, ajuste o caminho real
+const Feira = require('../models/Feira');   // Exemplo, ajuste o caminho real
+
+
 async function generatePdfReport(req, res, templateName, data, filename) {
+    let browser; // Declare browser fora do try para garantir acesso no finally
     try {
         const escolaId = req.session.adminEscola.escolaId;
         const escola = await Escola.findById(escolaId).lean();
@@ -1581,15 +1596,22 @@ async function generatePdfReport(req, res, templateName, data, filename) {
                 const date = new Date(dateString);
                 const year = date.getFullYear();
                 const month = String(date.getMonth() + 1).padStart(2, '0');
-                const day = String(date.getDate()).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, 0); // Correção aqui: padStart(2, '0')
                 return `${day}/${month}/${year}`;
             }
         });
 
-        const browser = await puppeteer.launch({
-            headless: true,
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
+        // =========================================================================
+        // <<< AS MUDANÇAS PRINCIPAIS ESTÃO AQUI >>>
+        browser = await puppeteer.launch({
+            args: [...chromium.args, '--hide-scrollbars', '--disable-web-security'], // Adiciona args do chromium E os seus
+            defaultViewport: chromium.defaultViewport, // Usa o viewport padrão do chromium
+            executablePath: await chromium.executablePath(), // Pega o caminho do executável do chromium fornecido pelo pacote
+            headless: chromium.headless, // Usa o modo headless do chromium (provavelmente 'new')
+            ignoreHTTPSErrors: true, // Boa prática para ambientes de desenvolvimento/produção com certificados self-signed
+            // Se você tinha outras opções aqui, mantenha-as se não entrarem em conflito.
         });
+        // =========================================================================
 
         const page = await browser.newPage();
         await page.setContent(html, { waitUntil: 'networkidle0' });
@@ -1608,7 +1630,8 @@ async function generatePdfReport(req, res, templateName, data, filename) {
             }
         });
 
-        await browser.close();
+        // O browser.close() já está no finally, o que é ótimo!
+        // await browser.close(); // Esta linha pode ser removida daqui, pois já está no finally
 
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename="${filename}.pdf"`);
@@ -1619,6 +1642,10 @@ async function generatePdfReport(req, res, templateName, data, filename) {
         if (!res.headersSent) {
             req.flash('error_msg', `Erro ao gerar PDF de ${filename}. Detalhes: ` + err.message);
             res.redirect('/admin/dashboard?tab=relatorios');
+        }
+    } finally {
+        if (browser) { // Certifica-se de fechar o navegador mesmo em caso de erro
+            await browser.close();
         }
     }
 }
