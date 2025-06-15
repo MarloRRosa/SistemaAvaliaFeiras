@@ -106,6 +106,7 @@
         if (!mediaGeralAvaliacoes) { mediaGeralAvaliacoes = 'N/A'; }
         if (!projetosPorCategoria) { projetosPorCategoria = {}; }
         if (!relatorioFinalPorProjeto) { relatorioFinalPorProjeto = {}; }
+        if (!usuarioLogado) { usuarioLogado = {}; } // Garante que usuarioLogado exista para o select do Avaliador
 
         // Função auxiliar para formatar datas para o input HTML (YYYY-MM-DD)
         const formatarDatasParaInput = (dateString) => {
@@ -319,7 +320,7 @@
                                                 data-nome="<%= categoria.nome %>">
                                             <i class="fas fa-edit mr-1"></i> Editar
                                         </button>
-                                        <form method="POST" action="/admin/categorias/<%= categoria._id %>/excluir?_method=DELETE" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar esta categoria?');">
+                                        <form method="POST" action="/admin/categorias/<%= categoria._id %>?_method=DELETE" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar esta categoria?');">
                                             <input type="hidden" name="_method" value="DELETE">
                                             <button type="submit"  class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-md text-sm shadow-sm transition duration-300 ease-in-out">
                                                 <i class="fas fa-trash-alt mr-1"></i>Excluir
@@ -364,7 +365,7 @@
                                             data-observacao="<%= criterio.observacao || '' %>">
                                             <i class="fas fa-edit mr-1"></i>Editar
                                         </button>                                        
-                                        <form method="POST" action="/admin/criterios/<%= criterio._id %>/excluir?_method=DELETE" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar este critério?');">
+                                        <form method="POST" action="/admin/criterios/<%= criterio._id %>?_method=DELETE" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar este critério?');">
                                             <input type="hidden"  name="_method" value="DELETE">
                                             <button type="submit"  class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-md text-sm shadow-sm transition duration-300 ease-in-out">
                                                 <i class="fas fa-trash-alt mr-1"></i>Excluir
@@ -428,7 +429,8 @@
                                             data-projetos="<%= avaliador.projetosAtribuidos.map(p => p._id).join(',') %>">
                                             <i class="fas fa-edit mr-1"></i>Editar
                                         </button>
-                                        <form action="/admin/avaliadores/<%= avaliador._id %>/excluir" method="POST" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar este avaliador?');">
+                                        <form action="/admin/avaliadores/<%= avaliador._id %>?_method=DELETE" method="POST" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar este avaliador?');">
+                                            <input type="hidden" name="_method" value="DELETE">
                                             <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-md text-sm shadow-sm transition duration-300 ease-in-out">
                                                 <i class="fas fa-trash-alt mr-1"></i>Deletar
                                             </button>
@@ -480,7 +482,8 @@
                                             data-status="<%= f.status %>">
                                             <i class="fas fa-edit mr-1"></i>Editar
                                         </button>
-                                        <form action="/admin/feiras/<%= f._id %>/excluir" method="POST" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar esta feira e TODOS os seus dados?');">
+                                        <form action="/admin/feiras/<%= f._id %>?_method=DELETE" method="POST" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar esta feira e TODOS os seus dados?');">
+                                            <input type="hidden" name="_method" value="DELETE">
                                             <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-md text-sm shadow-sm transition duration-300 ease-in-out">
                                                 <i class="fas fa-trash-alt mr-1"></i>Deletar
                                             </button>
@@ -1161,7 +1164,7 @@
                     const tituloModal = document.getElementById('tituloModalFeira');
 
                     tituloModal.innerText = 'Editar Feira';
-                    form.action = `/admin/feiras/${id}?_method=PUT`; // Define a action e o método
+                    form.action = `/admin/feiras/${id}`; // Ação de formulário para PUT
                     document.getElementById('feiraId').value = id;
                     document.getElementById('feiraMethod').value = 'PUT'; // Define o método para PUT
                     document.getElementById('nomeFeira').value = nome;
