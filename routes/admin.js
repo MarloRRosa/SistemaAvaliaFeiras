@@ -1693,7 +1693,7 @@ router.get('/relatorio-consolidado/pdf', verificarAdminEscola, async (req, res) 
         // Ordena por média geral (maior para menor)
         relatorioDados.sort((a, b) => b.mediaGeral - a.mediaGeral);
 
-        await generatePdfReport(req, res, 'pdf-consolidado', { relatorioDados: relatorioDados, feiraAtual: feiraAtual, titulo: 'Relatório Consolidado de Projetos' }, 'relatorio_consolidado');
+        await generatePdfReport(req, res, 'pdf-consolidado', { relatorioDados: relatorioDados, feiraAtual: feiraAtual, titulo: 'Relatório Consolidado de Projetos', nomeFeira: feiraAtual?.nome || 'Feira Atual' }, 'relatorio_consolidado');
 
     } catch (err) {
         console.error('Erro ao gerar PDF do relatório consolidado:', err);
@@ -1740,7 +1740,7 @@ router.get('/avaliacoes/pdf', verificarAdminEscola, async (req, res) => {
             });
         });
 
-        await generatePdfReport(req, res, 'pdf-avaliacoes', { avaliacoes: dadosRelatorio, feiraAtual: feiraAtual, titulo: 'Relatório de Avaliações' }, 'avaliacoes_completas');
+        await generatePdfReport(req, res, 'pdf-avaliacoes', { avaliacoes: dadosRelatorio, feiraAtual: feiraAtual, titulo: 'Relatório de Avaliações',  nomeFeira: feiraAtual?.nome || 'Feira Atual' }, 'avaliacoes_completas');
 
     } catch (err) {
         console.error('Erro ao gerar PDF de avaliações:', err);
@@ -1810,7 +1810,7 @@ router.get('/projetos-sem-avaliacao/pdf', verificarAdminEscola, async (req, res)
             }
         }
 
-        await generatePdfReport(req, res, 'pdf-projetos-sem-avaliacao', { projetosNaoAvaliados: projetosNaoAvaliados, feiraAtual: feiraAtual, titulo: 'Projetos sem Avaliação', feiraAtual: feiraAtual, }, 'projetos_sem_avaliacao');
+        await generatePdfReport(req, res, 'pdf-projetos-sem-avaliacao', { projetosNaoAvaliados: projetosNaoAvaliados, feiraAtual: feiraAtual, titulo: 'Projetos sem Avaliação', feiraAtual: feiraAtual,  nomeFeira: feiraAtual?.nome || 'Feira Atual' }, 'projetos_sem_avaliacao');
 
     } catch (err) {
         console.error('Erro ao gerar PDF de projetos sem avaliação:', err);
@@ -1893,7 +1893,7 @@ router.get('/ranking-categorias/pdf', verificarAdminEscola, async (req, res) => 
             });
         }
 
-        await generatePdfReport(req, res, 'pdf-ranking-categorias', { rankingPorCategoria: rankingPorCategoria, feiraAtual: feiraAtual, titulo: 'Relatório Por Categoria' }, 'ranking_por_categoria');
+        await generatePdfReport(req, res, 'pdf-ranking-categorias', { rankingPorCategoria: rankingPorCategoria, feiraAtual: feiraAtual, titulo: 'Relatório Por Categoria',  nomeFeira: feiraAtual?.nome || 'Feira Atual' }, 'ranking_por_categoria');
 
     } catch (err) {
         console.error('Erro ao gerar PDF de ranking por categoria:', err);
@@ -1979,7 +1979,7 @@ router.get('/resumo-avaliadores/pdf', verificarAdminEscola, async (req, res) => 
                 projetos: projetosAvaliadosDetalhes 
             });
         }
-        await generatePdfReport(req, res, 'pdf-resumo-avaliadores', { resumoAvaliadores: resumoAvaliadores, feiraAtual: feiraAtual, titulo: 'Relatório de Avaliadores' }, 'resumo_avaliadores');
+        await generatePdfReport(req, res, 'pdf-resumo-avaliadores', { resumoAvaliadores: resumoAvaliadores, feiraAtual: feiraAtual, titulo: 'Relatório de Avaliadores',  nomeFeira: feiraAtual?.nome || 'Feira Atual' }, 'resumo_avaliadores');
 
     } catch (err) {
         console.error('Erro ao gerar PDF de resumo de avaliadores:', err);
@@ -2054,7 +2054,7 @@ router.get('/resultados-finais/pdf', verificarAdminEscola, async (req, res) => {
         // Ordena por média geral (maior para menor)
         resultadosFinais.sort((a, b) => b.mediaGeral - a.mediaGeral);
 
-        await generatePdfReport(req, res, 'pdf-resultados', { resultadosFinais: resultadosFinais, feiraAtual: feiraAtual, titulo: 'Reultados Finais', criterios }, 'resultados_finais');
+        await generatePdfReport(req, res, 'pdf-resultados', { resultadosFinais: resultadosFinais, feiraAtual: feiraAtual, titulo: 'Reultados Finais', nomeFeira: feiraAtual?.nome || 'Feira Atual', criterios }, 'resultados_finais');
 
     } catch (err) {
         console.error('Erro ao gerar PDF de resultados finais:', err);
