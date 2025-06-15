@@ -22,7 +22,7 @@
     "method-override": "^3.0.0",
     "mongoose": "^8.15.1",
     "nodemailer": "^7.0.3",
-    "puppeteer-core": "^22.9.0",  
+    "puppeteer-core": "10.1.0",  
     "chrome-aws-lambda": "^10.1.0"
   },
   "devDependencies": {
