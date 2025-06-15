@@ -1566,9 +1566,6 @@ router.post('/configuracoes/feiradata', verificarAdminEscola, async (req, res) =
 // ===========================================
 
 // Função genérica para renderizar HTML com EJS e gerar PDF
-// No topo do seu arquivo (por exemplo, admin.js, se ainda não estiver lá)
-const puppeteer = require('puppeteer');
-const chromium = require('@sparticuz/chromium'); // <<< ADICIONE ESTA LINHA
 
 // Certifique-se de que 'path' e 'ejs' também estão importados se ainda não estiverem
 const path = require('path');
