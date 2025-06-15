@@ -1693,7 +1693,7 @@ router.get('/relatorio-consolidado/pdf', verificarAdminEscola, async (req, res) 
         // Ordena por média geral (maior para menor)
         relatorioDados.sort((a, b) => b.mediaGeral - a.mediaGeral);
 
-        await generatePdfReport(req, res, 'pdf-consolidado', { relatorioDados: relatorioDados, feiraAtual: feiraAtual, titulo: 'Relatório Consolidado de Projetos', nomeFeira: feiraAtual?.nome || 'Feira Atual' }, 'relatorio_consolidado');
+        await generatePdfReport(req, res, 'pdf-consolidado', { relatorioFinalPorProjeto: relatorioDados, criteriosOficiais: criterios, feiraAtual: feiraAtual, titulo: 'Relatório Consolidado de Projetos', nomeFeira: feiraAtual?.nome || 'Feira Atual' }, 'relatorio_consolidado');
 
     } catch (err) {
         console.error('Erro ao gerar PDF do relatório consolidado:', err);
