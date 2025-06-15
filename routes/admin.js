@@ -16,7 +16,6 @@ const Admin = require('../models/Admin');
 const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
-// Alterado para puppeteer-core e chrome-aws-lambda para compatibilidade com Render
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 const path = require('path');
