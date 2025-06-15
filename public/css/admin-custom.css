@@ -1,11 +1,46 @@
-/* admin-custom.css: estilo responsivo tipo app para o painel admin */
-
-/* Estreitar margens laterais em telas menores */
 @media (max-width: 768px) {
-  .main-content {
-    padding: 1rem !important;
+  .sidebar {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 16rem; /* 64 tailwind */
+    z-index: 50;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
   }
 
+  .sidebar.show {
+    transform: translateX(0%);
+  }
+
+  #overlay {
+    display: block;
+  }
+}
+
+/* Melhorar foco em inputs */
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.4);
+}
+
+/* Garantir que o botão de menu não seja sobreposto */
+#sidebarToggle {
+  z-index: 60;
+}
+
+/* Ocultar overlay por padrão */
+#overlay {
+  display: none;
+}
+
+/* Tornar responsivo o conteúdo geral já estava no CSS original */
+@media (max-width: 768px) {
+  .main-content,
   .tab-content {
     padding: 1rem !important;
   }
@@ -37,13 +72,4 @@
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
     padding: 1rem;
   }
-}
-
-/* Melhorar foco em inputs */
-input:focus,
-select:focus,
-textarea:focus {
-  outline: none;
-  border-color: #6366f1;
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.4);
 }

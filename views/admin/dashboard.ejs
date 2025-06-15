@@ -28,8 +28,16 @@
         if (!relatorioFinalPorProjeto) { relatorioFinalPorProjeto = {}; }
     %>
 
+    <!-- BOTÃO MENU HAMBÚRGUER (flutuante para telas pequenas) -->
+            <button id="sidebarToggle" class="fixed top-4 left-4 z-50 text-gray-800 bg-white p-2 rounded-lg shadow-md md:hidden">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+
+    <!-- OVERLAY ESCURO -->
+        <div id="overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden"></div>
+
     <!-- Sidebar -->
-    <aside id="sidebar" class="sidebar bg-gray-800 text-gray-300 p-4 shadow-lg relative flex flex-col">
+    <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-gray-800 text-gray-300 p-4 shadow-xl transform -translate-x-full transition-transform duration-300 z-50 md:relative md:translate-x-0 md:flex md:flex-col">
         <div class="p-4 text-center border-b border-gray-700 mb-4 flex justify-between items-center">
             <h1 class="text-2xl font-extrabold tracking-tight text-white link-text">Painel Admin</h1>
             <button id="sidebarToggle" class="text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-gray-600 rounded-md p-1">
@@ -731,362 +739,75 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const sidebar = document.getElementById('sidebar');
-            const sidebarToggle = document.getElementById('sidebarToggle');
-            const contentArea = document.getElementById('contentArea');
-            const tabLinks = document.querySelectorAll('.sidebar-link');
-            const tabContents = document.querySelectorAll('.tab-content');
+  document.addEventListener('DOMContentLoaded', () => {
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const overlay = document.getElementById('overlay');
 
-            // Função para ativar a aba
-            const activateTab = (tabId) => {
-                tabLinks.forEach(link => {
-                    link.classList.remove('active');
-                });
-                tabContents.forEach(content => {
-                    content.classList.add('hidden');
-                });
+    // Toggle do menu
+    sidebarToggle.addEventListener('click', () => {
+      const isOpen = !sidebar.classList.contains('-translate-x-full');
+      sidebar.classList.toggle('-translate-x-full');
+      overlay.classList.toggle('hidden', isOpen);
+    });
 
-                const activeLink = document.querySelector(`.sidebar-link[data-tab="${tabId}"]`);
-                const activeContent = document.getElementById(tabId);
+    // Fecha o menu ao clicar fora
+    overlay.addEventListener('click', () => {
+      sidebar.classList.add('-translate-x-full');
+      overlay.classList.add('hidden');
+    });
 
-                if (activeLink) {
-                    activeLink.classList.add('active');
-                }
-                if (activeContent) {
-                    activeContent.classList.remove('hidden');
-                }
-            };
+    // Ajusta automaticamente para desktop (mostrar menu)
+    function applySidebarState() {
+      if (window.innerWidth >= 768) {
+        sidebar.classList.remove('-translate-x-full');
+        overlay.classList.add('hidden');
+      } else {
+        sidebar.classList.add('-translate-x-full');
+        overlay.classList.add('hidden');
+      }
+    }
 
-            // Lógica para abas e URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const initialTabFromUrl = urlParams.get('tab');
-            const savedTab = localStorage.getItem('activeTab');
+    window.addEventListener('resize', applySidebarState);
+    applySidebarState();
 
-            const initialTab = initialTabFromUrl || savedTab || 'dashboard-geral';
-            activateTab(initialTab);
+    // Mantém lógica das abas
+    const tabLinks = document.querySelectorAll('.sidebar-link');
+    const tabContents = document.querySelectorAll('.tab-content');
 
-            tabLinks.forEach(link => {
-                link.addEventListener('click', (event) => {
-                    event.preventDefault(); // Impede o comportamento padrão do link
-                    const tabId = link.dataset.tab;
-                    activateTab(tabId);
-                    localStorage.setItem('activeTab', tabId);
-                    // Atualiza a URL para que a aba seja mantida em caso de recarga
-                    const newUrl = new URL(window.location.href);
-                    newUrl.searchParams.set('tab', tabId);
-                    window.history.pushState({ path: newUrl.href }, '', newUrl.href);
-                });
-            });
+    const activateTab = (tabId) => {
+      tabLinks.forEach(link => link.classList.remove('active'));
+      tabContents.forEach(content => content.classList.add('hidden'));
 
-            // Lógica para recolher/expandir o sidebar
-            // Verifica a largura da tela ao carregar e ajusta o sidebar
-            const applySidebarState = () => {
-                if (window.innerWidth <= 768) { // Ex: para telas menores que md
-                    sidebar.classList.remove('collapsed');
-                    sidebar.classList.remove('show');
-                    contentArea.style.marginLeft = '0px';
-                    // Talvez esconder o toggle button ou mudá-lo para um menu hamburger flutuante
-                } else {
-                    const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-                    if (isCollapsed) {
-                        sidebar.classList.add('collapsed');
-                        contentArea.style.marginLeft = '64px'; // Largura do sidebar colapsado
-                    } else {
-                        sidebar.classList.remove('collapsed');
-                        contentArea.style.marginLeft = '250px'; // Largura do sidebar expandido
-                    }
-                     sidebar.classList.remove('show'); // Remove a classe 'show' se estiver em desktop
-                }
-            };
+      const activeLink = document.querySelector(`.sidebar-link[data-tab="${tabId}"]`);
+      const activeContent = document.getElementById(tabId);
+      if (activeLink) activeLink.classList.add('active');
+      if (activeContent) activeContent.classList.remove('hidden');
+    };
 
-            // Aplica o estado inicial do sidebar
-            applySidebarState();
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialTab = urlParams.get('tab') || localStorage.getItem('activeTab') || 'dashboard-geral';
+    activateTab(initialTab);
 
-            // Adiciona evento de clique para o botão de toggle
-            sidebarToggle.addEventListener('click', () => {
-                const isCurrentlyCollapsed = sidebar.classList.toggle('collapsed');
-                localStorage.setItem('sidebarCollapsed', isCurrentlyCollapsed);
-                // Ajusta a margem do conteúdo principal
-                if (isCurrentlyCollapsed) {
-                    contentArea.style.marginLeft = '64px';
-                } else {
-                    contentArea.style.marginLeft = '250px';
-                }
-            });
+    tabLinks.forEach(link => {
+      link.addEventListener('click', (event) => {
+        event.preventDefault();
+        const tabId = link.dataset.tab;
+        activateTab(tabId);
+        localStorage.setItem('activeTab', tabId);
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.set('tab', tabId);
+        window.history.pushState({ path: newUrl.href }, '', newUrl.href);
 
-            // Adiciona um listener para redimensionamento de janela
-            window.addEventListener('resize', applySidebarState);
-
-
-            // Funções para os modais (permanecem as mesmas)
-
-            // Mostrar modal de Projeto
-            const modalProjeto = document.getElementById('modalProjeto');
-            const btnAbrirModalProjeto = document.getElementById('btnAbrirModalProjeto');
-            const btnFecharModalProjeto = document.getElementById('btnFecharModalProjeto');
-            const formProjeto = document.getElementById('formProjeto');
-            const tituloModalProjeto = document.getElementById('tituloModalProjeto');
-            const projetoId = document.getElementById('projetoId');
-            const inputTitulo = document.getElementById('titulo');
-            const inputDescricao = document.getElementById('descricao');
-            const selectCategoria = document.getElementById('categoria');
-            const criteriosProjetoCheckboxesDiv = document.getElementById('criteriosProjetoCheckboxes');
-            const inputTurmaProjeto = document.getElementById('turmaProjeto');
-
-            btnAbrirModalProjeto.addEventListener('click', () => {
-                tituloModalProjeto.textContent = 'Adicionar Novo Projeto';
-                formProjeto.action = '/admin/projetos'; // Rota de criação
-                projetoId.value = '';
-                inputTitulo.value = '';
-                inputDescricao.value = '';
-                selectCategoria.value = '';
-                inputTurmaProjeto.value = '';
-
-                // Limpar todos os checkboxes de critérios
-                criteriosProjetoCheckboxesDiv.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                    checkbox.checked = false;
-                });
-
-                modalProjeto.classList.remove('hidden');
-                modalProjeto.classList.add('flex');
-            });
-
-            btnFecharModalProjeto.addEventListener('click', () => {
-                modalProjeto.classList.remove('flex');
-                modalProjeto.classList.add('hidden');
-            });
-
-            document.querySelectorAll('.btn-editar-projeto').forEach(button => {
-                button.addEventListener('click', (event) => {
-                    tituloModalProjeto.textContent = 'Editar Projeto';
-                    formProjeto.action = `/admin/projetos/${event.target.dataset.id}?_method=PUT`; // Rota de edição
-                    projetoId.value = event.target.dataset.id;
-                    inputTitulo.value = event.target.dataset.titulo;
-                    inputDescricao.value = event.dataset.descricao; // Use .dataset.descricao
-                    selectCategoria.value = event.target.dataset.categoriaId;
-                    inputTurmaProjeto.value = event.target.dataset.turma;
-
-                    // Marcar checkboxes de critérios
-                    const criteriosIds = event.target.dataset.criterios ? event.target.dataset.criterios.split(',') : [];
-                    criteriosProjetoCheckboxesDiv.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                        checkbox.checked = criteriosIds.includes(checkbox.value);
-                    });
-
-                    modalProjeto.classList.remove('hidden');
-                    modalProjeto.classList.add('flex');
-                });
-            });
-
-            // Mostrar modal de Categoria
-            const modalCategoria = document.getElementById('modalCategoria');
-            const btnAbrirModalCategoria = document.getElementById('btnAbrirModalCategoria');
-            const btnFecharModalCategoria = document.getElementById('btnFecharModalCategoria');
-            const formCategoria = document.getElementById('formCategoria');
-            const tituloModalCategoria = document.getElementById('tituloModalCategoria');
-            const categoriaId = document.getElementById('categoriaId');
-            const inputNomeCategoria = document.getElementById('nomeCategoria');
-
-            btnAbrirModalCategoria.addEventListener('click', () => {
-                tituloModalCategoria.textContent = 'Adicionar Nova Categoria';
-                formCategoria.action = '/admin/categorias'; // Rota de criação
-                categoriaId.value = '';
-                inputNomeCategoria.value = '';
-                modalCategoria.classList.remove('hidden');
-                modalCategoria.classList.add('flex');
-            });
-
-            btnFecharModalCategoria.addEventListener('click', () => {
-                modalCategoria.classList.remove('flex');
-                modalCategoria.classList.add('hidden');
-            });
-
-            document.querySelectorAll('.btn-editar-categoria').forEach(button => {
-                button.addEventListener('click', (event) => {
-                    tituloModalCategoria.textContent = 'Editar Categoria';
-                    formCategoria.action = `/admin/categorias/${event.target.dataset.id}?_method=PUT`; // Rota de edição
-                    categoriaId.value = event.target.dataset.id;
-                    inputNomeCategoria.value = event.target.dataset.nome;
-                    modalCategoria.classList.remove('hidden');
-                    modalCategoria.classList.add('flex');
-                });
-            });
-
-            // Mostrar modal de Critério
-            const modalCriterio = document.getElementById('modalCriterio');
-            const btnAbrirModalCriterio = document.getElementById('btnAbrirModalCriterio');
-            const btnFecharModalCriterio = document.getElementById('btnFecharModalCriterio');
-            const btnCancelarModalCriterio = document.getElementById('btnCancelarModalCriterio');
-            const formCriterio = document.getElementById('formCriterio');
-            const tituloModalCriterio = document.getElementById('tituloModalCriterio');
-            const criterioId = document.getElementById('criterioId');
-            const inputNomeCriterio = document.getElementById('nomeCriterio');
-            const inputPesoCriterio = document.getElementById('pesoCriterio');
-            const inputObservacaoCriterio = document.getElementById('observacaoCriterio');
-
-
-            btnAbrirModalCriterio.addEventListener('click', () => {
-                tituloModalCriterio.textContent = 'Adicionar Novo Critério';
-                formCriterio.action = '/admin/criterios'; // Rota de criação
-                criterioId.value = '';
-                inputNomeCriterio.value = '';
-                inputPesoCriterio.value = '';
-                inputObservacaoCriterio.value = '';
-                modalCriterio.classList.remove('hidden');
-                modalCriterio.classList.add('flex');
-            });
-
-            btnFecharModalCriterio.addEventListener('click', () => {
-                modalCriterio.classList.remove('flex');
-                modalCriterio.classList.add('hidden');
-            });
-
-            btnCancelarModalCriterio.addEventListener('click', () => {
-                modalCriterio.classList.remove('flex');
-                modalCriterio.classList.add('hidden');
-            });
-
-            document.querySelectorAll('.btn-editar-criterio').forEach(button => {
-                button.addEventListener('click', (event) => {
-                    tituloModalCriterio.textContent = 'Editar Critério';
-                    formCriterio.action = `/admin/criterios/${event.target.dataset.id}?_method=PUT`; // Rota de edição
-                    criterioId.value = event.target.dataset.id;
-                    inputNomeCriterio.value = event.target.dataset.nome;
-                    inputPesoCriterio.value = event.target.dataset.peso;
-                    inputObservacaoCriterio.value = event.target.dataset.observacao;
-                    modalCriterio.classList.remove('hidden');
-                    modalCriterio.classList.add('flex');
-                });
-            });
-
-            // Mostrar modal de Avaliador
-            const modalAvaliador = document.getElementById('modalAvaliador');
-            const btnAbrirModalAvaliador = document.getElementById('btnAbrirModalAvaliador');
-            const btnFecharAvaliador = document.getElementById('btnFecharAvaliador');
-            const formAvaliador = document.getElementById('formAvaliador');
-            const tituloAvaliador = document.getElementById('tituloAvaliador');
-            const avaliadorId = document.getElementById('avaliadorId');
-            const inputNomeAvaliador = document.getElementById('nomeAvaliador');
-            const inputEmailAvaliador = document.getElementById('emailAvaliador');
-            const inputAtivoAvaliador = document.getElementById('ativoAvaliador');
-            const avaliadorPinDisplay = document.getElementById('avaliadorPinDisplay');
-            const pinDisplayDiv = document.getElementById('pinDisplayDiv');
-            const projetosAvaliadorCheckboxesDiv = document.getElementById('projetosAvaliadorCheckboxes');
-
-            btnAbrirModalAvaliador.addEventListener('click', () => {
-                tituloAvaliador.textContent = 'Adicionar Novo Avaliador';
-                formAvaliador.action = '/admin/avaliadores'; // Rota de criação
-                avaliadorId.value = '';
-                inputNomeAvaliador.value = '';
-                inputEmailAvaliador.value = '';
-                inputAtivoAvaliador.checked = true; // Novo avaliador é ativo por padrão
-                avaliadorPinDisplay.textContent = 'Gerado Automaticamente';
-                pinDisplayDiv.classList.remove('hidden'); // Esconde o PIN para novos
-
-                // Limpar todos os checkboxes de projetos
-                projetosAvaliadorCheckboxesDiv.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                    checkbox.checked = false;
-                });
-
-                modalAvaliador.classList.remove('hidden');
-                modalAvaliador.classList.add('flex');
-            });
-
-            btnFecharAvaliador.addEventListener('click', () => {
-                modalAvaliador.classList.remove('flex');
-                modalAvaliador.classList.add('hidden');
-            });
-
-            document.querySelectorAll('.btn-editar-avaliador').forEach(button => {
-                button.addEventListener('click', (event) => {
-                    tituloAvaliador.textContent = 'Editar Avaliador';
-                    formAvaliador.action = `/admin/avaliadores/${event.target.dataset.id}?_method=PUT`; // Rota de edição
-                    avaliadorId.value = event.target.dataset.id;
-                    inputNomeAvaliador.value = event.target.dataset.nome;
-                    inputEmailAvaliador.value = event.target.dataset.email;
-                    inputAtivoAvaliador.checked = event.target.dataset.ativo === 'true';
-                    avaliadorPinDisplay.textContent = event.target.dataset.pin;
-                    pinDisplayDiv.classList.remove('hidden'); // Mostra o PIN para edição
-
-                    // Marcar checkboxes de projetos
-                    const projetosIds = event.target.dataset.projetos ? event.target.dataset.projetos.split(',') : [];
-                    projetosAvaliadorCheckboxesDiv.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                        checkbox.checked = projetosIds.includes(checkbox.value);
-                    });
-
-                    modalAvaliador.classList.remove('hidden');
-                    modalAvaliador.classList.add('flex');
-                });
-            });
-
-            // Mostrar modal de Feira
-            const modalFeira = document.getElementById('modalFeira');
-            const btnAbrirModalFeira = document.getElementById('btnAbrirModalFeira');
-            const btnFecharModalFeira = document.getElementById('btnFecharModalFeira');
-            const formFeira = document.getElementById('formFeira');
-            const tituloModalFeira = document.getElementById('tituloModalFeira');
-            const feiraId = document.getElementById('feiraId');
-            const inputNomeFeira = document.getElementById('nomeFeira');
-            const inputInicioFeiraModal = document.getElementById('inicioFeiraModal');
-            const inputFimFeiraModal = document.getElementById('fimFeiraModal');
-            const selectStatusFeiraModal = document.getElementById('statusFeiraModal');
-
-            btnAbrirModalFeira.addEventListener('click', () => {
-                tituloModalFeira.textContent = 'Adicionar Nova Feira';
-                formFeira.action = '/admin/feiras'; // Rota de criação (ajustei para /admin/feiras conforme seu admin.js)
-                feiraId.value = '';
-                inputNomeFeira.value = '';
-                inputInicioFeiraModal.value = '';
-                inputFimFeiraModal.value = '';
-                selectStatusFeiraModal.value = 'ativa'; // Nova feira é ativa por padrão
-                modalFeira.classList.remove('hidden');
-                modalFeira.classList.add('flex');
-            });
-
-            btnFecharModalFeira.addEventListener('click', () => {
-                modalFeira.classList.remove('flex');
-                modalFeira.classList.add('hidden');
-            });
-
-            document.querySelectorAll('.btn-editar-feira').forEach(button => {
-                button.addEventListener('click', (event) => {
-                    tituloModalFeira.textContent = 'Editar Feira';
-                    formFeira.action = `/admin/feiras/${event.target.dataset.id}?_method=PUT`; // Rota de edição
-                    feiraId.value = event.target.dataset.id;
-                    inputNomeFeira.value = event.target.dataset.nome;
-                    inputInicioFeiraModal.value = event.target.dataset.inicio;
-                    inputFimFeiraModal.value = event.target.dataset.fim;
-                    // selectStatusFeiraModal.value = feiraAtual.status; // Não está em dataset, precisa ser do contexto se necessário. Removido por simplicidade.
-                    modalFeira.classList.remove('hidden');
-                    modalFeira.classList.add('flex');
-                });
-            });
-
-            // Mostrar modal de Configurações (apenas datas)
-            const modalConfiguracoes = document.getElementById('modalConfiguracoes');
-            const btnAbrirModalConfiguracoes = document.getElementById('btnAbrirModalConfiguracoes');
-            const btnFecharModalConfiguracoes = document.getElementById('btnFecharModalConfiguracoes');
-
-            btnAbrirModalConfiguracoes.addEventListener('click', () => {
-                modalConfiguracoes.classList.remove('hidden');
-                modalConfiguracoes.classList.add('flex');
-            });
-
-            btnFecharModalConfiguracoes.addEventListener('click', () => {
-                modalConfiguracoes.classList.remove('flex');
-                modalConfiguracoes.classList.add('hidden');
-            });
-        });
-
-        // Função auxiliar para formatar datas (se já não estiver definida globalmente)
-        function formatarDatasParaInput(dateString) {
-            if (!dateString) return '';
-            const date = new Date(dateString);
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
+        // Fecha o menu automaticamente em telas pequenas
+        if (window.innerWidth < 768) {
+          sidebar.classList.add('-translate-x-full');
+          overlay.classList.add('hidden');
         }
-    </script>
+      });
+    });
+  });
+</script>
+
 </body>
 </html>
