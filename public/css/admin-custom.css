@@ -1,0 +1,49 @@
+/* admin-custom.css: estilo responsivo tipo app para o painel admin */
+
+/* Estreitar margens laterais em telas menores */
+@media (max-width: 768px) {
+  .main-content {
+    padding: 1rem !important;
+  }
+
+  .tab-content {
+    padding: 1rem !important;
+  }
+
+  h1, h2, h3, h4 {
+    font-size: 1.25rem !important;
+  }
+
+  table {
+    font-size: 0.875rem;
+  }
+
+  table th, table td {
+    padding: 0.5rem 0.25rem;
+  }
+
+  .btn-editar-projeto,
+  .btn-editar-categoria,
+  .btn-editar-criterio,
+  .btn-editar-avaliador {
+    width: 100%;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  .form-section,
+  .card-section {
+    border-radius: 1rem;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    padding: 1rem;
+  }
+}
+
+/* Melhorar foco em inputs */
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.4);
+}
