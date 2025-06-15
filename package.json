@@ -4,8 +4,7 @@
   "description": "Sistema de avaliação de feiras escolares",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js",
-    "postinstall": "npm install puppeteer-core chrome-aws-lambda --prefix=./node_modules/"
+    "start": "node app.js"
   },
   "engines": {
     "node": ">=18"
