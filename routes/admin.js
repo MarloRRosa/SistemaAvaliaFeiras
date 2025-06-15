@@ -1563,19 +1563,7 @@ router.post('/configuracoes/feiradata', verificarAdminEscola, async (req, res) =
 
 // ===========================================
 // ROTAS DE RELATÓRIOS (PDF) - COM PUPPETEER
-// ===========================================
-
-// Função genérica para renderizar HTML com EJS e gerar PDF
-
-// Certifique-se de que 'path' e 'ejs' também estão importados se ainda não estiverem
-const path = require('path');
-const ejs = require('ejs');
-
-// ... (seus modelos Escola e Feira precisam ser importados também)
-const Escola = require('../models/Escola'); // Exemplo, ajuste o caminho real
-const Feira = require('../models/Feira');   // Exemplo, ajuste o caminho real
-
-
+// ==========================================
 async function generatePdfReport(req, res, templateName, data, filename) {
     let browser; // Declare browser fora do try para garantir acesso no finally
     try {
