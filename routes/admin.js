@@ -17,7 +17,7 @@ const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 // Alterado para puppeteer-core e chrome-aws-lambda para compatibilidade com Render
-const puppeteer = require('puppeteer-core');
+const puppeteer = require('puppeteer');
 const chromium = require('chrome-aws-lambda');
 const fs = require('fs');
 const path = require('path');
@@ -1572,14 +1572,13 @@ async function generatePdfReport(req, res, templateName, data, filename) {
         const escolaId = req.session.adminEscola.escolaId;
         const escola = await Escola.findById(escolaId).lean();
         const feiraAtual = await Feira.findOne({ escolaId: escolaId, status: 'ativa' }).lean();
-        
-        // Renderiza o HTML usando EJS
+
         const html = await ejs.renderFile(path.join(__dirname, `../views/admin/${templateName}.ejs`), {
-            layout: false, // Não usar layout principal para PDF
-            escola: escola,
-            feiraAtual: feiraAtual,
-            ...data, // Dados específicos para cada relatório (estes precisam estar com os nomes que o EJS espera)
-            formatarData: (dateString) => { // Inclui a função de formatação de data
+            layout: false,
+            escola,
+            feiraAtual,
+            ...data,
+            formatarData: (dateString) => {
                 if (!dateString) return 'N/A';
                 const date = new Date(dateString);
                 const year = date.getFullYear();
@@ -1589,16 +1588,16 @@ async function generatePdfReport(req, res, templateName, data, filename) {
             }
         });
 
-        // Configuração do Puppeteer para Render
         const browser = await puppeteer.launch({
-            args: chromium.args, // Argumentos do chrome-aws-lambda
-            executablePath: await chromium.executablePath, // Caminho do executável
-            headless: chromium.headless, // Modo headless
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
         });
+
         const page = await browser.newPage();
         await page.setContent(html, { waitUntil: 'networkidle0' });
-        const pdf = await page.pdf({ 
-            format: 'A4', 
+
+        const pdf = await page.pdf({
+            format: 'A4',
             printBackground: true,
             displayHeaderFooter: true,
             headerTemplate: `<div style="font-size: 8px; margin-left: 1cm; margin-right: 1cm; color: #777; text-align: right;">${filename.replace(/_/g, ' ').toUpperCase()}</div>`,
@@ -1610,6 +1609,7 @@ async function generatePdfReport(req, res, templateName, data, filename) {
                 left: '1cm'
             }
         });
+
         await browser.close();
 
         res.setHeader('Content-Type', 'application/pdf');
@@ -1618,7 +1618,6 @@ async function generatePdfReport(req, res, templateName, data, filename) {
 
     } catch (err) {
         console.error(`Erro ao gerar PDF de ${filename}:`, err);
-        // Garante que a resposta só seja enviada uma vez
         if (!res.headersSent) {
             req.flash('error_msg', `Erro ao gerar PDF de ${filename}. Detalhes: ` + err.message);
             res.redirect('/admin/dashboard?tab=relatorios');
