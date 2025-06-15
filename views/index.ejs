@@ -1,138 +1,106 @@
-<!-- views/index.ejs -->
+<!-- Hero Section -->
+<section class="bg-gradient-to-r from-blue-100 to-blue-200 py-24 text-center">
+  <div class="container mx-auto px-6">
+    <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-blue-500 mb-6 leading-tight">
+      Transforme a Avaliação de Projetos na Sua Escola
+    </h1>
+    <p class="text-gray-700 text-lg sm:text-xl max-w-3xl mx-auto mb-10">
+      Sistema completo para simplificar o registro, avaliação e gestão de projetos escolares — ideal para feiras de ciências, mostras culturais e muito mais.
+    </p>
 
-<!-- REMOVA TUDO ACIMA DESTA LINHA EM SEU ARQUIVO index.ejs -->
-<!-- Ou seja, REMOVA: <!DOCTYPE html>, <html>, <head>, e <body> de index.ejs -->
-
-<section class="bg-gradient-to-r from-blue-50 to-blue-100 py-24 text-center">
-    <div class="container mx-auto px-6">
-        <h1 class="text-5xl md:text-6xl font-extrabold text-blue-gradient mb-6 leading-tight">
-            Transforme a Avaliação de Projetos na Sua Escola
-        </h1>
-        <p class="text-gray-700 text-xl max-w-3xl mx-auto mb-10">
-            O sistema completo para simplificar o registro, avaliação e gestão de projetos escolares, ideal para feiras de ciências, mostras culturais e muito mais.
-        </p>
-        <div class="flex flex-col md:flex-row justify-center gap-6">
-            <a href="/solicitar-acesso" class="bg-green-600 text-white px-8 py-4 rounded-lg shadow-lg hover:bg-green-700 hover-scale text-lg font-semibold transform hover:-translate-y-1">
-                <i class="fas fa-handshake mr-2"></i> Sou uma Escola (Solicitar Acesso)
-            </a>
-            <a href="#funcionalidades" class="bg-blue-600 text-white px-8 py-4 rounded-lg shadow-lg hover:bg-blue-700 hover-scale text-lg font-semibold transform hover:-translate-y-1">
-                <i class="fas fa-info-circle mr-2"></i> Saiba Mais
-            </a>
-        </div>
-
-        <div class="mt-12 text-center">
-            <p class="text-gray-600 text-base mb-4">Já possui acesso?</p>
-            <div class="flex flex-wrap justify-center gap-4">
-                <a href="/admin/login" class="text-blue-700 hover:text-blue-900 font-medium hover:underline px-4 py-2 border border-blue-700 rounded-lg hover-scale">
-                    <i class="fas fa-user-shield mr-1"></i> Acesso Administrador
-                </a>
-                <a href="/avaliador/login" class="text-purple-700 hover:text-purple-900 font-medium hover:underline px-4 py-2 border border-purple-700 rounded-lg hover-scale">
-                    <i class="fas fa-chalkboard-teacher mr-1"></i> Acesso Avaliador
-                </a>
-            </div>
-        </div>
+    <div class="flex flex-col md:flex-row justify-center gap-6">
+      <a href="/solicitar-acesso" class="bg-green-600 text-white px-8 py-4 rounded-full shadow-lg text-lg font-semibold hover:bg-green-700 hover:scale-105 transform transition duration-300">
+        <i class="fas fa-handshake mr-2"></i> Sou uma Escola (Solicitar Acesso)
+      </a>
+      <a href="#funcionalidades" class="bg-blue-600 text-white px-8 py-4 rounded-full shadow-lg text-lg font-semibold hover:bg-blue-700 hover:scale-105 transform transition duration-300">
+        <i class="fas fa-info-circle mr-2"></i> Saiba Mais
+      </a>
     </div>
-</section>
 
-<section id="funcionalidades" class="py-24 bg-white">
-    <div class="container mx-auto px-6">
-        <h2 class="text-4xl font-extrabold text-center mb-16 text-gray-800">Recursos que Fazem a Diferença</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-            <div class="bg-gray-50 p-8 rounded-xl shadow-lg hover-scale text-center border-t-4 border-blue-500">
-                <div class="text-blue-600 text-5xl mb-6">
-                    <i class="fas fa-school"></i>
-                </div>
-                <h3 class="text-2xl font-bold mb-3 text-gray-800">Gestão de Escolas</h3>
-                <p class="text-gray-700 text-lg">Centralize o registro de escolas, usuários e avaliadores, garantindo segurança e organização.</p>
-            </div>
-            <div class="bg-gray-50 p-8 rounded-xl shadow-lg hover-scale text-center border-t-4 border-purple-500">
-                <div class="text-purple-600 text-5xl mb-6">
-                    <i class="fas fa-user-shield"></i>
-                </div>
-                <h3 class="text-2xl font-bold mb-3 text-gray-800">Acesso Simplificado para Avaliadores</h3>
-                <p class="text-gray-700 text-lg">Avaliadores acessam projetos atribuídos de forma rápida e segura através de um PIN exclusivo.</p>
-            </div>
-            <div class="bg-gray-50 p-8 rounded-xl shadow-lg hover-scale text-center border-t-4 border-green-500">
-                <div class="text-green-600 text-5xl mb-6">
-                    <i class="fas fa-chart-line"></i>
-                </div>
-                <h3 class="text-2xl font-bold mb-3 text-gray-800">Relatórios Personalizados</h3>
-                <p class="text-gray-700 text-lg">Defina critérios de avaliação únicos para sua escola e gere relatórios detalhados automaticamente.</p>
-            </div>
-            <div class="bg-gray-50 p-8 rounded-xl shadow-lg hover-scale text-center border-t-4 border-orange-500 md:col-span-1 lg:col-span-1">
-                <div class="text-orange-600 text-5xl mb-6">
-                    <i class="fas fa-medal"></i>
-                </div>
-                <h3 class="text-2xl font-bold mb-3 text-gray-800">Ranking e Desempenho</h3>
-                <p class="text-gray-700 text-lg">Monitore o desempenho dos projetos em tempo real com rankings dinâmicos por categoria e turma.</p>
-            </div>
-            <div class="bg-gray-50 p-8 rounded-xl shadow-lg hover-scale text-center border-t-4 border-red-500">
-                <div class="text-red-600 text-5xl mb-6">
-                    <i class="fas fa-calendar-alt"></i>
-                </div>
-                <h3 class="text-2xl font-bold mb-3 text-gray-800">Organização de Eventos</h3>
-                <p class="text-gray-700 text-lg">Gerencie facilmente suas feiras, categorias e cronogramas de avaliação.</p>
-            </div>
-            <div class="bg-gray-50 p-8 rounded-xl shadow-lg hover-scale text-center border-t-4 border-indigo-500">
-                <div class="text-indigo-600 text-5xl mb-6">
-                    <i class="fas fa-envelope-open-text"></i>
-                </div>
-                <h3 class="text-2xl font-bold mb-3 text-gray-800">Comunicação Integrada</h3>
-                <p class="text-gray-700 text-lg">Facilite a comunicação entre administradores, avaliadores e escolas participantes.</p>
-            </div>
-        </div>
-    </div>
-</section>
-
-<section class="py-24 bg-gray-100">
-    <div class="container mx-auto px-6">
-        <h2 class="text-4xl font-extrabold text-center mb-16 text-gray-800">Simples de Usar, Poderoso nos Resultados</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
-            <div class="p-6 bg-white rounded-xl shadow-lg hover-scale">
-                <div class="text-blue-600 text-6xl mb-6 flex justify-center items-center h-20">
-                    <i class="fas fa-registered"></i> </div>
-                <h3 class="font-bold text-2xl mb-3 text-gray-800">1. Cadastre e Configure</h3>
-                <p class="text-gray-700 text-lg">Sua escola se registra, cria a feira, define critérios e convida avaliadores para começar.</p>
-            </div>
-            <div class="p-6 bg-white rounded-xl shadow-lg hover-scale">
-                <div class="text-green-600 text-6xl mb-6 flex justify-center items-center h-20">
-                    <i class="fas fa-clipboard-check"></i> </div>
-                <h3 class="font-bold text-2xl mb-3 text-gray-800">2. Avaliação Descomplicada</h3>
-                <p class="text-gray-700 text-lg">Avaliadores acessam com PINs exclusivos, atribuem notas e feedbacks de forma intuitiva.</p>
-            </div>
-            <div class="p-6 bg-white rounded-xl shadow-lg hover-scale">
-                <div class="text-purple-600 text-6xl mb-6 flex justify-center items-center h-20">
-                    <i class="fas fa-chart-pie"></i> </div>
-                <h3 class="font-bold text-2xl mb-3 text-gray-800">3. Análise e Resultados</h3>
-                <p class="text-gray-700 text-lg">Acompanhe métricas em tempo real e gere relatórios e rankings para celebrar o sucesso.</p>
-            </div>
-        </div>
-    </div>
-</section>
-
-<section class="bg-blue-gradient py-20 text-white text-center">
-    <div class="container mx-auto px-6">
-        <h2 class="text-4xl md:text-5xl font-extrabold mb-6">Pronto para Otimizar suas Avaliações?</h2>
-        <p class="text-xl max-w-3xl mx-auto mb-10">
-            Junte-se a outras escolas que já transformaram a gestão de seus projetos. Comece hoje mesmo!
-        </p>
-        <a href="/solicitar-acesso" class="bg-white text-blue-700 px-10 py-5 rounded-full shadow-xl hover:bg-gray-100 hover-scale text-xl font-bold transform hover:-translate-y-1">
-            <i class="fas fa-arrow-right mr-2"></i> Solicitar Acesso para Minha Escola
+    <div class="mt-12">
+      <p class="text-gray-600 text-base mb-4">Já possui acesso?</p>
+      <div class="flex flex-wrap justify-center gap-4">
+        <a href="/admin/login" class="text-blue-700 border border-blue-700 px-4 py-2 rounded-full hover:text-white hover:bg-blue-700 font-medium transition duration-300">
+          <i class="fas fa-user-shield mr-1"></i> Acesso Administrador
         </a>
+        <a href="/avaliador/login" class="text-purple-700 border border-purple-700 px-4 py-2 rounded-full hover:text-white hover:bg-purple-700 font-medium transition duration-300">
+          <i class="fas fa-chalkboard-teacher mr-1"></i> Acesso Avaliador
+        </a>
+      </div>
     </div>
+  </div>
 </section>
 
-<!-- O footer também está no index.ejs, mas deve ser movido para o layout se for comum a todas as páginas -->
-<footer class="bg-gray-800 text-white py-10 text-center">
-    <div class="container mx-auto px-6">
-        <p>&copy; 2025 Sistema de Avaliação de Projetos Escolares. Todos os direitos reservados.</p>
-        <div class="mt-4 text-sm">
-            <a href="/politica-privacidade" class="text-gray-400 hover:text-white mx-2">Política de Privacidade</a> |
-            <a href="/termos-de-uso" class="text-gray-400 hover:text-white mx-2">Termos de Uso</a>
-            <span class="mx-2">|</span> 
-            <a href="/superadmin/login" class="text-gray-400 hover:text-white text-sm">
-                Acesso Super Admin
-            </a>
+<!-- Funcionalidades -->
+<section id="funcionalidades" class="py-24 bg-white">
+  <div class="container mx-auto px-6">
+    <h2 class="text-4xl font-extrabold text-center mb-16 text-gray-800">Recursos que Fazem a Diferença</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+      <% const features = [
+        { icon: 'fa-school', title: 'Gestão de Escolas', color: 'blue', desc: 'Centralize o registro de escolas, usuários e avaliadores, garantindo segurança e organização.' },
+        { icon: 'fa-user-shield', title: 'Acesso Simplificado para Avaliadores', color: 'purple', desc: 'Avaliadores acessam projetos atribuídos de forma rápida e segura através de um PIN exclusivo.' },
+        { icon: 'fa-chart-line', title: 'Relatórios Personalizados', color: 'green', desc: 'Defina critérios únicos e gere relatórios detalhados automaticamente.' },
+        { icon: 'fa-medal', title: 'Ranking e Desempenho', color: 'orange', desc: 'Monitore desempenho dos projetos com rankings por categoria e turma.' },
+        { icon: 'fa-calendar-alt', title: 'Organização de Eventos', color: 'red', desc: 'Gerencie feiras, categorias e cronogramas de forma fácil.' },
+        { icon: 'fa-envelope-open-text', title: 'Comunicação Integrada', color: 'indigo', desc: 'Facilite a comunicação entre administradores, avaliadores e escolas.' },
+      ]; %>
+      <% features.forEach(f => { %>
+        <div class="bg-gray-50 p-8 rounded-xl shadow-lg text-center border-t-4 border-<%= f.color %>-500 hover:scale-105 transition duration-300">
+          <div class="text-<%= f.color %>-600 text-5xl mb-6">
+            <i class="fas <%= f.icon %>"></i>
+          </div>
+          <h3 class="text-2xl font-bold mb-3 text-gray-800"><%= f.title %></h3>
+          <p class="text-gray-700 text-lg"><%= f.desc %></p>
         </div>
+      <% }) %>
     </div>
+  </div>
+</section>
+
+<!-- Etapas -->
+<section class="py-24 bg-gray-100">
+  <div class="container mx-auto px-6">
+    <h2 class="text-4xl font-extrabold text-center mb-16 text-gray-800">Simples de Usar, Poderoso nos Resultados</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
+      <% const steps = [
+        { icon: 'fa-registered', title: '1. Cadastre e Configure', color: 'blue', desc: 'Sua escola se registra, cria a feira, define critérios e convida avaliadores.' },
+        { icon: 'fa-clipboard-check', title: '2. Avaliação Descomplicada', color: 'green', desc: 'Avaliadores usam PINs exclusivos para atribuir notas e feedbacks.' },
+        { icon: 'fa-chart-pie', title: '3. Análise e Resultados', color: 'purple', desc: 'Acompanhe métricas e gere relatórios e rankings em tempo real.' },
+      ]; %>
+      <% steps.forEach(s => { %>
+        <div class="p-6 bg-white rounded-xl shadow-lg hover:scale-105 transition duration-300">
+          <div class="text-<%= s.color %>-600 text-6xl mb-6 flex justify-center items-center h-20">
+            <i class="fas <%= s.icon %>"></i>
+          </div>
+          <h3 class="font-bold text-2xl mb-3 text-gray-800"><%= s.title %></h3>
+          <p class="text-gray-700 text-lg"><%= s.desc %></p>
+        </div>
+      <% }) %>
+    </div>
+  </div>
+</section>
+
+<!-- Call to Action -->
+<section class="bg-gradient-to-r from-blue-600 to-blue-800 py-20 text-white text-center">
+  <div class="container mx-auto px-6">
+    <h2 class="text-4xl md:text-5xl font-extrabold mb-6">Pronto para Otimizar suas Avaliações?</h2>
+    <p class="text-xl max-w-3xl mx-auto mb-10">
+      Junte-se a outras escolas que já transformaram a gestão de seus projetos. Comece hoje mesmo!
+    </p>
+    <a href="/solicitar-acesso" class="bg-white text-blue-700 px-10 py-5 rounded-full shadow-xl text-xl font-bold hover:bg-gray-100 hover:scale-105 transform transition duration-300">
+      <i class="fas fa-arrow-right mr-2"></i> Solicitar Acesso para Minha Escola
+    </a>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-gray-800 text-white py-10 text-center">
+  <div class="container mx-auto px-6">
+    <p class="text-sm">&copy; 2025 Sistema de Avaliação de Projetos Escolares. Desenvolvido por <span class="text-blue-400">Marlo Rosa</span>. Todos os direitos reservados.</p>
+    <div class="mt-4 text-xs sm:text-sm">
+      <a href="/politica-privacidade" class="text-gray-400 hover:text-white mx-2">Política de Privacidade</a> |
+      <a href="/termos-de-uso" class="text-gray-400 hover:text-white mx-2">Termos de Uso</a> |
+      <a href="/superadmin/login" class="text-gray-400 hover:text-white mx-2">Acesso Super Admin</a>
+    </div>
+  </div>
 </footer>
