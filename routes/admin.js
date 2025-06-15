@@ -1693,7 +1693,7 @@ router.get('/relatorio-consolidado/pdf', verificarAdminEscola, async (req, res) 
         // Ordena por média geral (maior para menor)
         relatorioDados.sort((a, b) => b.mediaGeral - a.mediaGeral);
 
-        await generatePdfReport(req, res, 'relatorios/pdf-consolidado', { relatorioDados: relatorioDados, feiraAtual: feiraAtual }, 'relatorio_consolidado');
+        await generatePdfReport(req, res, 'pdf-consolidado', { relatorioDados: relatorioDados, feiraAtual: feiraAtual }, 'relatorio_consolidado');
 
     } catch (err) {
         console.error('Erro ao gerar PDF do relatório consolidado:', err);
@@ -1740,7 +1740,7 @@ router.get('/avaliacoes/pdf', verificarAdminEscola, async (req, res) => {
             });
         });
 
-        await generatePdfReport(req, res, 'relatorios/pdf-avaliacoes', { avaliacoes: dadosRelatorio, feiraAtual: feiraAtual }, 'avaliacoes_completas');
+        await generatePdfReport(req, res, 'pdf-avaliacoes', { avaliacoes: dadosRelatorio, feiraAtual: feiraAtual }, 'avaliacoes_completas');
 
     } catch (err) {
         console.error('Erro ao gerar PDF de avaliações:', err);
@@ -1810,7 +1810,7 @@ router.get('/projetos-sem-avaliacao/pdf', verificarAdminEscola, async (req, res)
             }
         }
 
-        await generatePdfReport(req, res, 'relatorios/pdf-projetos-sem-avaliacao', { projetosNaoAvaliados: projetosNaoAvaliados, feiraAtual: feiraAtual }, 'projetos_sem_avaliacao');
+        await generatePdfReport(req, res, 'pdf-projetos-sem-avaliacao', { projetosNaoAvaliados: projetosNaoAvaliados, feiraAtual: feiraAtual }, 'projetos_sem_avaliacao');
 
     } catch (err) {
         console.error('Erro ao gerar PDF de projetos sem avaliação:', err);
@@ -1893,7 +1893,7 @@ router.get('/ranking-categorias/pdf', verificarAdminEscola, async (req, res) => 
             });
         }
 
-        await generatePdfReport(req, res, 'relatorios/pdf-ranking-categorias', { rankingPorCategoria: rankingPorCategoria, feiraAtual: feiraAtual }, 'ranking_por_categoria');
+        await generatePdfReport(req, res, 'pdf-ranking-categorias', { rankingPorCategoria: rankingPorCategoria, feiraAtual: feiraAtual }, 'ranking_por_categoria');
 
     } catch (err) {
         console.error('Erro ao gerar PDF de ranking por categoria:', err);
@@ -1979,7 +1979,7 @@ router.get('/resumo-avaliadores/pdf', verificarAdminEscola, async (req, res) => 
                 projetos: projetosAvaliadosDetalhes 
             });
         }
-        await generatePdfReport(req, res, 'relatorios/pdf-resumo-avaliadores', { resumoAvaliadores: resumoAvaliadores, feiraAtual: feiraAtual }, 'resumo_avaliadores');
+        await generatePdfReport(req, res, 'pdf-resumo-avaliadores', { resumoAvaliadores: resumoAvaliadores, feiraAtual: feiraAtual }, 'resumo_avaliadores');
 
     } catch (err) {
         console.error('Erro ao gerar PDF de resumo de avaliadores:', err);
@@ -2054,7 +2054,7 @@ router.get('/resultados-finais/pdf', verificarAdminEscola, async (req, res) => {
         // Ordena por média geral (maior para menor)
         resultadosFinais.sort((a, b) => b.mediaGeral - a.mediaGeral);
 
-        await generatePdfReport(req, res, 'relatorios/pdf-resultados', { resultadosFinais: resultadosFinais, feiraAtual: feiraAtual }, 'resultados_finais');
+        await generatePdfReport(req, res, 'pdf-resultados', { resultadosFinais: resultadosFinais, feiraAtual: feiraAtual }, 'resultados_finais');
 
     } catch (err) {
         console.error('Erro ao gerar PDF de resultados finais:', err);

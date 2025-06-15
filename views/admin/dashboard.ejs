@@ -47,48 +47,83 @@
         to { transform: translateY(0); opacity: 1; }
     }
 
-    /* Estilo para a sidebar em telas pequenas */
+    /* Estilo para o corpo principal flex, sidebar fixa em desktop */
+    body {
+        display: flex;
+        min-height: 100vh;
+        background-color: #f9fafb; /* bg-gray-50 */
+    }
+
+    /* Sidebar - Visível por padrão em telas maiores */
+    #sidebar {
+        width: 256px; /* w-64 */
+        background-color: #1f2937; /* bg-gray-800 */
+        color: #d1d5db; /* text-gray-300 */
+        padding: 1rem; /* p-4 */
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-xl */
+        flex-shrink: 0; /* Garante que a sidebar não encolhe */
+        /* Removido transform para desktop, pois deve ser visível por padrão */
+    }
+
+    /* Main content area - ocupa o restante do espaço */
+    #contentArea {
+        flex-grow: 1;
+        padding: 1.5rem; /* p-6 */
+        /* Removido margin-left fixo, flex-grow se encarrega */
+    }
+
+    /* Mobile: Sidebar escondida por padrão, botão hambúrguer visível */
     @media (max-width: 767px) {
         #sidebar {
             position: fixed;
             top: 0;
             left: 0;
             height: 100%;
-            width: 256px; /* 64 * 4px = 256px */
             z-index: 50;
-            transform: translateX(-100%);
+            transform: translateX(-100%); /* Escondida por padrão em mobile */
             transition: transform 0.3s ease-in-out;
             padding-top: 4rem; /* Espaço para o botão de toggle */
         }
         #sidebar.translate-x-0 {
-            transform: translateX(0%);
+            transform: translateX(0%); /* Mostra em mobile */
         }
-        #sidebarToggleMobile { /* Alterado ID */
-            display: block; /* Mostrar o botão de toggle */
+        #sidebarToggleMobile {
+            display: block; /* Mostrar o botão de toggle em mobile */
+            position: fixed; /* Fixar no canto superior esquerdo */
+            top: 1rem;
+            left: 1rem;
+            z-index: 60; /* Acima da sidebar */
+            background-color: white;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
-        .main-content {
-            margin-left: 0; /* Remove margem para não ter espaço vazio */
+        #sidebarToggleDesktop { /* Este botão é o 'X' de fechar para mobile */
+            display: block; 
+        }
+        #overlay {
+            display: block; /* Mostra overlay em mobile quando sidebar aberta */
         }
     }
 
-    /* Estilo para a sidebar em telas maiores */
+    /* Desktop: Sidebar visível, botão hambúrguer escondido */
     @media (min-width: 768px) {
         #sidebar {
-            position: relative;
-            transform: translateX(0%);
-            flex-shrink: 0; /* Não permite que a sidebar encolha */
-            padding-top: 1rem;
+            transform: translateX(0%); /* Sempre visível em desktop */
         }
-        #sidebarToggleMobile { /* Alterado ID */
-            display: none; /* Ocultar o botão de toggle */
+        #sidebarToggleMobile {
+            display: none; /* Esconder o botão de toggle em desktop */
         }
-        .main-content {
-            margin-left: 0; /* A sidebar empurra o conteúdo */
+        #sidebarToggleDesktop {
+            display: none; /* Esconder o 'X' de fechar em desktop */
+        }
+        #overlay {
+            display: none; /* Esconder overlay em desktop */
         }
     }
   </style>
 </head>
-<body class="bg-gray-50 flex min-h-screen">
+<body>
     <%
         // Inicialização de variáveis para evitar 'is not defined'
         if (!feiras) { feiras = []; }
@@ -120,18 +155,18 @@
     %>
 
     <!-- BOTÃO MENU HAMBÚRGUER (flutuante para telas pequenas) -->
-            <button id="sidebarToggleMobile" class="fixed top-4 left-4 z-50 text-gray-800 bg-white p-2 rounded-lg shadow-md md:hidden">
-                <i class="fas fa-bars text-xl"></i>
-            </button>
+    <button id="sidebarToggleMobile" class="md:hidden">
+        <i class="fas fa-bars text-xl"></i>
+    </button>
 
     <!-- OVERLAY ESCURO -->
-        <div id="overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden"></div>
+    <div id="overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden"></div>
 
     <!-- Sidebar -->
-    <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-gray-800 text-gray-300 p-4 shadow-xl transform -translate-x-full transition-transform duration-300 z-50 md:relative md:translate-x-0 md:flex md:flex-col">
+    <aside id="sidebar" class="bg-gray-800 text-gray-300 p-4 shadow-xl flex flex-col">
         <div class="p-4 text-center border-b border-gray-700 mb-4 flex justify-between items-center">
             <h1 class="text-2xl font-extrabold tracking-tight text-white link-text">Painel Admin</h1>
-            <!-- Botão de fechar/esconder para desktop, ou manter para consistência se o sidebarToggle for universal -->
+            <!-- Botão de fechar/esconder para mobile (o 'X') -->
             <button id="sidebarToggleDesktop" class="text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-gray-600 rounded-md p-1 md:hidden">
                 <i class="fas fa-times text-xl"></i>
             </button>
@@ -201,7 +236,7 @@
     </aside>
 
     <!-- Main Content Area -->
-    <div id="contentArea" class="flex-grow main-content p-4 sm:p-6 md:p-8">
+    <div id="contentArea">
         <header class="bg-white p-4 shadow-md rounded-lg mb-6">
             <div class="container mx-auto flex justify-between items-center">
                 <h2 class="text-3xl font-extrabold text-gray-800">
@@ -852,11 +887,11 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             const sidebar = document.getElementById('sidebar');
-            const sidebarToggleMobile = document.getElementById('sidebarToggleMobile'); // ID correto para o botão mobile
-            const sidebarToggleDesktop = document.getElementById('sidebarToggleDesktop'); // Para fechar/abrir em desktop
+            const sidebarToggleMobile = document.getElementById('sidebarToggleMobile');
+            const sidebarToggleDesktop = document.getElementById('sidebarToggleDesktop'); // Botão 'X' para fechar em mobile
             const overlay = document.getElementById('overlay');
 
-            // Funções para abrir/fechar o sidebar
+            // Funções para abrir e fechar o sidebar
             const openSidebar = () => {
                 sidebar.classList.remove('-translate-x-full');
                 overlay.classList.remove('hidden');
@@ -867,35 +902,35 @@
                 overlay.classList.add('hidden');
             };
 
-            // Event listener para o botão de toggle móvel
+            // Event listener para o botão de toggle móvel (hambúrguer)
             if (sidebarToggleMobile) {
                 sidebarToggleMobile.addEventListener('click', openSidebar);
             }
 
-            // Event listener para o toggle desktop (para fechar/abrir em desktop)
+            // Event listener para o botão de fechar (X) no topo da sidebar em mobile
             if (sidebarToggleDesktop) {
-                 sidebarToggleDesktop.addEventListener('click', closeSidebar); // Agora este botão fecha
+                sidebarToggleDesktop.addEventListener('click', closeSidebar);
             }
 
-
-            // Fecha o menu ao clicar no overlay
+            // Fecha o menu ao clicar no overlay (somente em mobile)
             if (overlay) {
                 overlay.addEventListener('click', closeSidebar);
             }
 
-            // Ajusta automaticamente para desktop (mostrar menu) e mobile (esconder)
+            // Ajusta a visibilidade da sidebar e do botão de toggle com base no tamanho da tela
             const applySidebarState = () => {
-                if (window.innerWidth >= 768) {
-                    sidebar.classList.remove('-translate-x-full');
-                    overlay.classList.add('hidden'); // Garante que o overlay está escondido em desktop
-                } else {
-                    sidebar.classList.add('-translate-x-full'); // Garante que o sidebar está escondido em mobile
-                    overlay.classList.add('hidden'); // Garante que o overlay está escondido em mobile
+                if (window.innerWidth >= 768) { // Desktop
+                    sidebar.classList.remove('-translate-x-full'); // Garante que a sidebar está visível
+                    overlay.classList.add('hidden'); // Garante que o overlay está escondido
+                } else { // Mobile
+                    // Mantém a sidebar escondida por padrão, e mostra o botão hambúrguer
+                    // A classe hidden no overlay será removida por openSidebar quando o botão for clicado
                 }
             };
 
             window.addEventListener('resize', applySidebarState);
             applySidebarState(); // Aplica o estado inicial ao carregar
+
 
             // Mantém lógica das abas
             const tabLinks = document.querySelectorAll('.sidebar-link');
@@ -925,9 +960,9 @@
                     newUrl.searchParams.set('tab', tabId);
                     window.history.pushState({ path: newUrl.href }, '', newUrl.href);
 
-                    // Fecha o menu automaticamente em telas pequenas
+                    // Fecha o menu automaticamente em telas pequenas após clicar em um link
                     if (window.innerWidth < 768) {
-                        closeSidebar(); // Usa a função de fechar
+                        closeSidebar();
                     }
                 });
             });
@@ -971,8 +1006,13 @@
                         }
                         if (titleElement) {
                             // Ajusta o título para "Adicionar Novo X"
-                            const baseTitle = openBtn.innerText.replace('Adicionar Novo ', ''); // Remove 'Adicionar Novo '
-                            titleElement.innerText = `Adicionar Novo ${baseTitle}`;
+                            let baseTitleText = '';
+                            if (openBtn.innerText.includes('Adicionar Novo')) {
+                                baseTitleText = openBtn.innerText.replace('Adicionar Novo ', '');
+                            } else if (openBtn.dataset.baseTitle) {
+                                baseTitleText = openBtn.dataset.baseTitle; // Use um data-attribute se o texto do botão não for padrão
+                            }
+                            titleElement.innerText = `Adicionar Novo ${baseTitleText.replace('Adicionar Novo ', '')}`;
                         }
                         // Lógica específica para o modal de Avaliador ao adicionar
                         if (modalId === 'modalAvaliador') {
