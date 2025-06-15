@@ -27,8 +27,10 @@
         @apply w-8 flex justify-center items-center; /* Garante que os ícones tenham largura fixa */
     }
     .sidebar-link .link-text {
-        @apply ml-3;
-    }
+  white-space: normal;
+  word-break: break-word;
+}
+
     .sidebar-link.active {
         @apply bg-blue-600 text-white shadow-lg;
     }
@@ -67,9 +69,7 @@
 
     /* Main content area - ocupa o restante do espaço */
     #contentArea {
-        flex-grow: 1;
-        padding: 1.5rem; /* p-6 */
-        /* Removido margin-left fixo, flex-grow se encarrega */
+        min-width: 0;
     }
 
     /* Mobile: Sidebar escondida por padrão, botão hambúrguer visível */
@@ -121,6 +121,13 @@
             display: none; /* Esconder overlay em desktop */
         }
     }
+
+    @media (min-width: 768px) and (max-width: 1024px) {
+  #contentArea {
+    padding: 1rem;
+  }
+}
+
   </style>
 </head>
 <body>
@@ -893,14 +900,15 @@
 
             // Funções para abrir e fechar o sidebar
             const openSidebar = () => {
-                sidebar.classList.remove('-translate-x-full');
-                overlay.classList.remove('hidden');
-            };
+    sidebar.classList.add('translate-x-0');
+    overlay.classList.remove('hidden');
+};
 
-            const closeSidebar = () => {
-                sidebar.classList.add('-translate-x-full');
-                overlay.classList.add('hidden');
-            };
+const closeSidebar = () => {
+    sidebar.classList.remove('translate-x-0');
+    overlay.classList.add('hidden');
+};
+
 
             // Event listener para o botão de toggle móvel (hambúrguer)
             if (sidebarToggleMobile) {
