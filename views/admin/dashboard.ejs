@@ -35,7 +35,7 @@
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const day = String(date.getDate()).padStart(2, '0');
-            return `${day}-${month}-${year}`;
+            return `${year}-${month}-${day}`;
         };
     %>
 
@@ -283,66 +283,67 @@
                         </table>
                     </div>
                 </div>
-                 <div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200 hidden" id="avaliadores" role="tabpanel" aria-labelledby="avaliadores-tab">
-                <button id="btnAbrirModalAvaliador" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg mb-6 shadow-md transition duration-300 ease-in-out">
-                    <i class="fas fa-plus-circle mr-2"></i>Adicionar Novo Avaliador
-                </button>
+                <div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200 hidden" id="avaliadores" role="tabpanel" aria-labelledby="avaliadores-tab">
+                    <button id="btnAbrirModalAvaliador" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg mb-6 shadow-md transition duration-300 ease-in-out">
+                        <i class="fas fa-plus-circle mr-2"></i>Adicionar Novo Avaliador
+                    </button>
 
-                <div class="overflow-x-auto bg-white rounded-lg shadow-md border border-gray-200">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-100">
-                            <tr>
-                                <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nome</th>
-                                <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Email</th>
-                                <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">PIN</th>
-                                <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Ativo</th>
-                                <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Projetos Atribuídos</th>
-                                <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            <% avaliadores.forEach(avaliador => { %>
-                                <tr class="hover:bg-gray-100 transition duration-150 ease-in-out">
-                                    <td class="py-3 px-4 text-gray-800"><%= avaliador.nome %></td>
-                                    <td class="py-3 px-4 text-gray-800"><%= avaliador.email %></td>
-                                    <td class="py-3 px-4 text-gray-800"><%= avaliador.pin %></td>
-                                    <td class="py-3 px-4">
-                                        <span class="px-2 py-1 rounded-full text-xs font-semibold
-                                            <%= avaliador.ativo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
-                                            <%= avaliador.ativo ? 'Sim' : 'Não' %>
-                                        </span>
-                                    </td>
-                                    <td class="py-3 px-4">
-                                        <% if (avaliador.projetosAtribuidos && avaliador.projetosAtribuidos.length > 0) { %>
-                                            <% avaliador.projetosAtribuidos.forEach(projeto => { %>
-                                                <span class="inline-block bg-indigo-100 text-indigo-800 text-xs font-semibold mr-1 mb-1 px-2.5 py-0.5 rounded-full dark:bg-indigo-200 dark:text-indigo-900"><%= projeto.titulo %></span>
-                                            <% }) %>
-                                        <% } else { %>
-                                            <span class="text-gray-500">Nenhum</span>
-                                        <% } %>
-                                    </td>
-                                    <td class="py-3 px-4 whitespace-nowrap">
-                                        <button class="btn-editar-avaliador bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1.5 px-3 rounded-md text-sm mr-2 shadow-sm transition duration-300 ease-in-out"
-                                            data-id="<%= avaliador._id %>"
-                                            data-nome="<%= avaliador.nome %>"
-                                            data-email="<%= avaliador.email %>"
-                                            data-pin="<%= avaliador.pin %>"
-                                            data-ativo="<%= avaliador.ativo %>"
-                                            data-projetos="<%= avaliador.projetosAtribuidos.map(p => p._id).join(',') %>">
-                                            <i class="fas fa-edit mr-1"></i>Editar
-                                        </button>
-                                        <form action="/admin/avaliadores/<%= avaliador._id %>/excluir" method="POST" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar este avaliador?');">
-                                            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-md text-sm shadow-sm transition duration-300 ease-in-out">
-                                                <i class="fas fa-trash-alt mr-1"></i>Deletar
-                                            </button>
-                                        </form>
-                                    </td>
+                    <div class="overflow-x-auto bg-white rounded-lg shadow-md border border-gray-200">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nome</th>
+                                    <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Email</th>
+                                    <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">PIN</th>
+                                    <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Ativo</th>
+                                    <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Projetos Atribuídos</th>
+                                    <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Ações</th>
                                 </tr>
-                            <% }) %>
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <% avaliadores.forEach(avaliador => { %>
+                                    <tr class="hover:bg-gray-100 transition duration-150 ease-in-out">
+                                        <td class="py-3 px-4 text-gray-800"><%= avaliador.nome %></td>
+                                        <td class="py-3 px-4 text-gray-800"><%= avaliador.email %></td>
+                                        <td class="py-3 px-4 text-gray-800"><%= avaliador.pin %></td>
+                                        <td class="py-3 px-4">
+                                            <span class="px-2 py-1 rounded-full text-xs font-semibold
+                                                <%= avaliador.ativo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
+                                                <%= avaliador.ativo ? 'Sim' : 'Não' %>
+                                            </span>
+                                        </td>
+                                        <td class="py-3 px-4">
+                                            <% if (avaliador.projetosAtribuidos && avaliador.projetosAtribuidos.length > 0) { %>
+                                                <% avaliador.projetosAtribuidos.forEach(projeto => { %>
+                                                    <span class="inline-block bg-indigo-100 text-indigo-800 text-xs font-semibold mr-1 mb-1 px-2.5 py-0.5 rounded-full dark:bg-indigo-200 dark:text-indigo-900"><%= projeto.titulo %></span>
+                                                <% }) %>
+                                            <% } else { %>
+                                                <span class="text-gray-500">Nenhum</span>
+                                            <% } %>
+                                        </td>
+                                        <td class="py-3 px-4 whitespace-nowrap">
+                                            <button class="btn-editar-avaliador bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1.5 px-3 rounded-md text-sm mr-2 shadow-sm transition duration-300 ease-in-out"
+                                                data-id="<%= avaliador._id %>"
+                                                data-nome="<%= avaliador.nome %>"
+                                                data-email="<%= avaliador.email %>"
+                                                data-pin="<%= avaliador.pin %>"
+                                                data-ativo="<%= avaliador.ativo %>"
+                                                data-projetos="<%= avaliador.projetosAtribuidos.map(p => p._id).join(',') %>">
+                                                <i class="fas fa-edit mr-1"></i>Editar
+                                            </button>
+                                            <form action="/admin/avaliadores/<%= avaliador._id %>?_method=DELETE" method="POST" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar este avaliador?');">
+                                                <input type="hidden" name="_method" value="DELETE">
+                                                <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-md text-sm shadow-sm transition duration-300 ease-in-out">
+                                                    <i class="fas fa-trash-alt mr-1"></i>Deletar
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
                 <div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200 hidden" id="feiras" role="tabpanel" aria-labelledby="feiras-tab">
                     <button id="btnAbrirModalFeira" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg mb-6 shadow-md transition duration-300 ease-in-out">
                         <i class="fas fa-plus-circle mr-2"></i>Adicionar Nova Feira
@@ -443,6 +444,16 @@
                     </div>
 
                     <div class="bg-gray-50 p-6 rounded-lg shadow-md mb-6">
+                        <h4 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-users-cog text-green-600 mr-3"></i>Gerenciar Usuários Admin
+                        </h4>
+                        <p class="text-gray-700 mb-4">
+                            Crie e gerencie contas de usuários com acesso ao painel administrativo.
+                        </p>
+                        <button id="btnAbrirModalUsuario" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-5 rounded-lg shadow-md transition duration-300 ease-in-out">
+                            <i class="fas fa-user-plus mr-2"></i>Adicionar Novo Usuário Admin
+                        </button>
+
                         <div class="overflow-x-auto bg-white rounded-lg shadow-md border border-gray-200 mt-6">
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-100">
@@ -544,7 +555,7 @@
     <div id="modalCategoria" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden transition-opacity duration-300 opacity-0">
         <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md mx-4 transform transition-transform duration-300 scale-95">
             <h2 id="tituloModalCategoria" class="text-2xl font-bold mb-6 text-gray-800 border-b pb-3">Adicionar Nova Categoria</h2>
-            <form id="formCategoria" method="POST" class="space-y-4">
+            <form id="formCategoria" method="POST" action="/admin/categorias" class="space-y-4">
                 <input type="hidden" id="categoriaId" name="id">
                 <input type="hidden" id="categoriaMethod" name="_method" value="POST">
                 
@@ -564,7 +575,7 @@
     <div id="modalCriterio" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden transition-opacity duration-300 opacity-0">
         <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md mx-4 transform transition-transform duration-300 scale-95">
             <h2 id="tituloModalCriterio" class="text-2xl font-bold mb-6 text-gray-800 border-b pb-3">Adicionar Novo Critério</h2>
-            <form id="formCriterio" method="POST" class="space-y-4">
+            <form id="formCriterio" method="POST" action="/admin/criterios" class="space-y-4">
                 <input type="hidden" id="criterioId" name="id">
                 <input type="hidden" id="criterioMethod" name="_method" value="POST">
                 
@@ -592,7 +603,7 @@
     <div id="modalAvaliador" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden transition-opacity duration-300 opacity-0">
         <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-2xl mx-4 transform transition-transform duration-300 scale-95">
             <h2 id="tituloModalAvaliador" class="text-2xl font-bold mb-6 text-gray-800 border-b pb-3">Adicionar Novo Avaliador</h2>
-            <form id="formAvaliador" method="POST" class="space-y-4">
+            <form id="formAvaliador" method="POST" action="/admin/avaliadores" class="space-y-4">
                 <input type="hidden" id="avaliadorId" name="id">
                 <input type="hidden" id="avaliadorMethod" name="_method" value="POST">
                 
@@ -605,8 +616,8 @@
                     <input type="email" id="emailAvaliador" name="email" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>
                 <div>
-                    <label for="pinAvaliador" class="block text-sm font-medium text-gray-700">PIN (4 dígitos)</label>
-                    <input type="text" id="pinAvaliador" name="pin" pattern="\d{4}" title="O PIN deve conter exatamente 4 dígitos numéricos." required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
+                    <label for="pinAvaliador" class="block text-sm font-medium text-gray-700">PIN (4 dígitos, será gerado automaticamente se vazio)</label>
+                    <input type="text" id="pinAvaliador" name="pin" pattern="\d{4}" title="O PIN deve conter exatamente 4 dígitos numéricos." class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>
                 <div class="flex items-center">
                     <input type="checkbox" id="ativoAvaliador" name="ativo" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
@@ -638,7 +649,7 @@
     <div id="modalFeira" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden transition-opacity duration-300 opacity-0">
         <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md mx-4 transform transition-transform duration-300 scale-95">
             <h2 id="tituloModalFeira" class="text-2xl font-bold mb-6 text-gray-800 border-b pb-3">Adicionar Nova Feira</h2>
-            <form id="formFeira" method="POST" class="space-y-4">
+            <form id="formFeira" method="POST" action="/admin/feiras" class="space-y-4">
                 <input type="hidden" id="feiraId" name="id">
                 <input type="hidden" id="feiraMethod" name="_method" value="POST">
                 
@@ -706,8 +717,7 @@
         <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md mx-4 transform transition-transform duration-300 scale-95">
             <h2 id="tituloModalConfiguracoes" class="text-2xl font-bold mb-6 text-gray-800 border-b pb-3">Configurações da Feira</h2>
             <form id="formConfiguracoesFeiraData" method="POST" action="/admin/configurar-datas-feira" class="space-y-4">
-                <input type="hidden" name="_method" value="PUT"> 
-                <input type="hidden" id="configuracoesFeiraId" name="id" value="<%= feiraAtual._id %>">
+                <input type="hidden" name="_method" value="POST"> <input type="hidden" id="configuracoesFeiraId" name="id" value="<%= feiraAtual._id %>">
 
                 <div>
                     <label for="novaDataInicio" class="block text-sm font-medium text-gray-700">Nova Data de Início</label>
@@ -837,11 +847,16 @@
                         if (form) {
                             form.reset();
                             const methodInput = form.querySelector('input[name="_method"]');
-                            if (methodInput) methodInput.value = 'POST';
-                            // Define a action padrão para POST (adicionar novo)
-                            form.action = `/admin/${modalId.replace('modal', '').toLowerCase()}`;
-                            if (modalId === 'modalUsuario') form.action = '/admin/usuarios'; // Exceção para plural
-                            if (modalId === 'modalConfiguracoes') form.action = '/admin/configurar-datas-feira'; // Exceção para rota específica
+                            if (methodInput) methodInput.value = 'POST'; // Define o método padrão para POST
+                            
+                            // Ajusta a action padrão para adicionar (plural)
+                            if (modalId === 'modalProjeto') form.action = '/admin/projetos';
+                            else if (modalId === 'modalCategoria') form.action = '/admin/categorias';
+                            else if (modalId === 'modalCriterio') form.action = '/admin/criterios';
+                            else if (modalId === 'modalAvaliador') form.action = '/admin/avaliadores';
+                            else if (modalId === 'modalFeira') form.action = '/admin/feiras';
+                            else if (modalId === 'modalUsuario') form.action = '/admin/usuarios';
+                            else if (modalId === 'modalConfiguracoes') form.action = '/admin/configurar-datas-feira';
                         }
                         if (title) {
                             if (modalId === 'modalProjeto') title.innerText = 'Adicionar Novo Projeto';
@@ -851,6 +866,10 @@
                             if (modalId === 'modalFeira') title.innerText = 'Adicionar Nova Feira';
                             if (modalId === 'modalUsuario') title.innerText = 'Adicionar Novo Usuário Admin';
                             if (modalId === 'modalConfiguracoes') title.innerText = 'Configurações da Feira';
+                        }
+                        // Limpar o campo PIN no modal de avaliador ao adicionar
+                        if (modalId === 'modalAvaliador') {
+                            document.getElementById('pinAvaliador').value = '';
                         }
                     });
                 }
@@ -1086,12 +1105,6 @@
                     }, 10);
                 });
             });
-
-
-            // MODAL DE CONFIGURAÇÕES (EDITAR DATAS DA FEIRA)
-            // Este modal já tem seu setup via setupModal. A lógica de preenchimento é no EJS
-            // O botão de "Salvar Configurações" envia para /admin/configurar-datas-feira
-            // com o método PUT (definido no input hidden)
         });
     </script>
 
