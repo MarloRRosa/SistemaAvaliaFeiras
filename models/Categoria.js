@@ -5,12 +5,12 @@ const CategoriaSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    escolaId: { // Mantenha se ainda for útil para alguma query global
+    escolaId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Escola',
         required: true
     },
-    feira: { // NOVO CAMPO: Referência à Feira
+    feira: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Feira',
         required: true
