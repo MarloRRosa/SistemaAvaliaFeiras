@@ -7,130 +7,8 @@
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="/css/admin-custom.css">
-  <style>
-    /* Estilos para a navegação de abas */
-    .tab-button {
-      /* Adicionado padding, arredondamento, sombra e transições */
-      @apply px-6 py-3 text-sm font-semibold text-gray-700 bg-white rounded-lg shadow-sm border border-gray-200 
-             hover:text-blue-600 hover:border-blue-400 hover:bg-blue-50 transition-all duration-300 ease-in-out;
-      white-space: nowrap; /* Evita que o texto quebre */
-      margin-right: 0.75rem; /* Espaçamento maior entre os botões */
-      margin-bottom: 0.5rem; /* Margem inferior para espaçamento vertical em telas menores */
-      display: inline-flex; /* Para alinhar melhor o conteúdo */
-      align-items: center;
-      justify-content: center;
-    }
-    .sidebar-link {
-        @apply flex items-center p-3 rounded-lg text-gray-300 hover:bg-gray-700 transition-colors duration-200;
-    }
-    .sidebar-link .icon-wrapper {
-        @apply w-8 flex justify-center items-center; /* Garante que os ícones tenham largura fixa */
-    }
-    .sidebar-link .link-text {
-  white-space: normal;
-  word-break: break-word;
-}
-
-    .sidebar-link.active {
-        @apply bg-blue-600 text-white shadow-lg;
-    }
-    .modal {
-        animation: fadeIn 0.3s ease-out;
-    }
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    .modal-content {
-        animation: slideIn 0.3s ease-out;
-    }
-    @keyframes slideIn {
-        from { transform: translateY(-50px); opacity: 0; }
-        to { transform: translateY(0); opacity: 1; }
-    }
-
-    /* Estilo para o corpo principal flex, sidebar fixa em desktop */
-    body {
-        display: flex;
-        min-height: 100vh;
-        background-color: #f9fafb; /* bg-gray-50 */
-    }
-
-    /* Sidebar - Visível por padrão em telas maiores */
-    #sidebar {
-        width: 256px; /* w-64 */
-        background-color: #1f2937; /* bg-gray-800 */
-        color: #d1d5db; /* text-gray-300 */
-        padding: 1rem; /* p-4 */
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-xl */
-        flex-shrink: 0; /* Garante que a sidebar não encolhe */
-        /* Removido transform para desktop, pois deve ser visível por padrão */
-    }
-
-    /* Main content area - ocupa o restante do espaço */
-    #contentArea {
-        min-width: 0;
-    }
-
-    /* Mobile: Sidebar escondida por padrão, botão hambúrguer visível */
-    @media (max-width: 767px) {
-        #sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100%;
-            z-index: 50;
-            transform: translateX(-100%); /* Escondida por padrão em mobile */
-            transition: transform 0.3s ease-in-out;
-            padding-top: 4rem; /* Espaço para o botão de toggle */
-        }
-        #sidebar.translate-x-0 {
-            transform: translateX(0%); /* Mostra em mobile */
-        }
-        #sidebarToggleMobile {
-            display: block; /* Mostrar o botão de toggle em mobile */
-            position: fixed; /* Fixar no canto superior esquerdo */
-            top: 1rem;
-            left: 1rem;
-            z-index: 60; /* Acima da sidebar */
-            background-color: white;
-            padding: 0.75rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-        #sidebarToggleDesktop { /* Este botão é o 'X' de fechar para mobile */
-            display: block; 
-        }
-        #overlay {
-            display: block; /* Mostra overlay em mobile quando sidebar aberta */
-        }
-    }
-
-    /* Desktop: Sidebar visível, botão hambúrguer escondido */
-    @media (min-width: 768px) {
-        #sidebar {
-            transform: translateX(0%); /* Sempre visível em desktop */
-        }
-        #sidebarToggleMobile {
-            display: none; /* Esconder o botão de toggle em desktop */
-        }
-        #sidebarToggleDesktop {
-            display: none; /* Esconder o 'X' de fechar em desktop */
-        }
-        #overlay {
-            display: none; /* Esconder overlay em desktop */
-        }
-    }
-
-    @media (min-width: 768px) and (max-width: 1024px) {
-  #contentArea {
-    padding: 1rem;
-  }
-}
-
-  </style>
 </head>
-<body>
+<body class="bg-gray-50">
     <%
         // Inicialização de variáveis para evitar 'is not defined'
         if (!feiras) { feiras = []; }
@@ -161,902 +39,861 @@
         };
     %>
 
-    <!-- BOTÃO MENU HAMBÚRGUER (flutuante para telas pequenas) -->
-    <button id="sidebarToggleMobile" class="md:hidden">
+    <button id="sidebarToggleMobile" class="md:hidden fixed top-4 left-4 z-50 bg-white p-3 rounded-md shadow-md">
         <i class="fas fa-bars text-xl"></i>
     </button>
 
-    <!-- OVERLAY ESCURO -->
-    <div id="overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden"></div>
+    <div id="mobile-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden transition-opacity duration-300 opacity-0 pointer-events-none"></div>
 
-    <!-- Sidebar -->
-    <aside id="sidebar" class="bg-gray-800 text-gray-300 p-4 shadow-xl flex flex-col">
-        <div class="p-4 text-center border-b border-gray-700 mb-4 flex justify-between items-center">
-            <h1 class="text-2xl font-extrabold tracking-tight text-white link-text">Painel Admin</h1>
-            <!-- Botão de fechar/esconder para mobile (o 'X') -->
-            <button id="sidebarToggleDesktop" class="text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-gray-600 rounded-md p-1 md:hidden">
-                <i class="fas fa-times text-xl"></i>
-            </button>
-        </div>
-
-        <nav class="flex-grow">
-            <ul class="space-y-1">
-                <li>
-                    <a href="#" class="sidebar-link <% if(activeTab === 'dashboard-geral') { %>active<% } %>" data-tab="dashboard-geral">
-                        <span class="icon-wrapper"><i class="fas fa-tachometer-alt"></i></span>
-                        <span class="link-text">Visão Geral</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="sidebar-link <% if(activeTab === 'projetos') { %>active<% } %>" data-tab="projetos">
-                        <span class="icon-wrapper"><i class="fas fa-lightbulb"></i></span>
-                        <span class="link-text">Projetos</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="sidebar-link <% if(activeTab === 'categorias') { %>active<% } %>" data-tab="categorias">
-                        <span class="icon-wrapper"><i class="fas fa-tags"></i></span>
-                        <span class="link-text">Categorias</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="sidebar-link <% if(activeTab === 'criterios') { %>active<% } %>" data-tab="criterios">
-                        <span class="icon-wrapper"><i class="fas fa-clipboard-list"></i></span>
-                        <span class="link-text">Critérios</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="sidebar-link <% if(activeTab === 'avaliadores') { %>active<% } %>" data-tab="avaliadores">
-                        <span class="icon-wrapper"><i class="fas fa-user-tie"></i></span>
-                        <span class="link-text">Avaliadores</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="sidebar-link <% if(activeTab === 'feiras') { %>active<% } %>" data-tab="feiras">
-                        <span class="icon-wrapper"><i class="fas fa-calendar-alt"></i></span>
-                        <span class="link-text">Feiras</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="sidebar-link <% if(activeTab === 'relatorios') { %>active<% } %>" data-tab="relatorios">
-                        <span class="icon-wrapper"><i class="fas fa-file-pdf"></i></span>
-                        <span class="link-text">Relatórios</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="sidebar-link <% if(activeTab === 'tab-configuracoes') { %>active<% } %>" data-tab="tab-configuracoes">
-                        <span class="icon-wrapper"><i class="fas fa-cog"></i></span>
-                        <span class="link-text">Configurações</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
-        
-        <div class="mt-auto pt-4 border-t border-gray-700">
-            <form action="/admin/logout" method="POST" class="w-full">
-                <button type="submit" class="w-full bg-red-700 hover:bg-red-800 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out">
-                    <span class="icon-wrapper"><i class="fas fa-sign-out-alt"></i></span>
-                    <span class="link-text">Sair</span>
+    <div class="app-container flex flex-col md:flex-row min-h-screen w-full">
+        <aside id="sidebar" class="bg-gray-800 text-gray-300 p-4 shadow-xl flex flex-col fixed inset-y-0 left-0 w-64 transform -translate-x-full md:relative md:translate-x-0 md:flex-shrink-0 transition-transform duration-300 ease-in-out z-50 md:z-auto">
+            <div class="p-4 text-center border-b border-gray-700 mb-4 flex justify-between items-center">
+                <h1 class="text-2xl font-extrabold tracking-tight text-white link-text">Painel Admin</h1>
+                <button id="sidebarToggleDesktop" class="text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-gray-600 rounded-md p-1 md:hidden">
+                    <i class="fas fa-times text-xl"></i>
                 </button>
-            </form>
-        </div>
-    </aside>
-
-    <!-- Main Content Area -->
-    <div id="contentArea">
-        <header class="bg-white p-4 shadow-md rounded-lg mb-6">
-            <div class="container mx-auto flex justify-between items-center">
-                <h2 class="text-3xl font-extrabold text-gray-800">
-                    Feira Atual: <span class="text-blue-600"><%= feiraAtual.nome || 'Nenhuma Feira Ativa' %></span>
-                    <small class="text-gray-500 text-lg ml-2">
-                        (<%= feiraAtual.status ? (feiraAtual.status === 'ativa' ? 'Ativa' : 'Arquivada') : 'Não Definida' %>)
-                        <%= feiraAtual.inicioFeira && feiraAtual.fimFeira ? ` (${formatarDatasParaInput(feiraAtual.inicioFeira)} - ${formatarDatasParaInput(feiraAtual.fimFeira)})` : '' %>
-                    </small>
-                </h2>
             </div>
-        </header>
 
-        <div class="mb-6 bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-            <form method="GET" action="/admin/dashboard" class="flex flex-wrap items-center gap-4">
-                <label for="feiraSelecionada" class="text-base font-medium text-gray-700">Selecionar Feira:</label>
-                <select name="feiraId" id="feiraSelecionada" class="flex-grow md:flex-grow-0 border border-gray-300 px-4 py-2 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out">
-                    <option value="">-- Selecione uma Feira --</option>
-                    <% feiras.forEach(f => { %>
-                        <option value="<%= f._id %>" <%= feiraAtual._id && feiraAtual._id.toString() === f._id.toString() ? 'selected' : '' %>>
-                            <%= f.nome %> - <%= f.status === 'arquivada' ? 'Arquivada' : 'Ativa' %>
-                        </option>
-                    <% }) %>
-                </select>
-                <button type="submit" class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition duration-300 ease-in-out shadow-md w-full md:w-auto">
-                    <i class="fas fa-sync-alt mr-2"></i>Carregar
-                </button>
-            </form>
-        </div>
-
-        <div id="tab-content-container">
-            <!-- ABA: DASHBOARD GERAL -->
-            <div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200" id="dashboard-geral" role="tabpanel" aria-labelledby="dashboard-geral-tab">
-                <%- include('dashboard-geral-content', {
-                    projetosPorCategoria: projetosPorCategoria,
-                    avaliadores: avaliadores,
-                    relatorioFinalPorProjeto: relatorioFinalPorProjeto,
-                    criteriosOficiais: criterios, 
-                    formatarData: formatarDatasParaInput 
-                }) %>
+            <nav class="flex-grow">
+                <ul class="space-y-1">
+                    <li>
+                        <a href="#" class="sidebar-link <% if(activeTab === 'dashboard-geral') { %>active<% } %>" data-tab="dashboard-geral">
+                            <span class="icon-wrapper"><i class="fas fa-tachometer-alt"></i></span>
+                            <span class="link-text">Visão Geral</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="sidebar-link <% if(activeTab === 'projetos') { %>active<% } %>" data-tab="projetos">
+                            <span class="icon-wrapper"><i class="fas fa-lightbulb"></i></span>
+                            <span class="link-text">Projetos</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="sidebar-link <% if(activeTab === 'categorias') { %>active<% } %>" data-tab="categorias">
+                            <span class="icon-wrapper"><i class="fas fa-tags"></i></span>
+                            <span class="link-text">Categorias</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="sidebar-link <% if(activeTab === 'criterios') { %>active<% } %>" data-tab="criterios">
+                            <span class="icon-wrapper"><i class="fas fa-clipboard-list"></i></span>
+                            <span class="link-text">Critérios</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="sidebar-link <% if(activeTab === 'avaliadores') { %>active<% } %>" data-tab="avaliadores">
+                            <span class="icon-wrapper"><i class="fas fa-user-tie"></i></span>
+                            <span class="link-text">Avaliadores</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="sidebar-link <% if(activeTab === 'feiras') { %>active<% } %>" data-tab="feiras">
+                            <span class="icon-wrapper"><i class="fas fa-calendar-alt"></i></span>
+                            <span class="link-text">Feiras</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="sidebar-link <% if(activeTab === 'relatorios') { %>active<% } %>" data-tab="relatorios">
+                            <span class="icon-wrapper"><i class="fas fa-file-pdf"></i></span>
+                            <span class="link-text">Relatórios</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="sidebar-link <% if(activeTab === 'tab-configuracoes') { %>active<% } %>" data-tab="tab-configuracoes">
+                            <span class="icon-wrapper"><i class="fas fa-cog"></i></span>
+                            <span class="link-text">Configurações</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="mt-auto pt-4 border-t border-gray-700">
+                <form action="/admin/logout" method="POST" class="w-full">
+                    <button type="submit" class="w-full bg-red-700 hover:bg-red-800 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out">
+                        <span class="icon-wrapper"><i class="fas fa-sign-out-alt"></i></span>
+                        <span class="link-text">Sair</span>
+                    </button>
+                </form>
             </div>
-            <!-- FIM ABA: DASHBOARD GERAL -->
+        </aside>
 
-            <!-- ABA: PROJETOS -->
-            <div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200 hidden" id="projetos" role="tabpanel" aria-labelledby="projetos-tab">
-                <button id="btnAbrirModalProjeto" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg mb-6 shadow-md transition duration-300 ease-in-out">
-                    <i class="fas fa-plus-circle mr-2"></i>Adicionar Novo Projeto
-                </button>
+        <div id="contentArea" class="flex-grow flex flex-col min-w-0">
+            <header class="bg-white p-4 shadow-md rounded-lg mb-6">
+                <div class="container mx-auto flex justify-between items-center">
+                    <h2 class="text-3xl font-extrabold text-gray-800">
+                        Feira Atual: <span class="text-blue-600"><%= feiraAtual.nome || 'Nenhuma Feira Ativa' %></span>
+                        <small class="text-gray-500 text-lg ml-2">
+                            (<%= feiraAtual.status ? (feiraAtual.status === 'ativa' ? 'Ativa' : 'Arquivada') : 'Não Definida' %>)
+                            <%= feiraAtual.inicioFeira && feiraAtual.fimFeira ? ` (${formatarDatasParaInput(feiraAtual.inicioFeira)} - ${formatarDatasParaInput(feiraAtual.fimFeira)})` : '' %>
+                        </small>
+                    </h2>
+                </div>
+            </header>
 
-                <div class="overflow-x-auto bg-white rounded-lg shadow-md border border-gray-200">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-100">
-                            <tr>
-                                <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Título</th>
-                                <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Turma</th>
-                                <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            <% Object.keys(projetosPorCategoria).sort().forEach(nomeCategoria => { %>
-                                <tr class="bg-gray-50">
-                                    <td colspan="3" class="py-2 px-4 text-left font-extrabold text-lg text-blue-700">
-                                        <%= nomeCategoria %>
-                                    </td>
+            <div class="mb-6 bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                <form method="GET" action="/admin/dashboard" class="flex flex-wrap items-center gap-4">
+                    <label for="feiraSelecionada" class="text-base font-medium text-gray-700">Selecionar Feira:</label>
+                    <select name="feiraId" id="feiraSelecionada" class="flex-grow md:flex-grow-0 border border-gray-300 px-4 py-2 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out">
+                        <option value="">-- Selecione uma Feira --</option>
+                        <% feiras.forEach(f => { %>
+                            <option value="<%= f._id %>" <%= feiraAtual._id && feiraAtual._id.toString() === f._id.toString() ? 'selected' : '' %>>
+                                <%= f.nome %> - <%= f.status === 'arquivada' ? 'Arquivada' : 'Ativa' %>
+                            </option>
+                        <% }) %>
+                    </select>
+                    <button type="submit" class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition duration-300 ease-in-out shadow-md w-full md:w-auto">
+                        <i class="fas fa-sync-alt mr-2"></i>Carregar
+                    </button>
+                </form>
+            </div>
+
+            <div id="tab-content-container" class="flex-grow p-4 md:p-6 lg:p-8 space-y-6">
+                <div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200" id="dashboard-geral" role="tabpanel" aria-labelledby="dashboard-geral-tab">
+                    <%- include('dashboard-geral-content', {
+                        projetosPorCategoria: projetosPorCategoria,
+                        avaliadores: avaliadores,
+                        relatorioFinalPorProjeto: relatorioFinalPorProjeto,
+                        criteriosOficiais: criterios, 
+                        formatarData: formatarDatasParaInput 
+                    }) %>
+                </div>
+                <div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200 hidden" id="projetos" role="tabpanel" aria-labelledby="projetos-tab">
+                    <button id="btnAbrirModalProjeto" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg mb-6 shadow-md transition duration-300 ease-in-out">
+                        <i class="fas fa-plus-circle mr-2"></i>Adicionar Novo Projeto
+                    </button>
+
+                    <div class="overflow-x-auto bg-white rounded-lg shadow-md border border-gray-200">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Título</th>
+                                    <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Turma</th>
+                                    <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Ações</th>
                                 </tr>
-                                <% projetosPorCategoria[nomeCategoria].forEach(projeto => { %>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <% Object.keys(projetosPorCategoria).sort().forEach(nomeCategoria => { %>
+                                    <tr class="bg-gray-50">
+                                        <td colspan="3" class="py-2 px-4 text-left font-extrabold text-lg text-blue-700">
+                                            <%= nomeCategoria %>
+                                        </td>
+                                    </tr>
+                                    <% projetosPorCategoria[nomeCategoria].forEach(projeto => { %>
+                                        <tr class="hover:bg-gray-100 transition duration-150 ease-in-out">
+                                            <td class="py-3 px-4 text-gray-800"><%= projeto.titulo %></td>
+                                            <td class="py-3 px-4 text-gray-800"><%= projeto.turma || 'Não informado' %></td>
+                                            <td class="py-3 px-4 whitespace-nowrap">
+                                                <button class="btn-editar-projeto bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1.5 px-3 rounded-md text-sm mr-2 shadow-sm transition duration-300 ease-in-out"
+                                                    data-id="<%= projeto._id %>"
+                                                    data-titulo="<%= projeto.titulo %>"
+                                                    data-descricao="<%= projeto.descricao %>"
+                                                    data-categoria-id="<%= projeto.categoria ? projeto.categoria._id : '' %>"
+                                                    data-criterios="<%= projeto.criterios && projeto.criterios.length > 0 ? projeto.criterios.map(c => c._id).join(',') : '' %>"
+                                                    data-turma="<%= projeto.turma %>"
+                                                    data-alunos="<%= projeto.alunos && projeto.alunos.length > 0 ? projeto.alunos.join(',') : '' %>">
+                                                    <i class="fas fa-edit mr-1"></i>Editar
+                                                </button>
+                                                <form method="POST" action="/admin/projetos/<%= projeto._id %>?_method=DELETE" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar este projeto?');">
+                                                    <input type="hidden"  name="_method" value="DELETE">
+                                                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-md text-sm shadow-sm transition duration-300 ease-in-out">Deletar</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    <% }) %>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200 hidden" id="categorias" role="tabpanel" aria-labelledby="categorias-tab">
+                    <button id="btnAbrirModalCategoria" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg mb-6 shadow-md transition duration-300 ease-in-out">
+                        <i class="fas fa-plus-circle mr-2"></i>Adicionar Nova Categoria
+                    </button>
+
+                    <div class="overflow-x-auto bg-white rounded-lg shadow-md border border-gray-200">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nome da Categoria</th>
+                                    <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% categorias.forEach(categoria => { %>
                                     <tr class="hover:bg-gray-100 transition duration-150 ease-in-out">
-                                        <td class="py-3 px-4 text-gray-800"><%= projeto.titulo %></td>
-                                        <td class="py-3 px-4 text-gray-800"><%= projeto.turma || 'Não informado' %></td>
+                                        <td class="py-3 px-4 text-gray-800"><%= categoria.nome %></td>
                                         <td class="py-3 px-4 whitespace-nowrap">
-                                            <button class="btn-editar-projeto bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1.5 px-3 rounded-md text-sm mr-2 shadow-sm transition duration-300 ease-in-out"
-                                                data-id="<%= projeto._id %>"
-                                                data-titulo="<%= projeto.titulo %>"
-                                                data-descricao="<%= projeto.descricao %>"
-                                                data-categoria-id="<%= projeto.categoria ? projeto.categoria._id : '' %>"
-                                                data-criterios="<%= projeto.criterios && projeto.criterios.length > 0 ? projeto.criterios.map(c => c._id).join(',') : '' %>"
-                                                data-turma="<%= projeto.turma %>"
-                                                data-alunos="<%= projeto.alunos && projeto.alunos.length > 0 ? projeto.alunos.join(',') : '' %>">
-                                                <i class="fas fa-edit mr-1"></i>Editar
+                                            <button class="btn-editar-categoria bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1.5 px-3 rounded-md text-sm mr-2 shadow-sm transition duration-300 ease-in-out"
+                                                data-id="<%= categoria._id %>" 
+                                                data-nome="<%= categoria.nome %>">
+                                                <i class="fas fa-edit mr-1"></i> Editar
                                             </button>
-             
-                                            <form method="POST" action="/admin/projetos/<%= projeto._id %>?_method=DELETE" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar este projeto?');">
-                                                <input type="hidden"  name="_method" value="DELETE">
-                                                <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-md text-sm shadow-sm transition duration-300 ease-in-out">Deletar</button>
+                                            <form method="POST" action="/admin/categorias/<%= categoria._id %>?_method=DELETE" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar esta categoria?');">
+                                                <input type="hidden" name="_method" value="DELETE">
+                                                <button type="submit"  class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-md text-sm shadow-sm transition duration-300 ease-in-out">
+                                                    <i class="fas fa-trash-alt mr-1"></i>Excluir
+                                                </button>
                                             </form>
                                         </td>
                                     </tr>
                                 <% }) %>
-                            <% }) %>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <!-- FIM ABA: PROJETOS -->
-
-            <!-- ABA: CATEGORIAS -->
-            <div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200 hidden" id="categorias" role="tabpanel" aria-labelledby="categorias-tab">
-                <button id="btnAbrirModalCategoria" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg mb-6 shadow-md transition duration-300 ease-in-out">
-                    <i class="fas fa-plus-circle mr-2"></i>Adicionar Nova Categoria
-                </button>
-
-                <div class="overflow-x-auto bg-white rounded-lg shadow-md border border-gray-200">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-100">
-                            <tr>
-                                <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nome da Categoria</th>
-                                <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% categorias.forEach(categoria => { %>
-                                <tr class="hover:bg-gray-100 transition duration-150 ease-in-out">
-                                    <td class="py-3 px-4 text-gray-800"><%= categoria.nome %></td>
-                                    <td class="py-3 px-4 whitespace-nowrap">
-                                        <button class="btn-editar-categoria bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1.5 px-3 rounded-md text-sm mr-2 shadow-sm transition duration-300 ease-in-out"
-                                                data-id="<%= categoria._id %>" 
-                                                data-nome="<%= categoria.nome %>">
-                                            <i class="fas fa-edit mr-1"></i> Editar
-                                        </button>
-                                        <form method="POST" action="/admin/categorias/<%= categoria._id %>?_method=DELETE" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar esta categoria?');">
-                                            <input type="hidden" name="_method" value="DELETE">
-                                            <button type="submit"  class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-md text-sm shadow-sm transition duration-300 ease-in-out">
-                                                <i class="fas fa-trash-alt mr-1"></i>Excluir
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            <% }) %>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <!-- FIM ABA: CATEGORIAS -->
-
-            <!-- ABA: CRITÉRIOS -->
-            <div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200 hidden" id="criterios" role="tabpanel" aria-labelledby="criterios-tab">
-                <button id="btnAbrirModalCriterio" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg mb-6 shadow-md transition duration-300 ease-in-out">
-                    <i class="fas fa-plus-circle mr-2"></i>Adicionar Novo Critério
-                </button>
-
-                <div class="overflow-x-auto bg-white rounded-lg shadow-md border border-gray-200">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-100">
-                            <tr>
-                                <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nome do Critério</th>
-                                <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Peso</th>
-                                <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Observações</th>
-                                <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            <% criterios.forEach(criterio => { %>
-                                <tr class="hover:bg-gray-100 transition duration-150 ease-in-out">
-                                    <td class="py-3 px-4 text-gray-800"><%= criterio.nome %></td>
-                                    <td class="py-3 px-4 text-gray-800"><%= criterio.peso %></td>
-                                    <td class="py-3 px-4 text-gray-800"><%= criterio.observacao || 'Nenhuma' %></td>
-                                    <td class="py-3 px-4 whitespace-nowrap">
-                                        <button class="btn-editar-criterio bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1.5 px-3 rounded-md text-sm mr-2 shadow-sm transition duration-300 ease-in-out"
-                                            data-id="<%= criterio._id %>"
-                                            data-nome="<%= criterio.nome %>"
-                                            data-peso="<%= criterio.peso %>"
-                                            data-observacao="<%= criterio.observacao || '' %>">
-                                            <i class="fas fa-edit mr-1"></i>Editar
-                                        </button>                                        
-                                        <form method="POST" action="/admin/criterios/<%= criterio._id %>?_method=DELETE" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar este critério?');">
-                                            <input type="hidden"  name="_method" value="DELETE">
-                                            <button type="submit"  class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-md text-sm shadow-sm transition duration-300 ease-in-out">
-                                                <i class="fas fa-trash-alt mr-1"></i>Excluir
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            <% }) %>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <!-- FIM ABA: CRITÉRIOS -->
-
-            <!-- ABA: AVALIADORES -->
-            <div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200 hidden" id="avaliadores" role="tabpanel" aria-labelledby="avaliadores-tab">
-                <button id="btnAbrirModalAvaliador" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg mb-6 shadow-md transition duration-300 ease-in-out">
-                    <i class="fas fa-plus-circle mr-2"></i>Adicionar Novo Avaliador
-                </button>
-
-                <div class="overflow-x-auto bg-white rounded-lg shadow-md border border-gray-200">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-100">
-                            <tr>
-                                <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nome</th>
-                                <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Email</th>
-                                <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">PIN</th>
-                                <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Ativo</th>
-                                <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Projetos Atribuídos</th>
-                                <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            <% avaliadores.forEach(avaliador => { %>
-                                <tr class="hover:bg-gray-100 transition duration-150 ease-in-out">
-                                    <td class="py-3 px-4 text-gray-800"><%= avaliador.nome %></td>
-                                    <td class="py-3 px-4 text-gray-800"><%= avaliador.email %></td>
-                                    <td class="py-3 px-4 text-gray-800"><%= avaliador.pin %></td>
-                                    <td class="py-3 px-4">
-                                        <span class="px-2 py-1 rounded-full text-xs font-semibold
-                                            <%= avaliador.ativo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
-                                            <%= avaliador.ativo ? 'Sim' : 'Não' %>
-                                        </span>
-                                    </td>
-                                    <td class="py-3 px-4">
-                                        <% if (avaliador.projetosAtribuidos && avaliador.projetosAtribuidos.length > 0) { %>
-                                            <% avaliador.projetosAtribuidos.forEach(projeto => { %>
-                                                <span class="inline-block bg-indigo-100 text-indigo-800 text-xs font-semibold mr-1 mb-1 px-2.5 py-0.5 rounded-full dark:bg-indigo-200 dark:text-indigo-900"><%= projeto.titulo %></span>
-                                            <% }) %>
-                                        <% } else { %>
-                                            <span class="text-gray-500">Nenhum</span>
-                                        <% } %>
-                                    </td>
-                                    <td class="py-3 px-4 whitespace-nowrap">
-                                        <button class="btn-editar-avaliador bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1.5 px-3 rounded-md text-sm mr-2 shadow-sm transition duration-300 ease-in-out"
-                                            data-id="<%= avaliador._id %>"
-                                            data-nome="<%= avaliador.nome %>"
-                                            data-email="<%= avaliador.email %>"
-                                            data-pin="<%= avaliador.pin %>"
-                                            data-ativo="<%= avaliador.ativo %>"
-                                            data-projetos="<%= avaliador.projetosAtribuidos.map(p => p._id).join(',') %>">
-                                            <i class="fas fa-edit mr-1"></i>Editar
-                                        </button>
-                                        <form action="/admin/avaliadores/<%= avaliador._id %>?_method=DELETE" method="POST" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar este avaliador?');">
-                                            <input type="hidden" name="_method" value="DELETE">
-                                            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-md text-sm shadow-sm transition duration-300 ease-in-out">
-                                                <i class="fas fa-trash-alt mr-1"></i>Deletar
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            <% }) %>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <!-- FIM ABA: AVALIADORES -->
-
-            <!-- ABA: FEIRAS -->
-            <div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200 hidden" id="feiras" role="tabpanel" aria-labelledby="feiras-tab">
-                <button id="btnAbrirModalFeira" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg mb-6 shadow-md transition duration-300 ease-in-out">
-                    <i class="fas fa-plus-circle mr-2"></i>Adicionar Nova Feira
-                </button>
-
-                <div class="overflow-x-auto bg-white rounded-lg shadow-md border border-gray-200">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-100">
-                            <tr>
-                                <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nome da Feira</th>
-                                <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Início</th>
-                                <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Término</th>
-                                <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
-                                <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            <% feiras.forEach(f => { %>
-                                <tr class="hover:bg-gray-100 transition duration-150 ease-in-out">
-                                    <td class="py-3 px-4 text-gray-800"><%= f.nome %></td>
-                                    <td class="py-3 px-4 text-gray-800"><%= f.inicioFeira ? formatarDatasParaInput(f.inicioFeira) : 'N/A' %></td>
-                                    <td class="py-3 px-4 text-gray-800"><%= f.fimFeira ? formatarDatasParaInput(f.fimFeira) : 'N/A' %></td>
-                                    <td class="py-3 px-4">
-                                        <span class="px-2 py-1 rounded-full text-xs font-semibold
-                                            <%= f.status === 'ativa' ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800' %>">
-                                            <%= f.status === 'ativa' ? 'Ativa' : 'Arquivada' %>
-                                        </span>
-                                    </td>
-                                    <td class="py-3 px-4 whitespace-nowrap">
-                                        <button class="btn-editar-feira bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1.5 px-3 rounded-md text-sm mr-2 shadow-sm transition duration-300 ease-in-out"
-                                            data-id="<%= f._id %>"
-                                            data-nome="<%= f.nome %>"
-                                            data-inicio="<%= f.inicioFeira ? formatarDatasParaInput(f.inicioFeira) : '' %>"
-                                            data-fim="<%= f.fimFeira ? formatarDatasParaInput(f.fimFeira) : '' %>"
-                                            data-status="<%= f.status %>">
-                                            <i class="fas fa-edit mr-1"></i>Editar
-                                        </button>
-                                        <form action="/admin/feiras/<%= f._id %>?_method=DELETE" method="POST" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar esta feira e TODOS os seus dados?');">
-                                            <input type="hidden" name="_method" value="DELETE">
-                                            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-md text-sm shadow-sm transition duration-300 ease-in-out">
-                                                <i class="fas fa-trash-alt mr-1"></i>Deletar
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            <% }) %>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <!-- FIM ABA: FEIRAS -->
-
-            <!-- ABA DE RELATÓRIOS -->
-            <div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200 hidden" id="relatorios" role="tabpanel" aria-labelledby="relatorios-tab">
-                <h3 class="text-2xl font-bold mb-5 text-gray-700">Relatórios Gerenciais</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <a href="/admin/relatorio-consolidado/pdf" target="_blank" class="block p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out text-center">
-                        <i class="fas fa-file-invoice text-indigo-600 text-4xl mb-3"></i>
-                        <h4 class="text-lg font-semibold text-gray-800">Relatório Consolidado</h4>
-                        <p class="text-sm text-gray-600">Gera um relatório detalhado de projetos e avaliações.</p>
-                    </a>
-                    <a href="/admin/avaliacoes/pdf" target="_blank" class="block p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out text-center">
-                        <i class="fas fa-file-alt text-blue-600 text-4xl mb-3"></i>
-                        <h4 class="text-lg font-semibold text-gray-800">Avaliações Completas</h4>
-                        <p class="text-sm text-gray-600">Gera um PDF com detalhes de todas as avaliações.</p>
-                    </a>
-                    <a href="/admin/projetos-sem-avaliacao/pdf" target="_blank" class="block p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out text-center">
-                        <i class="fas fa-exclamation-triangle text-orange-600 text-4xl mb-3"></i>
-                        <h4 class="text-lg font-semibold text-gray-800">Projetos Sem Avaliação</h4>
-                        <p class="text-sm text-gray-600">Lista de projetos que ainda não foram avaliados.</p>
-                    </a>
-                    <a href="/admin/ranking-categorias/pdf" target="_blank" class="block p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out text-center">
-                        <i class="fas fa-trophy text-purple-600 text-4xl mb-3"></i>
-                        <h4 class="text-lg font-semibold text-gray-800">Ranking por Categoria</h4>
-                        <p class="text-sm text-gray-600">Classificação de projetos por categoria.</p>
-                    </a>
-                    <a href="/admin/resumo-avaliadores/pdf" target="_blank" class="block p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out text-center">
-                        <i class="fas fa-users text-green-600 text-4xl mb-3"></i>
-                        <h4 class="text-lg font-semibold text-gray-800">Resumo de Avaliadores</h4>
-                        <p class="text-sm text-gray-600">Status e atividades dos avaliadores.</p>
-                    </a>
-                    <a href="/admin/resultados-finais/pdf" target="_blank" class="block p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out text-center">
-                        <i class="fas fa-chart-bar text-red-600 text-4xl mb-3"></i>
-                        <h4 class="text-lg font-semibold text-gray-800">Resultados Finais</h4>
-                        <p class="text-sm text-gray-600">Relatório de resultados finais dos projetos.</p>
-                    </a>
-                </div>
-            </div>
-            <!-- FIM DA ABA DE RELATÓRIOS -->
-
-            <!-- ABA: CONFIGURAÇÕES -->
-            <div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200 hidden" id="tab-configuracoes" role="tabpanel" aria-labelledby="tab-configuracoes-tab">
-                <h3 class="text-2xl font-bold mb-5 text-gray-700">Configurações da Feira</h3>
-
-                <div class="mb-6 bg-white p-6 rounded-lg shadow-md border border-gray-200">
-                    <h4 class="text-xl font-semibold mb-4 text-gray-700 border-b pb-3">Informações da Feira Atual</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label for="nomeFeiraDisplay" class="block text-sm font-medium text-gray-600 mb-1">Nome da Feira:</label>
-                            <p id="nomeFeiraDisplay" class="mt-1 p-3 border border-gray-200 rounded-md bg-gray-50 text-gray-800 font-medium"><%= feiraAtual.nome || 'N/A' %></p>
-                        </div>
-                        <div>
-                            <label for="statusFeiraDisplay" class="block text-sm font-medium text-gray-600 mb-1">Status:</label>
-                            <p id="statusFeiraDisplay" class="mt-1 p-3 border border-gray-200 rounded-md bg-gray-50 text-gray-800 font-medium">
-                                <%= feiraAtual.status ? (feiraAtual.status === 'ativa' ? 'Ativa' : 'Arquivada') : 'N/A' %>
-                            </p>
-                        </div>
-                        <div>
-                            <label for="criadaEmDisplay" class="block text-sm font-medium text-gray-600 mb-1">Criada Em:</label>
-                            <p id="criadaEmDisplay" class="mt-1 p-3 border border-gray-200 rounded-md bg-gray-50 text-gray-800 font-medium"><%= feiraAtual.createdAt ? formatarDatasParaInput(feiraAtual.createdAt) : 'N/A' %></p>
-                        </div>
-                        <div>
-                            <label for="inicioFeiraDisplay" class="block text-sm font-medium text-gray-600 mb-1">Início da Feira:</label>
-                            <p id="inicioFeiraDisplay" class="mt-1 p-3 border border-gray-200 rounded-md bg-gray-50 text-gray-800 font-medium"><%= feiraAtual.inicioFeira ? formatarDatasParaInput(feiraAtual.inicioFeira) : 'Não definido' %></p>
-                        </div>
-                        <div>
-                            <label for="fimFeiraDisplay" class="block text-sm font-medium text-gray-600 mb-1">Fim da Feira:</label>
-                            <p id="fimFeiraDisplay" class="mt-1 p-3 border border-gray-200 rounded-md bg-gray-50 text-gray-800 font-medium"><%= feiraAtual.fimFeira ? formatarDatasParaInput(feiraAtual.fimFeira) : 'Não definido' %></p>
-                        </div>
-                        <% if (feiraAtual.arquivadaEm) { %>
-                        <div>
-                            <label for="arquivadaEmDisplay" class="block text-sm font-medium text-gray-600 mb-1">Arquivada Em:</label>
-                            <p id="arquivadaEmDisplay" class="mt-1 p-3 border border-gray-200 rounded-md bg-gray-50 text-gray-800 font-medium"><%= formatarDatasParaInput(feiraAtual.arquivadaEm) %></p>
-                        </div>
-                        <% } %>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
+                <div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200 hidden" id="criterios" role="tabpanel" aria-labelledby="criterios-tab">
+                    <button id="btnAbrirModalCriterio" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg mb-6 shadow-md transition duration-300 ease-in-out">
+                        <i class="fas fa-plus-circle mr-2"></i>Adicionar Novo Critério
+                    </button>
 
-                <div class="mb-6 bg-white p-6 rounded-lg shadow-md border border-gray-200">
-                    <h4 class="text-xl font-semibold mb-4 text-gray-700 border-b pb-3">Ações da Feira</h4>
-                    <div class="flex flex-col md:flex-row gap-4">
-                       <form action="/admin/configuracoes/arquivar" method="POST" onsubmit="return confirm('Tem certeza que deseja ARQUIVAR a feira atual? Isso moverá todos os dados para histórico.');">
-                            <button type="submit" class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2.5 px-5 rounded-lg w-full md:w-auto shadow-md transition duration-300 ease-in-out">
-                                <i class="fas fa-archive mr-2"></i>Arquivar Feira Atual
-                            </button>
-                        </form>
+                    <div class="overflow-x-auto bg-white rounded-lg shadow-md border border-gray-200">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nome do Critério</th>
+                                    <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Peso</th>
+                                    <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Observações</th>
+                                    <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <% criterios.forEach(criterio => { %>
+                                    <tr class="hover:bg-gray-100 transition duration-150 ease-in-out">
+                                        <td class="py-3 px-4 text-gray-800"><%= criterio.nome %></td>
+                                        <td class="py-3 px-4 text-gray-800"><%= criterio.peso %></td>
+                                        <td class="py-3 px-4 text-gray-800"><%= criterio.observacao || 'Nenhuma' %></td>
+                                        <td class="py-3 px-4 whitespace-nowrap">
+                                            <button class="btn-editar-criterio bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1.5 px-3 rounded-md text-sm mr-2 shadow-sm transition duration-300 ease-in-out"
+                                                data-id="<%= criterio._id %>"
+                                                data-nome="<%= criterio.nome %>"
+                                                data-peso="<%= criterio.peso %>"
+                                                data-observacao="<%= criterio.observacao || '' %>">
+                                                <i class="fas fa-edit mr-1"></i>Editar
+                                            </button>                                 
+                                            <form method="POST" action="/admin/criterios/<%= criterio._id %>?_method=DELETE" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar este critério?');">
+                                                <input type="hidden"  name="_method" value="DELETE">
+                                                <button type="submit"  class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-md text-sm shadow-sm transition duration-300 ease-in-out">
+                                                    <i class="fas fa-trash-alt mr-1"></i>Excluir
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200 hidden" id="avaliadores" role="tabpanel" aria-labelledby="avaliadores-tab">
+                    <button id="btnAbrirModalAvaliador" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg mb-6 shadow-md transition duration-300 ease-in-out">
+                        <i class="fas fa-plus-circle mr-2"></i>Adicionar Novo Avaliador
+                    </button>
 
-                        <form action="/admin/configuracoes/nova" method="POST" onsubmit="return confirm('Tem certeza que deseja iniciar uma NOVA feira? Isso ARQUIVARÁ a feira atual e APAGARÁ os projetos dela.');">
-                            <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 px-5 rounded-lg w-full md:w-auto shadow-md transition duration-300 ease-in-out">
-                                <i class="fas fa-plus mr-2"></i>Iniciar Nova Feira
-                            </button>
-                        </form>
+                    <div class="overflow-x-auto bg-white rounded-lg shadow-md border border-gray-200">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nome</th>
+                                    <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Email</th>
+                                    <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">PIN</th>
+                                    <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Ativo</th>
+                                    <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Projetos Atribuídos</th>
+                                    <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <% avaliadores.forEach(avaliador => { %>
+                                    <tr class="hover:bg-gray-100 transition duration-150 ease-in-out">
+                                        <td class="py-3 px-4 text-gray-800"><%= avaliador.nome %></td>
+                                        <td class="py-3 px-4 text-gray-800"><%= avaliador.email %></td>
+                                        <td class="py-3 px-4 text-gray-800"><%= avaliador.pin %></td>
+                                        <td class="py-3 px-4">
+                                            <span class="px-2 py-1 rounded-full text-xs font-semibold
+                                                <%= avaliador.ativo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
+                                                <%= avaliador.ativo ? 'Sim' : 'Não' %>
+                                            </span>
+                                        </td>
+                                        <td class="py-3 px-4">
+                                            <% if (avaliador.projetosAtribuidos && avaliador.projetosAtribuidos.length > 0) { %>
+                                                <% avaliador.projetosAtribuidos.forEach(projeto => { %>
+                                                    <span class="inline-block bg-indigo-100 text-indigo-800 text-xs font-semibold mr-1 mb-1 px-2.5 py-0.5 rounded-full dark:bg-indigo-200 dark:text-indigo-900"><%= projeto.titulo %></span>
+                                                <% }) %>
+                                            <% } else { %>
+                                                <span class="text-gray-500">Nenhum</span>
+                                            <% } %>
+                                        </td>
+                                        <td class="py-3 px-4 whitespace-nowrap">
+                                            <button class="btn-editar-avaliador bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1.5 px-3 rounded-md text-sm mr-2 shadow-sm transition duration-300 ease-in-out"
+                                                data-id="<%= avaliador._id %>"
+                                                data-nome="<%= avaliador.nome %>"
+                                                data-email="<%= avaliador.email %>"
+                                                data-pin="<%= avaliador.pin %>"
+                                                data-ativo="<%= avaliador.ativo %>"
+                                                data-projetos="<%= avaliador.projetosAtribuidos.map(p => p._id).join(',') %>">
+                                                <i class="fas fa-edit mr-1"></i>Editar
+                                            </button>
+                                            <form action="/admin/avaliadores/<%= avaliador._id %>?_method=DELETE" method="POST" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar este avaliador?');">
+                                                <input type="hidden" name="_method" value="DELETE">
+                                                <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-md text-sm shadow-sm transition duration-300 ease-in-out">
+                                                    <i class="fas fa-trash-alt mr-1"></i>Deletar
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200 hidden" id="feiras" role="tabpanel" aria-labelledby="feiras-tab">
+                    <button id="btnAbrirModalFeira" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg mb-6 shadow-md transition duration-300 ease-in-out">
+                        <i class="fas fa-plus-circle mr-2"></i>Adicionar Nova Feira
+                    </button>
 
-                        <button id="btnAbrirModalConfiguracoes" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 px-5 rounded-lg w-full md:w-auto shadow-md transition duration-300 ease-in-out">
-                            <i class="fas fa-calendar-alt mr-2"></i>Editar Datas da Feira
+                    <div class="overflow-x-auto bg-white rounded-lg shadow-md border border-gray-200">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nome da Feira</th>
+                                    <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Início</th>
+                                    <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Término</th>
+                                    <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+                                    <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <% feiras.forEach(f => { %>
+                                    <tr class="hover:bg-gray-100 transition duration-150 ease-in-out">
+                                        <td class="py-3 px-4 text-gray-800"><%= f.nome %></td>
+                                        <td class="py-3 px-4 text-gray-800"><%= f.inicioFeira ? formatarDatasParaInput(f.inicioFeira) : 'N/A' %></td>
+                                        <td class="py-3 px-4 text-gray-800"><%= f.fimFeira ? formatarDatasParaInput(f.fimFeira) : 'N/A' %></td>
+                                        <td class="py-3 px-4">
+                                            <span class="px-2 py-1 rounded-full text-xs font-semibold <%= f.status === 'ativa' ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800' %>">
+                                                <%= f.status === 'ativa' ? 'Ativa' : 'Arquivada' %>
+                                            </span>
+                                        </td>
+                                        <td class="py-3 px-4 whitespace-nowrap">
+                                            <button class="btn-editar-feira bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1.5 px-3 rounded-md text-sm mr-2 shadow-sm transition duration-300 ease-in-out"
+                                                data-id="<%= f._id %>"
+                                                data-nome="<%= f.nome %>"
+                                                data-inicio="<%= f.inicioFeira ? formatarDatasParaInput(f.inicioFeira) : '' %>"
+                                                data-fim="<%= f.fimFeira ? formatarDatasParaInput(f.fimFeira) : '' %>"
+                                                data-status="<%= f.status %>">
+                                                <i class="fas fa-edit mr-1"></i>Editar
+                                            </button>
+                                            <form action="/admin/feiras/<%= f._id %>?_method=DELETE" method="POST" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar esta feira e TODOS os seus dados?');">
+                                                <input type="hidden" name="_method" value="DELETE">
+                                                <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-md text-sm shadow-sm transition duration-300 ease-in-out">
+                                                    <i class="fas fa-trash-alt mr-1"></i>Deletar
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200 hidden" id="relatorios" role="tabpanel" aria-labelledby="relatorios-tab">
+                    <h3 class="text-2xl font-bold mb-5 text-gray-700">Relatórios Gerenciais</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <a href="/admin/relatorio-consolidado/pdf" target="_blank" class="block p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out text-center">
+                            <i class="fas fa-file-invoice text-indigo-600 text-4xl mb-3"></i>
+                            <h4 class="text-lg font-semibold text-gray-800">Relatório Consolidado</h4>
+                            <p class="text-sm text-gray-600">Gera um relatório detalhado de projetos e avaliações.</p>
+                        </a>
+                        <a href="/admin/avaliacoes/pdf" target="_blank" class="block p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out text-center">
+                            <i class="fas fa-file-alt text-blue-600 text-4xl mb-3"></i>
+                            <h4 class="text-lg font-semibold text-gray-800">Avaliações Completas</h4>
+                            <p class="text-sm text-gray-600">Gera um PDF com detalhes de todas as avaliações.</p>
+                        </a>
+                        <a href="/admin/projetos-sem-avaliacao/pdf" target="_blank" class="block p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out text-center">
+                            <i class="fas fa-exclamation-triangle text-orange-600 text-4xl mb-3"></i>
+                            <h4 class="text-lg font-semibold text-gray-800">Projetos Sem Avaliação</h4>
+                            <p class="text-sm text-gray-600">Lista de projetos que ainda não foram avaliados.</p>
+                        </a>
+                        <a href="/admin/ranking-categorias/pdf" target="_blank" class="block p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out text-center">
+                            <i class="fas fa-trophy text-green-600 text-4xl mb-3"></i>
+                            <h4 class="text-lg font-semibold text-gray-800">Ranking por Categoria</h4>
+                            <p class="text-sm text-gray-600">Visualiza os projetos mais bem avaliados por categoria.</p>
+                        </a>
+                        <a href="/admin/ranking-geral/pdf" target="_blank" class="block p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out text-center">
+                            <i class="fas fa-medal text-purple-600 text-4xl mb-3"></i>
+                            <h4 class="text-lg font-semibold text-gray-800">Ranking Geral</h4>
+                            <p class="text-sm text-gray-600">Ranking dos projetos com as maiores notas médias.</p>
+                        </a>
+                        <a href="/admin/relatorio-por-projeto/pdf" target="_blank" class="block p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out text-center">
+                            <i class="fas fa-book-open text-red-600 text-4xl mb-3"></i>
+                            <h4 class="text-lg font-semibold text-gray-800">Relatório por Projeto</h4>
+                            <p class="text-sm text-gray-600">Relatórios individuais para cada projeto avaliado.</p>
+                        </a>
+                    </div>
+                </div>
+                <div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200 hidden" id="tab-configuracoes" role="tabpanel" aria-labelledby="tab-configuracoes-tab">
+                    <h3 class="text-2xl font-bold mb-5 text-gray-700">Configurações Gerais</h3>
+
+                    <div class="bg-gray-50 p-6 rounded-lg shadow-md mb-6">
+                        <h4 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-calendar-alt text-blue-600 mr-3"></i>Gerenciar Feiras
+                        </h4>
+                        <p class="text-gray-700 mb-4">
+                            Aqui você pode iniciar, finalizar ou arquivar as feiras, bem como definir suas datas.
+                        </p>
+                        <button id="btnAbrirModalConfiguracoes" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-5 rounded-lg shadow-md transition duration-300 ease-in-out">
+                            <i class="fas fa-cog mr-2"></i>Ajustar Datas da Feira Atual
                         </button>
                     </div>
+
+                    <div class="bg-gray-50 p-6 rounded-lg shadow-md mb-6">
+                        <h4 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-users-cog text-green-600 mr-3"></i>Gerenciar Usuários Admin
+                        </h4>
+                        <p class="text-gray-700 mb-4">
+                            Crie e gerencie contas de usuários com acesso ao painel administrativo.
+                        </p>
+                        <button id="btnAbrirModalUsuario" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-5 rounded-lg shadow-md transition duration-300 ease-in-out">
+                            <i class="fas fa-user-plus mr-2"></i>Adicionar Novo Usuário Admin
+                        </button>
+
+                        <div class="overflow-x-auto bg-white rounded-lg shadow-md border border-gray-200 mt-6">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-100">
+                                    <tr>
+                                        <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nome</th>
+                                        <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Email</th>
+                                        <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <% if (usuarioLogado && usuarioLogado.email === 'admin@admin.com') { %>
+                                        <% } %>
+                                    <% avaliadores.filter(a => a.isAdmin).forEach(user => { %>
+                                        <tr class="hover:bg-gray-100 transition duration-150 ease-in-out">
+                                            <td class="py-3 px-4 text-gray-800"><%= user.nome %></td>
+                                            <td class="py-3 px-4 text-gray-800"><%= user.email %></td>
+                                            <td class="py-3 px-4 whitespace-nowrap">
+                                                <% if (user.email !== 'admin@admin.com') { %>
+                                                    <button class="btn-editar-usuario bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1.5 px-3 rounded-md text-sm mr-2 shadow-sm transition duration-300 ease-in-out"
+                                                        data-id="<%= user._id %>"
+                                                        data-nome="<%= user.nome %>"
+                                                        data-email="<%= user.email %>"
+                                                        data-is-admin="<%= user.isAdmin %>">
+                                                        <i class="fas fa-edit mr-1"></i>Editar
+                                                    </button>
+                                                    <form action="/admin/usuarios/<%= user._id %>?_method=DELETE" method="POST" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar este usuário admin?');">
+                                                        <input type="hidden" name="_method" value="DELETE">
+                                                        <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-md text-sm shadow-sm transition duration-300 ease-in-out">
+                                                            <i class="fas fa-trash-alt mr-1"></i>Deletar
+                                                        </button>
+                                                    </form>
+                                                <% } else { %>
+                                                    <span class="text-gray-500 text-sm">Usuário padrão (não editável)</span>
+                                                <% } %>
+                                            </td>
+                                        </tr>
+                                    <% }) %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <!-- FIM ABA: CONFIGURAÇÕES -->
+                </div>
         </div>
     </div>
 
-    <!-- Modals -->
-    <div id="modalProjeto" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden justify-center items-center z-50 p-4">
-        <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-2xl relative">
-            <h2 id="tituloModalProjeto" class="text-3xl font-extrabold mb-6 text-center text-gray-800">Adicionar Novo Projeto</h2>
-            <button id="btnFecharModalProjeto" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-4xl leading-none transition duration-300 ease-in-out">&times;</button>
-
-            <form id="formProjeto" action="/admin/projetos" method="POST">
+    <div id="modalProjeto" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden transition-opacity duration-300 opacity-0">
+        <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-2xl mx-4 transform transition-transform duration-300 scale-95">
+            <h2 id="tituloModalProjeto" class="text-2xl font-bold mb-6 text-gray-800 border-b pb-3">Adicionar Novo Projeto</h2>
+            <form id="formProjeto" method="POST" action="/admin/projetos" class="space-y-4">
                 <input type="hidden" id="projetoId" name="id">
-                <input type="hidden" name="_method" id="projetoMethod" value="POST">
-
-                <div class="mb-4">
-                    <label for="titulo" class="block text-gray-700 text-sm font-bold mb-2">Título do Projeto:</label>
-                    <input type="text" id="titulo" name="titulo" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out" required>
+                <input type="hidden" id="projetoMethod" name="_method" value="POST">
+                
+                <div>
+                    <label for="tituloProjeto" class="block text-sm font-medium text-gray-700">Título do Projeto</label>
+                    <input type="text" id="tituloProjeto" name="titulo" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>
-
-                <div class="mb-4">
-                    <label for="descricao" class="block text-gray-700 text-sm font-bold mb-2">Descrição:</label>
-                    <textarea id="descricao" name="descricao" rows="4" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out"></textarea>
+                <div>
+                    <label for="descricaoProjeto" class="block text-sm font-medium text-gray-700">Descrição</label>
+                    <textarea id="descricaoProjeto" name="descricao" rows="3" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
                 </div>
-
-                <div class="mb-4">
-                    <label for="categoria" class="block text-gray-700 text-sm font-bold mb-2">Categoria:</label>
-                    <select id="categoria" name="categoria" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out" required>
-                        <option value="">Selecione uma Categoria</option>
+                <div>
+                    <label for="turmaProjeto" class="block text-sm font-medium text-gray-700">Turma</label>
+                    <input type="text" id="turmaProjeto" name="turma" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label for="alunosProjeto" class="block text-sm font-medium text-gray-700">Alunos (separados por vírgula)</label>
+                    <input type="text" id="alunosProjeto" name="alunos" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label for="categoriaProjeto" class="block text-sm font-medium text-gray-700">Categoria</label>
+                    <select id="categoriaProjeto" name="categoria" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">-- Selecione uma Categoria --</option>
                         <% categorias.forEach(cat => { %>
                             <option value="<%= cat._id %>"><%= cat.nome %></option>
                         <% }) %>
                     </select>
                 </div>
-
-                <div class="mb-6">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Critérios de Avaliação:</label>
-                    <div id="criteriosProjetoCheckboxes" class="max-h-48 overflow-y-auto border border-gray-300 p-3 rounded-lg bg-gray-50 shadow-inner">
-                        <% if (criterios && criterios.length > 0) { %>
-                            <% criterios.forEach(criterio => { %>
-                                <div class="flex items-center mb-2">
-                                    <input type="checkbox" id="criterio_<%= criterio._id %>" name="criterios" value="<%= criterio._id %>" class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-                                    <label for="criterio_<%= criterio._id %>" class="text-gray-700 text-base"><%= criterio.nome %> (Peso: <%= criterio.peso %>)</label>
-                                </div>
-                            <% }) %>
-                        <% } else { %>
-                            <p class="text-gray-500">Nenhum critério disponível.</p>
-                        <% } %>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Critérios de Avaliação</label>
+                    <div class="mt-1 grid grid-cols-1 md:grid-cols-2 gap-2">
+                        <% criterios.forEach(crit => { %>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="criterio_<%= crit._id %>" name="criterios" value="<%= crit._id %>" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                <label for="criterio_<%= crit._id %>" class="ml-2 text-sm text-gray-700"><%= crit.nome %> (Peso: <%= crit.peso %>)</label>
+                            </div>
+                        <% }) %>
                     </div>
                 </div>
 
-                <div class="mb-4">
-                    <label for="turmaProjeto" class="block text-gray-700 text-sm font-bold mb-2">Turma:</label>
-                    <input type="text" id="turmaProjeto" name="turma" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out" required>
-                </div>
-                
-                <div class="mb-4">
-                    <label for="alunosProjeto" class="block text-gray-700 text-sm font-bold mb-2">Alunos (separados por vírgula):</label>
-                    <input type="text" id="alunosProjeto" name="alunos" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out">
-                </div>
-
-
-                <div class="flex items-center justify-end mt-6">
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-5 rounded-lg focus:outline-none focus:shadow-outline shadow-md transition duration-300 ease-in-out">
-                        <i class="fas fa-save mr-2"></i>Salvar Projeto
-                    </button>
+                <div class="flex justify-end space-x-3 mt-6">
+                    <button type="button" id="btnFecharModalProjeto" class="px-5 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors duration-200">Cancelar</button>
+                    <button type="submit" class="px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200">Salvar Projeto</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <div id="modalCategoria" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden justify-center items-center z-50 p-4">
-        <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md relative">
-            <h2 id="tituloModalCategoria" class="text-3xl font-extrabold mb-6 text-center text-gray-800">Adicionar Nova Categoria</h2>
-            <button id="btnFecharModalCategoria" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-4xl leading-none transition duration-300 ease-in-out">&times;</button>
-            <form id="formCategoria" action="/admin/categorias" method="POST">
+    <div id="modalCategoria" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden transition-opacity duration-300 opacity-0">
+        <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md mx-4 transform transition-transform duration-300 scale-95">
+            <h2 id="tituloModalCategoria" class="text-2xl font-bold mb-6 text-gray-800 border-b pb-3">Adicionar Nova Categoria</h2>
+            <form id="formCategoria" method="POST" action="/admin/categorias" class="space-y-4">
                 <input type="hidden" id="categoriaId" name="id">
-                <input type="hidden" name="_method" id="categoriaMethod" value="POST">
-                <div class="mb-4">
-                    <label for="nomeCategoria" class="block text-gray-700 text-sm font-bold mb-2">Nome da Categoria:</label>
-                    <input type="text" id="nomeCategoria" name="nome" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out" required>
+                <input type="hidden" id="categoriaMethod" name="_method" value="POST">
+                
+                <div>
+                    <label for="nomeCategoria" class="block text-sm font-medium text-gray-700">Nome da Categoria</label>
+                    <input type="text" id="nomeCategoria" name="nome" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>
-                <div class="flex items-center justify-end mt-6">
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-5 rounded-lg focus:outline-none focus:shadow-outline shadow-md transition duration-300 ease-in-out">
-                        <i class="fas fa-save mr-2"></i>Salvar Categoria
-                    </button>
+
+                <div class="flex justify-end space-x-3 mt-6">
+                    <button type="button" id="btnFecharModalCategoria" class="px-5 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors duration-200">Cancelar</button>
+                    <button type="submit" class="px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200">Salvar Categoria</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <div id="modalCriterio" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden justify-center items-center z-50 p-4">
-        <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md relative">
-            <h2 id="tituloModalCriterio" class="text-3xl font-extrabold mb-6 text-center text-gray-800">Adicionar Novo Critério</h2>
-            <button id="btnFecharModalCriterio" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-4xl leading-none transition duration-300 ease-in-out">&times;</button>
-            <form id="formCriterio" action="/admin/criterios" method="POST">
+    <div id="modalCriterio" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden transition-opacity duration-300 opacity-0">
+        <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md mx-4 transform transition-transform duration-300 scale-95">
+            <h2 id="tituloModalCriterio" class="text-2xl font-bold mb-6 text-gray-800 border-b pb-3">Adicionar Novo Critério</h2>
+            <form id="formCriterio" method="POST" action="/admin/criterios" class="space-y-4">
                 <input type="hidden" id="criterioId" name="id">
-                <input type="hidden" name="_method" id="criterioMethod" value="POST">
-                <div class="mb-4">
-                    <label for="nomeCriterio" class="block text-gray-700 text-sm font-bold mb-2">Nome do Critério:</label>
-                    <input type="text" id="nomeCriterio" name="nome" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out" required>
+                <input type="hidden" id="criterioMethod" name="_method" value="POST">
+                
+                <div>
+                    <label for="nomeCriterio" class="block text-sm font-medium text-gray-700">Nome do Critério</label>
+                    <input type="text" id="nomeCriterio" name="nome" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>
-                <div class="mb-4">
-                    <label for="pesoCriterio" class="block text-gray-700 text-sm font-bold mb-2">Peso (1-10):</label>
-                    <input type="number" id="pesoCriterio" name="peso" min="1" max="10" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out" required>
+                <div>
+                    <label for="pesoCriterio" class="block text-sm font-medium text-gray-700">Peso (Ex: 1-5)</label>
+                    <input type="number" id="pesoCriterio" name="peso" min="1" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>
-                <div class="mb-6">
-                    <label for="observacaoCriterio" class="block text-gray-700 text-sm font-bold mb-2">Observações:</label>
-                    <textarea id="observacaoCriterio" name="observacao" rows="3" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out"></textarea>
+                <div>
+                    <label for="observacaoCriterio" class="block text-sm font-medium text-gray-700">Observações</label>
+                    <textarea id="observacaoCriterio" name="observacao" rows="2" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
                 </div>
-                <div class="flex items-center justify-end gap-4 mt-6">
-                    <button type="button" id="btnCancelarModalCriterio" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2.5 px-5 rounded-lg focus:outline-none focus:shadow-outline shadow-md transition duration-300 ease-in-out">
-                        <i class="fas fa-times-circle mr-2"></i>Cancelar
-                    </button>
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-5 rounded-lg focus:outline-none focus:shadow-outline shadow-md transition duration-300 ease-in-out">
-                        <i class="fas fa-save mr-2"></i>Salvar Critério
-                    </button>
+
+                <div class="flex justify-end space-x-3 mt-6">
+                    <button type="button" id="btnFecharModalCriterio" class="px-5 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors duration-200">Cancelar</button>
+                    <button type="submit" class="px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200">Salvar Critério</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <div id="modalAvaliador" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden justify-center items-center z-50 p-4">
-    <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md relative">
-        <h2 id="tituloAvaliador" class="text-3xl font-extrabold mb-6 text-center text-gray-800">Adicionar Novo Avaliador</h2>
-        <button id="btnFecharAvaliador" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-4xl leading-none transition duration-300 ease-in-out">&times;</button>
-        <form id="formAvaliador" action="/admin/avaliadores" method="POST">
-            <input type="hidden" id="avaliadorId" name="id">
-            <input type="hidden" name="_method" id="avaliadorMethod" value="POST">
-            <div class="mb-4">
-                <label for="nomeAvaliador" class="block text-gray-700 text-sm font-bold mb-2">Nome do Avaliador:</label>
-                <input type="text" id="nomeAvaliador" name="nome" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out" required>
-            </div>
-            <div class="mb-4">
-                <label for="emailAvaliador" class="block text-gray-700 text-sm font-bold mb-2">Email:</label>
-                <input type="email" id="emailAvaliador" name="email" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out" required>
-            </div>
-
-            <div class="mb-4">
-                <label for="escolaAvaliador" class="block text-gray-700 text-sm font-bold mb-2">Escola:</label>
-                <select id="escolaAvaliador" name="escolaId" class="shadow-sm border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out" disabled>
-                    <option value="<%= usuarioLogado.escolaId %>"><%= escola.nome %></option>
-                </select>
-            </div>
-
-            <div class="mb-4">
-                <label for="feiraAvaliador" class="block text-gray-700 text-sm font-bold mb-2">Feira:</label>
-                <select id="feiraAvaliador" name="feira" class="shadow-sm border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out" required>
-                    <option value="">Selecione a Feira</option>
-                    <% if (feiras && feiras.length > 0) { %>
-                        <% feiras.forEach(feira => { %>
-                            <option value="<%= feira._id %>"><%= feira.nome %></option>
-                        <% }) %>
-                    <% } %>
-                </select>
-            </div>
-            <div class="mb-4" id="pinDisplayDiv">
-                <label class="block text-gray-700 text-sm font-bold mb-2">PIN:</label>
-                <span id="avaliadorPinDisplay" class="block bg-gray-100 p-3 rounded-lg text-xl font-mono tracking-wider text-gray-800 border border-gray-200"></span>
-            </div>
-            <div class="mb-4 flex items-center">
-                <input type="checkbox" id="ativoAvaliador" name="ativo" class="mr-2 h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-                <label for="ativoAvaliador" class="text-gray-700 text-base font-bold">Ativo</label>
-            </div>
-            <div class="mb-6">
-                <label class="block text-gray-700 text-sm font-bold mb-2">Atribuir Projetos:</label>
-                <div id="projetosAvaliadorCheckboxes" class="max-h-48 overflow-y-auto border border-gray-300 p-3 rounded-lg bg-gray-50 shadow-inner">
-                    <% if (projetos && projetos.length > 0) { %>
-                        <% projetos.forEach(projeto => { %>
-                            <div class="flex items-center mb-2">
-                                <input type="checkbox" id="projeto_<%= projeto._id %>" name="projetosAtribuidos" value="<%= projeto._id %>" class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-                                <label for="projeto_<%= projeto._id %>" class="text-gray-700 text-base"><%= projeto.titulo %></label>
-                            </div>
-                        <% }) %>
-                    <% } else { %>
-                        <p class="text-gray-500">Nenhum projeto disponível.</p>
-                    <% } %>
+    <div id="modalAvaliador" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden transition-opacity duration-300 opacity-0">
+        <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-2xl mx-4 transform transition-transform duration-300 scale-95">
+            <h2 id="tituloModalAvaliador" class="text-2xl font-bold mb-6 text-gray-800 border-b pb-3">Adicionar Novo Avaliador</h2>
+            <form id="formAvaliador" method="POST" action="/admin/avaliadores" class="space-y-4">
+                <input type="hidden" id="avaliadorId" name="id">
+                <input type="hidden" id="avaliadorMethod" name="_method" value="POST">
+                
+                <div>
+                    <label for="nomeAvaliador" class="block text-sm font-medium text-gray-700">Nome do Avaliador</label>
+                    <input type="text" id="nomeAvaliador" name="nome" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>
-            </div>
-            <div class="flex items-center justify-end mt-6">
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-5 rounded-lg focus:outline-none focus:shadow-outline shadow-md transition duration-300 ease-in-out">
-                    <i class="fas fa-save mr-2"></i>Salvar Avaliador
-                </button>
-            </div>
-        </form>
+                <div>
+                    <label for="emailAvaliador" class="block text-sm font-medium text-gray-700">Email</label>
+                    <input type="email" id="emailAvaliador" name="email" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label for="pinAvaliador" class="block text-sm font-medium text-gray-700">PIN (4 dígitos)</label>
+                    <input type="text" id="pinAvaliador" name="pin" pattern="\d{4}" title="O PIN deve conter exatamente 4 dígitos numéricos." required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div class="flex items-center">
+                    <input type="checkbox" id="ativoAvaliador" name="ativo" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                    <label for="ativoAvaliador" class="ml-2 text-sm font-medium text-gray-700">Ativo</label>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Projetos Atribuídos</label>
+                    <div class="mt-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 max-h-60 overflow-y-auto border border-gray-300 p-2 rounded-md">
+                        <% Object.keys(projetosPorCategoria).sort().forEach(nomeCategoria => { %>
+                            <div class="col-span-full text-sm font-semibold text-gray-800 bg-gray-100 p-1 rounded-sm"><%= nomeCategoria %></div>
+                            <% projetosPorCategoria[nomeCategoria].forEach(projeto => { %>
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="projeto_<%= projeto._id %>" name="projetosAtribuidos" value="<%= projeto._id %>" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                    <label for="projeto_<%= projeto._id %>" class="ml-2 text-sm text-gray-700"><%= projeto.titulo %></label>
+                                </div>
+                            <% }) %>
+                        <% }) %>
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-3 mt-6">
+                    <button type="button" id="btnFecharModalAvaliador" class="px-5 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors duration-200">Cancelar</button>
+                    <button type="submit" class="px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200">Salvar Avaliador</button>
+                </div>
+            </form>
+        </div>
     </div>
-</div>
 
-    <div id="modalFeira" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden justify-center items-center z-50 p-4">
-        <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md relative">
-            <h2 id="tituloModalFeira" class="text-3xl font-extrabold mb-6 text-center text-gray-800">Adicionar Nova Feira</h2>
-            <button id="btnFecharModalFeira" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-4xl leading-none transition duration-300 ease-in-out">&times;</button>
-            <form id="formFeira" action="/admin/feiras" method="POST">
+    <div id="modalFeira" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden transition-opacity duration-300 opacity-0">
+        <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md mx-4 transform transition-transform duration-300 scale-95">
+            <h2 id="tituloModalFeira" class="text-2xl font-bold mb-6 text-gray-800 border-b pb-3">Adicionar Nova Feira</h2>
+            <form id="formFeira" method="POST" action="/admin/feiras" class="space-y-4">
                 <input type="hidden" id="feiraId" name="id">
-                <input type="hidden" name="_method" id="feiraMethod" value="POST">
-                <div class="mb-4">
-                    <label for="nomeFeira" class="block text-gray-700 text-sm font-bold mb-2">Nome da Feira:</label>
-                    <input type="text" id="nomeFeira" name="nome" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out" required>
+                <input type="hidden" id="feiraMethod" name="_method" value="POST">
+                
+                <div>
+                    <label for="nomeFeira" class="block text-sm font-medium text-gray-700">Nome da Feira</label>
+                    <input type="text" id="nomeFeira" name="nome" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>
-                <div class="mb-4">
-                    <label for="inicioFeiraModal" class="block text-gray-700 text-sm font-bold mb-2">Data de Início:</label>
-                    <input type="date" id="inicioFeiraModal" name="inicioFeira" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out">
+                <div>
+                    <label for="inicioFeiraModal" class="block text-sm font-medium text-gray-700">Data de Início</label>
+                    <input type="date" id="inicioFeiraModal" name="inicioFeira" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>
-                <div class="mb-4">
-                    <label for="fimFeiraModal" class="block text-gray-700 text-sm font-bold mb-2">Data de Término:</label>
-                    <input type="date" id="fimFeiraModal" name="fimFeira" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out">
+                <div>
+                    <label for="fimFeiraModal" class="block text-sm font-medium text-gray-700">Data de Término</label>
+                    <input type="date" id="fimFeiraModal" name="fimFeira" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>
-                <div class="mb-4">
-                    <label for="statusFeiraModal" class="block text-gray-700 text-sm font-bold mb-2">Status:</label>
-                    <select id="statusFeiraModal" name="status" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out" required>
+                <div>
+                    <label for="statusFeiraModal" class="block text-sm font-medium text-gray-700">Status</label>
+                    <select id="statusFeiraModal" name="status" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
                         <option value="ativa">Ativa</option>
                         <option value="arquivada">Arquivada</option>
                     </select>
                 </div>
-                <div class="flex items-center justify-end mt-6">
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-5 rounded-lg focus:outline-none focus:shadow-outline shadow-md transition duration-300 ease-in-out">
-                        <i class="fas fa-save mr-2"></i>Salvar Feira
-                    </button>
+
+                <div class="flex justify-end space-x-3 mt-6">
+                    <button type="button" id="btnFecharModalFeira" class="px-5 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors duration-200">Cancelar</button>
+                    <button type="submit" class="px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200">Salvar Feira</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <div id="modalConfiguracoes" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden justify-center items-center z-50 p-4">
-        <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md relative">
-            <h2 class="text-3xl font-extrabold mb-6 text-center text-gray-800">Editar Datas da Feira</h2>
-            <button id="btnFecharModalConfiguracoes" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-4xl leading-none transition duration-300 ease-in-out">&times;</button>
-            <form action="/admin/configuracoes/feiradata" method="POST"> 
-                <input type="hidden" name="feiraId" value="<%= feiraAtual._id %>"> 
-                <div class="mb-4">
-                    <label for="inicioFeira" class="block text-gray-700 text-sm font-bold mb-2">Início da Feira:</label>
-                    <input type="date" id="inicioFeira" name="inicioFeira" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out" value="<%= feiraAtual.inicioFeira ? formatarDatasParaInput(feiraAtual.inicioFeira) : '' %>">
+    <div id="modalUsuario" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden transition-opacity duration-300 opacity-0">
+        <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md mx-4 transform transition-transform duration-300 scale-95">
+            <h2 id="tituloModalUsuario" class="text-2xl font-bold mb-6 text-gray-800 border-b pb-3">Adicionar Novo Usuário Admin</h2>
+            <form id="formUsuario" method="POST" action="/admin/usuarios" class="space-y-4">
+                <input type="hidden" id="usuarioId" name="id">
+                <input type="hidden" id="usuarioMethod" name="_method" value="POST">
+                
+                <div>
+                    <label for="nomeUsuario" class="block text-sm font-medium text-gray-700">Nome</label>
+                    <input type="text" id="nomeUsuario" name="nome" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>
-                <div class="mb-4">
-                    <label for="fimFeira" class="block text-gray-700 text-sm font-bold mb-2">Fim da Feira:</label>
-                    <input type="date" id="fimFeira" name="fimFeira" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out" value="<%= feiraAtual.fimFeira ? formatarDatasParaInput(feiraAtual.fimFeira) : '' %>">
+                <div>
+                    <label for="emailUsuario" class="block text-sm font-medium text-gray-700">Email</label>
+                    <input type="email" id="emailUsuario" name="email" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>
-                <div class="flex items-center justify-end mt-6">
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-5 rounded-lg focus:outline-none focus:shadow-outline shadow-md transition duration-300 ease-in-out">
-                        <i class="fas fa-save mr-2"></i>Salvar Datas
-                    </button>
+                <div>
+                    <label for="senhaUsuario" class="block text-sm font-medium text-gray-700">Senha</label>
+                    <input type="password" id="senhaUsuario" name="senha" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div class="flex items-center">
+                    <input type="checkbox" id="isAdminUsuario" name="isAdmin" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                    <label for="isAdminUsuario" class="ml-2 text-sm font-medium text-gray-700">É Administrador</label>
+                </div>
+
+                <div class="flex justify-end space-x-3 mt-6">
+                    <button type="button" id="btnFecharModalUsuario" class="px-5 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors duration-200">Cancelar</button>
+                    <button type="submit" class="px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200">Salvar Usuário</button>
                 </div>
             </form>
         </div>
     </div>
+
+    <div id="modalConfiguracoes" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden transition-opacity duration-300 opacity-0">
+        <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md mx-4 transform transition-transform duration-300 scale-95">
+            <h2 id="tituloModalConfiguracoes" class="text-2xl font-bold mb-6 text-gray-800 border-b pb-3">Configurações da Feira</h2>
+            <form id="formConfiguracoesFeiraData" method="POST" action="/admin/configurar-datas-feira" class="space-y-4">
+                <input type="hidden" name="_method" value="PUT"> 
+                <input type="hidden" id="configuracoesFeiraId" name="id" value="<%= feiraAtual._id %>">
+
+                <div>
+                    <label for="novaDataInicio" class="block text-sm font-medium text-gray-700">Nova Data de Início</label>
+                    <input type="date" id="novaDataInicio" name="inicioFeira" value="<%= feiraAtual.inicioFeira ? formatarDatasParaInput(feiraAtual.inicioFeira) : '' %>" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label for="novaDataFim" class="block text-sm font-medium text-gray-700">Nova Data de Término</label>
+                    <input type="date" id="novaDataFim" name="fimFeira" value="<%= feiraAtual.fimFeira ? formatarDatasParaInput(feiraAtual.fimFeira) : '' %>" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label for="novoStatusFeira" class="block text-sm font-medium text-gray-700">Novo Status da Feira</label>
+                    <select id="novoStatusFeira" name="status" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="ativa" <%= feiraAtual.status === 'ativa' ? 'selected' : '' %>>Ativa</option>
+                        <option value="arquivada" <%= feiraAtual.status === 'arquivada' ? 'selected' : '' %>>Arquivada</option>
+                    </select>
+                </div>
+
+                <div class="flex justify-end space-x-3 mt-6">
+                    <button type="button" id="btnFecharModalConfiguracoes" class="px-5 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors duration-200">Cancelar</button>
+                    <button type="submit" class="px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200">Salvar Configurações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 
     <script>
-        // Função auxiliar para formatar datas (já definida no EJS, mas útil para JS direto)
-        function formatarDatasParaInput(dateString) {
-            if (!dateString) return '';
-            const date = new Date(dateString);
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
-        }
-
         document.addEventListener('DOMContentLoaded', () => {
             const sidebar = document.getElementById('sidebar');
             const sidebarToggleMobile = document.getElementById('sidebarToggleMobile');
-            const sidebarToggleDesktop = document.getElementById('sidebarToggleDesktop'); // Botão 'X' para fechar em mobile
-            const overlay = document.getElementById('overlay');
-
-            // Funções para abrir e fechar o sidebar
-            const openSidebar = () => {
-    sidebar.classList.add('translate-x-0');
-    overlay.classList.remove('hidden');
-};
-
-const closeSidebar = () => {
-    sidebar.classList.remove('translate-x-0');
-    overlay.classList.add('hidden');
-};
-
-
-            // Event listener para o botão de toggle móvel (hambúrguer)
-            if (sidebarToggleMobile) {
-                sidebarToggleMobile.addEventListener('click', openSidebar);
-            }
-
-            // Event listener para o botão de fechar (X) no topo da sidebar em mobile
-            if (sidebarToggleDesktop) {
-                sidebarToggleDesktop.addEventListener('click', closeSidebar);
-            }
-
-            // Fecha o menu ao clicar no overlay (somente em mobile)
-            if (overlay) {
-                overlay.addEventListener('click', closeSidebar);
-            }
-
-            // Ajusta a visibilidade da sidebar e do botão de toggle com base no tamanho da tela
-            const applySidebarState = () => {
-                if (window.innerWidth >= 768) { // Desktop
-                    sidebar.classList.remove('-translate-x-full'); // Garante que a sidebar está visível
-                    overlay.classList.add('hidden'); // Garante que o overlay está escondido
-                } else { // Mobile
-                    // Mantém a sidebar escondida por padrão, e mostra o botão hambúrguer
-                    // A classe hidden no overlay será removida por openSidebar quando o botão for clicado
-                }
-            };
-
-            window.addEventListener('resize', applySidebarState);
-            applySidebarState(); // Aplica o estado inicial ao carregar
-
-
-            // Mantém lógica das abas
-            const tabLinks = document.querySelectorAll('.sidebar-link');
+            const sidebarToggleDesktop = document.getElementById('sidebarToggleDesktop'); // O 'X' de fechar no mobile
+            const mobileOverlay = document.getElementById('mobile-overlay');
+            const sidebarLinks = document.querySelectorAll('.sidebar-link');
             const tabContents = document.querySelectorAll('.tab-content');
 
-            const activateTab = (tabId) => {
-                tabLinks.forEach(link => link.classList.remove('active'));
-                tabContents.forEach(content => content.classList.add('hidden'));
+            // Função para alternar a visibilidade da sidebar e overlay
+            function toggleSidebar() {
+                sidebar.classList.toggle('-translate-x-full');
+                mobileOverlay.classList.toggle('opacity-0');
+                mobileOverlay.classList.toggle('opacity-50');
+                mobileOverlay.classList.toggle('pointer-events-none');
+                mobileOverlay.classList.toggle('pointer-events-auto');
+            }
 
-                const activeLink = document.querySelector(`.sidebar-link[data-tab="${tabId}"]`);
-                const activeContent = document.getElementById(tabId);
-                if (activeLink) activeLink.classList.add('active');
-                if (activeContent) activeContent.classList.remove('hidden');
-            };
+            // Event listeners para os botões de toggle
+            sidebarToggleMobile.addEventListener('click', toggleSidebar);
+            sidebarToggleDesktop.addEventListener('click', toggleSidebar); // Para o 'X' de fechar
+            mobileOverlay.addEventListener('click', toggleSidebar); // Clicar no overlay fecha a sidebar
 
-            const urlParams = new URLSearchParams(window.location.search);
-            const initialTab = urlParams.get('tab') || localStorage.getItem('activeTab') || 'dashboard-geral';
-            activateTab(initialTab);
+            // Função para mostrar a aba correta
+            function showTab(tabId) {
+                tabContents.forEach(content => {
+                    if (content.id === tabId) {
+                        content.classList.remove('hidden');
+                        content.setAttribute('aria-hidden', 'false');
+                    } else {
+                        content.classList.add('hidden');
+                        content.setAttribute('aria-hidden', 'true');
+                    }
+                });
+            }
 
-            tabLinks.forEach(link => {
-                link.addEventListener('click', (event) => {
-                    event.preventDefault();
-                    const tabId = link.dataset.tab;
-                    activateTab(tabId);
-                    localStorage.setItem('activeTab', tabId);
-                    const newUrl = new URL(window.location.href);
-                    newUrl.searchParams.set('tab', tabId);
-                    window.history.pushState({ path: newUrl.href }, '', newUrl.href);
+            // Ativar a aba inicial (baseado em activeTab da renderização EJS)
+            const initialActiveTab = document.querySelector('.sidebar-link.active');
+            if (initialActiveTab) {
+                showTab(initialActiveTab.dataset.tab);
+            } else {
+                // Fallback: mostrar dashboard-geral se nenhuma tab estiver ativa
+                showTab('dashboard-geral');
+                document.querySelector('.sidebar-link[data-tab="dashboard-geral"]').classList.add('active');
+            }
 
-                    // Fecha o menu automaticamente em telas pequenas após clicar em um link
+            // Event listener para cliques nos links da sidebar
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Remover 'active' de todos os links e adicionar ao clicado
+                    sidebarLinks.forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+
+                    // Mostrar a aba correspondente
+                    const tabId = this.dataset.tab;
+                    showTab(tabId);
+
+                    // Em telas mobile, fechar a sidebar após a seleção
                     if (window.innerWidth < 768) {
-                        closeSidebar();
+                        toggleSidebar();
                     }
                 });
             });
 
-            // Lógica para selecionar Feira no cabeçalho e recarregar dashboard
-            const feiraSelecionadaDropdown = document.getElementById('feiraSelecionada');
-            if (feiraSelecionadaDropdown) {
-                feiraSelecionadaDropdown.addEventListener('change', () => {
-                    const selectedFeiraId = feiraSelecionadaDropdown.value;
-                    const currentUrl = new URL(window.location.href);
-                    currentUrl.searchParams.set('feiraId', selectedFeiraId);
-                    window.location.href = currentUrl.toString(); // Redireciona para carregar os dados da feira
-                });
-            }
+            // Lógica para fechar overlay e sidebar automaticamente em desktop se a tela for redimensionada
+            window.addEventListener('resize', () => {
+                if (window.innerWidth >= 768) {
+                    sidebar.classList.remove('-translate-x-full');
+                    mobileOverlay.classList.add('opacity-0', 'pointer-events-none');
+                    mobileOverlay.classList.remove('opacity-50', 'pointer-events-auto');
+                } else {
+                     // Ao redimensionar para mobile, se a sidebar não estiver ativa, esconda-a
+                    if (!sidebar.classList.contains('-translate-x-full') && !mobileOverlay.classList.contains('opacity-50')) {
+                        sidebar.classList.add('-translate-x-full');
+                        mobileOverlay.classList.add('opacity-0', 'pointer-events-none');
+                    }
+                }
+            });
 
 
-            /* =======================================
-               LÓGICA DOS MODAIS (CRUD)
-               ======================================= */
-
-            // Funções genéricas para abrir e fechar modais
-            const setupModal = (modalId, openBtnId, closeBtnId, formId, titleElementId) => {
+            // Funções genéricas para Modals
+            function setupModal(modalId, openBtnId, closeBtnId, formId, titleId) {
                 const modal = document.getElementById(modalId);
                 const openBtn = document.getElementById(openBtnId);
                 const closeBtn = document.getElementById(closeBtnId);
                 const form = document.getElementById(formId);
-                const titleElement = document.getElementById(titleElementId);
+                const title = document.getElementById(titleId);
 
-                // Listener para o botão de abrir modal
                 if (openBtn) {
                     openBtn.addEventListener('click', () => {
                         modal.classList.remove('hidden');
-                        modal.classList.add('flex'); // Garante que o modal use flex para centralizar
-                        // Reseta o formulário para adicionar
+                        modal.classList.add('flex');
+                        setTimeout(() => {
+                            modal.classList.add('opacity-100');
+                            modal.querySelector('div').classList.add('scale-100'); // Seleciona o conteúdo do modal
+                        }, 10);
+                        // Resetar formulário e título para adicionar novo
                         if (form) {
                             form.reset();
-                            const idInput = form.querySelector('input[type="hidden"][name="id"]');
-                            if (idInput) idInput.value = ''; // Limpa ID
-                            const methodInput = form.querySelector('input[type="hidden"][name="_method"]');
-                            if (methodInput) methodInput.value = 'POST'; // Define para POST
+                            const methodInput = form.querySelector('input[name="_method"]');
+                            if (methodInput) methodInput.value = 'POST';
                         }
-                        if (titleElement) {
-                            // Ajusta o título para "Adicionar Novo X"
-                            let baseTitleText = '';
-                            if (openBtn.innerText.includes('Adicionar Novo')) {
-                                baseTitleText = openBtn.innerText.replace('Adicionar Novo ', '');
-                            } else if (openBtn.dataset.baseTitle) {
-                                baseTitleText = openBtn.dataset.baseTitle; // Use um data-attribute se o texto do botão não for padrão
-                            }
-                            titleElement.innerText = `Adicionar Novo ${baseTitleText.replace('Adicionar Novo ', '')}`;
-                        }
-                        // Lógica específica para o modal de Avaliador ao adicionar
-                        if (modalId === 'modalAvaliador') {
-                            const pinDisplayDiv = document.getElementById('pinDisplayDiv');
-                            if (pinDisplayDiv) pinDisplayDiv.classList.add('hidden'); // Oculta PIN ao adicionar novo
-                            // Define a feira ativa automaticamente no modal de Avaliador
-                            const feiraAvaliadorSelect = document.getElementById('feiraAvaliador');
-                            const feiraAtualId = "<%= feiraAtual._id %>";
-                            if (feiraAvaliadorSelect && feiraAtualId && feiraAtualId !== "null" && feiraAtualId !== "undefined") {
-                                feiraAvaliadorSelect.value = feiraAtualId;
-                            }
+                        if (title) {
+                            if (modalId === 'modalProjeto') title.innerText = 'Adicionar Novo Projeto';
+                            if (modalId === 'modalCategoria') title.innerText = 'Adicionar Nova Categoria';
+                            if (modalId === 'modalCriterio') title.innerText = 'Adicionar Novo Critério';
+                            if (modalId === 'modalAvaliador') title.innerText = 'Adicionar Novo Avaliador';
+                            if (modalId === 'modalFeira') title.innerText = 'Adicionar Nova Feira';
+                            if (modalId === 'modalUsuario') title.innerText = 'Adicionar Novo Usuário Admin';
+                            if (modalId === 'modalConfiguracoes') title.innerText = 'Configurações da Feira';
                         }
                     });
                 }
 
-                // Listener para o botão de fechar modal
-                if (closeBtn) {
-                    closeBtn.addEventListener('click', () => {
+                closeBtn.addEventListener('click', () => {
+                    modal.classList.remove('opacity-100');
+                    modal.querySelector('div').classList.remove('scale-100');
+                    setTimeout(() => {
                         modal.classList.add('hidden');
                         modal.classList.remove('flex');
-                    });
-                }
+                    }, 300); // Esperar a transição terminar
+                });
 
-                // Fechar modal clicando fora do conteúdo
-                if (modal) {
-                    modal.addEventListener('click', (event) => {
-                        if (event.target === modal) {
-                            closeBtn.click(); // Simula clique no botão de fechar
-                        }
-                    });
-                }
-            };
+                // Fechar modal ao clicar fora
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.classList.remove('opacity-100');
+                        modal.querySelector('div').classList.remove('scale-100');
+                        setTimeout(() => {
+                            modal.classList.add('hidden');
+                            modal.classList.remove('flex');
+                        }, 300);
+                    }
+                });
+            }
 
-            // PROJETOS
+            // Setup para todos os modais
             setupModal('modalProjeto', 'btnAbrirModalProjeto', 'btnFecharModalProjeto', 'formProjeto', 'tituloModalProjeto');
-            // Lógica para o botão "Editar Projeto"
+            setupModal('modalCategoria', 'btnAbrirModalCategoria', 'btnFecharModalCategoria', 'formCategoria', 'tituloModalCategoria');
+            setupModal('modalCriterio', 'btnAbrirModalCriterio', 'btnFecharModalCriterio', 'formCriterio', 'tituloModalCriterio');
+            setupModal('modalAvaliador', 'btnAbrirModalAvaliador', 'btnFecharModalAvaliador', 'formAvaliador', 'tituloModalAvaliador');
+            setupModal('modalFeira', 'btnAbrirModalFeira', 'btnFecharModalFeira', 'formFeira', 'tituloModalFeira');
+            setupModal('modalUsuario', 'btnAbrirModalUsuario', 'btnFecharModalUsuario', 'formUsuario', 'tituloModalUsuario');
+            setupModal('modalConfiguracoes', 'btnAbrirModalConfiguracoes', 'btnFecharModalConfiguracoes', 'formConfiguracoesFeiraData', 'tituloModalConfiguracoes');
+
+
+            // Lógica para EDITAR PROJETO
             document.querySelectorAll('.btn-editar-projeto').forEach(button => {
                 button.addEventListener('click', () => {
                     const id = button.dataset.id;
@@ -1065,37 +902,39 @@ const closeSidebar = () => {
                     const categoriaId = button.dataset.categoriaId;
                     const criterios = button.dataset.criterios ? button.dataset.criterios.split(',') : [];
                     const turma = button.dataset.turma;
-                    const alunos = button.dataset.alunos ? button.dataset.alunos.split(',') : []; // Captura alunos
+                    const alunos = button.dataset.alunos ? button.dataset.alunos.split(',') : [];
 
-                    // Preenche o modal
                     const modal = document.getElementById('modalProjeto');
                     const form = document.getElementById('formProjeto');
                     const tituloModal = document.getElementById('tituloModalProjeto');
-                    
+
                     tituloModal.innerText = 'Editar Projeto';
-                    form.action = `/admin/projetos/${id}`; // Altera a action para a rota PUT
+                    form.action = `/admin/projetos/${id}`; // Ação de formulário para PUT
                     document.getElementById('projetoId').value = id;
                     document.getElementById('projetoMethod').value = 'PUT'; // Define o método para PUT
-                    
-                    document.getElementById('titulo').value = titulo;
-                    document.getElementById('descricao').value = descricao;
-                    document.getElementById('categoria').value = categoriaId;
+                    document.getElementById('tituloProjeto').value = titulo;
+                    document.getElementById('descricaoProjeto').value = descricao;
                     document.getElementById('turmaProjeto').value = turma;
-                    document.getElementById('alunosProjeto').value = alunos.join(', '); // Preenche alunos
+                    document.getElementById('alunosProjeto').value = alunos.join(', '); // Exibir formatado
 
-                    // Preenche checkboxes de critérios
-                    document.querySelectorAll('#criteriosProjetoCheckboxes input[type="checkbox"]').forEach(checkbox => {
+                    // Selecionar categoria
+                    document.getElementById('categoriaProjeto').value = categoriaId;
+
+                    // Marcar checkboxes de critérios
+                    document.querySelectorAll('input[name="criterios"]').forEach(checkbox => {
                         checkbox.checked = criterios.includes(checkbox.value);
                     });
 
                     modal.classList.remove('hidden');
                     modal.classList.add('flex');
+                    setTimeout(() => {
+                        modal.classList.add('opacity-100');
+                        modal.querySelector('div').classList.add('scale-100');
+                    }, 10);
                 });
             });
 
-            // CATEGORIAS
-            setupModal('modalCategoria', 'btnAbrirModalCategoria', 'btnFecharModalCategoria', 'formCategoria', 'tituloModalCategoria');
-            // Lógica para o botão "Editar Categoria"
+            // Lógica para EDITAR CATEGORIA
             document.querySelectorAll('.btn-editar-categoria').forEach(button => {
                 button.addEventListener('click', () => {
                     const id = button.dataset.id;
@@ -1106,20 +945,21 @@ const closeSidebar = () => {
                     const tituloModal = document.getElementById('tituloModalCategoria');
 
                     tituloModal.innerText = 'Editar Categoria';
-                    form.action = `/admin/categorias/${id}?_method=PUT`; // Define a action e o método
+                    form.action = `/admin/categorias/${id}`; // Ação de formulário para PUT
                     document.getElementById('categoriaId').value = id;
                     document.getElementById('categoriaMethod').value = 'PUT'; // Define o método para PUT
                     document.getElementById('nomeCategoria').value = nome;
 
                     modal.classList.remove('hidden');
                     modal.classList.add('flex');
+                    setTimeout(() => {
+                        modal.classList.add('opacity-100');
+                        modal.querySelector('div').classList.add('scale-100');
+                    }, 10);
                 });
             });
 
-
-            // CRITÉRIOS
-            setupModal('modalCriterio', 'btnAbrirModalCriterio', 'btnFecharModalCriterio', 'formCriterio', 'tituloModalCriterio');
-            // Lógica para o botão "Editar Critério"
+            // Lógica para EDITAR CRITÉRIO
             document.querySelectorAll('.btn-editar-criterio').forEach(button => {
                 button.addEventListener('click', () => {
                     const id = button.dataset.id;
@@ -1132,7 +972,7 @@ const closeSidebar = () => {
                     const tituloModal = document.getElementById('tituloModalCriterio');
 
                     tituloModal.innerText = 'Editar Critério';
-                    form.action = `/admin/criterios/${id}?_method=PUT`; // Define a action e o método
+                    form.action = `/admin/criterios/${id}`; // Ação de formulário para PUT
                     document.getElementById('criterioId').value = id;
                     document.getElementById('criterioMethod').value = 'PUT'; // Define o método para PUT
                     document.getElementById('nomeCriterio').value = nome;
@@ -1141,64 +981,58 @@ const closeSidebar = () => {
 
                     modal.classList.remove('hidden');
                     modal.classList.add('flex');
+                    setTimeout(() => {
+                        modal.classList.add('opacity-100');
+                        modal.querySelector('div').classList.add('scale-100');
+                    }, 10);
                 });
             });
 
-            // AVALIADORES
-            setupModal('modalAvaliador', 'btnAbrirModalAvaliador', 'btnFecharAvaliador', 'formAvaliador', 'tituloAvaliador');
-            // Lógica para o botão "Editar Avaliador"
+            // Lógica para EDITAR AVALIADOR
             document.querySelectorAll('.btn-editar-avaliador').forEach(button => {
                 button.addEventListener('click', () => {
                     const id = button.dataset.id;
                     const nome = button.dataset.nome;
                     const email = button.dataset.email;
                     const pin = button.dataset.pin;
-                    const ativo = button.dataset.ativo === 'true'; // Converte para booleano
+                    const ativo = button.dataset.ativo === 'true'; // Converter para booleano
                     const projetosAtribuidos = button.dataset.projetos ? button.dataset.projetos.split(',') : [];
 
                     const modal = document.getElementById('modalAvaliador');
                     const form = document.getElementById('formAvaliador');
-                    const tituloModal = document.getElementById('tituloAvaliador');
-                    const pinDisplayDiv = document.getElementById('pinDisplayDiv');
-                    const avaliadorPinDisplay = document.getElementById('avaliadorPinDisplay');
-                    const feiraAvaliadorSelect = document.getElementById('feiraAvaliador'); // Para edição, não muda a feira
+                    const tituloModal = document.getElementById('tituloModalAvaliador');
 
                     tituloModal.innerText = 'Editar Avaliador';
-                    form.action = `/admin/avaliadores/${id}?_method=PUT`; // Define a action e o método
+                    form.action = `/admin/avaliadores/${id}`; // Ação de formulário para PUT
                     document.getElementById('avaliadorId').value = id;
                     document.getElementById('avaliadorMethod').value = 'PUT'; // Define o método para PUT
-
                     document.getElementById('nomeAvaliador').value = nome;
                     document.getElementById('emailAvaliador').value = email;
+                    document.getElementById('pinAvaliador').value = pin;
                     document.getElementById('ativoAvaliador').checked = ativo;
-                    
-                    // Exibir PIN para edição
-                    if (pin) {
-                        avaliadorPinDisplay.innerText = pin;
-                        pinDisplayDiv.classList.remove('hidden'); // Garante que a div do PIN esteja visível
-                    } else {
-                        pinDisplayDiv.classList.add('hidden');
-                    }
-                    
-                    // Preencher projetos atribuídos
-                    document.querySelectorAll('#projetosAvaliadorCheckboxes input[type="checkbox"]').forEach(checkbox => {
-                        checkbox.checked = projetosAtribuidos.includes(checkbox.value);
+
+                    // Desmarcar todos os projetos primeiro
+                    document.querySelectorAll('input[name="projetosAtribuidos"]').forEach(checkbox => {
+                        checkbox.checked = false;
                     });
-
-                    // Desabilitar seleção de feira e escola ao editar avaliador (já está associado)
-                    const escolaAvaliadorSelect = document.getElementById('escolaAvaliador');
-                    if (escolaAvaliadorSelect) escolaAvaliadorSelect.disabled = true;
-                    if (feiraAvaliadorSelect) feiraAvaliadorSelect.disabled = true;
-
+                    // Marcar projetos atribuídos
+                    projetosAtribuidos.forEach(projId => {
+                        const checkbox = document.getElementById(`projeto_${projId}`);
+                        if (checkbox) {
+                            checkbox.checked = true;
+                        }
+                    });
 
                     modal.classList.remove('hidden');
                     modal.classList.add('flex');
+                    setTimeout(() => {
+                        modal.classList.add('opacity-100');
+                        modal.querySelector('div').classList.add('scale-100');
+                    }, 10);
                 });
             });
 
-            // FEIRAS
-            setupModal('modalFeira', 'btnAbrirModalFeira', 'btnFecharModalFeira', 'formFeira', 'tituloModalFeira');
-            // Lógica para o botão "Editar Feira"
+            // Lógica para EDITAR FEIRA
             document.querySelectorAll('.btn-editar-feira').forEach(button => {
                 button.addEventListener('click', () => {
                     const id = button.dataset.id;
@@ -1222,11 +1056,48 @@ const closeSidebar = () => {
 
                     modal.classList.remove('hidden');
                     modal.classList.add('flex');
+                    setTimeout(() => {
+                        modal.classList.add('opacity-100');
+                        modal.querySelector('div').classList.add('scale-100');
+                    }, 10);
                 });
             });
 
+            // Lógica para EDITAR USUÁRIO ADMIN (na aba de configurações)
+            document.querySelectorAll('.btn-editar-usuario').forEach(button => {
+                button.addEventListener('click', () => {
+                    const id = button.dataset.id;
+                    const nome = button.dataset.nome;
+                    const email = button.dataset.email;
+                    const isAdmin = button.dataset.isAdmin === 'true';
+
+                    const modal = document.getElementById('modalUsuario');
+                    const form = document.getElementById('formUsuario');
+                    const tituloModal = document.getElementById('tituloModalUsuario');
+
+                    tituloModal.innerText = 'Editar Usuário Admin';
+                    form.action = `/admin/usuarios/${id}`;
+                    document.getElementById('usuarioId').value = id;
+                    document.getElementById('usuarioMethod').value = 'PUT';
+                    document.getElementById('nomeUsuario').value = nome;
+                    document.getElementById('emailUsuario').value = email;
+                    document.getElementById('senhaUsuario').required = false; // Senha não é obrigatória na edição
+                    document.getElementById('isAdminUsuario').checked = isAdmin;
+
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                    setTimeout(() => {
+                        modal.classList.add('opacity-100');
+                        modal.querySelector('div').classList.add('scale-100');
+                    }, 10);
+                });
+            });
+
+
             // MODAL DE CONFIGURAÇÕES (EDITAR DATAS DA FEIRA)
-            setupModal('modalConfiguracoes', 'btnAbrirModalConfiguracoes', 'btnFecharModalConfiguracoes', 'formConfiguracoesFeiraData', 'tituloModalConfiguracoes');
+            // Este modal já tem seu setup via setupModal. A lógica de preenchimento é no EJS
+            // O botão de "Salvar Configurações" envia para /admin/configurar-datas-feira
+            // com o método PUT (definido no input hidden)
         });
     </script>
 

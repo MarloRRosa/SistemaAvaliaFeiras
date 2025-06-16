@@ -1,75 +1,157 @@
-@media (max-width: 768px) {
-  .sidebar {
-    position: fixed !important;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    width: 16rem; /* 64 tailwind */
-    z-index: 50;
-    transform: translateX(-100%);
-    transition: transform 0.3s ease-in-out;
+/* admin-custom.css */
+
+/* Layout principal com flexbox para sidebar e conteúdo */
+.app-container {
+  display: flex;
+  flex-direction: column; /* Padrão mobile: elementos empilhados */
+  min-height: 100vh;
+  width: 100%;
+  background-color: #f9fafb; /* bg-gray-50 */
+}
+
+/* Sidebar */
+#sidebar {
+  width: 256px; /* w-64 */
+  background-color: #1f2937; /* bg-gray-800 */
+  color: #d1d5db; /* text-gray-300 */
+  padding: 1rem; /* p-4 */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-xl */
+  flex-shrink: 0; /* Garante que a sidebar não encolhe */
+  position: fixed; /* Fixo para mobile */
+  top: 0;
+  left: 0;
+  height: 100%;
+  z-index: 50;
+  transform: translateX(-100%); /* Escondida por padrão em mobile */
+  transition: transform 0.3s ease-in-out;
+}
+
+/* Estilo para mostrar a sidebar em mobile */
+#sidebar.translate-x-0 {
+  transform: translateX(0%);
+}
+
+/* Overlay escuro para mobile */
+#mobile-overlay {
+  background-color: rgba(0, 0, 0, 0.5); /* bg-black bg-opacity-50 */
+  z-index: 40;
+  transition: opacity 0.3s ease-in-out;
+  opacity: 0; /* Escondido por padrão */
+  pointer-events: none; /* Não interfere com cliques quando escondido */
+}
+
+/* Estilo para mostrar o overlay */
+#mobile-overlay.opacity-50 {
+  opacity: 1;
+  pointer-events: auto; /* Permite cliques para fechar */
+}
+
+
+/* Main Content Area */
+#contentArea {
+  flex-grow: 1; /* Ocupa o restante do espaço horizontal */
+  min-width: 0; /* Permite que o conteúdo encolha */
+  padding-left: 0; /* Padrão mobile, sem padding extra da sidebar */
+  transition: padding-left 0.3s ease-in-out;
+}
+
+/* Desktop: Sidebar visível, layout lado a lado */
+@media (min-width: 768px) {
+  .app-container {
+    flex-direction: row; /* Desktop: sidebar e conteúdo lado a lado */
   }
 
-  .sidebar.show {
-    transform: translateX(0%);
+  #sidebar {
+    position: relative; /* Volta a ser parte do fluxo do documento */
+    transform: translateX(0%); /* Sempre visível em desktop */
+    padding-top: 1rem; /* Resetar padding mobile */
   }
 
-  #overlay {
-    display: block;
+  #contentArea {
+    padding-left: 0; /* Removido padding extra pois a sidebar não é mais fixed */
+  }
+
+  #sidebarToggleMobile {
+    display: none !important; /* Esconder o botão de toggle em desktop */
+  }
+
+  #sidebarToggleDesktop {
+    display: none !important; /* Esconder o 'X' de fechar em desktop */
   }
 }
+
+/* Estilos para a navegação de abas */
+.tab-button {
+  /* Adicionado padding, arredondamento, sombra e transições */
+  @apply px-6 py-3 text-sm font-semibold text-gray-700 bg-white rounded-lg shadow-sm border border-gray-200 
+         hover:text-blue-600 hover:border-blue-400 hover:bg-blue-50 transition-all duration-300 ease-in-out;
+  white-space: nowrap; /* Evita que o texto quebre */
+  margin-right: 0.75rem; /* Espaçamento maior entre os botões */
+  margin-bottom: 0.5rem; /* Margem inferior para espaçamento vertical em telas menores */
+  display: inline-flex; /* Para alinhar melhor o conteúdo */
+  align-items: center;
+  justify-content: center;
+}
+
+.tab-button.active {
+  @apply text-blue-700 border-blue-500 bg-blue-100 shadow-md;
+}
+
+/* Sidebar links */
+.sidebar-link {
+    @apply flex items-center p-3 rounded-lg text-gray-300 hover:bg-gray-700 transition-colors duration-200;
+}
+.sidebar-link .icon-wrapper {
+    @apply w-8 flex justify-center items-center; /* Garante que os ícones tenham largura fixa */
+}
+.sidebar-link .link-text {
+  white-space: normal;
+  word-break: break-word;
+}
+
+.sidebar-link.active {
+    @apply bg-blue-600 text-white shadow-lg;
+}
+
+/* Estilos para modais */
+.modal {
+    animation: fadeIn 0.3s ease-out forwards; /* 'forwards' mantém o estado final da animação */
+}
+.modal > div { /* Para o conteúdo do modal */
+    transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+    transform: translateY(-20px); /* Começa um pouco acima */
+    opacity: 0;
+}
+.modal.flex > div { /* Quando o modal está visível */
+    transform: translateY(0);
+    opacity: 1;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+/* Removida a animação slideIn do modal-content pois estou usando transições CSS */
+
 
 /* Melhorar foco em inputs */
 input:focus,
 select:focus,
 textarea:focus {
   outline: none;
-  border-color: #6366f1;
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.4);
+  border-color: #6366f1; /* Cor primária do Tailwind, blue-600 */
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.4); /* blue-600 com opacidade */
 }
 
-/* Garantir que o botão de menu não seja sobreposto */
-#sidebarToggle {
-  z-index: 60;
+/* Ajustes para tabelas */
+.table-responsive {
+  overflow-x: auto;
 }
 
-/* Ocultar overlay por padrão */
-#overlay {
-  display: none;
-}
-
-/* Tornar responsivo o conteúdo geral já estava no CSS original */
+/* Responsividade geral (se necessário, mas Tailwind já lida com muito) */
 @media (max-width: 768px) {
-  .main-content,
-  .tab-content {
-    padding: 1rem !important;
-  }
-
-  h1, h2, h3, h4 {
-    font-size: 1.25rem !important;
-  }
-
-  table {
-    font-size: 0.875rem;
-  }
-
-  table th, table td {
-    padding: 0.5rem 0.25rem;
-  }
-
-  .btn-editar-projeto,
-  .btn-editar-categoria,
-  .btn-editar-criterio,
-  .btn-editar-avaliador {
-    width: 100%;
-    margin-bottom: 0.5rem;
-    font-size: 0.875rem;
-  }
-
-  .form-section,
-  .card-section {
-    border-radius: 1rem;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  /* No mobile, o padding do contentArea pode ser um pouco menor */
+  #contentArea {
     padding: 1rem;
   }
 }
