@@ -1438,76 +1438,50 @@ router.put('/criterios/:id', verificarAdminEscola, async (req, res) => {
     const { nome, peso, observacao } = req.body;
     const escolaId = req.session.adminEscola.escolaId;
 
-    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-        req.flash('error_msg', 'ID do critério inválido para edição.');
-        return res.redirect('/admin/dashboard?tab=criterios');
-    }
-
-    let errors = [];
-    if (!nome || nome.trim() === '') errors.push({ text: 'O nome do critério é obrigatório.' });
-    if (peso === undefined || peso === null || peso < 1 || peso > 10) errors.push({ text: 'O peso do critério deve ser um número entre 1 e 10.' });
-
-    if (errors.length > 0) {
-        req.flash('error_msg', errors.map(e => e.text).join(', '));
+    if (!nome || !peso || isNaN(peso)) {
+        req.flash('error_msg', 'Nome e peso válidos são obrigatórios para editar o critério.');
         return res.redirect('/admin/dashboard?tab=criterios');
     }
 
     try {
-        const updatedCriterio = await Criterio.findOneAndUpdate(
-            { _id: id, escolaId: escolaId },
-            { nome: nome.trim(), peso: parseInt(peso, 10), observacao: observacao || '' },
-            { new: true, runValidators: true }
-        );
-
-        if (!updatedCriterio) {
-            req.flash('error_msg', 'Critério não encontrado ou você não tem permissão para editá-lo.');
+        const criterio = await Criterio.findOne({ _id: id, escolaId: escolaId });
+        if (!criterio) {
+            req.flash('error_msg', 'Critério não encontrado.');
             return res.redirect('/admin/dashboard?tab=criterios');
         }
 
+        criterio.nome = nome;
+        criterio.peso = parseFloat(peso);
+        criterio.observacao = observacao || '';
+        await criterio.save();
+
         req.flash('success_msg', 'Critério atualizado com sucesso!');
     } catch (err) {
-        console.error('Erro ao editar critério:', err);
-        req.flash('error_msg', 'Erro ao editar critério. Detalhes: ' + err.message);
+        console.error('Erro ao atualizar critério:', err);
+        req.flash('error_msg', 'Erro ao atualizar critério.');
     }
 
     res.redirect('/admin/dashboard?tab=criterios');
 });
 
 
+
 // Excluir Critério (DELETE)
-// Rota ajustada para o padrão RESTful /criterios/:id (sem /excluir)
 router.delete('/criterios/:id', verificarAdminEscola, async (req, res) => {
     const { id } = req.params;
     const escolaId = req.session.adminEscola.escolaId;
 
-    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-        req.flash('error_msg', 'ID do critério inválido para exclusão.');
-        return res.redirect('/admin/dashboard?tab=criterios');
-    }
-
     try {
-        const criterioParaExcluir = await Criterio.findOne({ _id: id, escolaId: escolaId });
-        if (!criterioParaExcluir) {
-            req.flash('error_msg', 'Critério não encontrado ou você não tem permissão para excluí-lo.');
-            return res.redirect('/admin/dashboard?tab=criterios');
-        }
-
-        // Verifica se há projetos associados a este critério para esta escola
-        const projetosAssociados = await Projeto.countDocuments({ criterios: id, escolaId: escolaId });
-        if (projetosAssociados > 0) {
-            req.flash('error_msg', `Não é possível deletar o critério "${criterioParaExcluir.nome}" porque ele está associado a ${projetosAssociados} projeto(s).`);
-            return res.redirect('/admin/dashboard?tab=criterios');
-        }
-
         await Criterio.deleteOne({ _id: id, escolaId: escolaId });
         req.flash('success_msg', 'Critério excluído com sucesso!');
     } catch (err) {
         console.error('Erro ao excluir critério:', err);
-        req.flash('error_msg', 'Erro ao excluir critério. Detalhes: ' + err.message);
+        req.flash('error_msg', 'Erro ao excluir critério.');
     }
 
     res.redirect('/admin/dashboard?tab=criterios');
 });
+
 
 
 // ===========================================
