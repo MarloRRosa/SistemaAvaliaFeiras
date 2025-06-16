@@ -1535,27 +1535,20 @@ router.get('/resultados-finais/pdf', verificarAdminEscola, async (req, res) => {
 router.get('/avaliacoes/pdf', verificarAdminEscola, async (req, res) => {
     try {
         const escolaId = req.session.adminEscola.escolaId;
-        const feiraAtual = await Feira.findOne({ status: 'ativa', escolaId: escolaId }); // USANDO escolaId AQUI
+        const feiraAtual = await Feira.findOne({ status: 'ativa', escolaId: escolaId });
         if (!feiraAtual) {
             req.flash('error_msg', 'Nenhuma feira ativa para esta escola para gerar o relatório de avaliações.');
-            if (!res.headersSent) {
-                return res.redirect('/admin/dashboard?tab=relatorios');
-            }
+            if (!res.headersSent) { return res.redirect('/admin/dashboard?tab=relatorios'); }
         }
 
-        const avaliacoes = await Avaliacao.find({ feira: feiraAtual._id, escolaId: escolaId }) // USANDO escolaId AQUI
+        const avaliacoes = await Avaliacao.find({ feira: feiraAtual._id, escolaId: escolaId })
             .populate('avaliador')
-            .populate({
-                path: 'projeto',
-                populate: { path: 'categoria' }
-            })
+            .populate({ path: 'projeto', populate: { path: 'categoria' } })
             .lean();
 
         const criteriosMap = {};
-        const todosCriterios = await Criterio.find({ feira: feiraAtual._id, escolaId: escolaId }).lean(); // USANDO escolaId AQUI
-        todosCriterios.forEach(c => {
-            criteriosMap[c._id.toString()] = c.nome;
-        });
+        const todosCriterios = await Criterio.find({ feira: feiraAtual._id, escolaId: escolaId }).lean();
+        todosCriterios.forEach(c => { criteriosMap[c._id.toString()] = c.nome; });
 
         const avaliacoesParaRelatorio = avaliacoes.map(avaliacao => {
             const notasArray = avaliacao.notas || avaliacao.itens;
@@ -1564,50 +1557,17 @@ router.get('/avaliacoes/pdf', verificarAdminEscola, async (req, res) => {
                 valor: parseFloat(item.nota),
                 observacao: item.comentario || ''
             }));
-            return {
-                ...avaliacao,
-                notasComNomesDeCriterio: notasComNomesDeCriterio
-            };
+            return { ...avaliacao, notasComNomesDeCriterio: notasComNomesDeCriterio };
         });
 
+        const escola = await Escola.findById(escolaId).lean() || { nome: "Nome da Escola" };
 
-        const escola = await Escola.findById(escolaId) || { nome: "Nome da Escola" };
-
-        const htmlContent = await ejs.renderFile(path.join(__dirname, '../views/admin/pdf-avaliacoes.ejs'), {
+        await generatePdfReport(req, res, 'pdf-avaliacoes', {
             titulo: 'Avaliações Completas',
-            feira: feiraAtual,
             nomeFeira: feiraAtual.nome,
             avaliacoes: avaliacoesParaRelatorio,
-            escola: escola,
-            formatarData: (dataISO) => {
-                if (!dataISO) return '';
-                const data = new Date(dataISO);
-                return data.toLocaleDateString('pt-BR');
-            }
-        });
-
-        const browser = await puppeteer.launch({
-            headless: true,
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
-        });
-        const page = await browser.newPage();
-        await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
-        const pdfBuffer = await page.pdf({
-            format: 'A4',
-            printBackground: true,
-            displayHeaderFooter: true,
-            headerTemplate: `<div style="font-size: 8px; margin-left: 1cm; margin-right: 1cm; color: #777; text-align: right;">Relatório de Avaliações</div>`,
-            footerTemplate: `<div style="font-size: 8px; margin-left: 1cm; margin-right: 1cm; color: #777; text-align: center;">Página <span class="pageNumber"></span> de <span class="totalPages"></span></div>`,
-            margin: { top: '2cm', right: '1cm', bottom: '2cm', left: '1cm' }
-        });
-        await browser.close();
-
-        res.set({
-            'Content-Type': 'application/pdf',
-            'Content-Disposition': `attachment; filename="avaliacoes_${feiraAtual.nome}.pdf"`,
-            'Content-Length': pdfBuffer.length
-        });
-        res.send(pdfBuffer);
+            escola: escola
+        }, `avaliacoes_${feiraAtual.nome}`);
 
     } catch (error) {
         console.error('Erro ao gerar PDF de avaliações:', error);
@@ -1622,33 +1582,25 @@ router.get('/avaliacoes/pdf', verificarAdminEscola, async (req, res) => {
 router.get('/projetos-sem-avaliacao/pdf', verificarAdminEscola, async (req, res) => {
     try {
         const escolaId = req.session.adminEscola.escolaId;
-        const feiraAtual = await Feira.findOne({ status: 'ativa', escolaId: escolaId }); // USANDO escolaId AQUI
+        const feiraAtual = await Feira.findOne({ status: 'ativa', escolaId: escolaId });
         if (!feiraAtual) {
             req.flash('error_msg', 'Nenhuma feira ativa para esta escola para gerar o relatório de projetos sem avaliação.');
-            if (!res.headersSent) {
-                return res.redirect('/admin/dashboard?tab=relatorios');
-            }
+            if (!res.headersSent) { return res.redirect('/admin/dashboard?tab=relatorios'); }
         }
 
-        const projetos = await Projeto.find({ feira: feiraAtual._id, escolaId: escolaId }).lean(); // USANDO escolaId AQUI
-        const avaliacoes = await Avaliacao.find({ feira: feiraAtual._id, escolaId: escolaId }).lean(); // USANDO escolaId AQUI
-        const avaliadores = await Avaliador.find({ feira: feiraAtual._id, escolaId: escolaId }).lean(); // USANDO escolaId AQUI
+        const projetos = await Projeto.find({ feira: feiraAtual._id, escolaId: escolaId }).lean();
+        const avaliacoes = await Avaliacao.find({ feira: feiraAtual._id, escolaId: escolaId }).lean();
+        const avaliadores = await Avaliador.find({ feira: feiraAtual._id, escolaId: escolaId }).lean();
 
         const projetosSemAvaliacao = [];
-
         for (const projeto of projetos) {
             const numAvaliadoresAtribuidos = avaliadores.filter(av => av.projetosAtribuidos && av.projetosAtribuidos.some(pa => String(pa) === String(projeto._id))).length;
             const avaliacoesDoProjeto = avaliacoes.filter(a => a.projeto && String(a.projeto) === String(projeto._id));
-
-            // Um projeto é considerado "sem avaliação" se não tem nenhuma avaliação
-            // ou se o número de avaliações recebidas é menor que o número de avaliadores atribuídos (parcialmente avaliado)
             if (avaliacoesDoProjeto.length === 0 || avaliacoesDoProjeto.length < numAvaliadoresAtribuidos) {
-                // Fetch details of assigned evaluators
                 const assignedEvaluators = avaliadores
                     .filter(av => av.projetosAtribuidos && av.projetosAtribuidos.some(pa => String(pa) === String(projeto._id)))
                     .map(av => av.nome)
                     .join(', ');
-
                 projetosSemAvaliacao.push({
                     titulo: projeto.titulo,
                     turma: projeto.turma,
@@ -1659,44 +1611,14 @@ router.get('/projetos-sem-avaliacao/pdf', verificarAdminEscola, async (req, res)
             }
         }
 
-        const escola = await Escola.findById(escolaId) || { nome: "Nome da Escola" };
+        const escola = await Escola.findById(escolaId).lean() || { nome: "Nome da Escola" };
 
-        const htmlContent = await ejs.renderFile(path.join(__dirname, '../views/admin/pdf-projetos-sem-avaliacao.ejs'), {
+        await generatePdfReport(req, res, 'pdf-projetos-sem-avaliacao', {
             titulo: 'Projetos Sem Avaliação',
-            layout: false,
-            feira: feiraAtual,
-            nomeFeira: feiraAtual.nome, 
-            projetosNaoAvaliados: projetosSemAvaliacao, 
-            escola: escola,
-            formatarData: (dataISO) => {
-                if (!dataISO) return '';
-                const data = new Date(dataISO);
-                return data.toLocaleDateString('pt-BR');
-            }
-        });
-
-        const browser = await puppeteer.launch({
-            headless: true,
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
-        });
-        const page = await browser.newPage();
-        await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
-        const pdfBuffer = await page.pdf({
-            format: 'A4',
-            printBackground: true,
-            displayHeaderFooter: true,
-            headerTemplate: `<div style="font-size: 8px; margin-left: 1cm; margin-right: 1cm; color: #777; text-align: right;">Relatório de Projetos Sem Avaliação</div>`,
-            footerTemplate: `<div style="font-size: 8px; margin-left: 1cm; margin-right: 1cm; color: #777; text-align: center;">Página <span class="pageNumber"></span> de <span class="totalPages"></span></div>`,
-            margin: { top: '2cm', right: '1cm', bottom: '2cm', left: '1cm' }
-        });
-        await browser.close();
-
-        res.set({
-            'Content-Type': 'application/pdf',
-            'Content-Disposition': `attachment; filename="projetos-sem-avaliacao_${feiraAtual.nome}.pdf"`,
-            'Content-Length': pdfBuffer.length
-        });
-        res.send(pdfBuffer);
+            nomeFeira: feiraAtual.nome,
+            projetosNaoAvaliados: projetosSemAvaliacao,
+            escola: escola
+        }, `projetos-sem-avaliacao_${feiraAtual.nome}`);
 
     } catch (error) {
         console.error('Erro ao gerar PDF de projetos sem avaliação:', error);
@@ -1711,28 +1633,25 @@ router.get('/projetos-sem-avaliacao/pdf', verificarAdminEscola, async (req, res)
 router.get('/ranking-categorias/pdf', verificarAdminEscola, async (req, res) => {
     try {
         const escolaId = req.session.adminEscola.escolaId;
-        const feiraAtual = await Feira.findOne({ status: 'ativa', escolaId: escolaId }); // USANDO escolaId AQUI
+        const feiraAtual = await Feira.findOne({ status: 'ativa', escolaId: escolaId });
         if (!feiraAtual) {
             req.flash('error_msg', 'Nenhuma feira ativa para esta escola para gerar o ranking por categoria.');
-            if (!res.headersSent) {
-                return res.redirect('/admin/dashboard?tab=relatorios');
-            }
+            if (!res.headersSent) { return res.redirect('/admin/dashboard?tab=relatorios'); }
         }
 
-        const projetos = await Projeto.find({ feira: feiraAtual._id, escolaId: escolaId }) // USANDO escolaId AQUI
+        const projetos = await Projeto.find({ feira: feiraAtual._id, escolaId: escolaId })
             .populate('categoria')
             .populate('criterios')
             .lean();
-        const avaliacoes = await Avaliacao.find({ feira: feiraAtual._id, escolaId: escolaId }).lean(); // USANDO escolaId AQUI
-        const categorias = await Categoria.find({ feira: feiraAtual._id, escolaId: escolaId }).lean(); // USANDO escolaId AQUI
+        const avaliacoes = await Avaliacao.find({ feira: feiraAtual._id, escolaId: escolaId }).lean();
+        const categorias = await Categoria.find({ feira: feiraAtual._id, escolaId: escolaId }).lean();
 
         const rankingPorCategoria = {};
-
         for (const projeto of projetos) {
             let totalNotaPonderada = 0;
             let totalPeso = 0;
             const avaliacoesDoProjeto = avaliacoes.filter(a => a.projeto && String(a.projeto) === String(projeto._id));
-            const numAvaliacoes = avaliacoesDoProjeto.length; 
+            const numAvaliacoes = avaliacoesDoProjeto.length;
 
             if (projeto.criterios && Array.isArray(projeto.criterios)) {
                 for (const criterioProjeto of projeto.criterios) {
@@ -1766,44 +1685,14 @@ router.get('/ranking-categorias/pdf', verificarAdminEscola, async (req, res) => 
                 });
         });
 
-        const escola = await Escola.findById(escolaId) || { nome: "Nome da Escola" };
+        const escola = await Escola.findById(escolaId).lean() || { nome: "Nome da Escola" };
 
-        const htmlContent = await ejs.renderFile(path.join(__dirname, '../views/admin/pdf-ranking-categorias.ejs'), {
+        await generatePdfReport(req, res, 'pdf-ranking-categorias', {
             titulo: 'Ranking por Categoria',
-            layout: false,
-            feira: feiraAtual,
-            nomeFeira: feiraAtual.nome, 
-            rankingPorCategoria: rankingPorCategoria, 
-            escola: escola,
-            formatarData: (dataISO) => {
-                if (!dataISO) return '';
-                const data = new Date(dataISO);
-                return data.toLocaleDateString('pt-BR');
-            }
-        });
-
-        const browser = await puppeteer.launch({
-            headless: true,
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
-        });
-        const page = await browser.newPage();
-        await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
-        const pdfBuffer = await page.pdf({
-            format: 'A4',
-            printBackground: true,
-            displayHeaderFooter: true,
-            headerTemplate: `<div style="font-size: 8px; margin-left: 1cm; margin-right: 1cm; color: #777; text-align: right;">Relatório de Ranking por Categoria</div>`,
-            footerTemplate: `<div style="font-size: 8px; margin-left: 1cm; margin-right: 1cm; color: #777; text-align: center;">Página <span class="pageNumber"></span> de <span class="totalPages"></span></div>`,
-            margin: { top: '2cm', right: '1cm', bottom: '2cm', left: '1cm' }
-        });
-        await browser.close();
-
-        res.set({
-            'Content-Type': 'application/pdf',
-            'Content-Disposition': `attachment; filename="ranking-categorias_${feiraAtual.nome}.pdf"`,
-            'Content-Length': pdfBuffer.length
-        });
-        res.send(pdfBuffer);
+            nomeFeira: feiraAtual.nome,
+            rankingPorCategoria: rankingPorCategoria,
+            escola: escola
+        }, `ranking-categorias_${feiraAtual.nome}`);
 
     } catch (error) {
         console.error('Erro ao gerar PDF de ranking por categoria:', error);
@@ -1818,17 +1707,15 @@ router.get('/ranking-categorias/pdf', verificarAdminEscola, async (req, res) => 
 router.get('/resumo-avaliadores/pdf', verificarAdminEscola, async (req, res) => {
     try {
         const escolaId = req.session.adminEscola.escolaId;
-        const feiraAtual = await Feira.findOne({ status: 'ativa', escolaId: escolaId }); // USANDO escolaId AQUI
+        const feiraAtual = await Feira.findOne({ status: 'ativa', escolaId: escolaId });
         if (!feiraAtual) {
             req.flash('error_msg', 'Nenhuma feira ativa para esta escola para gerar o relatório de resumo de avaliadores.');
-            if (!res.headersSent) {
-                return res.redirect('/admin/dashboard?tab=relatorios');
-            }
+            if (!res.headersSent) { return res.redirect('/admin/dashboard?tab=relatorios'); }
         }
 
-        const avaliadores = await Avaliador.find({ feira: feiraAtual._id, escolaId: escolaId }).populate('projetosAtribuidos').lean(); // USANDO escolaId AQUI
-        const avaliacoes = await Avaliacao.find({ feira: feiraAtual._id, escolaId: escolaId }).lean(); // USANDO escolaId AQUI
-        const criterios = await Criterio.find({ feira: feiraAtual._id, escolaId: escolaId }).lean(); // USANDO escolaId AQUI
+        const avaliadores = await Avaliador.find({ feira: feiraAtual._id, escolaId: escolaId }).populate('projetosAtribuidos').lean();
+        const avaliacoes = await Avaliacao.find({ feira: feiraAtual._id, escolaId: escolaId }).lean();
+        const criterios = await Criterio.find({ feira: feiraAtual._id, escolaId: escolaId }).lean();
 
         const resumoAvaliadores = await Promise.all(avaliadores.map(async av => {
             const avaliacoesDoAvaliador = avaliacoes.filter(a => String(a.avaliador) === String(av._id));
@@ -1845,18 +1732,12 @@ router.get('/resumo-avaliadores/pdf', verificarAdminEscola, async (req, res) => 
                         totalAvaliados++;
                         statusProjeto = '✅ Avaliado';
                     }
-                    // Buscar o título do projeto para exibir na tabela
                     const projetoObj = await Projeto.findById(projetoAtribuido._id).lean();
                     if (projetoObj) {
-                        projetosAvaliadosDetalhes.push({
-                            titulo: projetoObj.titulo,
-                            status: statusProjeto
-                        });
+                        projetosAvaliadosDetalhes.push({ titulo: projetoObj.titulo, status: statusProjeto });
                     }
                 }
             }
-
-
             return {
                 nome: av.nome,
                 email: av.email,
@@ -1868,44 +1749,14 @@ router.get('/resumo-avaliadores/pdf', verificarAdminEscola, async (req, res) => 
             };
         }));
 
-        const escola = await Escola.findById(escolaId) || { nome: "Nome da Escola" };
+        const escola = await Escola.findById(escolaId).lean() || { nome: "Nome da Escola" };
 
-        const htmlContent = await ejs.renderFile(path.join(__dirname, '../views/admin/pdf-resumo-avaliadores.ejs'), {
+        await generatePdfReport(req, res, 'pdf-resumo-avaliadores', {
             titulo: 'Resumo de Avaliadores',
-            layout: false,
-            feira: feiraAtual,
-            nomeFeira: feiraAtual.nome, 
-            avaliadores: resumoAvaliadores, 
-            escola: escola,
-            formatarData: (dataISO) => {
-                if (!dataISO) return '';
-                const data = new Date(dataISO);
-                return data.toLocaleDateString('pt-BR');
-            }
-        });
-
-        const browser = await puppeteer.launch({
-            headless: true,
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
-        });
-        const page = await browser.newPage();
-        await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
-        const pdfBuffer = await page.pdf({
-            format: 'A4',
-            printBackground: true,
-            displayHeaderFooter: true,
-            headerTemplate: `<div style="font-size: 8px; margin-left: 1cm; margin-right: 1cm; color: #777; text-align: right;">Relatório de Resumo de Avaliadores</div>`,
-            footerTemplate: `<div style="font-size: 8px; margin-left: 1cm; margin-right: 1cm; color: #777; text-align: center;">Página <span class="pageNumber"></span> de <span class="totalPages"></span></div>`,
-            margin: { top: '2cm', right: '1cm', bottom: '2cm', left: '1cm' }
-        });
-        await browser.close();
-
-        res.set({
-            'Content-Type': 'application/pdf',
-            'Content-Disposition': `attachment; filename="resumo-avaliadores_${feiraAtual.nome}.pdf"`,
-            'Content-Length': pdfBuffer.length
-        });
-        res.send(pdfBuffer);
+            nomeFeira: feiraAtual.nome,
+            avaliadores: resumoAvaliadores,
+            escola: escola
+        }, `resumo-avaliadores_${feiraAtual.nome}`);
 
     } catch (error) {
         console.error('Erro ao gerar PDF de resumo de avaliadores:', error);
@@ -1921,22 +1772,19 @@ router.get('/resumo-avaliadores/pdf', verificarAdminEscola, async (req, res) => 
 router.get('/relatorio-consolidado/pdf', verificarAdminEscola, async (req, res) => {
     try {
         const escolaId = req.session.adminEscola.escolaId;
-        const feiraAtual = await Feira.findOne({ status: 'ativa', escolaId: escolaId }); // USANDO escolaId AQUI
+        const feiraAtual = await Feira.findOne({ status: 'ativa', escolaId: escolaId });
         if (!feiraAtual) {
             req.flash('error_msg', 'Nenhuma feira ativa para esta escola para gerar o relatório consolidado.');
-            if (!res.headersSent) {
-                return res.redirect('/admin/dashboard?tab=relatorios');
-            }
+            if (!res.headersSent) { return res.redirect('/admin/dashboard?tab=relatorios'); }
         }
 
-        const projetos = await Projeto.find({ feira: feiraAtual._id, escolaId: escolaId }) // USANDO escolaId AQUI
+        const projetos = await Projeto.find({ feira: feiraAtual._id, escolaId: escolaId })
             .populate('categoria')
             .populate('criterios')
             .lean();
 
-        const avaliacoes = await Avaliacao.find({ feira: feiraAtual._id, escolaId: escolaId }).lean(); // USANDO escolaId AQUI
-
-        const criteriosOficiais = await Criterio.find({ feira: feiraAtual._id, escolaId: escolaId }).sort({ nome: 1 }).lean(); // USANDO escolaId AQUI
+        const avaliacoes = await Avaliacao.find({ feira: feiraAtual._id, escolaId: escolaId }).lean();
+        const criteriosOficiais = await Criterio.find({ feira: feiraAtual._id, escolaId: escolaId }).sort({ nome: 1 }).lean();
 
         const relatorioFinalPorProjeto = {};
 
@@ -1956,11 +1804,9 @@ router.get('/relatorio-consolidado/pdf', verificarAdminEscola, async (req, res) 
             for (const criterioOficial of criteriosOficiais) {
                 const notasDoCriterioParaEsteProjeto = avaliacoesDoProjeto.flatMap(avaliacao => {
                     const notasArray = avaliacao.notas || avaliacao.itens;
-                    
                     return (notasArray && Array.isArray(notasArray)) ? notasArray.filter(item => {
                         const isCriterioMatch = item.criterio && (String(item.criterio) === String(criterioOficial._id));
                         const isValorValid = item.nota !== undefined && item.nota !== null && !isNaN(parseFloat(item.nota));
-                        
                         return isCriterioMatch && isValorValid;
                     }) : [];
                 });
@@ -1991,43 +1837,15 @@ router.get('/relatorio-consolidado/pdf', verificarAdminEscola, async (req, res) 
             });
         }
 
-        const escola = await Escola.findById(escolaId) || { nome: "Nome da Escola" };
+        const escola = await Escola.findById(escolaId).lean() || { nome: "Nome da Escola" };
 
-        const htmlContent = await ejs.renderFile(path.join(__dirname, '../views/admin/pdf-consolidado.ejs'), {
+        await generatePdfReport(req, res, 'pdf-consolidado', {
             titulo: 'Relatório Consolidado da Feira',
             nomeFeira: feiraAtual.nome,
             relatorioFinalPorProjeto: relatorioFinalPorProjeto,
             criteriosOficiais: criteriosOficiais,
-            escola: escola,
-            formatarData: (dataISO) => {
-                if (!dataISO) return '';
-                const data = new Date(dataISO);
-                return data.toLocaleDateString('pt-BR');
-            }
-        });
-
-        const browser = await puppeteer.launch({
-            headless: true,
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
-        });
-        const page = await browser.newPage();
-        await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
-        const pdfBuffer = await page.pdf({
-            format: 'A4',
-            printBackground: true,
-            displayHeaderFooter: true,
-            headerTemplate: `<div style="font-size: 8px; margin-left: 1cm; margin-right: 1cm; color: #777; text-align: right;">Relatório Consolidado</div>`,
-            footerTemplate: `<div style="font-size: 8px; margin-left: 1cm; margin-right: 1cm; color: #777; text-align: center;">Página <span class="pageNumber"></span> de <span class="totalPages"></span></div>`,
-            margin: { top: '2cm', right: '1cm', bottom: '2cm', left: '1cm' }
-        });
-        await browser.close();
-
-        res.set({
-            'Content-Type': 'application/pdf',
-            'Content-Disposition': `attachment; filename="relatorio-consolidado_${feiraAtual.nome}.pdf"`,
-            'Content-Length': pdfBuffer.length
-        });
-        res.send(pdfBuffer);
+            escola: escola
+        }, `relatorio-consolidado_${feiraAtual.nome}`);
 
     } catch (error) {
         console.error('Erro ao gerar PDF do relatório consolidado:', error);
