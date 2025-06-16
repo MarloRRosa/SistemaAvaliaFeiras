@@ -1100,6 +1100,32 @@
             // O botão de "Salvar Configurações" envia para /admin/configurar-datas-feira
             // com o método PUT (definido no input hidden)
         });
+
+         document.addEventListener('DOMContentLoaded', () => {
+    const sidebar = document.getElementById('sidebar');
+    const toggle = document.getElementById('sidebarToggle');
+    const overlay = document.getElementById('overlay');
+
+    function openSidebar() {
+      sidebar.classList.add('show');
+      overlay.classList.add('active');
+    }
+
+    function closeSidebar() {
+      sidebar.classList.remove('show');
+      overlay.classList.remove('active');
+    }
+
+    toggle.addEventListener('click', openSidebar);
+    overlay.addEventListener('click', closeSidebar);
+
+    // Fecha sidebar se mudar tamanho para desktop
+    window.addEventListener('resize', () => {
+      if (window.innerWidth >= 768) {
+        closeSidebar();
+      }
+    });
+  });
     </script>
 
 </body>
