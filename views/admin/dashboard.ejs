@@ -746,387 +746,277 @@
 
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const sidebar = document.getElementById('sidebar');
-            const sidebarToggle = document.getElementById('sidebarToggle'); // Alterado para sidebarToggle
-            const closeSidebar = document.getElementById('closeSidebar'); // Novo ID para o 'X'
-            const overlay = document.getElementById('overlay'); // Alterado para overlay
-            const sidebarLinks = document.querySelectorAll('.sidebar-link');
-            const tabContents = document.querySelectorAll('.tab-content');
+document.addEventListener('DOMContentLoaded', () => {
+  // ======== SIDEBAR ========
+  const sidebar = document.getElementById('sidebar');
+  const sidebarToggle = document.getElementById('sidebarToggle');
+  const overlay = document.getElementById('overlay');
+  const sidebarLinks = document.querySelectorAll('.sidebar-link');
+  const tabContents = document.querySelectorAll('.tab-content');
 
-            // Função para alternar a visibilidade da sidebar e overlay
-            function toggleSidebar() {
-                sidebar.classList.toggle('-translate-x-full');
-                overlay.classList.toggle('opacity-0');
-                overlay.classList.toggle('opacity-50');
-                overlay.classList.toggle('pointer-events-none');
-                overlay.classList.toggle('pointer-events-auto');
-                overlay.classList.toggle('hidden'); // Alternar a classe hidden também
-            }
+  function openSidebar() {
+    sidebar.classList.add('show');
+    overlay.classList.add('active');
+  }
 
-            // Event listeners para os botões de toggle
-            sidebarToggle.addEventListener('click', toggleSidebar);
-            closeSidebar.addEventListener('click', toggleSidebar); 
-            overlay.addEventListener('click', toggleSidebar); // Clicar no overlay fecha a sidebar
+  function closeSidebar() {
+    sidebar.classList.remove('show');
+    overlay.classList.remove('active');
+  }
 
-            // Função para mostrar a aba correta
-            function showTab(tabId) {
-                tabContents.forEach(content => {
-                    if (content.id === tabId) {
-                        content.classList.remove('hidden');
-                        content.setAttribute('aria-hidden', 'false');
-                    } else {
-                        content.classList.add('hidden');
-                        content.setAttribute('aria-hidden', 'true');
-                    }
-                });
-            }
+  sidebarToggle.addEventListener('click', openSidebar);
+  overlay.addEventListener('click', closeSidebar);
 
-            // Ativar a aba inicial (baseado em activeTab da renderização EJS)
-            const initialActiveTab = document.querySelector('.sidebar-link.active');
-            if (initialActiveTab) {
-                showTab(initialActiveTab.dataset.tab);
-            } else {
-                // Fallback: mostrar dashboard-geral se nenhuma tab estiver ativa
-                showTab('dashboard-geral');
-                document.querySelector('.sidebar-link[data-tab="dashboard-geral"]').classList.add('active');
-            }
+  window.addEventListener('resize', () => {
+    if (window.innerWidth >= 768) closeSidebar();
+  });
 
-            // Event listener para cliques nos links da sidebar
-            sidebarLinks.forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    // Remover 'active' de todos os links e adicionar ao clicado
-                    sidebarLinks.forEach(l => l.classList.remove('active'));
-                    this.classList.add('active');
+  // ======== TABS ========
+  function showTab(tabId) {
+    tabContents.forEach(content => {
+      content.classList.toggle('hidden', content.id !== tabId);
+      content.setAttribute('aria-hidden', content.id !== tabId ? 'true' : 'false');
+    });
+  }
 
-                    // Mostrar a aba correspondente
-                    const tabId = this.dataset.tab;
-                    showTab(tabId);
+  const initialTab = document.querySelector('.sidebar-link.active');
+  if (initialTab) {
+    showTab(initialTab.dataset.tab);
+  } else {
+    showTab('dashboard-geral');
+    document.querySelector('.sidebar-link[data-tab="dashboard-geral"]').classList.add('active');
+  }
 
-                    // Em telas mobile, fechar a sidebar após a seleção
-                    if (window.innerWidth < 768) {
-                        toggleSidebar();
-                    }
-                });
-            });
-
-            // Lógica para fechar overlay e sidebar automaticamente em desktop se a tela for redimensionada
-            window.addEventListener('resize', () => {
-                if (window.innerWidth >= 768) {
-                    sidebar.classList.remove('-translate-x-full');
-                    overlay.classList.add('hidden', 'opacity-0', 'pointer-events-none'); // Adiciona 'hidden' em desktop
-                    overlay.classList.remove('opacity-50', 'pointer-events-auto');
-                } else {
-                     // Ao redimensionar para mobile, se a sidebar não estiver ativa, esconda-a
-                    if (!sidebar.classList.contains('-translate-x-full') && !overlay.classList.contains('opacity-50')) {
-                        sidebar.classList.add('-translate-x-full');
-                        overlay.classList.add('hidden', 'opacity-0', 'pointer-events-none');
-                    }
-                }
-            });
-
-
-            // Funções genéricas para Modals
-            function setupModal(modalId, openBtnId, closeBtnId, formId, titleId) {
-                const modal = document.getElementById(modalId);
-                const openBtn = document.getElementById(openBtnId);
-                const closeBtn = document.getElementById(closeBtnId);
-                const form = document.getElementById(formId);
-                const title = document.getElementById(titleId);
-
-                if (openBtn) {
-                    openBtn.addEventListener('click', () => {
-                        modal.classList.remove('hidden');
-                        modal.classList.add('flex');
-                        setTimeout(() => {
-                            modal.classList.add('opacity-100');
-                            modal.querySelector('div').classList.add('scale-100'); // Seleciona o conteúdo do modal
-                        }, 10);
-                        // Resetar formulário e título para adicionar novo
-                        if (form) {
-                            form.reset();
-                            const methodInput = form.querySelector('input[name="_method"]');
-                            if (methodInput) methodInput.value = 'POST';
-                        }
-                        if (title) {
-                            if (modalId === 'modalProjeto') title.innerText = 'Adicionar Novo Projeto';
-                            if (modalId === 'modalCategoria') title.innerText = 'Adicionar Nova Categoria';
-                            if (modalId === 'modalCriterio') title.innerText = 'Adicionar Novo Critério';
-                            if (modalId === 'modalAvaliador') title.innerText = 'Adicionar Novo Avaliador';
-                            if (modalId === 'modalFeira') title.innerText = 'Adicionar Nova Feira';
-                            if (modalId === 'modalUsuario') title.innerText = 'Adicionar Novo Usuário Admin';
-                            if (modalId === 'modalConfiguracoes') title.innerText = 'Configurações da Feira';
-                        }
-                    });
-                }
-
-                closeBtn.addEventListener('click', () => {
-                    modal.classList.remove('opacity-100');
-                    modal.querySelector('div').classList.remove('scale-100');
-                    setTimeout(() => {
-                        modal.classList.add('hidden');
-                        modal.classList.remove('flex');
-                    }, 300); // Esperar a transição terminar
-                });
-
-                // Fechar modal ao clicar fora
-                modal.addEventListener('click', (e) => {
-                    if (e.target === modal) {
-                        modal.classList.remove('opacity-100');
-                        modal.querySelector('div').classList.remove('scale-100');
-                        setTimeout(() => {
-                            modal.classList.add('hidden');
-                            modal.classList.remove('flex');
-                        }, 300);
-                    }
-                });
-            }
-
-            // Setup para todos os modais
-            setupModal('modalProjeto', 'btnAbrirModalProjeto', 'btnFecharModalProjeto', 'formProjeto', 'tituloModalProjeto');
-            setupModal('modalCategoria', 'btnAbrirModalCategoria', 'btnFecharModalCategoria', 'formCategoria', 'tituloModalCategoria');
-            setupModal('modalCriterio', 'btnAbrirModalCriterio', 'btnFecharModalCriterio', 'formCriterio', 'tituloModalCriterio');
-            setupModal('modalAvaliador', 'btnAbrirModalAvaliador', 'btnFecharModalAvaliador', 'formAvaliador', 'tituloModalAvaliador');
-            setupModal('modalFeira', 'btnAbrirModalFeira', 'btnFecharModalFeira', 'formFeira', 'tituloModalFeira');
-            setupModal('modalUsuario', 'btnAbrirModalUsuario', 'btnFecharModalUsuario', 'formUsuario', 'tituloModalUsuario');
-            setupModal('modalConfiguracoes', 'btnAbrirModalConfiguracoes', 'btnFecharModalConfiguracoes', 'formConfiguracoesFeiraData', 'tituloModalConfiguracoes');
-
-
-            // Lógica para EDITAR PROJETO
-            document.querySelectorAll('.btn-editar-projeto').forEach(button => {
-                button.addEventListener('click', () => {
-                    const id = button.dataset.id;
-                    const titulo = button.dataset.titulo;
-                    const descricao = button.dataset.descricao;
-                    const categoriaId = button.dataset.categoriaId;
-                    const criterios = button.dataset.criterios ? button.dataset.criterios.split(',') : [];
-                    const turma = button.dataset.turma;
-                    const alunos = button.dataset.alunos ? button.dataset.alunos.split(',') : [];
-
-                    const modal = document.getElementById('modalProjeto');
-                    const form = document.getElementById('formProjeto');
-                    const tituloModal = document.getElementById('tituloModalProjeto');
-
-                    tituloModal.innerText = 'Editar Projeto';
-                    form.action = `/admin/projetos/${id}`; // Ação de formulário para PUT
-                    document.getElementById('projetoId').value = id;
-                    document.getElementById('projetoMethod').value = 'PUT'; // Define o método para PUT
-                    document.getElementById('tituloProjeto').value = titulo;
-                    document.getElementById('descricaoProjeto').value = descricao;
-                    document.getElementById('turmaProjeto').value = turma;
-                    document.getElementById('alunosProjeto').value = alunos.join(', '); // Exibir formatado
-
-                    // Selecionar categoria
-                    document.getElementById('categoriaProjeto').value = categoriaId;
-
-                    // Marcar checkboxes de critérios
-                    document.querySelectorAll('input[name="criterios"]').forEach(checkbox => {
-                        checkbox.checked = criterios.includes(checkbox.value);
-                    });
-
-                    modal.classList.remove('hidden');
-                    modal.classList.add('flex');
-                    setTimeout(() => {
-                        modal.classList.add('opacity-100');
-                        modal.querySelector('div').classList.add('scale-100');
-                    }, 10);
-                });
-            });
-
-            // Lógica para EDITAR CATEGORIA
-            document.querySelectorAll('.btn-editar-categoria').forEach(button => {
-                button.addEventListener('click', () => {
-                    const id = button.dataset.id;
-                    const nome = button.dataset.nome;
-
-                    const modal = document.getElementById('modalCategoria');
-                    const form = document.getElementById('formCategoria');
-                    const tituloModal = document.getElementById('tituloModalCategoria');
-
-                    tituloModal.innerText = 'Editar Categoria';
-                    form.action = `/admin/categorias/${id}`; // Ação de formulário para PUT
-                    document.getElementById('categoriaId').value = id;
-                    document.getElementById('categoriaMethod').value = 'PUT'; // Define o método para PUT
-                    document.getElementById('nomeCategoria').value = nome;
-
-                    modal.classList.remove('hidden');
-                    modal.classList.add('flex');
-                    setTimeout(() => {
-                        modal.classList.add('opacity-100');
-                        modal.querySelector('div').classList.add('scale-100');
-                    }, 10);
-                });
-            });
-
-            // Lógica para EDITAR CRITÉRIO
-            document.querySelectorAll('.btn-editar-criterio').forEach(button => {
-                button.addEventListener('click', () => {
-                    const id = button.dataset.id;
-                    const nome = button.dataset.nome;
-                    const peso = button.dataset.peso;
-                    const observacao = button.dataset.observacao;
-
-                    const modal = document.getElementById('modalCriterio');
-                    const form = document.getElementById('formCriterio');
-                    const tituloModal = document.getElementById('tituloModalCriterio');
-
-                    tituloModal.innerText = 'Editar Critério';
-                    form.action = `/admin/criterios/${id}`; // Ação de formulário para PUT
-                    document.getElementById('criterioId').value = id;
-                    document.getElementById('criterioMethod').value = 'PUT'; // Define o método para PUT
-                    document.getElementById('nomeCriterio').value = nome;
-                    document.getElementById('pesoCriterio').value = peso;
-                    document.getElementById('observacaoCriterio').value = observacao;
-
-                    modal.classList.remove('hidden');
-                    modal.classList.add('flex');
-                    setTimeout(() => {
-                        modal.classList.add('opacity-100');
-                        modal.querySelector('div').classList.add('scale-100');
-                    }, 10);
-                });
-            });
-
-            // Lógica para EDITAR AVALIADOR
-            document.querySelectorAll('.btn-editar-avaliador').forEach(button => {
-                button.addEventListener('click', () => {
-                    const id = button.dataset.id;
-                    const nome = button.dataset.nome;
-                    const email = button.dataset.email;
-                    const pin = button.dataset.pin;
-                    const ativo = button.dataset.ativo === 'true'; // Converter para booleano
-                    const projetosAtribuidos = button.dataset.projetos ? button.dataset.projetos.split(',') : [];
-
-                    const modal = document.getElementById('modalAvaliador');
-                    const form = document.getElementById('formAvaliador');
-                    const tituloModal = document.getElementById('tituloModalAvaliador');
-
-                    tituloModal.innerText = 'Editar Avaliador';
-                    form.action = `/admin/avaliadores/${id}`; // Ação de formulário para PUT
-                    document.getElementById('avaliadorId').value = id;
-                    document.getElementById('avaliadorMethod').value = 'PUT'; // Define o método para PUT
-                    document.getElementById('nomeAvaliador').value = nome;
-                    document.getElementById('emailAvaliador').value = email;
-                    document.getElementById('pinAvaliador').value = pin;
-                    document.getElementById('ativoAvaliador').checked = ativo;
-
-                    // Desmarcar todos os projetos primeiro
-                    document.querySelectorAll('input[name="projetosAtribuidos"]').forEach(checkbox => {
-                        checkbox.checked = false;
-                    });
-                    // Marcar projetos atribuídos
-                    projetosAtribuidos.forEach(projId => {
-                        const checkbox = document.getElementById(`projeto_${projId}`);
-                        if (checkbox) {
-                            checkbox.checked = true;
-                        }
-                    });
-
-                    modal.classList.remove('hidden');
-                    modal.classList.add('flex');
-                    setTimeout(() => {
-                        modal.classList.add('opacity-100');
-                        modal.querySelector('div').classList.add('scale-100');
-                    }, 10);
-                });
-            });
-
-            // Lógica para EDITAR FEIRA
-            document.querySelectorAll('.btn-editar-feira').forEach(button => {
-                button.addEventListener('click', () => {
-                    const id = button.dataset.id;
-                    const nome = button.dataset.nome;
-                    const inicio = button.dataset.inicio;
-                    const fim = button.dataset.fim;
-                    const status = button.dataset.status;
-
-                    const modal = document.getElementById('modalFeira');
-                    const form = document.getElementById('formFeira');
-                    const tituloModal = document.getElementById('tituloModalFeira');
-
-                    tituloModal.innerText = 'Editar Feira';
-                    form.action = `/admin/feiras/${id}`; // Ação de formulário para PUT
-                    document.getElementById('feiraId').value = id;
-                    document.getElementById('feiraMethod').value = 'PUT'; // Define o método para PUT
-                    document.getElementById('nomeFeira').value = nome;
-                    document.getElementById('inicioFeiraModal').value = inicio;
-                    document.getElementById('fimFeiraModal').value = fim;
-                    document.getElementById('statusFeiraModal').value = status;
-
-                    modal.classList.remove('hidden');
-                    modal.classList.add('flex');
-                    setTimeout(() => {
-                        modal.classList.add('opacity-100');
-                        modal.querySelector('div').classList.add('scale-100');
-                    }, 10);
-                });
-            });
-
-            // Lógica para EDITAR USUÁRIO ADMIN (na aba de configurações)
-            document.querySelectorAll('.btn-editar-usuario').forEach(button => {
-                button.addEventListener('click', () => {
-                    const id = button.dataset.id;
-                    const nome = button.dataset.nome;
-                    const email = button.dataset.email;
-                    const isAdmin = button.dataset.isAdmin === 'true';
-
-                    const modal = document.getElementById('modalUsuario');
-                    const form = document.getElementById('formUsuario');
-                    const tituloModal = document.getElementById('tituloModalUsuario');
-
-                    tituloModal.innerText = 'Editar Usuário Admin';
-                    form.action = `/admin/usuarios/${id}`;
-                    document.getElementById('usuarioId').value = id;
-                    document.getElementById('usuarioMethod').value = 'PUT';
-                    document.getElementById('nomeUsuario').value = nome;
-                    document.getElementById('emailUsuario').value = email;
-                    document.getElementById('senhaUsuario').required = false; // Senha não é obrigatória na edição
-                    document.getElementById('isAdminUsuario').checked = isAdmin;
-
-                    modal.classList.remove('hidden');
-                    modal.classList.add('flex');
-                    setTimeout(() => {
-                        modal.classList.add('opacity-100');
-                        modal.querySelector('div').classList.add('scale-100');
-                    }, 10);
-                });
-            });
-
-
-            // MODAL DE CONFIGURAÇÕES (EDITAR DATAS DA FEIRA)
-            // Este modal já tem seu setup via setupModal. A lógica de preenchimento é no EJS
-            // O botão de "Salvar Configurações" envia para /admin/configurar-datas-feira
-            // com o método PUT (definido no input hidden)
-        });
-
-         document.addEventListener('DOMContentLoaded', () => {
-    const sidebar = document.getElementById('sidebar');
-    const toggle = document.getElementById('sidebarToggle');
-    const overlay = document.getElementById('overlay');
-
-    function openSidebar() {
-      sidebar.classList.add('show');
-      overlay.classList.add('active');
-    }
-
-    function closeSidebar() {
-      sidebar.classList.remove('show');
-      overlay.classList.remove('active');
-    }
-
-    toggle.addEventListener('click', openSidebar);
-    overlay.addEventListener('click', closeSidebar);
-
-    // Fecha sidebar se mudar tamanho para desktop
-    window.addEventListener('resize', () => {
-      if (window.innerWidth >= 768) {
-        closeSidebar();
-      }
+  sidebarLinks.forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      sidebarLinks.forEach(l => l.classList.remove('active'));
+      link.classList.add('active');
+      showTab(link.dataset.tab);
+      if (window.innerWidth < 768) closeSidebar();
     });
   });
-    </script>
+
+  // ======== MODAIS ========
+  function setupModal(modalId, openBtnId, closeBtnId, formId, titleId) {
+    const modal = document.getElementById(modalId);
+    const openBtn = document.getElementById(openBtnId);
+    const closeBtn = document.getElementById(closeBtnId);
+    const form = document.getElementById(formId);
+    const title = document.getElementById(titleId);
+
+    if (openBtn) {
+      openBtn.addEventListener('click', () => {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        setTimeout(() => {
+          modal.classList.add('opacity-100');
+          modal.querySelector('div').classList.add('scale-100');
+        }, 10);
+        if (form) {
+          form.reset();
+          const methodInput = form.querySelector('input[name="_method"]');
+          if (methodInput) methodInput.value = 'POST';
+        }
+        if (title) {
+          const titles = {
+            modalProjeto: 'Adicionar Novo Projeto',
+            modalCategoria: 'Adicionar Nova Categoria',
+            modalCriterio: 'Adicionar Novo Critério',
+            modalAvaliador: 'Adicionar Novo Avaliador',
+            modalFeira: 'Adicionar Nova Feira',
+            modalUsuario: 'Adicionar Novo Usuário Admin',
+            modalConfiguracoes: 'Configurações da Feira'
+          };
+          title.innerText = titles[modalId] || '';
+        }
+      });
+    }
+
+    closeBtn.addEventListener('click', () => {
+      modal.classList.remove('opacity-100');
+      modal.querySelector('div').classList.remove('scale-100');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }, 300);
+    });
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.classList.remove('opacity-100');
+        modal.querySelector('div').classList.remove('scale-100');
+        setTimeout(() => {
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+        }, 300);
+      }
+    });
+  }
+
+  // Inicializar modais
+  setupModal('modalProjeto', 'btnAbrirModalProjeto', 'btnFecharModalProjeto', 'formProjeto', 'tituloModalProjeto');
+  setupModal('modalCategoria', 'btnAbrirModalCategoria', 'btnFecharModalCategoria', 'formCategoria', 'tituloModalCategoria');
+  setupModal('modalCriterio', 'btnAbrirModalCriterio', 'btnFecharModalCriterio', 'formCriterio', 'tituloModalCriterio');
+  setupModal('modalAvaliador', 'btnAbrirModalAvaliador', 'btnFecharModalAvaliador', 'formAvaliador', 'tituloModalAvaliador');
+  setupModal('modalFeira', 'btnAbrirModalFeira', 'btnFecharModalFeira', 'formFeira', 'tituloModalFeira');
+  setupModal('modalUsuario', 'btnAbrirModalUsuario', 'btnFecharModalUsuario', 'formUsuario', 'tituloModalUsuario');
+  setupModal('modalConfiguracoes', 'btnAbrirModalConfiguracoes', 'btnFecharModalConfiguracoes', 'formConfiguracoesFeiraData', 'tituloModalConfiguracoes');
+
+  // ======== EDIÇÃO - PROJETO ========
+  document.querySelectorAll('.btn-editar-projeto').forEach(button => {
+    button.addEventListener('click', () => {
+      const modal = document.getElementById('modalProjeto');
+      const form = document.getElementById('formProjeto');
+
+      form.action = `/admin/projetos/${button.dataset.id}`;
+      document.getElementById('projetoId').value = button.dataset.id;
+      document.getElementById('projetoMethod').value = 'PUT';
+      document.getElementById('tituloProjeto').value = button.dataset.titulo;
+      document.getElementById('descricaoProjeto').value = button.dataset.descricao;
+      document.getElementById('turmaProjeto').value = button.dataset.turma;
+      document.getElementById('alunosProjeto').value = (button.dataset.alunos || '').split(',').join(', ');
+      document.getElementById('categoriaProjeto').value = button.dataset.categoriaId;
+      document.querySelectorAll('input[name="criterios"]').forEach(cb => cb.checked = false);
+      (button.dataset.criterios || '').split(',').forEach(id => {
+        const cb = document.getElementById(`criterio_${id}`);
+        if (cb) cb.checked = true;
+      });
+
+      document.getElementById('tituloModalProjeto').innerText = 'Editar Projeto';
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      setTimeout(() => {
+        modal.classList.add('opacity-100');
+        modal.querySelector('div').classList.add('scale-100');
+      }, 10);
+    });
+  });
+
+  // ======== EDIÇÃO - CATEGORIA ========
+  document.querySelectorAll('.btn-editar-categoria').forEach(button => {
+    button.addEventListener('click', () => {
+      const modal = document.getElementById('modalCategoria');
+      const form = document.getElementById('formCategoria');
+
+      form.action = `/admin/categorias/${button.dataset.id}`;
+      document.getElementById('categoriaId').value = button.dataset.id;
+      document.getElementById('categoriaMethod').value = 'PUT';
+      document.getElementById('nomeCategoria').value = button.dataset.nome;
+
+      document.getElementById('tituloModalCategoria').innerText = 'Editar Categoria';
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      setTimeout(() => {
+        modal.classList.add('opacity-100');
+        modal.querySelector('div').classList.add('scale-100');
+      }, 10);
+    });
+  });
+
+  // ======== EDIÇÃO - CRITÉRIO ========
+  document.querySelectorAll('.btn-editar-criterio').forEach(button => {
+    button.addEventListener('click', () => {
+      const modal = document.getElementById('modalCriterio');
+      const form = document.getElementById('formCriterio');
+
+      form.action = `/admin/criterios/${button.dataset.id}`;
+      document.getElementById('criterioId').value = button.dataset.id;
+      document.getElementById('criterioMethod').value = 'PUT';
+      document.getElementById('nomeCriterio').value = button.dataset.nome;
+      document.getElementById('pesoCriterio').value = button.dataset.peso;
+      document.getElementById('observacaoCriterio').value = button.dataset.observacao;
+
+      document.getElementById('tituloModalCriterio').innerText = 'Editar Critério';
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      setTimeout(() => {
+        modal.classList.add('opacity-100');
+        modal.querySelector('div').classList.add('scale-100');
+      }, 10);
+    });
+  });
+
+  // ======== EDIÇÃO - AVALIADOR ========
+  document.querySelectorAll('.btn-editar-avaliador').forEach(button => {
+    button.addEventListener('click', () => {
+      const modal = document.getElementById('modalAvaliador');
+      const form = document.getElementById('formAvaliador');
+
+      form.action = `/admin/avaliadores/${button.dataset.id}`;
+      document.getElementById('avaliadorId').value = button.dataset.id;
+      document.getElementById('avaliadorMethod').value = 'PUT';
+      document.getElementById('nomeAvaliador').value = button.dataset.nome;
+      document.getElementById('emailAvaliador').value = button.dataset.email;
+      document.getElementById('pinAvaliador').value = button.dataset.pin;
+      document.getElementById('ativoAvaliador').checked = button.dataset.ativo === 'true';
+
+      document.querySelectorAll('input[name="projetosAtribuidos"]').forEach(cb => cb.checked = false);
+      (button.dataset.projetos || '').split(',').forEach(id => {
+        const cb = document.getElementById(`projeto_${id}`);
+        if (cb) cb.checked = true;
+      });
+
+      document.getElementById('tituloModalAvaliador').innerText = 'Editar Avaliador';
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      setTimeout(() => {
+        modal.classList.add('opacity-100');
+        modal.querySelector('div').classList.add('scale-100');
+      }, 10);
+    });
+  });
+
+  // ======== EDIÇÃO - FEIRA ========
+  document.querySelectorAll('.btn-editar-feira').forEach(button => {
+    button.addEventListener('click', () => {
+      const modal = document.getElementById('modalFeira');
+      const form = document.getElementById('formFeira');
+
+      form.action = `/admin/feiras/${button.dataset.id}`;
+      document.getElementById('feiraId').value = button.dataset.id;
+      document.getElementById('feiraMethod').value = 'PUT';
+      document.getElementById('nomeFeira').value = button.dataset.nome;
+      document.getElementById('inicioFeiraModal').value = button.dataset.inicio;
+      document.getElementById('fimFeiraModal').value = button.dataset.fim;
+      document.getElementById('statusFeiraModal').value = button.dataset.status;
+
+      document.getElementById('tituloModalFeira').innerText = 'Editar Feira';
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      setTimeout(() => {
+        modal.classList.add('opacity-100');
+        modal.querySelector('div').classList.add('scale-100');
+      }, 10);
+    });
+  });
+
+  // ======== EDIÇÃO - USUÁRIO ADMIN ========
+  document.querySelectorAll('.btn-editar-usuario').forEach(button => {
+    button.addEventListener('click', () => {
+      const modal = document.getElementById('modalUsuario');
+      const form = document.getElementById('formUsuario');
+
+      form.action = `/admin/usuarios/${button.dataset.id}`;
+      document.getElementById('usuarioId').value = button.dataset.id;
+      document.getElementById('usuarioMethod').value = 'PUT';
+      document.getElementById('nomeUsuario').value = button.dataset.nome;
+      document.getElementById('emailUsuario').value = button.dataset.email;
+      document.getElementById('senhaUsuario').required = false;
+      document.getElementById('isAdminUsuario').checked = button.dataset.isAdmin === 'true';
+
+      document.getElementById('tituloModalUsuario').innerText = 'Editar Usuário Admin';
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      setTimeout(() => {
+        modal.classList.add('opacity-100');
+        modal.querySelector('div').classList.add('scale-100');
+      }, 10);
+    });
+  });
+});
+</script>
+
 
 </body>
 </html>
