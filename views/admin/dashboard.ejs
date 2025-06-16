@@ -14,7 +14,7 @@
         if (!feiras) { feiras = []; }
         if (!feiraAtual) { feiraAtual = {}; }
         if (!projetos) { projetos = []; }
-        if (!categorias) { categorias = []; }
+        if (!categorias) { categorias = []; } 
         if (!criterios) { criterios = []; } 
         if (!avaliadores) { avaliadores = []; }
         if (!avaliacoes) { avaliacoes = []; }
@@ -29,13 +29,14 @@
         if (!usuarioLogado) { usuarioLogado = {}; } // Garante que usuarioLogado exista para o select do Avaliador
 
         // Função auxiliar para formatar datas para o input HTML (YYYY-MM-DD)
+        // Esta função é para uso no SERVER-SIDE (EJS) para preencher o HTML inicialmente.
         const formatarDatasParaInput = (dateString) => {
             if (!dateString) return '';
             const date = new Date(dateString);
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const day = String(date.getDate()).padStart(2, '0');
-            return `${day}-${month}-${year}`;
+            return `${year}-${month}-${day}`;
         };
     %>
 
@@ -1077,9 +1078,9 @@
                 button.addEventListener('click', () => {
                     const id = button.dataset.id;
                     const nome = button.dataset.nome;
-                    // Certifica-se de que as datas sejam formatadas para YYYY-MM-DD para o input type="date"
-                    const inicio = button.dataset.inicio; 
-                    const fim = button.dataset.fim;
+                    // Recebe a data no formato original, e converte para YYYY-MM-DD
+                    const inicioOriginal = button.dataset.inicio; 
+                    const fimOriginal = button.dataset.fim;
                     const status = button.dataset.status;
 
                     const modal = document.getElementById('modalFeira');
@@ -1091,8 +1092,9 @@
                     document.getElementById('feiraId').value = id;
                     document.getElementById('feiraMethod').value = 'PUT'; // Define o método para PUT
                     document.getElementById('nomeFeira').value = nome;
-                    document.getElementById('inicioFeiraModal').value = inicio;
-                    document.getElementById('fimFeiraModal').value = fim;
+                    // Aplica a nova função de formatação para os inputs de data
+                    document.getElementById('inicioFeiraModal').value = formatarDataParaInputDate(inicioOriginal);
+                    document.getElementById('fimFeiraModal').value = formatarDataParaInputDate(fimOriginal);
                     document.getElementById('statusFeiraModal').value = status;
 
                     modal.classList.remove('hidden');
@@ -1140,95 +1142,17 @@
             // O botão de "Salvar Configurações" envia para /admin/configuracoes/feiradata (já está correto na form)
         });
 
-        // =========================================================================
-        // FUNÇÃO FORMATAR DATA PARA INPUT (YYYY-MM-DD) - MOVIDA PARA DENTRO DO HTML PARA USO NO JS
-        // Esta função já está sendo passada via res.locals no backend.
-        // No entanto, para ser usada no JavaScript do frontend para preencher campos date,
-        // ela precisa estar disponível globalmente ou no escopo onde é chamada.
-        // Já a movi para o topo do EJS dentro de um scriptlet `<% ... %>` para estar disponível.
-        // Para inputs tipo "date", o formato deve ser YYYY-MM-DD.
-        // Sua função formatarDatasParaInput() está formatando para DD-MM-YYYY.
-        // Precisamos de uma versão para YYYY-MM-DD para os inputs de data.
-        // Vou ajustar a lógica de preenchimento dos inputs de data nos listeners.
-        // =========================================================================
-
-    </script>
-    <script>
-        // Esta função auxiliar formatarDatasParaInput está sendo usada no EJS (server-side)
-        // e também é necessária para preencher os inputs de data no JavaScript (client-side).
-        // Se ela já está disponível globalmente via app.locals, não precisa ser duplicada aqui,
-        // mas o formato para `input type="date"` é YYYY-MM-DD.
-        // A função formatarDatasParaInput que você tinha retorna DD-MM-YYYY.
-        // Para os inputs de data, vamos garantir o formato YYYY-MM-DD.
-        // Para isso, farei um ajuste local nas lógicas de preenchimento dos modais.
-
+        // Função auxiliar para formatar datas para o input HTML (YYYY-MM-DD) para CLIENT-SIDE JS
+        // Esta função deve ser separada daquela usada no SERVER-SIDE (EJS) se os formatos forem diferentes.
+        // O input type="date" sempre espera YYYY-MM-DD.
         function formatarDataParaInputDate(dateString) {
             if (!dateString) return '';
             const date = new Date(dateString);
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const day = String(date.getDate()).padStart(2, '0');
-            return `${day}-${month}-${year}`;
+            return `${year}-${month}-${day}`;
         }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            // ... (código existente da inicialização de sidebar, tabs, etc.) ...
-
-            // Lógica para EDITAR FEIRA: Ajustar formato da data para input type="date"
-            document.querySelectorAll('.btn-editar-feira').forEach(button => {
-                button.addEventListener('click', () => {
-                    const id = button.dataset.id;
-                    const nome = button.dataset.nome;
-                    // Recebe a data no formato original, e converte para YYYY-MM-DD
-                    const inicioOriginal = button.dataset.inicio;
-                    const fimOriginal = button.dataset.fim;
-                    const status = button.dataset.status;
-
-                    const modal = document.getElementById('modalFeira');
-                    const form = document.getElementById('formFeira');
-                    const tituloModal = document.getElementById('tituloModalFeira');
-
-                    tituloModal.innerText = 'Editar Feira';
-                    form.action = `/admin/feiras/${id}`;
-                    document.getElementById('feiraId').value = id;
-                    document.getElementById('feiraMethod').value = 'PUT';
-                    document.getElementById('nomeFeira').value = nome;
-                    // Aplica a nova função de formatação para os inputs de data
-                    document.getElementById('inicioFeiraModal').value = formatarDataParaInputDate(inicioOriginal);
-                    document.getElementById('fimFeiraModal').value = formatarDataParaInputDate(fimOriginal);
-                    document.getElementById('statusFeiraModal').value = status;
-
-                    modal.classList.remove('hidden');
-                    modal.classList.add('flex');
-                    setTimeout(() => {
-                        modal.classList.add('opacity-100');
-                        modal.querySelector('div').classList.add('scale-100');
-                    }, 10);
-                });
-            });
-
-            // Lógica para MODAL DE CONFIGURAÇÕES (EDITAR DATAS DA FEIRA): Ajustar formato da data para input type="date"
-            // Esta lógica está no setupModal agora, mas o preenchimento de dados precisa usar a função de formato YYYY-MM-DD
-            // Para garantir que a data inicial da feiraAtual seja exibida corretamente no input type="date"
-            // Vou garantir que a data seja formatada antes de ser atribuída ao value do input.
-            // A linha `<input type="date" id="novaDataInicio" name="inicioFeira" value="<%= feiraAtual.inicioFeira ? formatarDatasParaInput(feiraAtual.inicioFeira) : '' %>"`
-            // no próprio EJS já tenta formatar. A 'formatarDatasParaInput' do EJS DEVE RETORNAR YYYY-MM-DD para inputs type="date".
-            // Vou adicionar a função formatarDataParaInputDate acima para uso explícito no JS.
-            // E você deve garantir que a função 'formatarDatasParaInput' no seu app.locals ou onde ela é definida para o EJS,
-            // retorne o formato YYYY-MM-DD quando for para campos de formulário date.
-            // Se formatarDatasParaInput para o EJS retornar DD-MM-YYYY, os inputs type="date" não funcionarão.
-
-            // Vou ajustar a sua função formatarDatasParaInput no topo do EJS para sempre retornar YYYY-MM-DD
-            // assim ela será consistente para inputs. Se você precisa dela em DD-MM-YYYY para exibição
-            // em outro lugar, precisará de DUAS funções ou uma função com um parâmetro para o formato.
-            // Para resolver o problema do input, vou deixá-la YYYY-MM-DD.
-
-            // O setupModal já lida com a action, mas a inicialização dos campos para editar
-            // a feira atual na aba de configurações é feita diretamente no HTML EJS.
-            // Portanto, a função `formatarDatasParaInput` que preenche os `value`
-            // dos inputs `type="date"` precisa retornar o formato `YYYY-MM-DD`.
-            // Vou corrigir a declaração dessa função no topo do seu `dashboard.ejs`.
-        });
     </script>
 </body>
 </html>
