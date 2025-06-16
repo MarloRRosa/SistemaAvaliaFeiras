@@ -441,7 +441,7 @@ router.post('/resetar-senha/:token', async (req, res) => {
 // ROTAS DE RELATÓRIOS (PDF) - COM PUPPETEER
 // ==========================================
 async function generatePdfReport(req, res, templateName, data, filename) {
-    let browser; // Declare browser fora do try para garantir acesso no finally
+    let browser;
     try {
         const escolaId = req.session.adminEscola.escolaId;
         const escola = await Escola.findById(escolaId).lean();
@@ -457,22 +457,19 @@ async function generatePdfReport(req, res, templateName, data, filename) {
                 const date = new Date(dateString);
                 const year = date.getFullYear();
                 const month = String(date.getMonth() + 1).padStart(2, '0');
-                const day = String(date.getDate()).padStart(2, 0); // Correção aqui: padStart(2, '0')
+                const day = String(date.getDate()).padStart(2, '0'); // padStart(2, '0') para garantir 2 dígitos
                 return `${day}/${month}/${year}`;
             }
         });
 
-        // =========================================================================
-        // <<< AS MUDANÇAS PRINCIPAIS ESTÃO AQUI >>>
+        // Configuração Puppeteer para Render com @sparticuz/chromium
         browser = await puppeteer.launch({
-            args: [...chromium.args, '--hide-scrollbars', '--disable-web-security'], // Adiciona args do chromium E os seus
-            defaultViewport: chromium.defaultViewport, // Usa o viewport padrão do chromium
-            executablePath: await chromium.executablePath(), // Pega o caminho do executável do chromium fornecido pelo pacote
-            headless: chromium.headless, // Usa o modo headless do chromium (provavelmente 'new')
-            ignoreHTTPSErrors: true, // Boa prática para ambientes de desenvolvimento/produção com certificados self-signed
-            // Se você tinha outras opções aqui, mantenha-as se não entrarem em conflito.
+            args: [...chromium.args, '--hide-scrollbars', '--disable-web-security'],
+            defaultViewport: chromium.defaultViewport,
+            executablePath: await chromium.executablePath, // Corrigido: `executablePath` é uma propriedade, não uma função
+            headless: chromium.headless,
+            ignoreHTTPSErrors: true,
         });
-        // =========================================================================
 
         const page = await browser.newPage();
         await page.setContent(html, { waitUntil: 'networkidle0' });
@@ -491,9 +488,6 @@ async function generatePdfReport(req, res, templateName, data, filename) {
             }
         });
 
-        // O browser.close() já está no finally, o que é ótimo!
-        // await browser.close(); // Esta linha pode ser removida daqui, pois já está no finally
-
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename="${filename}.pdf"`);
         res.send(pdf);
@@ -505,7 +499,7 @@ async function generatePdfReport(req, res, templateName, data, filename) {
             res.redirect('/admin/dashboard?tab=relatorios');
         }
     } finally {
-        if (browser) { // Certifica-se de fechar o navegador mesmo em caso de erro
+        if (browser) {
             await browser.close();
         }
     }
@@ -1468,27 +1462,22 @@ router.delete('/criterios/:id/excluir', verificarAdminEscola, async (req, res) =
 router.get('/resultados-finais/pdf', verificarAdminEscola, async (req, res) => {
     try {
         const escolaId = req.session.adminEscola.escolaId;
-        const feiraAtual = await Feira.findOne({ status: 'ativa', escolaId: escolaId }); // USANDO escolaId AQUI
-
+        const feiraAtual = await Feira.findOne({ status: 'ativa', escolaId: escolaId });
         if (!feiraAtual) {
             req.flash('error_msg', 'Nenhuma feira ativa para esta escola para gerar o relatório de resultados finais.');
-            if (!res.headersSent) {
-                return res.redirect('/admin/dashboard?tab=relatorios');
-            }
+            if (!res.headersSent) { return res.redirect('/admin/dashboard?tab=relatorios'); }
         }
 
-        const projetos = await Projeto.find({ feira: feiraAtual._id, escolaId: escolaId }) // USANDO escolaId AQUI
+        const projetos = await Projeto.find({ feira: feiraAtual._id, escolaId: escolaId })
             .populate('categoria')
             .populate('criterios')
             .lean();
-
-        const avaliacoes = await Avaliacao.find({ feira: feiraAtual._id, escolaId: escolaId }).lean(); // USANDO escolaId AQUI
+        const avaliacoes = await Avaliacao.find({ feira: feiraAtual._id, escolaId: escolaId }).lean();
 
         for (const projeto of projetos) {
             let totalNotaPonderada = 0;
             let totalPeso = 0;
             let criteriosAvaliadosCount = new Set();
-
             if (projeto.criterios && Array.isArray(projeto.criterios)) {
                 for (const criterioProjeto of projeto.criterios) {
                     const avaliacoesDoCriterio = avaliacoes.flatMap(avaliacao => {
@@ -1523,51 +1512,14 @@ router.get('/resultados-finais/pdf', verificarAdminEscola, async (req, res) => {
             return notaB - notaA;
         });
 
-        const escola = await Escola.findById(escolaId) || { nome: "Nome da Escola", diretor: "Diretor da Escola" };
+        const escola = await Escola.findById(escolaId).lean() || { nome: "Nome da Escola", diretor: "Diretor da Escola" };
 
-        const htmlContent = await ejs.renderFile(path.join(__dirname, '../views/admin/pdf-resultados.ejs'), {
+        await generatePdfReport(req, res, 'pdf-resultados', {
             titulo: 'Resultados Finais',
-            feira: feiraAtual,
             nomeFeira: feiraAtual.nome,
             projetos: projetosOrdenados,
-            escola: escola,
-            formatarData: (dataISO) => {
-                if (!dataISO) return '';
-                const data = new Date(dataISO);
-                return data.toLocaleDateString('pt-BR');
-            }
-        });
-
-        const browser = await puppeteer.launch({
-            headless: true,
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
-        });
-        const page = await browser.newPage();
-
-        await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
-
-        const pdfBuffer = await page.pdf({
-            format: 'A4',
-            printBackground: true,
-            displayHeaderFooter: true,
-            headerTemplate: `<div style="font-size: 8px; margin-left: 1cm; margin-right: 1cm; color: #777; text-align: right;">Relatório de Resultados Finais</div>`,
-            footerTemplate: `<div style="font-size: 8px; margin-left: 1cm; margin-right: 1cm; color: #777; text-align: center;">Página <span class="pageNumber"></span> de <span class="totalPages"></span></div>`,
-            margin: {
-                top: '2cm',
-                right: '1cm',
-                bottom: '2cm',
-                left: '1cm'
-            }
-        });
-        await browser.close();
-
-        res.set({
-            'Content-Type': 'application/pdf',
-            'Content-Disposition': `attachment; filename="resultados-finais_${feiraAtual.nome}.pdf"`,
-            'Content-Length': pdfBuffer.length
-        });
-
-        res.send(pdfBuffer);
+            escola: escola
+        }, `resultados-finais_${feiraAtual.nome}`);
 
     } catch (error) {
         console.error('Erro ao gerar PDF de resultados finais:', error);
