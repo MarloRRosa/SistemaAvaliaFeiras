@@ -466,7 +466,7 @@ async function generatePdfReport(req, res, templateName, data, filename) {
         browser = await puppeteer.launch({
             args: [...chromium.args, '--hide-scrollbars', '--disable-web-security'],
             defaultViewport: chromium.defaultViewport,
-            executablePath: await chromium.executablePath, // Corrigido: `executablePath` é uma propriedade, não uma função
+            executablePath: await chromium.executablePath(), // Corrigido: `executablePath` é uma propriedade, não uma função
             headless: chromium.headless,
             ignoreHTTPSErrors: true,
         });
