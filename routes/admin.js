@@ -25,6 +25,70 @@ const ejs = require('ejs');
 // Carrega variáveis de ambiente (garante que estão disponíveis para este arquivo)
 require('dotenv').config();
 
+
+// Função para gerar PIN alfanumérico único
+function generateUniquePin(length = 6) {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = '';
+    const charactersLength = characters.length;
+    for (let i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+}
+
+// Função para formatar data para input HTML (YYYY-MM-DD)
+function formatarDataParaInput(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+// Função para enviar e-mail de redefinição de PIN para avaliador
+async function sendResetPinEmail(avaliador) {
+    const transporter = nodemailer.createTransport({
+        host: process.env.EMAIL_HOST,
+        port: process.env.EMAIL_PORT,
+        secure: process.env.EMAIL_SECURE === 'true',
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
+        },
+        tls: {
+            rejectUnauthorized: false
+        }
+    });
+
+    const mailOptions = {
+        from: `"AvaliaFeiras" <${process.env.EMAIL_USER}>`,
+        to: avaliador.email,
+        subject: 'Redefinição de PIN do Avaliador - AvaliaFeiras',
+        html: `
+            <p>Olá, ${avaliador.nome},</p>
+            <p>Seu PIN de acesso ao sistema AvaliaFeiras foi redefinido.</p>
+            <p>Seu novo PIN é: <strong>${avaliador.pin}</strong></p>
+            <p>Por favor, utilize este PIN para acessar sua conta de avaliador.</p>
+            <p>Se você não solicitou esta redefinição, por favor, ignore este e-mail.</p>
+            <br>
+            <p>Atenciosamente,</p>
+            <p>Equipe AvaliaFeiras</p>
+        `
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log(`Email de redefinição de PIN enviado para ${avaliador.email}`);
+        return true;
+    } catch (error) {
+        console.error(`Erro ao enviar email de redefinição de PIN para ${avaliador.email}:`, error);
+        return false;
+    }
+}
+
+
 // ===========================================
 // VERIFICAÇÃO DE MODELOS (Adicionado para depuração)
 // ===========================================
@@ -890,50 +954,38 @@ router.delete('/projetos/:id', verificarAdminEscola, async (req, res) => {
 
 // Adicionar Avaliador (POST)
 router.post('/avaliadores', verificarAdminEscola, async (req, res) => {
-    const { nome, email, ativo, projetosAtribuidos, feira: feiraId } = req.body;
-    const escolaId = req.session.adminEscola.escolaId;
-    const appUrl = process.env.APP_URL || 'http://localhost:3000';
-
-    let errors = [];
-    if (!nome || nome.trim() === '') errors.push({ text: 'O nome do avaliador é obrigatório.' });
-    if (!email || email.trim() === '') {
-        errors.push({ text: 'O e-mail do avaliador é obrigatório.' });
-    } else {
-        const existingAvaliador = await Avaliador.findOne({ email, escolaId: escolaId });
-        if (existingAvaliador) {
-            errors.push({ text: 'Já existe um avaliador com este e-mail nesta escola.' });
-        }
-    }
-    if (!feiraId || !mongoose.Types.ObjectId.isValid(feiraId)) {
-        errors.push({ text: 'Selecione uma feira válida para o avaliador.' });
-    }
-
-    if (errors.length > 0) {
-        req.flash('error_msg', errors.map(e => e.text).join(', '));
-        return res.redirect('/admin/dashboard?tab=avaliadores');
-    }
+    const { nome, email, pin, ativo, projetosAtribuidos, feira } = req.body;
+    const adminEscolaId = req.session.adminEscola.escolaId;
 
     try {
-        const pin = generatePin(); // Gera um PIN
+        // Verifica se já existe um avaliador com este e-mail para ESTA ESCOLA
+        const existingAvaliador = await Avaliador.findOne({ email, escolaId: adminEscolaId }); // USANDO escolaId AQUI
+        if (existingAvaliador) {
+            req.flash('error_msg', 'Já existe um avaliador com este e-mail nesta escola.');
+            return res.redirect('/admin/dashboard?tab=avaliadores');
+        }
+
+        const generatedPin = pin || generateUniquePin();
         const newAvaliador = new Avaliador({
-            nome: nome.trim(),
-            email: email.toLowerCase().trim(),
-            escolaId: escolaId,
-            feira: new mongoose.Types.ObjectId(feiraId),
-            pin: pin,
-            ativo: !!ativo, // Convert 'on' or true to boolean
-            projetosAtribuidos: Array.isArray(projetosAtribuidos) ? projetosAtribuidos.map(id => new mongoose.Types.ObjectId(id)) : (projetosAtribuidos ? [new mongoose.Types.ObjectId(projetosAtribuidos)] : [])
+            nome,
+            email,
+            pin: generatedPin,
+            ativo: !!ativo,
+            // Garante que projetosAtribuidos é um array válido
+            projetosAtribuidos: Array.isArray(projetosAtribuidos) ? projetosAtribuidos : (projetosAtribuidos ? [projetosAtribuidos].filter(Boolean) : []),
+            escolaId: adminEscolaId, // Vincula SEMPRE à escola do admin logado (USANDO escolaId AQUI)
+            feira: feira // A feira deve ser passada pelo formulário (via modal)
         });
 
         await newAvaliador.save();
 
-        const emailSent = await sendAvaliadorPinEmail(newAvaliador, appUrl);
-        let successMessage = `Avaliador "${newAvaliador.nome}" adicionado com sucesso! PIN: <strong>${pin}</strong>.`;
-        if (!emailSent) {
-            successMessage += ' <em>(Não foi possível enviar o e-mail com o PIN. Verifique as configurações de e-mail.)</em>';
+        const emailSent = await sendResetPinEmail(newAvaliador);
+        if (emailSent) {
+            req.flash('success_msg', `Avaliador ${newAvaliador.nome} adicionado e PIN enviado por e-mail.`);
+        } else {
+            req.flash('success_msg', `Avaliador ${newAvaliador.nome} adicionado, mas falha ao enviar PIN por e-mail. Verifique as configurações.`);
         }
 
-        req.flash('success_msg', successMessage);
         res.redirect('/admin/dashboard?tab=avaliadores');
     } catch (err) {
         console.error('Erro ao adicionar avaliador:', err);
@@ -945,120 +997,119 @@ router.post('/avaliadores', verificarAdminEscola, async (req, res) => {
 // Editar Avaliador (PUT)
 router.put('/avaliadores/:id', verificarAdminEscola, async (req, res) => {
     const { id } = req.params;
-    const { nome, email, ativo, projetosAtribuidos } = req.body; // Removido 'feira' daqui, pois não deve ser editável após a criação para um avaliador
-    const escolaId = req.session.adminEscola.escolaId;
+    const { nome, email, pin, ativo, projetosAtribuidos, feira } = req.body;
+    const adminEscolaId = req.session.adminEscola.escolaId;
 
+    // Validação de ID antes de tentar a operação no banco
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
         req.flash('error_msg', 'ID do avaliador inválido para edição.');
         return res.redirect('/admin/dashboard?tab=avaliadores');
     }
 
-    let errors = [];
-    if (!nome || nome.trim() === '') errors.push({ text: 'O nome do avaliador é obrigatório.' });
-    if (!email || email.trim() === '') {
-        errors.push({ text: 'O e-mail do avaliador é obrigatório.' });
-    } else {
-        const existingAvaliador = await Avaliador.findOne({ email: email.toLowerCase().trim(), escolaId: escolaId, _id: { $ne: id } });
-        if (existingAvaliador) {
-            errors.push({ text: 'Já existe outro avaliador com este e-mail nesta escola.' });
-        }
-    }
-
-    if (errors.length > 0) {
-        req.flash('error_msg', errors.map(e => e.text).join(', '));
-        return res.redirect('/admin/dashboard?tab=avaliadores');
-    }
-
     try {
-        const updatedAvaliador = await Avaliador.findOneAndUpdate(
-            { _id: id, escolaId: escolaId },
-            {
-                nome: nome.trim(),
-                email: email.toLowerCase().trim(),
-                ativo: !!ativo,
-                projetosAtribuidos: Array.isArray(projetosAtribuidos) ? projetosAtribuidos.map(pid => new mongoose.Types.ObjectId(pid)) : (projetosAtribuidos ? [new mongoose.Types.ObjectId(projetosAtribuidos)] : [])
-            },
-            { new: true, runValidators: true }
-        );
-
-        if (!updatedAvaliador) {
+        // Encontra o avaliador e garante que ele pertence à escola do admin
+        const avaliador = await Avaliador.findOne({ _id: id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
+        if (!avaliador) {
             req.flash('error_msg', 'Avaliador não encontrado ou você não tem permissão para editá-lo.');
             return res.redirect('/admin/dashboard?tab=avaliadores');
         }
 
+        // Se o e-mail for alterado, verifica se já existe outro avaliador com ele nesta escola
+        if (email !== avaliador.email) {
+            const existingAvaliador = await Avaliador.findOne({ email, _id: { $ne: id }, escolaId: adminEscolaId }); // USANDO escolaId AQUI
+            if (existingAvaliador) {
+                req.flash('error_msg', 'Este e-mail já está em uso por outro avaliador nesta escola.');
+                return res.redirect('/admin/dashboard?tab=avaliadores');
+            }
+        }
+
+        avaliador.nome = nome;
+        avaliador.email = email;
+        avaliador.pin = pin || avaliador.pin; // Mantém o PIN se não for alterado
+        avaliador.ativo = !!ativo;
+        avaliador.projetosAtribuidos = Array.isArray(projetosAtribuidos) ? projetosAtribuidos : (projetosAtribuidos ? [projetosAtribuidos].filter(Boolean) : []);
+        avaliador.feira = feira; // NOTE: Se `feira` no Avaliador for `feiraId`, isso deve ser ajustado aqui também.
+
+        await avaliador.save();
+
         req.flash('success_msg', 'Avaliador atualizado com sucesso!');
+        res.redirect('/admin/dashboard?tab=avaliadores');
     } catch (err) {
         console.error('Erro ao atualizar avaliador:', err);
         req.flash('error_msg', 'Erro ao atualizar avaliador. Detalhes: ' + err.message);
+        res.redirect('/admin/dashboard?tab=avaliadores');
     }
-
-    res.redirect('/admin/dashboard?tab=avaliadores');
 });
 
 // Redefinir PIN do Avaliador (POST)
 router.post('/avaliadores/reset-pin/:id', verificarAdminEscola, async (req, res) => {
     const { id } = req.params;
-    const escolaId = req.session.adminEscola.escolaId;
-    const appUrl = process.env.APP_URL || 'http://localhost:3000';
+    const adminEscolaId = req.session.adminEscola.escolaId;
 
+    // Validação de ID antes de tentar a operação no banco
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
         req.flash('error_msg', 'ID do avaliador inválido para redefinição de PIN.');
         return res.redirect('/admin/dashboard?tab=avaliadores');
     }
 
     try {
-        const avaliador = await Avaliador.findOne({ _id: id, escolaId: escolaId });
+        // Encontra o avaliador e garante que ele pertence à escola do admin
+        const avaliador = await Avaliador.findOne({ _id: id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
         if (!avaliador) {
             req.flash('error_msg', 'Avaliador não encontrado ou não pertence a esta escola.');
             return res.redirect('/admin/dashboard?tab=avaliadores');
         }
 
-        const newPin = generatePin();
+        const newPin = generateUniquePin();
         avaliador.pin = newPin;
         await avaliador.save();
 
-        const emailSent = await sendAvaliadorPinEmail(avaliador, appUrl, true); // Passa true para indicar que é um reset
+        const emailSent = await sendResetPinEmail(avaliador);
+
         if (emailSent) {
             req.flash('success_msg', `PIN do avaliador ${avaliador.nome} redefinido e enviado por e-mail com sucesso.`);
         } else {
             req.flash('error_msg', `PIN do avaliador ${avaliador.nome} redefinido, mas falha ao enviar e-mail.`);
         }
+        res.redirect('/admin/dashboard?tab=avaliadores');
     } catch (err) {
         console.error('Erro ao redefinir PIN do avaliador:', err);
         req.flash('error_msg', 'Erro ao redefinir PIN do avaliador. Detalhes: ' + err.message);
+        res.redirect('/admin/dashboard?tab=avaliadores');
     }
-
-    res.redirect('/admin/dashboard?tab=avaliadores');
 });
 
 
 // Excluir Avaliador (DELETE)
 router.delete('/avaliadores/:id', verificarAdminEscola, async (req, res) => {
     const { id } = req.params;
-    const escolaId = req.session.adminEscola.escolaId;
+    const adminEscolaId = req.session.adminEscola.escolaId;
 
+    // Validação de ID antes de tentar a operação no banco
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
         req.flash('error_msg', 'ID do avaliador inválido para exclusão.');
         return res.redirect('/admin/dashboard?tab=avaliadores');
     }
 
     try {
-        const avaliadorParaExcluir = await Avaliador.findOne({ _id: id, escolaId: escolaId });
+        // Encontra o avaliador e garante que ele pertence à escola do admin antes de excluir
+        const avaliadorParaExcluir = await Avaliador.findOne({ _id: id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
         if (!avaliadorParaExcluir) {
             req.flash('error_msg', 'Avaliador não encontrado ou você não tem permissão para excluí-lo.');
             return res.redirect('/admin/dashboard?tab=avaliadores');
         }
         
-        await Avaliacao.deleteMany({ avaliador: id, escola: escolaId }); // Exclui avaliações do avaliador nesta escola
-        await Avaliador.deleteOne({ _id: id, escolaId: escolaId });
+        // Exclui avaliações e depois o avaliador, filtrando por escola
+        await Avaliacao.deleteMany({ avaliador: id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
+        await Avaliador.deleteOne({ _id: id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
 
         req.flash('success_msg', 'Avaliador e suas avaliações excluídos com sucesso!');
+        res.redirect('/admin/dashboard?tab=avaliadores');
     } catch (err) {
         console.error('Erro ao excluir avaliador:', err);
         req.flash('error_msg', 'Erro ao excluir avaliador. Detalhes: ' + err.message);
+        res.redirect('/admin/dashboard?tab=avaliadores');
     }
-
-    res.redirect('/admin/dashboard?tab=avaliadores');
 });
 
 // ===========================================
