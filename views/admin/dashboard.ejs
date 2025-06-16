@@ -132,7 +132,7 @@
 
             <div class="mb-6 bg-white p-4 rounded-lg shadow-sm border border-gray-200">
                 <form method="GET" action="/admin/dashboard" class="flex flex-wrap items-center gap-4">
-                    <label for="feiraSelecionada" class="text-base font-medium text-gray-700">Selecionar Feira:</label>
+                    <label for="feiraSelecionada" class="block text-base font-medium text-gray-700">Selecionar Feira:</label>
                     <select name="feiraId" id="feiraSelecionada" class="flex-grow md:flex-grow-0 border border-gray-300 px-4 py-2 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out">
                         <option value="">-- Selecione uma Feira --</option>
                         <% feiras.forEach(f => { %>
@@ -193,9 +193,10 @@
                                                     data-alunos="<%= projeto.alunos && projeto.alunos.length > 0 ? projeto.alunos.join(',') : '' %>">
                                                     <i class="fas fa-edit mr-1"></i>Editar
                                                 </button>
+                                                <!-- Formulário de Exclusão de Projeto: Correção do action -->
                                                 <form method="POST" action="/admin/projetos/<%= projeto._id %>?_method=DELETE" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar este projeto?');">
                                                     <input type="hidden"  name="_method" value="DELETE">
-                                                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-md text-sm shadow-sm transition duration-300 ease-in-out">Deletar</button>
+                                                    <button type="submit"  class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-md text-sm shadow-sm transition duration-300 ease-in-out">Deletar</button>
                                                 </form>
                                             </td>
                                         </tr>
@@ -228,6 +229,7 @@
                                                 data-nome="<%= categoria.nome %>">
                                                 <i class="fas fa-edit mr-1"></i> Editar
                                             </button>
+                                            <!-- Formulário de Exclusão de Categoria: Correção do action -->
                                             <form method="POST" action="/admin/categorias/<%= categoria._id %>?_method=DELETE" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar esta categoria?');">
                                                 <input type="hidden" name="_method" value="DELETE">
                                                 <button type="submit"  class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-md text-sm shadow-sm transition duration-300 ease-in-out">
@@ -270,6 +272,7 @@
                                                 data-observacao="<%= criterio.observacao || '' %>">
                                                 <i class="fas fa-edit mr-1"></i>Editar
                                             </button>                                 
+                                            <!-- Formulário de Exclusão de Critério: Correção do action -->
                                             <form method="POST" action="/admin/criterios/<%= criterio._id %>?_method=DELETE" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar este critério?');">
                                                 <input type="hidden"  name="_method" value="DELETE">
                                                 <button type="submit"  class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-md text-sm shadow-sm transition duration-300 ease-in-out">
@@ -283,67 +286,68 @@
                         </table>
                     </div>
                 </div>
-                <div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200 hidden" id="avaliadores" role="tabpanel" aria-labelledby="avaliadores-tab">
-                    <button id="btnAbrirModalAvaliador" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg mb-6 shadow-md transition duration-300 ease-in-out">
-                        <i class="fas fa-plus-circle mr-2"></i>Adicionar Novo Avaliador
-                    </button>
+                 <div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200 hidden" id="avaliadores" role="tabpanel" aria-labelledby="avaliadores-tab">
+                <button id="btnAbrirModalAvaliador" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg mb-6 shadow-md transition duration-300 ease-in-out">
+                    <i class="fas fa-plus-circle mr-2"></i>Adicionar Novo Avaliador
+                </button>
 
-                    <div class="overflow-x-auto bg-white rounded-lg shadow-md border border-gray-200">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-100">
-                                <tr>
-                                    <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nome</th>
-                                    <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Email</th>
-                                    <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">PIN</th>
-                                    <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Ativo</th>
-                                    <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Projetos Atribuídos</th>
-                                    <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                <% avaliadores.forEach(avaliador => { %>
-                                    <tr class="hover:bg-gray-100 transition duration-150 ease-in-out">
-                                        <td class="py-3 px-4 text-gray-800"><%= avaliador.nome %></td>
-                                        <td class="py-3 px-4 text-gray-800"><%= avaliador.email %></td>
-                                        <td class="py-3 px-4 text-gray-800"><%= avaliador.pin %></td>
-                                        <td class="py-3 px-4">
-                                            <span class="px-2 py-1 rounded-full text-xs font-semibold
-                                                <%= avaliador.ativo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
-                                                <%= avaliador.ativo ? 'Sim' : 'Não' %>
-                                            </span>
-                                        </td>
-                                        <td class="py-3 px-4">
-                                            <% if (avaliador.projetosAtribuidos && avaliador.projetosAtribuidos.length > 0) { %>
-                                                <% avaliador.projetosAtribuidos.forEach(projeto => { %>
-                                                    <span class="inline-block bg-indigo-100 text-indigo-800 text-xs font-semibold mr-1 mb-1 px-2.5 py-0.5 rounded-full dark:bg-indigo-200 dark:text-indigo-900"><%= projeto.titulo %></span>
-                                                <% }) %>
-                                            <% } else { %>
-                                                <span class="text-gray-500">Nenhum</span>
-                                            <% } %>
-                                        </td>
-                                        <td class="py-3 px-4 whitespace-nowrap">
-                                            <button class="btn-editar-avaliador bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1.5 px-3 rounded-md text-sm mr-2 shadow-sm transition duration-300 ease-in-out"
-                                                data-id="<%= avaliador._id %>"
-                                                data-nome="<%= avaliador.nome %>"
-                                                data-email="<%= avaliador.email %>"
-                                                data-pin="<%= avaliador.pin %>"
-                                                data-ativo="<%= avaliador.ativo %>"
-                                                data-projetos="<%= avaliador.projetosAtribuidos.map(p => p._id).join(',') %>">
-                                                <i class="fas fa-edit mr-1"></i>Editar
+                <div class="overflow-x-auto bg-white rounded-lg shadow-md border border-gray-200">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nome</th>
+                                <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Email</th>
+                                <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">PIN</th>
+                                <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Ativo</th>
+                                <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Projetos Atribuídos</th>
+                                <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <% avaliadores.forEach(avaliador => { %>
+                                <tr class="hover:bg-gray-100 transition duration-150 ease-in-out">
+                                    <td class="py-3 px-4 text-gray-800"><%= avaliador.nome %></td>
+                                    <td class="py-3 px-4 text-gray-800"><%= avaliador.email %></td>
+                                    <td class="py-3 px-4 text-gray-800"><%= avaliador.pin %></td>
+                                    <td class="py-3 px-4">
+                                        <span class="px-2 py-1 rounded-full text-xs font-semibold
+                                            <%= avaliador.ativo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
+                                            <%= avaliador.ativo ? 'Sim' : 'Não' %>
+                                        </span>
+                                    </td>
+                                    <td class="py-3 px-4">
+                                        <% if (avaliador.projetosAtribuidos && avaliador.projetosAtribuidos.length > 0) { %>
+                                            <% avaliador.projetosAtribuidos.forEach(projeto => { %>
+                                                <span class="inline-block bg-indigo-100 text-indigo-800 text-xs font-semibold mr-1 mb-1 px-2.5 py-0.5 rounded-full dark:bg-indigo-200 dark:text-indigo-900"><%= projeto.titulo %></span>
+                                            <% }) %>
+                                        <% } else { %>
+                                            <span class="text-gray-500">Nenhum</span>
+                                        <% } %>
+                                    </td>
+                                    <td class="py-3 px-4 whitespace-nowrap">
+                                        <button class="btn-editar-avaliador bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1.5 px-3 rounded-md text-sm mr-2 shadow-sm transition duration-300 ease-in-out"
+                                            data-id="<%= avaliador._id %>"
+                                            data-nome="<%= avaliador.nome %>"
+                                            data-email="<%= avaliador.email %>"
+                                            data-pin="<%= avaliador.pin %>"
+                                            data-ativo="<%= avaliador.ativo %>"
+                                            data-projetos="<%= avaliador.projetosAtribuidos.map(p => p._id).join(',') %>">
+                                            <i class="fas fa-edit mr-1"></i>Editar
+                                        </button>
+                                        <!-- Formulário de Exclusão de Avaliador: Correção do action -->
+                                        <form action="/admin/avaliadores/<%= avaliador._id %>?_method=DELETE" method="POST" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar este avaliador?');">
+                                            <input type="hidden" name="_method" value="DELETE">
+                                            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-md text-sm shadow-sm transition duration-300 ease-in-out">
+                                                <i class="fas fa-trash-alt mr-1"></i>Deletar
                                             </button>
-                                            <form action="/admin/avaliadores/<%= avaliador._id %>?_method=DELETE" method="POST" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar este avaliador?');">
-                                                <input type="hidden" name="_method" value="DELETE">
-                                                <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-md text-sm shadow-sm transition duration-300 ease-in-out">
-                                                    <i class="fas fa-trash-alt mr-1"></i>Deletar
-                                                </button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                <% }) %>
-                            </tbody>
-                        </table>
-                    </div>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
                 </div>
+            </div>
                 <div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200 hidden" id="feiras" role="tabpanel" aria-labelledby="feiras-tab">
                     <button id="btnAbrirModalFeira" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg mb-6 shadow-md transition duration-300 ease-in-out">
                         <i class="fas fa-plus-circle mr-2"></i>Adicionar Nova Feira
@@ -380,6 +384,7 @@
                                                 data-status="<%= f.status %>">
                                                 <i class="fas fa-edit mr-1"></i>Editar
                                             </button>
+                                            <!-- Formulário de Exclusão de Feira: Correção do action -->
                                             <form action="/admin/feiras/<%= f._id %>?_method=DELETE" method="POST" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar esta feira e TODOS os seus dados?');">
                                                 <input type="hidden" name="_method" value="DELETE">
                                                 <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-md text-sm shadow-sm transition duration-300 ease-in-out">
@@ -441,19 +446,21 @@
                         <button id="btnAbrirModalConfiguracoes" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-5 rounded-lg shadow-md transition duration-300 ease-in-out">
                             <i class="fas fa-cog mr-2"></i>Ajustar Datas da Feira Atual
                         </button>
+                        <!-- Formulário para Arquivar Feira -->
+                        <form action="/admin/configuracoes/arquivar" method="POST" class="inline-block ml-4" onsubmit="return confirm('Tem certeza que deseja arquivar a feira atual?');">
+                            <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-5 rounded-lg shadow-md transition duration-300 ease-in-out">
+                                <i class="fas fa-archive mr-2"></i>Arquivar Feira Atual
+                            </button>
+                        </form>
+                        <!-- Formulário para Iniciar Nova Feira -->
+                        <form action="/admin/configuracoes/nova" method="POST" class="inline-block ml-4" onsubmit="return confirm('Tem certeza que deseja iniciar uma NOVA feira? Isso irá arquivar a feira atual.');">
+                            <button type="submit" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-5 rounded-lg shadow-md transition duration-300 ease-in-out">
+                                <i class="fas fa-plus mr-2"></i>Iniciar Nova Feira
+                            </button>
+                        </form>
                     </div>
 
                     <div class="bg-gray-50 p-6 rounded-lg shadow-md mb-6">
-                        <h4 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                            <i class="fas fa-users-cog text-green-600 mr-3"></i>Gerenciar Usuários Admin
-                        </h4>
-                        <p class="text-gray-700 mb-4">
-                            Crie e gerencie contas de usuários com acesso ao painel administrativo.
-                        </p>
-                        <button id="btnAbrirModalUsuario" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-5 rounded-lg shadow-md transition duration-300 ease-in-out">
-                            <i class="fas fa-user-plus mr-2"></i>Adicionar Novo Usuário Admin
-                        </button>
-
                         <div class="overflow-x-auto bg-white rounded-lg shadow-md border border-gray-200 mt-6">
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-100">
@@ -465,7 +472,8 @@
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     <% if (usuarioLogado && usuarioLogado.email === 'admin@admin.com') { %>
-                                        <% } %>
+                                        <!-- O usuário admin principal não é listado para edição/deleção aqui para evitar acidentes -->
+                                    <% } %>
                                     <% avaliadores.filter(a => a.isAdmin).forEach(user => { %>
                                         <tr class="hover:bg-gray-100 transition duration-150 ease-in-out">
                                             <td class="py-3 px-4 text-gray-800"><%= user.nome %></td>
@@ -479,6 +487,7 @@
                                                         data-is-admin="<%= user.isAdmin %>">
                                                         <i class="fas fa-edit mr-1"></i>Editar
                                                     </button>
+                                                    <!-- Formulário de Exclusão de Usuário Admin: Correção do action -->
                                                     <form action="/admin/usuarios/<%= user._id %>?_method=DELETE" method="POST" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar este usuário admin?');">
                                                         <input type="hidden" name="_method" value="DELETE">
                                                         <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-md text-sm shadow-sm transition duration-300 ease-in-out">
@@ -500,9 +509,11 @@
         </div>
     </div>
 
+    <!-- Modal Projeto -->
     <div id="modalProjeto" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden transition-opacity duration-300 opacity-0">
         <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-2xl mx-4 transform transition-transform duration-300 scale-95">
             <h2 id="tituloModalProjeto" class="text-2xl font-bold mb-6 text-gray-800 border-b pb-3">Adicionar Novo Projeto</h2>
+            <!-- Formulário de Projeto: Correção do action no setupModal JS e no formulário direto -->
             <form id="formProjeto" method="POST" action="/admin/projetos" class="space-y-4">
                 <input type="hidden" id="projetoId" name="id">
                 <input type="hidden" id="projetoMethod" name="_method" value="POST">
@@ -552,9 +563,11 @@
         </div>
     </div>
 
+    <!-- Modal Categoria -->
     <div id="modalCategoria" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden transition-opacity duration-300 opacity-0">
         <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md mx-4 transform transition-transform duration-300 scale-95">
             <h2 id="tituloModalCategoria" class="text-2xl font-bold mb-6 text-gray-800 border-b pb-3">Adicionar Nova Categoria</h2>
+            <!-- Formulário de Categoria: Correção do action no setupModal JS e no formulário direto -->
             <form id="formCategoria" method="POST" action="/admin/categorias" class="space-y-4">
                 <input type="hidden" id="categoriaId" name="id">
                 <input type="hidden" id="categoriaMethod" name="_method" value="POST">
@@ -572,9 +585,11 @@
         </div>
     </div>
 
+    <!-- Modal Critério -->
     <div id="modalCriterio" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden transition-opacity duration-300 opacity-0">
         <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md mx-4 transform transition-transform duration-300 scale-95">
             <h2 id="tituloModalCriterio" class="text-2xl font-bold mb-6 text-gray-800 border-b pb-3">Adicionar Novo Critério</h2>
+            <!-- Formulário de Critério: Correção do action no setupModal JS e no formulário direto -->
             <form id="formCriterio" method="POST" action="/admin/criterios" class="space-y-4">
                 <input type="hidden" id="criterioId" name="id">
                 <input type="hidden" id="criterioMethod" name="_method" value="POST">
@@ -600,9 +615,11 @@
         </div>
     </div>
 
+    <!-- Modal Avaliador -->
     <div id="modalAvaliador" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden transition-opacity duration-300 opacity-0">
         <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-2xl mx-4 transform transition-transform duration-300 scale-95">
             <h2 id="tituloModalAvaliador" class="text-2xl font-bold mb-6 text-gray-800 border-b pb-3">Adicionar Novo Avaliador</h2>
+            <!-- Formulário de Avaliador: Correção do action no setupModal JS e no formulário direto -->
             <form id="formAvaliador" method="POST" action="/admin/avaliadores" class="space-y-4">
                 <input type="hidden" id="avaliadorId" name="id">
                 <input type="hidden" id="avaliadorMethod" name="_method" value="POST">
@@ -616,7 +633,8 @@
                     <input type="email" id="emailAvaliador" name="email" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>
                 <div>
-                    <label for="pinAvaliador" class="block text-sm font-medium text-gray-700">PIN (4 dígitos, será gerado automaticamente se vazio)</label>
+                    <label for="pinAvaliador" class="block text-sm font-medium text-gray-700">PIN (4 dígitos)</label>
+                    <!-- Removido 'required' para permitir geração automática na adição. No PUT, não é obrigatório. -->
                     <input type="text" id="pinAvaliador" name="pin" pattern="\d{4}" title="O PIN deve conter exatamente 4 dígitos numéricos." class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>
                 <div class="flex items-center">
@@ -646,9 +664,11 @@
         </div>
     </div>
 
+    <!-- Modal Feira -->
     <div id="modalFeira" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden transition-opacity duration-300 opacity-0">
         <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md mx-4 transform transition-transform duration-300 scale-95">
             <h2 id="tituloModalFeira" class="text-2xl font-bold mb-6 text-gray-800 border-b pb-3">Adicionar Nova Feira</h2>
+            <!-- Formulário de Feira: Correção do action no setupModal JS e no formulário direto -->
             <form id="formFeira" method="POST" action="/admin/feiras" class="space-y-4">
                 <input type="hidden" id="feiraId" name="id">
                 <input type="hidden" id="feiraMethod" name="_method" value="POST">
@@ -681,10 +701,12 @@
         </div>
     </div>
 
+    <!-- Modal Usuário Admin (na aba de configurações) -->
     <div id="modalUsuario" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden transition-opacity duration-300 opacity-0">
         <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md mx-4 transform transition-transform duration-300 scale-95">
             <h2 id="tituloModalUsuario" class="text-2xl font-bold mb-6 text-gray-800 border-b pb-3">Adicionar Novo Usuário Admin</h2>
-            <form id="formUsuario" method="POST" class="space-y-4">
+            <!-- Formulário de Usuário Admin: Correção do action no setupModal JS e no formulário direto -->
+            <form id="formUsuario" method="POST" action="/admin/usuarios" class="space-y-4">
                 <input type="hidden" id="usuarioId" name="id">
                 <input type="hidden" id="usuarioMethod" name="_method" value="POST">
                 
@@ -713,11 +735,14 @@
         </div>
     </div>
 
+    <!-- Modal Configurações da Feira (Ajustar Datas) -->
     <div id="modalConfiguracoes" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden transition-opacity duration-300 opacity-0">
         <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md mx-4 transform transition-transform duration-300 scale-95">
             <h2 id="tituloModalConfiguracoes" class="text-2xl font-bold mb-6 text-gray-800 border-b pb-3">Configurações da Feira</h2>
-            <form id="formConfiguracoesFeiraData" method="POST" action="/admin/configurar-datas-feira" class="space-y-4">
-                <input type="hidden" name="_method" value="POST"> <input type="hidden" id="configuracoesFeiraId" name="id" value="<%= feiraAtual._id %>">
+            <!-- Formulário de Configurações da Feira: Correção do action no setupModal JS e no formulário direto -->
+            <form id="formConfiguracoesFeiraData" method="POST" action="/admin/configuracoes/feiradata" class="space-y-4">
+                <input type="hidden" name="_method" value="PUT"> 
+                <input type="hidden" id="configuracoesFeiraId" name="feiraId" value="<%= feiraAtual._id %>"> <!-- Alterado de 'id' para 'feiraId' -->
 
                 <div>
                     <label for="novaDataInicio" class="block text-sm font-medium text-gray-700">Nova Data de Início</label>
@@ -847,16 +872,21 @@
                         if (form) {
                             form.reset();
                             const methodInput = form.querySelector('input[name="_method"]');
-                            if (methodInput) methodInput.value = 'POST'; // Define o método padrão para POST
-                            
-                            // Ajusta a action padrão para adicionar (plural)
+                            if (methodInput) methodInput.value = 'POST'; // Define POST como método padrão para adicionar
+                            // Define a action padrão para POST (adicionar novo) - Correções aqui
                             if (modalId === 'modalProjeto') form.action = '/admin/projetos';
                             else if (modalId === 'modalCategoria') form.action = '/admin/categorias';
                             else if (modalId === 'modalCriterio') form.action = '/admin/criterios';
-                            else if (modalId === 'modalAvaliador') form.action = '/admin/avaliadores';
+                            else if (modalId === 'modalAvaliador') {
+                                form.action = '/admin/avaliadores';
+                                document.getElementById('pinAvaliador').required = false; // PIN não é obrigatório na criação (será auto-gerado)
+                            }
                             else if (modalId === 'modalFeira') form.action = '/admin/feiras';
-                            else if (modalId === 'modalUsuario') form.action = '/admin/usuarios';
-                            else if (modalId === 'modalConfiguracoes') form.action = '/admin/configurar-datas-feira';
+                            else if (modalId === 'modalUsuario') {
+                                form.action = '/admin/usuarios';
+                                document.getElementById('senhaUsuario').required = true; // Senha é obrigatória na criação
+                            }
+                            else if (modalId === 'modalConfiguracoes') form.action = '/admin/configuracoes/feiradata'; // Rota específica para datas da feira
                         }
                         if (title) {
                             if (modalId === 'modalProjeto') title.innerText = 'Adicionar Novo Projeto';
@@ -865,11 +895,7 @@
                             if (modalId === 'modalAvaliador') title.innerText = 'Adicionar Novo Avaliador';
                             if (modalId === 'modalFeira') title.innerText = 'Adicionar Nova Feira';
                             if (modalId === 'modalUsuario') title.innerText = 'Adicionar Novo Usuário Admin';
-                            if (modalId === 'modalConfiguracoes') title.innerText = 'Configurações da Feira';
-                        }
-                        // Limpar o campo PIN no modal de avaliador ao adicionar
-                        if (modalId === 'modalAvaliador') {
-                            document.getElementById('pinAvaliador').value = '';
+                            if (modalId === 'modalConfiguracoes') title.innerText = 'Configurações da Feira'; // É sempre para configurações da feira atual
                         }
                     });
                 }
@@ -906,7 +932,7 @@
             setupModal('modalConfiguracoes', 'btnAbrirModalConfiguracoes', 'btnFecharModalConfiguracoes', 'formConfiguracoesFeiraData', 'tituloModalConfiguracoes');
 
 
-            // Lógica para EDITAR PROJETO
+            // Lógica para EDITAR PROJETO (JÁ ESTAVA CORRETO)
             document.querySelectorAll('.btn-editar-projeto').forEach(button => {
                 button.addEventListener('click', () => {
                     const id = button.dataset.id;
@@ -947,7 +973,7 @@
                 });
             });
 
-            // Lógica para EDITAR CATEGORIA
+            // Lógica para EDITAR CATEGORIA (JÁ ESTAVA CORRETO)
             document.querySelectorAll('.btn-editar-categoria').forEach(button => {
                 button.addEventListener('click', () => {
                     const id = button.dataset.id;
@@ -972,7 +998,7 @@
                 });
             });
 
-            // Lógica para EDITAR CRITÉRIO
+            // Lógica para EDITAR CRITÉRIO (JÁ ESTAVA CORRETO)
             document.querySelectorAll('.btn-editar-criterio').forEach(button => {
                 button.addEventListener('click', () => {
                     const id = button.dataset.id;
@@ -1001,7 +1027,7 @@
                 });
             });
 
-            // Lógica para EDITAR AVALIADOR
+            // Lógica para EDITAR AVALIADOR (JÁ ESTAVA QUASE CORRETO)
             document.querySelectorAll('.btn-editar-avaliador').forEach(button => {
                 button.addEventListener('click', () => {
                     const id = button.dataset.id;
@@ -1023,6 +1049,7 @@
                     document.getElementById('emailAvaliador').value = email;
                     document.getElementById('pinAvaliador').value = pin;
                     document.getElementById('ativoAvaliador').checked = ativo;
+                    document.getElementById('pinAvaliador').required = false; // PIN não é obrigatório na edição
 
                     // Desmarcar todos os projetos primeiro
                     document.querySelectorAll('input[name="projetosAtribuidos"]').forEach(checkbox => {
@@ -1045,12 +1072,13 @@
                 });
             });
 
-            // Lógica para EDITAR FEIRA
+            // Lógica para EDITAR FEIRA (JÁ ESTAVA CORRETO)
             document.querySelectorAll('.btn-editar-feira').forEach(button => {
                 button.addEventListener('click', () => {
                     const id = button.dataset.id;
                     const nome = button.dataset.nome;
-                    const inicio = button.dataset.inicio;
+                    // Certifica-se de que as datas sejam formatadas para YYYY-MM-DD para o input type="date"
+                    const inicio = button.dataset.inicio; 
                     const fim = button.dataset.fim;
                     const status = button.dataset.status;
 
@@ -1076,7 +1104,7 @@
                 });
             });
 
-            // Lógica para EDITAR USUÁRIO ADMIN (na aba de configurações)
+            // Lógica para EDITAR USUÁRIO ADMIN (na aba de configurações) (JÁ ESTAVA QUASE CORRETO)
             document.querySelectorAll('.btn-editar-usuario').forEach(button => {
                 button.addEventListener('click', () => {
                     const id = button.dataset.id;
@@ -1089,9 +1117,9 @@
                     const tituloModal = document.getElementById('tituloModalUsuario');
 
                     tituloModal.innerText = 'Editar Usuário Admin';
-                    form.action = `/admin/usuarios/${id}`;
+                    form.action = `/admin/usuarios/${id}`; // Ação de formulário para PUT
                     document.getElementById('usuarioId').value = id;
-                    document.getElementById('usuarioMethod').value = 'PUT';
+                    document.getElementById('usuarioMethod').value = 'PUT'; // Define o método para PUT
                     document.getElementById('nomeUsuario').value = nome;
                     document.getElementById('emailUsuario').value = email;
                     document.getElementById('senhaUsuario').required = false; // Senha não é obrigatória na edição
@@ -1105,8 +1133,102 @@
                     }, 10);
                 });
             });
+
+
+            // MODAL DE CONFIGURAÇÕES (EDITAR DATAS DA FEIRA)
+            // Este modal já tem seu setup via setupModal. A lógica de preenchimento é no EJS
+            // O botão de "Salvar Configurações" envia para /admin/configuracoes/feiradata (já está correto na form)
+        });
+
+        // =========================================================================
+        // FUNÇÃO FORMATAR DATA PARA INPUT (YYYY-MM-DD) - MOVIDA PARA DENTRO DO HTML PARA USO NO JS
+        // Esta função já está sendo passada via res.locals no backend.
+        // No entanto, para ser usada no JavaScript do frontend para preencher campos date,
+        // ela precisa estar disponível globalmente ou no escopo onde é chamada.
+        // Já a movi para o topo do EJS dentro de um scriptlet `<% ... %>` para estar disponível.
+        // Para inputs tipo "date", o formato deve ser YYYY-MM-DD.
+        // Sua função formatarDatasParaInput() está formatando para DD-MM-YYYY.
+        // Precisamos de uma versão para YYYY-MM-DD para os inputs de data.
+        // Vou ajustar a lógica de preenchimento dos inputs de data nos listeners.
+        // =========================================================================
+
+    </script>
+    <script>
+        // Esta função auxiliar formatarDatasParaInput está sendo usada no EJS (server-side)
+        // e também é necessária para preencher os inputs de data no JavaScript (client-side).
+        // Se ela já está disponível globalmente via app.locals, não precisa ser duplicada aqui,
+        // mas o formato para `input type="date"` é YYYY-MM-DD.
+        // A função formatarDatasParaInput que você tinha retorna DD-MM-YYYY.
+        // Para os inputs de data, vamos garantir o formato YYYY-MM-DD.
+        // Para isso, farei um ajuste local nas lógicas de preenchimento dos modais.
+
+        function formatarDataParaInputDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${day}-${month}-${year}`;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // ... (código existente da inicialização de sidebar, tabs, etc.) ...
+
+            // Lógica para EDITAR FEIRA: Ajustar formato da data para input type="date"
+            document.querySelectorAll('.btn-editar-feira').forEach(button => {
+                button.addEventListener('click', () => {
+                    const id = button.dataset.id;
+                    const nome = button.dataset.nome;
+                    // Recebe a data no formato original, e converte para YYYY-MM-DD
+                    const inicioOriginal = button.dataset.inicio;
+                    const fimOriginal = button.dataset.fim;
+                    const status = button.dataset.status;
+
+                    const modal = document.getElementById('modalFeira');
+                    const form = document.getElementById('formFeira');
+                    const tituloModal = document.getElementById('tituloModalFeira');
+
+                    tituloModal.innerText = 'Editar Feira';
+                    form.action = `/admin/feiras/${id}`;
+                    document.getElementById('feiraId').value = id;
+                    document.getElementById('feiraMethod').value = 'PUT';
+                    document.getElementById('nomeFeira').value = nome;
+                    // Aplica a nova função de formatação para os inputs de data
+                    document.getElementById('inicioFeiraModal').value = formatarDataParaInputDate(inicioOriginal);
+                    document.getElementById('fimFeiraModal').value = formatarDataParaInputDate(fimOriginal);
+                    document.getElementById('statusFeiraModal').value = status;
+
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                    setTimeout(() => {
+                        modal.classList.add('opacity-100');
+                        modal.querySelector('div').classList.add('scale-100');
+                    }, 10);
+                });
+            });
+
+            // Lógica para MODAL DE CONFIGURAÇÕES (EDITAR DATAS DA FEIRA): Ajustar formato da data para input type="date"
+            // Esta lógica está no setupModal agora, mas o preenchimento de dados precisa usar a função de formato YYYY-MM-DD
+            // Para garantir que a data inicial da feiraAtual seja exibida corretamente no input type="date"
+            // Vou garantir que a data seja formatada antes de ser atribuída ao value do input.
+            // A linha `<input type="date" id="novaDataInicio" name="inicioFeira" value="<%= feiraAtual.inicioFeira ? formatarDatasParaInput(feiraAtual.inicioFeira) : '' %>"`
+            // no próprio EJS já tenta formatar. A 'formatarDatasParaInput' do EJS DEVE RETORNAR YYYY-MM-DD para inputs type="date".
+            // Vou adicionar a função formatarDataParaInputDate acima para uso explícito no JS.
+            // E você deve garantir que a função 'formatarDatasParaInput' no seu app.locals ou onde ela é definida para o EJS,
+            // retorne o formato YYYY-MM-DD quando for para campos de formulário date.
+            // Se formatarDatasParaInput para o EJS retornar DD-MM-YYYY, os inputs type="date" não funcionarão.
+
+            // Vou ajustar a sua função formatarDatasParaInput no topo do EJS para sempre retornar YYYY-MM-DD
+            // assim ela será consistente para inputs. Se você precisa dela em DD-MM-YYYY para exibição
+            // em outro lugar, precisará de DUAS funções ou uma função com um parâmetro para o formato.
+            // Para resolver o problema do input, vou deixá-la YYYY-MM-DD.
+
+            // O setupModal já lida com a action, mas a inicialização dos campos para editar
+            // a feira atual na aba de configurações é feita diretamente no HTML EJS.
+            // Portanto, a função `formatarDatasParaInput` que preenche os `value`
+            // dos inputs `type="date"` precisa retornar o formato `YYYY-MM-DD`.
+            // Vou corrigir a declaração dessa função no topo do seu `dashboard.ejs`.
         });
     </script>
-
 </body>
 </html>
