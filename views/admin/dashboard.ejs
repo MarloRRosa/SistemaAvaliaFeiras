@@ -39,17 +39,17 @@
         };
     %>
 
-    <button id="sidebarToggleMobile" class="md:hidden fixed top-4 left-4 z-50 bg-white p-3 rounded-md shadow-md">
+    <button id="sidebarToggle" class="md:hidden fixed top-4 left-4 z-50 bg-white p-3 rounded-md shadow-md">
         <i class="fas fa-bars text-xl"></i>
     </button>
 
-    <div id="mobile-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden transition-opacity duration-300 opacity-0 pointer-events-none"></div>
+    <div id="overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden transition-opacity duration-300 opacity-0 pointer-events-none"></div>
 
     <div class="app-container flex flex-col md:flex-row min-h-screen w-full">
         <aside id="sidebar" class="bg-gray-800 text-gray-300 p-4 shadow-xl flex flex-col fixed inset-y-0 left-0 w-64 transform -translate-x-full md:relative md:translate-x-0 md:flex-shrink-0 transition-transform duration-300 ease-in-out z-50 md:z-auto">
             <div class="p-4 text-center border-b border-gray-700 mb-4 flex justify-between items-center">
                 <h1 class="text-2xl font-extrabold tracking-tight text-white link-text">Painel Admin</h1>
-                <button id="sidebarToggleDesktop" class="text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-gray-600 rounded-md p-1 md:hidden">
+                <button id="closeSidebar" class="text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-gray-600 rounded-md p-1 md:hidden">
                     <i class="fas fa-times text-xl"></i>
                 </button>
             </div>
@@ -748,25 +748,26 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const sidebar = document.getElementById('sidebar');
-            const sidebarToggleMobile = document.getElementById('sidebarToggleMobile');
-            const sidebarToggleDesktop = document.getElementById('sidebarToggleDesktop'); // O 'X' de fechar no mobile
-            const mobileOverlay = document.getElementById('mobile-overlay');
+            const sidebarToggle = document.getElementById('sidebarToggle'); // Alterado para sidebarToggle
+            const closeSidebar = document.getElementById('closeSidebar'); // Novo ID para o 'X'
+            const overlay = document.getElementById('overlay'); // Alterado para overlay
             const sidebarLinks = document.querySelectorAll('.sidebar-link');
             const tabContents = document.querySelectorAll('.tab-content');
 
             // Função para alternar a visibilidade da sidebar e overlay
             function toggleSidebar() {
                 sidebar.classList.toggle('-translate-x-full');
-                mobileOverlay.classList.toggle('opacity-0');
-                mobileOverlay.classList.toggle('opacity-50');
-                mobileOverlay.classList.toggle('pointer-events-none');
-                mobileOverlay.classList.toggle('pointer-events-auto');
+                overlay.classList.toggle('opacity-0');
+                overlay.classList.toggle('opacity-50');
+                overlay.classList.toggle('pointer-events-none');
+                overlay.classList.toggle('pointer-events-auto');
+                overlay.classList.toggle('hidden'); // Alternar a classe hidden também
             }
 
             // Event listeners para os botões de toggle
-            sidebarToggleMobile.addEventListener('click', toggleSidebar);
-            sidebarToggleDesktop.addEventListener('click', toggleSidebar); // Para o 'X' de fechar
-            mobileOverlay.addEventListener('click', toggleSidebar); // Clicar no overlay fecha a sidebar
+            sidebarToggle.addEventListener('click', toggleSidebar);
+            closeSidebar.addEventListener('click', toggleSidebar); 
+            overlay.addEventListener('click', toggleSidebar); // Clicar no overlay fecha a sidebar
 
             // Função para mostrar a aba correta
             function showTab(tabId) {
@@ -815,13 +816,13 @@
             window.addEventListener('resize', () => {
                 if (window.innerWidth >= 768) {
                     sidebar.classList.remove('-translate-x-full');
-                    mobileOverlay.classList.add('opacity-0', 'pointer-events-none');
-                    mobileOverlay.classList.remove('opacity-50', 'pointer-events-auto');
+                    overlay.classList.add('hidden', 'opacity-0', 'pointer-events-none'); // Adiciona 'hidden' em desktop
+                    overlay.classList.remove('opacity-50', 'pointer-events-auto');
                 } else {
                      // Ao redimensionar para mobile, se a sidebar não estiver ativa, esconda-a
-                    if (!sidebar.classList.contains('-translate-x-full') && !mobileOverlay.classList.contains('opacity-50')) {
+                    if (!sidebar.classList.contains('-translate-x-full') && !overlay.classList.contains('opacity-50')) {
                         sidebar.classList.add('-translate-x-full');
-                        mobileOverlay.classList.add('opacity-0', 'pointer-events-none');
+                        overlay.classList.add('hidden', 'opacity-0', 'pointer-events-none');
                     }
                 }
             });

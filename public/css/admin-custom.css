@@ -32,18 +32,20 @@
 }
 
 /* Overlay escuro para mobile */
-#mobile-overlay {
+#overlay { /* Alterado para #overlay */
   background-color: rgba(0, 0, 0, 0.5); /* bg-black bg-opacity-50 */
   z-index: 40;
   transition: opacity 0.3s ease-in-out;
   opacity: 0; /* Escondido por padrão */
   pointer-events: none; /* Não interfere com cliques quando escondido */
+  display: none; /* Começa escondido */
 }
 
 /* Estilo para mostrar o overlay */
-#mobile-overlay.opacity-50 {
+#overlay.opacity-50 { /* Alterado para #overlay.opacity-50 */
   opacity: 1;
   pointer-events: auto; /* Permite cliques para fechar */
+  display: block; /* Exibe quando ativo */
 }
 
 
@@ -71,12 +73,16 @@
     padding-left: 0; /* Removido padding extra pois a sidebar não é mais fixed */
   }
 
-  #sidebarToggleMobile {
+  #sidebarToggle { /* Alterado para #sidebarToggle */
     display: none !important; /* Esconder o botão de toggle em desktop */
   }
 
-  #sidebarToggleDesktop {
+  #closeSidebar { /* Alterado para #closeSidebar */
     display: none !important; /* Esconder o 'X' de fechar em desktop */
+  }
+  
+  #overlay { /* Esconder overlay completamente em desktop */
+    display: none !important;
   }
 }
 
@@ -131,8 +137,6 @@
     from { opacity: 0; }
     to { opacity: 1; }
 }
-/* Removida a animação slideIn do modal-content pois estou usando transições CSS */
-
 
 /* Melhorar foco em inputs */
 input:focus,

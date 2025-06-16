@@ -714,7 +714,7 @@ router.get('/dashboard', verificarAdminEscola, async (req, res) => {
         // Renderiza o dashboard principal e passa TODOS os dados necessários para as abas
         res.render('admin/dashboard', {
             titulo: 'Dashboard Admin',
-            layout: 'layouts/main', // Ou 'layouts/public' se você não tiver um layout 'main'
+            layout: false,
             usuarioLogado: req.session.adminEscola,
             activeTab: activeTab,
             feiras,
