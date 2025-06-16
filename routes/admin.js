@@ -1042,238 +1042,121 @@ router.put('/avaliadores/:id', verificarAdminEscola, async (req, res) => {
 });
 
 // Redefinir PIN do Avaliador (POST)
-router.post('/avaliadores/reset-pin/:id', verificarAdminEscola, async (req, res) => {
-    const { id } = req.params;
-    const adminEscolaId = req.session.adminEscola.escolaId;
-
-    // Validação de ID antes de tentar a operação no banco
-    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-        req.flash('error_msg', 'ID do avaliador inválido para redefinição de PIN.');
-        return res.redirect('/admin/dashboard?tab=avaliadores');
-    }
-
+router.post('/avaliadores', verificarAdminEscola, async (req, res) => {
+    const { nome, email, projetosAtribuidos } = req.body;
+    const escolaId = req.session.adminEscola.escolaId;
     try {
-        // Encontra o avaliador e garante que ele pertence à escola do admin
-        const avaliador = await Avaliador.findOne({ _id: id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
-        if (!avaliador) {
-            req.flash('error_msg', 'Avaliador não encontrado ou não pertence a esta escola.');
-            return res.redirect('/admin/dashboard?tab=avaliadores');
-        }
-
-        const newPin = generateUniquePin();
-        avaliador.pin = newPin;
+        const feira = await Feira.findOne({ status: 'ativa', escola: escolaId });
+        const avaliador = new Avaliador({
+            nome,
+            email,
+            pin: generatePin(),
+            escolaId,
+            feira: feira._id,
+            projetosAtribuidos: Array.isArray(projetosAtribuidos)
+                ? projetosAtribuidos
+                : (projetosAtribuidos ? [projetosAtribuidos] : [])
+        });
         await avaliador.save();
-
-        const emailSent = await sendResetPinEmail(avaliador);
-
-        if (emailSent) {
-            req.flash('success_msg', `PIN do avaliador ${avaliador.nome} redefinido e enviado por e-mail com sucesso.`);
-        } else {
-            req.flash('error_msg', `PIN do avaliador ${avaliador.nome} redefinido, mas falha ao enviar e-mail.`);
-        }
-        res.redirect('/admin/dashboard?tab=avaliadores');
+        req.flash('success_msg', 'Avaliador criado com sucesso!');
     } catch (err) {
-        console.error('Erro ao redefinir PIN do avaliador:', err);
-        req.flash('error_msg', 'Erro ao redefinir PIN do avaliador. Detalhes: ' + err.message);
-        res.redirect('/admin/dashboard?tab=avaliadores');
+        console.error('Erro ao criar avaliador:', err);
+        req.flash('error_msg', 'Erro ao criar avaliador. ' + err.message);
     }
+    res.redirect('/admin/dashboard?tab=avaliadores');
 });
 
-
-// Excluir Avaliador (DELETE)
-router.delete('/avaliadores/:id', verificarAdminEscola, async (req, res) => {
-    const { id } = req.params;
-    const adminEscolaId = req.session.adminEscola.escolaId;
-
-    // Validação de ID antes de tentar a operação no banco
-    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-        req.flash('error_msg', 'ID do avaliador inválido para exclusão.');
-        return res.redirect('/admin/dashboard?tab=avaliadores');
-    }
-
+// Editar Avaliador
+router.put('/avaliadores/:id', verificarAdminEscola, async (req, res) => {
+    const { nome, email, ativo, projetosAtribuidos } = req.body;
     try {
-        // Encontra o avaliador e garante que ele pertence à escola do admin antes de excluir
-        const avaliadorParaExcluir = await Avaliador.findOne({ _id: id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
-        if (!avaliadorParaExcluir) {
-            req.flash('error_msg', 'Avaliador não encontrado ou você não tem permissão para excluí-lo.');
-            return res.redirect('/admin/dashboard?tab=avaliadores');
-        }
-        
-        // Exclui avaliações e depois o avaliador, filtrando por escola
-        await Avaliacao.deleteMany({ avaliador: id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
-        await Avaliador.deleteOne({ _id: id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
+        await Avaliador.findByIdAndUpdate(req.params.id, {
+            nome,
+            email,
+            ativo: ativo === 'true' || ativo === true,
+            projetosAtribuidos: Array.isArray(projetosAtribuidos)
+                ? projetosAtribuidos
+                : (projetosAtribuidos ? [projetosAtribuidos] : [])
+        });
+        req.flash('success_msg', 'Avaliador atualizado com sucesso!');
+    } catch (err) {
+        console.error('Erro ao atualizar avaliador:', err);
+        req.flash('error_msg', 'Erro ao atualizar avaliador.');
+    }
+    res.redirect('/admin/dashboard?tab=avaliadores');
+});
 
-        req.flash('success_msg', 'Avaliador e suas avaliações excluídos com sucesso!');
-        res.redirect('/admin/dashboard?tab=avaliadores');
+// Excluir Avaliador
+router.delete('/avaliadores/:id', verificarAdminEscola, async (req, res) => {
+    try {
+        await Avaliador.findByIdAndDelete(req.params.id);
+        req.flash('success_msg', 'Avaliador excluído com sucesso!');
     } catch (err) {
         console.error('Erro ao excluir avaliador:', err);
-        req.flash('error_msg', 'Erro ao excluir avaliador. Detalhes: ' + err.message);
-        res.redirect('/admin/dashboard?tab=avaliadores');
+        req.flash('error_msg', 'Erro ao excluir avaliador.');
     }
+    res.redirect('/admin/dashboard?tab=avaliadores');
 });
 
 // ===========================================
 // ROTAS CRUD - FEIRAS
 // ===========================================
 
-// Adicionar Feira (POST)
-router.post('/feiras', verificarAdminEscola, async (req, res) => {
-    const { nome, inicioFeira, fimFeira, status } = req.body;
+router.post('/avaliadores', verificarAdminEscola, async (req, res) => {
+    const { nome, email, projetosAtribuidos } = req.body;
     const escolaId = req.session.adminEscola.escolaId;
-
-    let errors = [];
-
-    if (!nome || nome.trim() === '') {
-        errors.push({ text: 'Por favor, insira um nome para a feira.' });
-    }
-    if (!status || (status !== 'ativa' && status !== 'arquivada')) {
-        errors.push({ text: 'Status da feira inválido.' });
-    }
-
-    if (status === 'ativa') {
-        const existingActiveFeira = await Feira.findOne({ status: 'ativa', escolaId: escolaId });
-        if (existingActiveFeira) {
-            errors.push({ text: `Já existe uma feira ativa para esta escola (${existingActiveFeira.nome}). Desative-a antes de ativar uma nova.` });
-        }
-    }
-
-    if (errors.length > 0) {
-        req.flash('error_msg', errors.map(e => e.text).join(', '));
-        return res.redirect('/admin/dashboard?tab=feiras');
-    }
-
     try {
-        const newFeira = new Feira({
-            nome: nome.trim(),
-            inicioFeira: inicioFeira || null,
-            fimFeira: fimFeira || null,
-            status: status,
-            escolaId: escolaId
+        const feira = await Feira.findOne({ status: 'ativa', escola: escolaId });
+        const avaliador = new Avaliador({
+            nome,
+            email,
+            pin: generatePin(),
+            escolaId,
+            feira: feira._id,
+            projetosAtribuidos: Array.isArray(projetosAtribuidos)
+                ? projetosAtribuidos
+                : (projetosAtribuidos ? [projetosAtribuidos] : [])
         });
-
-        await newFeira.save();
-        req.flash('success_msg', 'Feira adicionada com sucesso!');
+        await avaliador.save();
+        req.flash('success_msg', 'Avaliador criado com sucesso!');
     } catch (err) {
-        console.error('Erro ao adicionar feira:', err);
-        req.flash('error_msg', 'Erro ao adicionar feira. Detalhes: ' + err.message);
+        console.error('Erro ao criar avaliador:', err);
+        req.flash('error_msg', 'Erro ao criar avaliador. ' + err.message);
     }
-
-    res.redirect('/admin/dashboard?tab=feiras');
+    res.redirect('/admin/dashboard?tab=avaliadores');
 });
 
-// Editar Feira (PUT)
-router.put('/feiras/:id', verificarAdminEscola, async (req, res) => {
-    const { id } = req.params;
-    const { nome, inicioFeira, fimFeira, status } = req.body;
-    const escolaId = req.session.adminEscola.escolaId;
-
-    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-        req.flash('error_msg', 'ID da feira inválido para edição.');
-        return res.redirect('/admin/dashboard?tab=feiras');
-    }
-
-    let errors = [];
-    if (!nome || nome.trim() === '') errors.push({ text: 'O nome da feira é obrigatório.' });
-    if (!status || (status !== 'ativa' && status !== 'arquivada')) errors.push({ text: 'Status da feira inválido.' });
-
-    if (status === 'ativa') {
-        const existingActiveFeira = await Feira.findOne({ status: 'ativa', escolaId: escolaId, _id: { $ne: id } });
-        if (existingActiveFeira) {
-            errors.push({ text: `Já existe outra feira ativa para esta escola (${existingActiveFeira.nome}). Desative-a antes de ativar esta.` });
-        }
-    }
-
-    if (errors.length > 0) {
-        req.flash('error_msg', errors.map(e => e.text).join(', '));
-        return res.redirect('/admin/dashboard?tab=feiras');
-    }
-
+// Editar Avaliador
+router.put('/avaliadores/:id', verificarAdminEscola, async (req, res) => {
+    const { nome, email, ativo, projetosAtribuidos } = req.body;
     try {
-        if (status === 'ativa') {
-            await Feira.updateMany(
-                { _id: { $ne: new mongoose.Types.ObjectId(id) }, status: 'ativa', escolaId: escolaId },
-                { status: 'arquivada' }
-            );
-        }
-
-        const updatedFeira = await Feira.findOneAndUpdate(
-            { _id: id, escolaId: escolaId },
-            { nome: nome.trim(), inicioFeira: inicioFeira || null, fimFeira: fimFeira || null, status: status },
-            { new: true, runValidators: true }
-        );
-
-        if (!updatedFeira) {
-            req.flash('error_msg', 'Feira não encontrada ou você não tem permissão para editá-la.');
-            return res.redirect('/admin/dashboard?tab=feiras');
-        }
-
-        req.flash('success_msg', 'Feira atualizada com sucesso!');
+        await Avaliador.findByIdAndUpdate(req.params.id, {
+            nome,
+            email,
+            ativo: ativo === 'true' || ativo === true,
+            projetosAtribuidos: Array.isArray(projetosAtribuidos)
+                ? projetosAtribuidos
+                : (projetosAtribuidos ? [projetosAtribuidos] : [])
+        });
+        req.flash('success_msg', 'Avaliador atualizado com sucesso!');
     } catch (err) {
-        console.error('Erro ao atualizar feira:', err);
-        req.flash('error_msg', 'Erro ao atualizar feira. Detalhes: ' + err.message);
+        console.error('Erro ao atualizar avaliador:', err);
+        req.flash('error_msg', 'Erro ao atualizar avaliador.');
     }
-
-    res.redirect('/admin/dashboard?tab=feiras');
+    res.redirect('/admin/dashboard?tab=avaliadores');
 });
 
-// Excluir Feira (DELETE)
-router.delete('/feiras/:id', verificarAdminEscola, async (req, res) => {
-    const { id } = req.params;
-    const escolaId = req.session.adminEscola.escolaId;
-
-    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-        req.flash('error_msg', 'ID da feira inválido para exclusão.');
-        return res.redirect('/admin/dashboard?tab=feiras');
-    }
-
+// Excluir Avaliador
+router.delete('/avaliadores/:id', verificarAdminEscola, async (req, res) => {
     try {
-        const feiraParaExcluir = await Feira.findOne({ _id: id, escolaId: escolaId });
-        if (!feiraParaExcluir) {
-            req.flash('error_msg', 'Feira não encontrada ou você não tem permissão para excluí-la.');
-            return res.redirect('/admin/dashboard?tab=feiras');
-        }
-
-        // Antes de deletar a feira, verificar se ela é a feira ATIVA.
-        // Se for a feira ativa, não permitimos a exclusão direta para evitar um estado inconsistente.
-        // O usuário deve arquivá-la e/ou iniciar uma nova feira antes de tentar excluir.
-        const activeFeiraCheck = await Feira.findOne({ _id: id, escolaId: escolaId, status: 'ativa' });
-        if (activeFeiraCheck) {
-            req.flash('error_msg', `Não é possível deletar a feira "${feiraParaExcluir.nome}" porque ela está ATIVA. Por favor, arquive-a ou inicie uma nova feira antes de tentar excluí-la.`);
-            return res.redirect('/admin/dashboard?tab=feiras');
-        }
-
-        // Contar projetos e avaliações associados para avisar o usuário se houver dados
-        const numProjetos = await Projeto.countDocuments({ feira: id, escolaId: escolaId });
-        const numAvaliacoes = await Avaliacao.countDocuments({ feira: id, escola: escolaId });
-        const numAvaliadores = await Avaliador.countDocuments({ feira: id, escolaId: escolaId });
-        const numCategorias = await Categoria.countDocuments({ feira: id, escolaId: escolaId });
-        const numCriterios = await Criterio.countDocuments({ feira: id, escolaId: escolaId });
-
-        if (numProjetos > 0 || numAvaliacoes > 0 || numAvaliadores > 0 || numCategorias > 0 || numCriterios > 0) {
-            // Se houver dados associados, apenas avisa e não exclui
-            let message = `Não é possível deletar a feira "${feiraParaExcluir.nome}" porque ela ainda possui dados associados: `;
-            if (numProjetos > 0) message += `${numProjetos} projeto(s), `;
-            if (numAvaliacoes > 0) message += `${numAvaliacoes} avaliação(ões), `;
-            if (numAvaliadores > 0) message += `${numAvaliadores} avaliador(es), `;
-            if (numCategorias > 0) message += `${numCategorias} categoria(s), `;
-            if (numCriterios > 0) message += `${numCriterios} critério(s).`;
-            message += ' Por favor, remova estes dados ou arquive a feira antes de tentar excluí-la.';
-            req.flash('error_msg', message);
-            return res.redirect('/admin/dashboard?tab=feiras');
-        }
-
-        // Se não houver dados associados e não for a feira ativa, procede com a exclusão
-        await Feira.deleteOne({ _id: id, escolaId: escolaId });
-
-        req.flash('success_msg', `Feira "${feiraParaExcluir.nome}" excluída com sucesso!`);
+        await Avaliador.findByIdAndDelete(req.params.id);
+        req.flash('success_msg', 'Avaliador excluído com sucesso!');
     } catch (err) {
-        console.error('Erro ao excluir feira:', err);
-        req.flash('error_msg', 'Erro ao excluir feira. Detalhes: ' + err.message);
+        console.error('Erro ao excluir avaliador:', err);
+        req.flash('error_msg', 'Erro ao excluir avaliador.');
     }
-
-    res.redirect('/admin/dashboard?tab=feiras');
+    res.redirect('/admin/dashboard?tab=avaliadores');
 });
-
 
 // ===========================================
 // ROTAS CRUD - CATEGORIAS
@@ -1391,94 +1274,107 @@ router.delete('/categorias/:id', verificarAdminEscola, async (req, res) => {
 // ROTAS CRUD - CRITÉRIOS
 // ===========================================
 
-// Adicionar Critério (POST)
-router.post('/criterios', verificarAdminEscola, async (req, res) => {
-    const { nome, peso, observacao } = req.body;
+// Criar Categoria
+router.post('/categorias', verificarAdminEscola, async (req, res) => {
+    const { nome } = req.body;
     const escolaId = req.session.adminEscola.escolaId;
-
     try {
-        const feira = await Feira.findOne({ status: 'ativa', escolaId: escolaId });
-
-        if (!feira) {
-            req.flash('error_msg', 'Nenhuma feira ativa encontrada para esta escola. Não é possível criar um critério.');
-            return res.redirect('/admin/dashboard?tab=criterios');
-        }
-
-        let errors = [];
-        if (!nome || nome.trim() === '') errors.push({ text: 'O nome do critério é obrigatório.' });
-        if (peso === undefined || peso === null || peso < 1 || peso > 10) errors.push({ text: 'O peso do critério deve ser um número entre 1 e 10.' });
-
-        if (errors.length > 0) {
-            req.flash('error_msg', errors.map(e => e.text).join(', '));
-            return res.redirect('/admin/dashboard?tab=criterios');
-        }
-
-        const novo = new Criterio({
-            nome: nome.trim(),
-            peso: parseInt(peso, 10),
-            observacao: observacao || '',
-            escolaId: escolaId,
-            feira: feira._id // Associa o critério à feira ativa
-        });
-
-        await novo.save();
-        req.flash('success_msg', 'Critério criado com sucesso!');
+        const feira = await Feira.findOne({ status: 'ativa', escola: escolaId });
+        if (!feira) throw new Error('Feira ativa não encontrada');
+        const categoria = new Categoria({ nome, escolaId, feira: feira._id });
+        await categoria.save();
+        req.flash('success_msg', 'Categoria criada com sucesso!');
     } catch (err) {
-        console.error('Erro ao criar critério:', err);
-        req.flash('error_msg', 'Erro ao criar critério. Detalhes: ' + err.message);
+        console.error('Erro ao criar categoria:', err);
+        req.flash('error_msg', 'Erro ao criar categoria.');
     }
+    res.redirect('/admin/dashboard?tab=categorias');
+});
 
-    res.redirect('/admin/dashboard?tab=criterios');
+// Editar Categoria
+router.put('/categorias/:id', verificarAdminEscola, async (req, res) => {
+    const { nome } = req.body;
+    const escolaId = req.session.adminEscola.escolaId;
+    try {
+        const categoria = await Categoria.findOneAndUpdate(
+            { _id: req.params.id, escolaId },
+            { nome },
+            { new: true }
+        );
+        if (!categoria) throw new Error('Categoria não encontrada');
+        req.flash('success_msg', 'Categoria atualizada com sucesso!');
+    } catch (err) {
+        console.error('Erro ao atualizar categoria:', err);
+        req.flash('error_msg', 'Erro ao atualizar categoria.');
+    }
+    res.redirect('/admin/dashboard?tab=categorias');
+});
+
+// Excluir Categoria
+router.delete('/categorias/:id', verificarAdminEscola, async (req, res) => {
+    try {
+        await Categoria.deleteOne({ _id: req.params.id });
+        req.flash('success_msg', 'Categoria excluída com sucesso!');
+    } catch (err) {
+        console.error('Erro ao excluir categoria:', err);
+        req.flash('error_msg', 'Erro ao excluir categoria.');
+    }
+    res.redirect('/admin/dashboard?tab=categorias');
 });
 
 
-// Editar Critério (PUT)
-router.put('/criterios/:id', verificarAdminEscola, async (req, res) => {
-    const { id } = req.params;
+// ========================
+// ROTAS DE CRITÉRIOS
+// ========================
+
+// Criar Critério
+router.post('/criterios', verificarAdminEscola, async (req, res) => {
     const { nome, peso, observacao } = req.body;
     const escolaId = req.session.adminEscola.escolaId;
-
-    if (!nome || !peso || isNaN(peso)) {
-        req.flash('error_msg', 'Nome e peso válidos são obrigatórios para editar o critério.');
-        return res.redirect('/admin/dashboard?tab=criterios');
-    }
-
     try {
-        const criterio = await Criterio.findOne({ _id: id, escolaId: escolaId });
-        if (!criterio) {
-            req.flash('error_msg', 'Critério não encontrado.');
-            return res.redirect('/admin/dashboard?tab=criterios');
-        }
-
-        criterio.nome = nome;
-        criterio.peso = parseFloat(peso);
-        criterio.observacao = observacao || '';
+        const feira = await Feira.findOne({ status: 'ativa', escola: escolaId });
+        const criterio = new Criterio({
+            nome,
+            peso: parseFloat(peso),
+            observacao,
+            escolaId,
+            feira: feira._id
+        });
         await criterio.save();
+        req.flash('success_msg', 'Critério criado com sucesso!');
+    } catch (err) {
+        console.error('Erro ao criar critério:', err);
+        req.flash('error_msg', 'Erro ao criar critério.');
+    }
+    res.redirect('/admin/dashboard?tab=criterios');
+});
 
+// Editar Critério
+router.put('/criterios/:id', verificarAdminEscola, async (req, res) => {
+    const { nome, peso, observacao } = req.body;
+    const escolaId = req.session.adminEscola.escolaId;
+    try {
+        await Criterio.findOneAndUpdate(
+            { _id: req.params.id, escolaId },
+            { nome, peso: parseFloat(peso), observacao }
+        );
         req.flash('success_msg', 'Critério atualizado com sucesso!');
     } catch (err) {
         console.error('Erro ao atualizar critério:', err);
         req.flash('error_msg', 'Erro ao atualizar critério.');
     }
-
     res.redirect('/admin/dashboard?tab=criterios');
 });
 
-
-
-// Excluir Critério (DELETE)
+// Excluir Critério
 router.delete('/criterios/:id', verificarAdminEscola, async (req, res) => {
-    const { id } = req.params;
-    const escolaId = req.session.adminEscola.escolaId;
-
     try {
-        await Criterio.deleteOne({ _id: id, escolaId: escolaId });
+        await Criterio.deleteOne({ _id: req.params.id });
         req.flash('success_msg', 'Critério excluído com sucesso!');
     } catch (err) {
         console.error('Erro ao excluir critério:', err);
         req.flash('error_msg', 'Erro ao excluir critério.');
     }
-
     res.redirect('/admin/dashboard?tab=criterios');
 });
 
