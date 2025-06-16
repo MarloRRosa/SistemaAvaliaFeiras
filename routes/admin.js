@@ -1,4 +1,3 @@
-// routes/admin.js
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose'); // Importar mongoose para validação de ObjectId
@@ -17,7 +16,6 @@ const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const puppeteer = require('puppeteer');
-const chromium = require('@sparticuz/chromium');
 const fs = require('fs');
 const path = require('path');
 const ejs = require('ejs');
@@ -25,6 +23,29 @@ const ejs = require('ejs');
 // Carrega variáveis de ambiente (garante que estão disponíveis para este arquivo)
 require('dotenv').config();
 
+// ===========================================
+// VERIFICAÇÃO DE MODELOS (Adicionado para depuração)
+// ===========================================
+// Verifica se os modelos foram carregados corretamente.
+// Se qualquer um desses for undefined ou não for um Model Mongoose,
+// indica um problema de importação/carregamento.
+if (!Feira || typeof Feira.findOne !== 'function' ||
+    !Projeto || typeof Projeto.findOne !== 'function' ||
+    !Categoria || typeof Categoria.findOne !== 'function' ||
+    !Criterio || typeof Criterio.findOne !== 'function' ||
+    !Avaliador || typeof Avaliador.findOne !== 'function' ||
+    !Avaliacao || typeof Avaliacao.findOne !== 'function' ||
+    !Admin || typeof Admin.findOne !== 'function' ||
+    !Escola || typeof Escola.findOne !== 'function') {
+    console.error('ERRO CRÍTICO: Um ou mais modelos Mongoose não foram carregados corretamente. Verifique os caminhos de importação e a exportação dos modelos.');
+    // Isso pode causar um erro de inicialização ou impedir o servidor de subir corretamente.
+    // Dependendo da criticidade, você pode querer encerrar o processo: process.exit(1);
+}
+
+
+// ===========================================
+// FUNÇÕES AUXILIARES
+// ===========================================
 
 // Função para gerar PIN alfanumérico único
 function generateUniquePin(length = 6) {
@@ -87,110 +108,6 @@ async function sendResetPinEmail(avaliador) {
         return false;
     }
 }
-
-
-// ===========================================
-// VERIFICAÇÃO DE MODELOS (Adicionado para depuração)
-// ===========================================
-// Verifica se os modelos foram carregados corretamente.
-// Se qualquer um desses for undefined ou não for um Model Mongoose,
-// indica um problema de importação/carregamento.
-if (!Feira || typeof Feira.findOne !== 'function' ||
-    !Projeto || typeof Projeto.findOne !== 'function' ||
-    !Categoria || typeof Categoria.findOne !== 'function' ||
-    !Criterio || typeof Criterio.findOne !== 'function' ||
-    !Avaliador || typeof Avaliador.findOne !== 'function' ||
-    !Avaliacao || typeof Avaliacao.findOne !== 'function' ||
-    !Admin || typeof Admin.findOne !== 'function' ||
-    !Escola || typeof Escola.findOne !== 'function') {
-    console.error('ERRO CRÍTICO: Um ou mais modelos Mongoose não foram carregados corretamente. Verifique os caminhos de importação e a exportação dos modelos.');
-    // Isso pode causar um erro de inicialização ou impedir o servidor de subir corretamente.
-    // Dependendo da criticidade, você pode querer encerrar o processo: process.exit(1);
-}
-
-
-// ===========================================
-// FUNÇÕES AUXILIARES
-// ===========================================
-
-// Função para gerar PIN numérico aleatório de 6 dígitos.
-function generatePin() {
-    return Math.floor(100000 + Math.random() * 900000).toString(); // Gera um número entre 100000 e 999999
-}
-
-// Função para formatar data para input HTML (YYYY-MM-DD)
-function formatarDataParaInput(dateString) {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-}
-
-// ===========================================
-// CONFIGURAÇÃO DO NODEMAILER
-// ===========================================
-// Certifique-se de que as variáveis de ambiente EMAIL_HOST, EMAIL_PORT, EMAIL_USER, EMAIL_PASS, EMAIL_SENDER_ADDRESS estão configuradas.
-const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,
-    port: parseInt(process.env.EMAIL_PORT, 10),
-    secure: process.env.EMAIL_SECURE === 'true', // Use 'true' para 465 (SSL), 'false' para 587 (TLS/STARTTLS)
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    },
-    tls: {
-        // Isso é crucial para ambientes como Render que podem ter certificados autoassinados ou proxies
-        // Em produção, isso pode ser um risco de segurança e deve ser usado com cautela.
-        rejectUnauthorized: false
-    }
-});
-
-// Função para enviar e-mail com PIN para Avaliador ou redefinição
-async function sendAvaliadorPinEmail(avaliador, appUrl, isReset = false) {
-    const subject = isReset ? 'Redefinição de PIN do Avaliador - AvaliaFeiras' : 'Seu PIN de Acesso ao Sistema AvaliaFeiras';
-    const bodyHtml = isReset ? `
-        <p>Olá, ${avaliador.nome},</p>
-        <p>Seu PIN de acesso ao sistema AvaliaFeiras foi redefinido.</p>
-        <p>Seu novo PIN é: <strong>${avaliador.pin}</strong></p>
-        <p>Por favor, utilize este PIN para acessar sua conta de avaliador.</p>
-        <p>Se você não solicitou esta redefinição, por favor, ignore este e-mail.</p>
-    ` : `
-        <p>Olá, ${avaliador.nome},</p>
-        <p>Seu PIN de acesso para avaliar projetos no sistema AvaliaFeiras foi gerado:</p>
-        <p><strong>PIN: ${avaliador.pin}</strong></p>
-        <p>Para aceder ao portal de avaliadores, clique aqui: <a href="${appUrl}/avaliador/login">${appUrl}/avaliador/login</a></p>
-        <p>Por favor, não partilhe este PIN. Ele é único para o seu acesso.</p>
-    `;
-
-    const mailOptions = {
-        from: `"AvaliaFeiras" <${process.env.EMAIL_SENDER_ADDRESS}>`,
-        to: avaliador.email,
-        subject: subject,
-        html: `
-            ${bodyHtml}
-            <p>Atenciosamente,<br>Equipe AvaliaFeiras</p>
-            <hr>
-            <p style="font-size: 10px; color: #777;">Este é um e-mail automático, por favor, não responda.</p>
-        `
-    };
-
-    try {
-        if (process.env.EMAIL_USER && process.env.EMAIL_HOST && process.env.EMAIL_PASS && process.env.EMAIL_SENDER_ADDRESS) {
-            await transporter.sendMail(mailOptions);
-            console.log(`[Email] ${isReset ? 'PIN redefinido' : 'PIN inicial'} enviado para o avaliador ${avaliador.email}`);
-            return true;
-        } else {
-            console.warn('[Email] Variáveis de ambiente de e-mail não configuradas. E-mail de PIN para avaliador não será enviado.');
-            return false;
-        }
-    } catch (error) {
-        console.error(`[Email] Erro ao enviar e-mail de PIN para ${avaliador.email}:`, error);
-        return false;
-    }
-}
-
 
 // ===========================================
 // MIDDLEWARE DE AUTENTICAÇÃO
@@ -341,19 +258,16 @@ router.post('/login', async (req, res) => {
 
 // Rota de Logout (POST)
 router.post('/logout', verificarAdminEscola, (req, res, next) => {
-    // MOVER O FLASH PARA ANTES
-    req.flash('success_msg', 'Você saiu da sua conta de administrador.');
-
     req.session.destroy(err => {
         if (err) {
             console.error('Erro ao destruir sessão:', err);
             return next(err);
         }
         res.clearCookie('connect.sid');
+        req.flash('success_msg', 'Você saiu da sua conta de administrador.');
         res.redirect('/admin/login');
     });
 });
-
 
 // ===================================
 // ROTAS DE RECUPERAÇÃO DE SENHA
@@ -396,11 +310,21 @@ router.post('/recuperar-senha', async (req, res) => {
 
         const resetURL = `${process.env.APP_URL || 'http://localhost:3000'}/admin/resetar-senha/${token}`;
 
-        const mailOptions = {
-            from: {
-                name: 'AvaliaFeiras',
-                address: process.env.EMAIL_SENDER_ADDRESS
+        const transporter = nodemailer.createTransport({
+            host: process.env.EMAIL_HOST,
+            port: process.env.EMAIL_PORT,
+            secure: process.env.EMAIL_SECURE === 'true',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
             },
+            tls: {
+                rejectUnauthorized: false
+            }
+        });
+
+        const mailOptions = {
+            from: `"AvaliaFeiras" <${process.env.EMAIL_USER}>`,
             to: admin.email,
             subject: 'Redefinição de Senha - Sistema AvaliaFeiras',
             html: `
@@ -511,6 +435,82 @@ router.post('/resetar-senha/:token', async (req, res) => {
     }
 });
 
+
+// ===========================================
+// ROTAS DE RELATÓRIOS (PDF) - COM PUPPETEER
+// ==========================================
+async function generatePdfReport(req, res, templateName, data, filename) {
+    let browser; // Declare browser fora do try para garantir acesso no finally
+    try {
+        const escolaId = req.session.adminEscola.escolaId;
+        const escola = await Escola.findById(escolaId).lean();
+        const feiraAtual = await Feira.findOne({ escolaId: escolaId, status: 'ativa' }).lean();
+
+        const html = await ejs.renderFile(path.join(__dirname, `../views/admin/${templateName}.ejs`), {
+            layout: false,
+            escola,
+            feiraAtual,
+            ...data,
+            formatarData: (dateString) => {
+                if (!dateString) return 'N/A';
+                const date = new Date(dateString);
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, 0); // Correção aqui: padStart(2, '0')
+                return `${day}/${month}/${year}`;
+            }
+        });
+
+        // =========================================================================
+        // <<< AS MUDANÇAS PRINCIPAIS ESTÃO AQUI >>>
+        browser = await puppeteer.launch({
+            args: [...chromium.args, '--hide-scrollbars', '--disable-web-security'], // Adiciona args do chromium E os seus
+            defaultViewport: chromium.defaultViewport, // Usa o viewport padrão do chromium
+            executablePath: await chromium.executablePath(), // Pega o caminho do executável do chromium fornecido pelo pacote
+            headless: chromium.headless, // Usa o modo headless do chromium (provavelmente 'new')
+            ignoreHTTPSErrors: true, // Boa prática para ambientes de desenvolvimento/produção com certificados self-signed
+            // Se você tinha outras opções aqui, mantenha-as se não entrarem em conflito.
+        });
+        // =========================================================================
+
+        const page = await browser.newPage();
+        await page.setContent(html, { waitUntil: 'networkidle0' });
+
+        const pdf = await page.pdf({
+            format: 'A4',
+            printBackground: true,
+            displayHeaderFooter: true,
+            headerTemplate: `<div style="font-size: 8px; margin-left: 1cm; margin-right: 1cm; color: #777; text-align: right;">${filename.replace(/_/g, ' ').toUpperCase()}</div>`,
+            footerTemplate: `<div style="font-size: 8px; margin-left: 1cm; margin-right: 1cm; color: #777; text-align: center;">Página <span class="pageNumber"></span> de <span class="totalPages"></span></div>`,
+            margin: {
+                top: '2cm',
+                right: '1cm',
+                bottom: '2cm',
+                left: '1cm'
+            }
+        });
+
+        // O browser.close() já está no finally, o que é ótimo!
+        // await browser.close(); // Esta linha pode ser removida daqui, pois já está no finally
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}.pdf"`);
+        res.send(pdf);
+
+    } catch (err) {
+        console.error(`Erro ao gerar PDF de ${filename}:`, err);
+        if (!res.headersSent) {
+            req.flash('error_msg', `Erro ao gerar PDF de ${filename}. Detalhes: ` + err.message);
+            res.redirect('/admin/dashboard?tab=relatorios');
+        }
+    } finally {
+        if (browser) { // Certifica-se de fechar o navegador mesmo em caso de erro
+            await browser.close();
+        }
+    }
+}
+
+
 // ===========================================
 // ROTAS DO DASHBOARD (PROTEGIDAS)
 // ===========================================
@@ -527,11 +527,11 @@ router.get('/dashboard', verificarAdminEscola, async (req, res) => {
         const escolaId = req.session.adminEscola.escolaId;
 
         // Filtra todas as consultas por escolaId
-        let feiraAtual = await Feira.findOne({ status: 'ativa', escolaId: escolaId }).lean(); // Use .lean() para objetos JS puros
-        let feiras = await Feira.find({ escolaId: escolaId }).sort({ inicioFeira: -1 }).lean();
+        const feiraAtual = await Feira.findOne({ status: 'ativa', escolaId: escolaId }); // USANDO escolaId AQUI
+        const feiras = await Feira.find({ escolaId: escolaId }).sort({ inicioFeira: -1 }); // USANDO escolaId AQUI
 
-        const escolaDoAdmin = await Escola.findById(escolaId).lean(); // Pega a escola do admin logado
-        const escolas = await Escola.find({}).lean(); // Todas as escolas para o dropdown de avaliadores (se necessário para algum modal)
+        const escolaDoAdmin = await Escola.findById(escolaId); // Pega a escola do admin logado
+        const escolas = await Escola.find({}); // Todas as escolas para o dropdown de avaliadores (se necessário para algum modal)
 
         const escola = escolaDoAdmin || { // Garante que 'escola' sempre tenha um valor padrão
             nome: "Nome da Escola",
@@ -543,42 +543,6 @@ router.get('/dashboard', verificarAdminEscola, async (req, res) => {
             responsavel: "Nome do Responsável",
             _id: null
         };
-        
-        // Lógica para carregar feira pela query param, se houver
-        const feiraSelecionadaId = req.query.feiraId;
-        if (feiraSelecionadaId && mongoose.Types.ObjectId.isValid(feiraSelecionadaId)) {
-            const selectedFeira = await Feira.findOne({ _id: feiraSelecionadaId, escolaId: escolaId }).lean();
-            if (selectedFeira) {
-                feiraAtual = selectedFeira;
-            } else {
-                req.flash('error_msg', 'Feira selecionada não encontrada ou não pertence à sua escola.');
-            }
-        }
-        
-        // Se não houver feira ativa, mas houver feiras arquivadas, seleciona a mais recente
-        if (!feiraAtual && feiras.length > 0) {
-            const ultimaFeiraArquivada = await Feira.findOne({ escolaId: escolaId, status: 'arquivada' }).sort({ createdAt: -1 }).lean();
-            if (ultimaFeiraArquivada) {
-                feiraAtual = ultimaFeiraArquivada;
-            }
-        }
-        
-        // Se ainda não houver feiraAtual e nenhuma feira existente, cria uma feira inicial
-        if (!feiraAtual && feiras.length === 0) {
-            console.log('Nenhuma feira encontrada. Criando feira inicial para a escola:', escola.nome);
-            const novaFeiraInicial = new Feira({
-                nome: `Feira Inicial ${new Date().getFullYear()}`,
-                escolaId: escolaId,
-                status: 'ativa',
-                inicioFeira: new Date(),
-                fimFeira: new Date(new Date().setFullYear(new Date().getFullYear() + 1)), // Válida por 1 ano
-            });
-            await novaFeiraInicial.save();
-            feiraAtual = novaFeiraInicial.toObject(); // Converter para objeto simples para passar ao EJS
-            // Re-fetch feiras to include the newly created one
-            feiras = await Feira.find({ escolaId: escolaId }).sort({ inicioFeira: -1 }).lean();
-            req.flash('success_msg', 'Nenhuma feira encontrada. Uma feira inicial foi criada automaticamente.');
-        }
 
         if (feiraAtual) {
             feiraAtual.inicioFeiraFormatted = formatarDataParaInput(feiraAtual.inicioFeira);
@@ -587,11 +551,11 @@ router.get('/dashboard', verificarAdminEscola, async (req, res) => {
 
         // --- INÍCIO: PREPARAÇÃO DE DADOS PARA O DASHBOARD GERAL (TODAS AS ABAS) ---
         // Todas as buscas agora incluem o filtro 'escolaId: escolaId'
-        const projetosFetched = feiraAtual ? await Projeto.find({ feira: feiraAtual._id, escolaId: escolaId }).populate('categoria').populate('criterios').lean() : [];
-        const categoriasFetched = feiraAtual ? await Categoria.find({ feira: feiraAtual._id, escolaId: escolaId }).lean() : [];
-        const criteriosOficiais = feiraAtual ? await Criterio.find({ feira: feiraAtual._id, escolaId: escolaId }).lean() : [];
-        const avaliadoresFetched = feiraAtual ? await Avaliador.find({ feira: feiraAtual._id, escolaId: escolaId }).populate('projetosAtribuidos').lean() : [];
-        const avaliacoesFetched = feiraAtual ? await Avaliacao.find({ feira: feiraAtual._id, escola: escolaId }).lean() : []; // 'escola' no Avaliacao é o escolaId
+        const projetosFetched = feiraAtual ? await Projeto.find({ feira: feiraAtual._id, escolaId: escolaId }).populate('categoria').populate('criterios').lean() : []; // USANDO escolaId AQUI
+        const categoriasFetched = feiraAtual ? await Categoria.find({ feira: feiraAtual._id, escolaId: escolaId }).lean() : []; // USANDO escolaId AQUI
+        const criteriosOficiais = feiraAtual ? await Criterio.find({ feira: feiraAtual._id, escolaId: escolaId }).lean() : []; // USANDO escolaId AQUI
+        const avaliadoresFetched = feiraAtual ? await Avaliador.find({ feira: feiraAtual._id, escolaId: escolaId }).populate('projetosAtribuidos').lean() : []; // USANDO escolaId AQUI
+        const avaliacoesFetched = feiraAtual ? await Avaliacao.find({ feira: feiraAtual._id, escolaId: escolaId }).lean() : []; // USANDO escolaId AQUI
 
         let projetosPorCategoria = {};
         if (feiraAtual && projetosFetched) {
@@ -783,7 +747,7 @@ router.get('/dashboard', verificarAdminEscola, async (req, res) => {
             activeTab: activeTab,
             feiras,
             escolas: escolas,
-            feiraAtual: feiraAtual,
+            feiraAtual: feiraAtual ? feiraAtual.toObject() : null,
             // Dados para a aba de Projetos, Categorias, Critérios, Avaliadores, Feiras
             projetos: projetosFetched,
             categorias: categoriasFetched,
@@ -801,9 +765,7 @@ router.get('/dashboard', verificarAdminEscola, async (req, res) => {
             projetosAvaliadosCompletosCount: projetosAvaliadosCompletosCount,
             projetosPendentesAvaliacaoCount: projetosPendentesAvaliacaoCount,
             mediaGeralAvaliacoes: mediaGeralAvaliacoes,
-            relatorioFinalPorProjeto: relatorioFinalPorProjeto,
-            error_msg: req.flash('error_msg'), // Garante que as mensagens flash são passadas
-            success_msg: req.flash('success_msg')
+            relatorioFinalPorProjeto: relatorioFinalPorProjeto
         });
 
     } catch (error) {
@@ -823,36 +785,25 @@ router.get('/dashboard', verificarAdminEscola, async (req, res) => {
 // Criar Projeto (POST)
 router.post('/projetos', verificarAdminEscola, async (req, res) => {
     const { titulo, descricao, turma, alunos, categoria, criterios } = req.body;
-    const escolaId = req.session.adminEscola.escolaId; // Obtém o ID da escola da sessão
+    const adminEscolaId = req.session.adminEscola.escolaId; // Obtém o ID da escola da sessão
 
     try {
-        const feira = await Feira.findOne({ status: 'ativa', escolaId: escolaId });
+        const feira = await Feira.findOne({ status: 'ativa', escolaId: adminEscolaId }); // USANDO escolaId AQUI
 
         if (!feira) {
             req.flash('error_msg', 'Nenhuma feira ativa encontrada para esta escola. Não é possível criar um projeto.');
             return res.redirect('/admin/dashboard?tab=projetos');
         }
-        
-        let errors = [];
-        if (!titulo || titulo.trim() === '') errors.push({ text: 'O título do projeto é obrigatório.' });
-        if (!categoria || !mongoose.Types.ObjectId.isValid(categoria)) errors.push({ text: 'Selecione uma categoria válida.' });
-        if (!turma || turma.trim() === '') errors.push({ text: 'A turma do projeto é obrigatória.' });
-
-        if (errors.length > 0) {
-            req.flash('error_msg', errors.map(e => e.text).join(', '));
-            return res.redirect('/admin/dashboard?tab=projetos');
-        }
-
 
         const novoProjeto = new Projeto({
-            titulo: titulo.trim(),
-            descricao: descricao || '',
-            turma: turma.trim(),
-            alunos: alunos ? (Array.isArray(alunos) ? alunos.map(a => a.trim()).filter(a => a) : alunos.split(',').map(a => a.trim()).filter(a => a)) : [],
-            criterios: criterios ? (Array.isArray(criterios) ? criterios.map(id => new mongoose.Types.ObjectId(id)) : [new mongoose.Types.ObjectId(criterios)]) : [],
-            categoria: new mongoose.Types.ObjectId(categoria),
-            escolaId: escolaId,
-            feira: feira._id
+            titulo,
+            descricao,
+            turma,
+            alunos: Array.isArray(alunos) ? alunos : (alunos ? [alunos] : []),
+            criterios: Array.isArray(criterios) ? criterios : (criterios ? [criterios] : []),
+            categoria,
+            escolaId: adminEscolaId, // Vincula à escola do admin logado (USANDO escolaId AQUI)
+            feira: feira._id // Vincula à feira ativa
         });
 
         await novoProjeto.save();
@@ -870,7 +821,7 @@ router.post('/projetos', verificarAdminEscola, async (req, res) => {
 router.put('/projetos/:id', verificarAdminEscola, async (req, res) => {
     const { id } = req.params;
     const { titulo, descricao, categoria, turma, alunos, criterios } = req.body;
-    const escolaId = req.session.adminEscola.escolaId;
+    const adminEscolaId = req.session.adminEscola.escolaId;
 
     // Validação de ID antes de tentar a operação no banco
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
@@ -878,28 +829,19 @@ router.put('/projetos/:id', verificarAdminEscola, async (req, res) => {
         return res.redirect('/admin/dashboard?tab=projetos');
     }
 
-    let errors = [];
-    if (!titulo || titulo.trim() === '') errors.push({ text: 'O título do projeto é obrigatório.' });
-    if (!categoria || !mongoose.Types.ObjectId.isValid(categoria)) errors.push({ text: 'Selecione uma categoria válida.' });
-    if (!turma || turma.trim() === '') errors.push({ text: 'A turma do projeto é obrigatória.' });
-
-    if (errors.length > 0) {
-        req.flash('error_msg', errors.map(e => e.text).join(', '));
-        return res.redirect('/admin/dashboard?tab=projetos');
-    }
-
     try {
+        // Garante que o projeto a ser atualizado pertence à escola do admin
         const updatedProjeto = await Projeto.findOneAndUpdate(
-            { _id: id, escolaId: escolaId },
+            { _id: id, escolaId: adminEscolaId }, // USANDO escolaId AQUI
             {
-                titulo: titulo.trim(),
-                descricao: descricao || '',
-                categoria: new mongoose.Types.ObjectId(categoria),
-                turma: turma.trim(),
-                alunos: alunos ? (Array.isArray(alunos) ? alunos.map(a => a.trim()).filter(a => a) : alunos.split(',').map(a => a.trim()).filter(a => a)) : [],
-                criterios: criterios ? (Array.isArray(criterios) ? criterios.map(id => new mongoose.Types.ObjectId(id)) : [new mongoose.Types.ObjectId(criterios)]) : []
+                titulo,
+                descricao,
+                categoria,
+                turma,
+                alunos: Array.isArray(alunos) ? alunos : (alunos ? [alunos] : []),
+                criterios: Array.isArray(criterios) ? criterios.filter(Boolean) : (criterios ? [criterios].filter(Boolean) : [])
             },
-            { new: true, runValidators: true }
+            { new: true }
         );
 
         if (!updatedProjeto) {
@@ -920,7 +862,7 @@ router.put('/projetos/:id', verificarAdminEscola, async (req, res) => {
 // Excluir Projeto (DELETE)
 router.delete('/projetos/:id', verificarAdminEscola, async (req, res) => {
     const { id } = req.params;
-    const escolaId = req.session.adminEscola.escolaId;
+    const adminEscolaId = req.session.adminEscola.escolaId;
 
     // Validação de ID antes de tentar a operação no banco
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
@@ -930,14 +872,14 @@ router.delete('/projetos/:id', verificarAdminEscola, async (req, res) => {
 
     try {
         // Encontra o projeto e garante que pertence à escola do admin
-        const projetoParaExcluir = await Projeto.findOne({ _id: id, escolaId: escolaId });
+        const projetoParaExcluir = await Projeto.findOne({ _id: id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
         if (!projetoParaExcluir) {
             req.flash('error_msg', 'Projeto não encontrado ou você não tem permissão para excluí-lo.');
             return res.redirect('/admin/dashboard?tab=projetos');
         }
 
-        await Avaliacao.deleteMany({ projeto: id, escola: escolaId }); // Exclui avaliações do projeto nesta escola
-        await Projeto.deleteOne({ _id: id, escolaId: escolaId }); // Exclui o projeto da escola
+        await Avaliacao.deleteMany({ projeto: id, escolaId: adminEscolaId }); // Exclui avaliações do projeto nesta escola (USANDO escolaId AQUI)
+        await Projeto.deleteOne({ _id: id, escolaId: adminEscolaId }); // Exclui o projeto da escola (USANDO escolaId AQUI)
 
         req.flash('success_msg', 'Projeto e suas avaliações excluídos com sucesso!');
     } catch (err) {
@@ -1042,120 +984,283 @@ router.put('/avaliadores/:id', verificarAdminEscola, async (req, res) => {
 });
 
 // Redefinir PIN do Avaliador (POST)
-router.post('/avaliadores', verificarAdminEscola, async (req, res) => {
-    const { nome, email, projetosAtribuidos } = req.body;
-    const escolaId = req.session.adminEscola.escolaId;
+router.post('/avaliadores/reset-pin/:id', verificarAdminEscola, async (req, res) => {
+    const { id } = req.params;
+    const adminEscolaId = req.session.adminEscola.escolaId;
+
+    // Validação de ID antes de tentar a operação no banco
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+        req.flash('error_msg', 'ID do avaliador inválido para redefinição de PIN.');
+        return res.redirect('/admin/dashboard?tab=avaliadores');
+    }
+
     try {
-        const feira = await Feira.findOne({ status: 'ativa', escola: escolaId });
-        const avaliador = new Avaliador({
-            nome,
-            email,
-            pin: generatePin(),
-            escolaId,
-            feira: feira._id,
-            projetosAtribuidos: Array.isArray(projetosAtribuidos)
-                ? projetosAtribuidos
-                : (projetosAtribuidos ? [projetosAtribuidos] : [])
-        });
+        // Encontra o avaliador e garante que ele pertence à escola do admin
+        const avaliador = await Avaliador.findOne({ _id: id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
+        if (!avaliador) {
+            req.flash('error_msg', 'Avaliador não encontrado ou não pertence a esta escola.');
+            return res.redirect('/admin/dashboard?tab=avaliadores');
+        }
+
+        const newPin = generateUniquePin();
+        avaliador.pin = newPin;
         await avaliador.save();
-        req.flash('success_msg', 'Avaliador criado com sucesso!');
+
+        const emailSent = await sendResetPinEmail(avaliador);
+
+        if (emailSent) {
+            req.flash('success_msg', `PIN do avaliador ${avaliador.nome} redefinido e enviado por e-mail com sucesso.`);
+        } else {
+            req.flash('error_msg', `PIN do avaliador ${avaliador.nome} redefinido, mas falha ao enviar e-mail.`);
+        }
+        res.redirect('/admin/dashboard?tab=avaliadores');
     } catch (err) {
-        console.error('Erro ao criar avaliador:', err);
-        req.flash('error_msg', 'Erro ao criar avaliador. ' + err.message);
+        console.error('Erro ao redefinir PIN do avaliador:', err);
+        req.flash('error_msg', 'Erro ao redefinir PIN do avaliador. Detalhes: ' + err.message);
+        res.redirect('/admin/dashboard?tab=avaliadores');
     }
-    res.redirect('/admin/dashboard?tab=avaliadores');
 });
 
-// Editar Avaliador
-router.put('/avaliadores/:id', verificarAdminEscola, async (req, res) => {
-    const { nome, email, ativo, projetosAtribuidos } = req.body;
-    try {
-        await Avaliador.findByIdAndUpdate(req.params.id, {
-            nome,
-            email,
-            ativo: ativo === 'true' || ativo === true,
-            projetosAtribuidos: Array.isArray(projetosAtribuidos)
-                ? projetosAtribuidos
-                : (projetosAtribuidos ? [projetosAtribuidos] : [])
-        });
-        req.flash('success_msg', 'Avaliador atualizado com sucesso!');
-    } catch (err) {
-        console.error('Erro ao atualizar avaliador:', err);
-        req.flash('error_msg', 'Erro ao atualizar avaliador.');
-    }
-    res.redirect('/admin/dashboard?tab=avaliadores');
-});
 
-// Excluir Avaliador
+// Excluir Avaliador (DELETE)
 router.delete('/avaliadores/:id', verificarAdminEscola, async (req, res) => {
+    const { id } = req.params;
+    const adminEscolaId = req.session.adminEscola.escolaId;
+
+    // Validação de ID antes de tentar a operação no banco
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+        req.flash('error_msg', 'ID do avaliador inválido para exclusão.');
+        return res.redirect('/admin/dashboard?tab=avaliadores');
+    }
+
     try {
-        await Avaliador.findByIdAndDelete(req.params.id);
-        req.flash('success_msg', 'Avaliador excluído com sucesso!');
+        // Encontra o avaliador e garante que ele pertence à escola do admin antes de excluir
+        const avaliadorParaExcluir = await Avaliador.findOne({ _id: id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
+        if (!avaliadorParaExcluir) {
+            req.flash('error_msg', 'Avaliador não encontrado ou você não tem permissão para excluí-lo.');
+            return res.redirect('/admin/dashboard?tab=avaliadores');
+        }
+        
+        // Exclui avaliações e depois o avaliador, filtrando por escola
+        await Avaliacao.deleteMany({ avaliador: id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
+        await Avaliador.deleteOne({ _id: id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
+
+        req.flash('success_msg', 'Avaliador e suas avaliações excluídos com sucesso!');
+        res.redirect('/admin/dashboard?tab=avaliadores');
     } catch (err) {
         console.error('Erro ao excluir avaliador:', err);
-        req.flash('error_msg', 'Erro ao excluir avaliador.');
+        req.flash('error_msg', 'Erro ao excluir avaliador. Detalhes: ' + err.message);
+        res.redirect('/admin/dashboard?tab=avaliadores');
     }
-    res.redirect('/admin/dashboard?tab=avaliadores');
 });
 
 // ===========================================
 // ROTAS CRUD - FEIRAS
 // ===========================================
 
-router.post('/avaliadores', verificarAdminEscola, async (req, res) => {
-    const { nome, email, projetosAtribuidos } = req.body;
-    const escolaId = req.session.adminEscola.escolaId;
+// Adicionar Feira (POST)
+router.post('/feiras', verificarAdminEscola, async (req, res) => {
+    const { nome, inicioFeira, fimFeira, status } = req.body;
+    const adminEscolaId = req.session.adminEscola.escolaId;
+
     try {
-        const feira = await Feira.findOne({ status: 'ativa', escola: escolaId });
-        const avaliador = new Avaliador({
+        // Verifica se já existe uma feira ativa para esta escola antes de criar uma nova
+        const existingActiveFeira = await Feira.findOne({ status: 'ativa', escolaId: adminEscolaId }); // USANDO escolaId AQUI
+        if (status === 'ativa' && existingActiveFeira) {
+            req.flash('error_msg', `Já existe uma feira ativa para esta escola (${existingActiveFeira.nome}). Desative-a antes de ativar uma nova.`);
+            return res.redirect('/admin/dashboard?tab=feiras');
+        }
+
+        const newFeira = new Feira({
             nome,
-            email,
-            pin: generatePin(),
-            escolaId,
-            feira: feira._id,
-            projetosAtribuidos: Array.isArray(projetosAtribuidos)
-                ? projetosAtribuidos
-                : (projetosAtribuidos ? [projetosAtribuidos] : [])
+            inicioFeira,
+            fimFeira,
+            status,
+            escolaId: adminEscolaId // Vincula à escola do admin logado (USANDO escolaId AQUI)
         });
-        await avaliador.save();
-        req.flash('success_msg', 'Avaliador criado com sucesso!');
+
+        await newFeira.save();
+        req.flash('success_msg', 'Feira adicionada com sucesso!');
     } catch (err) {
-        console.error('Erro ao criar avaliador:', err);
-        req.flash('error_msg', 'Erro ao criar avaliador. ' + err.message);
+        console.error('Erro ao adicionar feira:', err);
+        req.flash('error_msg', 'Erro ao adicionar feira. Detalhes: ' + err.message);
     }
-    res.redirect('/admin/dashboard?tab=avaliadores');
+
+    res.redirect('/admin/dashboard?tab=feiras');
 });
 
-// Editar Avaliador
-router.put('/avaliadores/:id', verificarAdminEscola, async (req, res) => {
-    const { nome, email, ativo, projetosAtribuidos } = req.body;
-    try {
-        await Avaliador.findByIdAndUpdate(req.params.id, {
-            nome,
-            email,
-            ativo: ativo === 'true' || ativo === true,
-            projetosAtribuidos: Array.isArray(projetosAtribuidos)
-                ? projetosAtribuidos
-                : (projetosAtribuidos ? [projetosAtribuidos] : [])
-        });
-        req.flash('success_msg', 'Avaliador atualizado com sucesso!');
-    } catch (err) {
-        console.error('Erro ao atualizar avaliador:', err);
-        req.flash('error_msg', 'Erro ao atualizar avaliador.');
+// Editar Feira (PUT)
+router.put('/feiras/:id', verificarAdminEscola, async (req, res) => {
+    const { id } = req.params;
+    const { nome, inicioFeira, fimFeira, status } = req.body;
+    const adminEscolaId = req.session.adminEscola.escolaId;
+
+    // Validação de ID antes de tentar a operação no banco
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+        req.flash('error_msg', 'ID da feira inválido para edição.');
+        return res.redirect('/admin/dashboard?tab=feiras');
     }
-    res.redirect('/admin/dashboard?tab=avaliadores');
+
+    try {
+        // Se a feira que está sendo editada for ativada, desativa as outras feiras ATIVAS da mesma escola
+        if (status === 'ativa') {
+            // Garante que o ID usado no $ne é um ObjectId válido
+            await Feira.updateMany(
+                { _id: { $ne: new mongoose.Types.ObjectId(id) }, status: 'ativa', escolaId: adminEscolaId }, // USANDO escolaId AQUI
+                { status: 'arquivada' }
+            );
+        }
+
+        // Atualiza a feira, garantindo que ela pertence à escola do admin logado
+        const updatedFeira = await Feira.findOneAndUpdate(
+            { _id: id, escolaId: adminEscolaId }, // Encontra pelo ID E pela escola (USANDO escolaId AQUI)
+            { nome, inicioFeira, fimFeira, status },
+            { new: true }
+        );
+
+        if (!updatedFeira) {
+            req.flash('error_msg', 'Feira não encontrada ou você não tem permissão para editá-la.');
+            return res.redirect('/admin/dashboard?tab=feiras');
+        }
+
+        req.flash('success_msg', 'Feira atualizada com sucesso!');
+    } catch (err) {
+        console.error('Erro ao atualizar feira:', err);
+        req.flash('error_msg', 'Erro ao atualizar feira. Detalhes: ' + err.message);
+    }
+
+    res.redirect('/admin/dashboard?tab=feiras');
 });
 
-// Excluir Avaliador
-router.delete('/avaliadores/:id', verificarAdminEscola, async (req, res) => {
-    try {
-        await Avaliador.findByIdAndDelete(req.params.id);
-        req.flash('success_msg', 'Avaliador excluído com sucesso!');
-    } catch (err) {
-        console.error('Erro ao excluir avaliador:', err);
-        req.flash('error_msg', 'Erro ao excluir avaliador.');
+// Mudar Status da Feira (POST - usando POST para simplicidade, idealmente PUT)
+router.post('/feiras/status/:id', verificarAdminEscola, async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body; // Assume que o status (ativa/arquivada) vem do formulário
+    const adminEscolaId = req.session.adminEscola.escolaId;
+
+    // Validação de ID antes de tentar a operação no banco
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+        req.flash('error_msg', 'ID da feira inválido para mudança de status.');
+        return res.redirect('/admin/dashboard?tab=feiras');
     }
-    res.redirect('/admin/dashboard?tab=avaliadores');
+
+    try {
+        // Encontra a feira e garante que ela pertence à escola do admin
+        const feira = await Feira.findOne({ _id: id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
+        if (!feira) {
+            req.flash('error_msg', 'Feira não encontrada ou não pertence a esta escola.');
+            return res.redirect('/admin/dashboard?tab=feiras');
+        }
+
+        // Se o status for 'ativa', desativa outras feiras ativas da mesma escola
+        if (status === 'ativa') {
+            // Garante que o ID usado no $ne é um ObjectId válido
+            await Feira.updateMany(
+                { _id: { $ne: new mongoose.Types.ObjectId(id) }, status: 'ativa', escolaId: adminEscolaId }, // USANDO escolaId AQUI
+                { status: 'arquivada' }
+            );
+        } else if (status === 'arquivada') {
+            // Se estiver arquivando, garante que não há mais nenhuma feira ativa automaticamente
+            // (Embora o updateMany acima já cuide de "outras ativas")
+        }
+
+
+        feira.status = status;
+        // Se a feira está sendo arquivada, registra a data de arquivamento
+        if (status === 'arquivada' && !feira.arquivadaEm) {
+            feira.arquivadaEm = Date.now();
+        } else if (status === 'ativa' && feira.arquivadaEm) {
+            // Se está sendo reativada, remove a data de arquivamento
+            feira.arquivadaEm = undefined;
+        }
+
+        await feira.save();
+
+        req.flash('success_msg', `Status da feira "${feira.nome}" alterado para "${status}" com sucesso!`);
+        res.redirect('/admin/dashboard?tab=feiras');
+    } catch (err) {
+        console.error('Erro ao mudar status da feira:', err);
+        req.flash('error_msg', 'Erro ao mudar status da feira. Detalhes: ' + err.message);
+        res.redirect('/admin/dashboard?tab=feiras');
+    }
+});
+
+
+// Rota para Iniciar Nova Feira (POST) - Arquiva a atual e limpa dados
+router.post('/configuracoes/nova', verificarAdminEscola, async (req, res) => {
+    const adminEscolaId = req.session.adminEscola.escolaId;
+
+    try {
+        const feiraAtual = await Feira.findOne({ status: 'ativa', escolaId: adminEscolaId }); // USANDO escolaId AQUI
+
+        if (feiraAtual) {
+            // 1. Arquiva a feira atual
+            feiraAtual.status = 'arquivada';
+            feiraAtual.arquivadaEm = Date.now();
+            await feiraAtual.save();
+
+            // 2. Apaga projetos, avaliadores, categorias, critérios e avaliações associados à feira arquivada
+            // Filtrando por feira E escola para garantir isolamento
+            await Projeto.deleteMany({ feira: feiraAtual._id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
+            await Avaliador.deleteMany({ feira: feiraAtual._id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
+            await Avaliacao.deleteMany({ feira: feiraAtual._id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
+            await Categoria.deleteMany({ feira: feiraAtual._id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
+            await Criterio.deleteMany({ feira: feiraAtual._id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
+        }
+        
+        // 3. Cria uma nova feira (com nome padrão e status 'ativa')
+        const novaFeira = new Feira({
+            nome: `Feira de Ciências ${new Date().getFullYear()}`, // Nome padrão
+            status: 'ativa',
+            escolaId: adminEscolaId // Vincula à escola do admin logado (USANDO escolaId AQUI)
+        });
+        await novaFeira.save();
+
+        req.flash('success_msg', 'Nova feira iniciada com sucesso! A feira anterior foi arquivada.');
+        res.redirect('/admin/dashboard?tab=feiras'); // Redireciona para a aba de feiras
+    } catch (err) {
+        console.error('Erro ao iniciar nova feira:', err);
+        req.flash('error_msg', 'Erro ao iniciar nova feira. Detalhes: ' + err.message);
+        res.redirect('/admin/dashboard?tab=configuracoes');
+    }
+});
+
+
+// Excluir Feira (DELETE)
+router.delete('/feiras/:id', verificarAdminEscola, async (req, res) => {
+    const { id } = req.params;
+    const adminEscolaId = req.session.adminEscola.escolaId;
+
+    // Validação de ID antes de tentar a operação no banco
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+        req.flash('error_msg', 'ID da feira inválido para exclusão.');
+        return res.redirect('/admin/dashboard?tab=feiras');
+    }
+
+    try {
+        // Encontra a feira e garante que ela pertence à escola do admin antes de excluir
+        const feiraParaExcluir = await Feira.findOne({ _id: id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
+        if (!feiraParaExcluir) {
+            req.flash('error_msg', 'Feira não encontrada ou você não tem permissão para excluí-la.');
+            return res.redirect('/admin/dashboard?tab=feiras');
+        }
+
+        // Exclui todos os dados associados àquela feira E escola
+        await Projeto.deleteMany({ feira: id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
+        await Avaliador.deleteMany({ feira: id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
+        await Avaliacao.deleteMany({ feira: id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
+        await Categoria.deleteMany({ feira: id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
+        await Criterio.deleteMany({ feira: id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
+        
+        await Feira.deleteOne({ _id: id, escolaId: adminEscolaId }); // Finalmente, exclui a feira (USANDO escolaId AQUI)
+
+        req.flash('success_msg', 'Feira e todos os dados associados excluídos com sucesso!');
+    } catch (err) {
+        console.error('Erro ao excluir feira:', err);
+        req.flash('error_msg', 'Erro ao excluir feira. Detalhes: ' + err.message);
+    }
+
+    res.redirect('/admin/dashboard?tab=feiras');
 });
 
 // ===========================================
@@ -1165,24 +1270,19 @@ router.delete('/avaliadores/:id', verificarAdminEscola, async (req, res) => {
 // Adicionar Categoria (POST)
 router.post('/categorias', verificarAdminEscola, async (req, res) => {
     const { nome } = req.body;
-    const escolaId = req.session.adminEscola.escolaId;
+    const adminEscolaId = req.session.adminEscola.escolaId;
 
     try {
-        const feira = await Feira.findOne({ status: 'ativa', escolaId: escolaId });
+        const feira = await Feira.findOne({ status: 'ativa', escolaId: adminEscolaId }); // USANDO escolaId AQUI
 
         if (!feira) {
             req.flash('error_msg', 'Nenhuma feira ativa encontrada para esta escola. Não é possível criar uma categoria.');
             return res.redirect('/admin/dashboard?tab=categorias');
         }
 
-        if (!nome || nome.trim() === '') {
-            req.flash('error_msg', 'Por favor, insira um nome para a categoria.');
-            return res.redirect('/admin/dashboard?tab=categorias');
-        }
-
         const novaCategoria = new Categoria({
-            nome: nome.trim(),
-            escolaId: escolaId,
+            nome,
+            escolaId: adminEscolaId, // USANDO escolaId AQUI
             feira: feira._id
         });
 
@@ -1201,22 +1301,20 @@ router.post('/categorias', verificarAdminEscola, async (req, res) => {
 router.put('/categorias/:id', verificarAdminEscola, async (req, res) => {
     const { id } = req.params;
     const { nome } = req.body;
-    const escolaId = req.session.adminEscola.escolaId;
+    const adminEscolaId = req.session.adminEscola.escolaId;
 
+    // Validação de ID antes de tentar a operação no banco
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
         req.flash('error_msg', 'ID da categoria inválido para edição.');
         return res.redirect('/admin/dashboard?tab=categorias');
     }
-    if (!nome || nome.trim() === '') {
-        req.flash('error_msg', 'Por favor, insira um nome para a categoria.');
-        return res.redirect('/admin/dashboard?tab=categorias');
-    }
 
     try {
+        // Garante que a categoria a ser atualizada pertence à escola do admin
         const updatedCategoria = await Categoria.findOneAndUpdate(
-            { _id: id, escolaId: escolaId },
-            { nome: nome.trim() }, 
-            { new: true, runValidators: true }
+            { _id: id, escolaId: adminEscolaId }, // USANDO escolaId AQUI
+            { nome }, 
+            { new: true }
         );
 
         if (!updatedCategoria) {
@@ -1235,31 +1333,24 @@ router.put('/categorias/:id', verificarAdminEscola, async (req, res) => {
 });
 
 // Excluir Categoria (DELETE)
-// Rota ajustada para o padrão RESTful /categorias/:id (sem /excluir)
-router.delete('/categorias/:id', verificarAdminEscola, async (req, res) => {
-    const { id } = req.params;
-    const escolaId = req.session.adminEscola.escolaId;
+router.delete('/categorias/:id/excluir', verificarAdminEscola, async (req, res) => {
+    const adminEscolaId = req.session.adminEscola.escolaId;
 
-    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+    // Validação de ID antes de tentar a operação no banco
+    if (!req.params.id || !mongoose.Types.ObjectId.isValid(req.params.id)) {
         req.flash('error_msg', 'ID da categoria inválido para exclusão.');
         return res.redirect('/admin/dashboard?tab=categorias');
     }
 
     try {
-        const categoriaParaExcluir = await Categoria.findOne({ _id: id, escolaId: escolaId });
+        // Encontra a categoria e garante que pertence à escola do admin antes de excluir
+        const categoriaParaExcluir = await Categoria.findOne({ _id: req.params.id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
         if (!categoriaParaExcluir) {
             req.flash('error_msg', 'Categoria não encontrada ou você não tem permissão para excluí-la.');
             return res.redirect('/admin/dashboard?tab=categorias');
         }
 
-        // Verifica se há projetos associados a esta categoria para esta escola
-        const projetosAssociados = await Projeto.countDocuments({ categoria: id, escolaId: escolaId });
-        if (projetosAssociados > 0) {
-            req.flash('error_msg', `Não é possível deletar a categoria "${categoriaParaExcluir.nome}" porque ela possui ${projetosAssociados} projeto(s) associado(s).`);
-            return res.redirect('/admin/dashboard?tab=categorias');
-        }
-
-        await Categoria.deleteOne({ _id: id, escolaId: escolaId });
+        await Categoria.deleteOne({ _id: req.params.id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
         req.flash('success_msg', 'Categoria excluída com sucesso!');
     } catch (err) {
         console.error('Erro ao excluir categoria:', err);
@@ -1274,259 +1365,191 @@ router.delete('/categorias/:id', verificarAdminEscola, async (req, res) => {
 // ROTAS CRUD - CRITÉRIOS
 // ===========================================
 
-// Criar Categoria
-router.post('/categorias', verificarAdminEscola, async (req, res) => {
-    const { nome } = req.body;
-    const escolaId = req.session.adminEscola.escolaId;
-    try {
-        const feira = await Feira.findOne({ status: 'ativa', escola: escolaId });
-        if (!feira) throw new Error('Feira ativa não encontrada');
-        const categoria = new Categoria({ nome, escolaId, feira: feira._id });
-        await categoria.save();
-        req.flash('success_msg', 'Categoria criada com sucesso!');
-    } catch (err) {
-        console.error('Erro ao criar categoria:', err);
-        req.flash('error_msg', 'Erro ao criar categoria.');
-    }
-    res.redirect('/admin/dashboard?tab=categorias');
-});
-
-// Editar Categoria
-router.put('/categorias/:id', verificarAdminEscola, async (req, res) => {
-    const { nome } = req.body;
-    const escolaId = req.session.adminEscola.escolaId;
-    try {
-        const categoria = await Categoria.findOneAndUpdate(
-            { _id: req.params.id, escolaId },
-            { nome },
-            { new: true }
-        );
-        if (!categoria) throw new Error('Categoria não encontrada');
-        req.flash('success_msg', 'Categoria atualizada com sucesso!');
-    } catch (err) {
-        console.error('Erro ao atualizar categoria:', err);
-        req.flash('error_msg', 'Erro ao atualizar categoria.');
-    }
-    res.redirect('/admin/dashboard?tab=categorias');
-});
-
-// Excluir Categoria
-router.delete('/categorias/:id', verificarAdminEscola, async (req, res) => {
-    try {
-        await Categoria.deleteOne({ _id: req.params.id });
-        req.flash('success_msg', 'Categoria excluída com sucesso!');
-    } catch (err) {
-        console.error('Erro ao excluir categoria:', err);
-        req.flash('error_msg', 'Erro ao excluir categoria.');
-    }
-    res.redirect('/admin/dashboard?tab=categorias');
-});
-
-
-// ========================
-// ROTAS DE CRITÉRIOS
-// ========================
-
-// Criar Critério
+// Adicionar Critério (POST)
 router.post('/criterios', verificarAdminEscola, async (req, res) => {
     const { nome, peso, observacao } = req.body;
-    const escolaId = req.session.adminEscola.escolaId;
+    const adminEscolaId = req.session.adminEscola.escolaId;
+
     try {
-        const feira = await Feira.findOne({ status: 'ativa', escola: escolaId });
-        const criterio = new Criterio({
+        const feira = await Feira.findOne({ status: 'ativa', escolaId: adminEscolaId }); // USANDO escolaId AQUI
+
+        if (!feira) {
+            req.flash('error_msg', 'Nenhuma feira ativa encontrada para esta escola. Não é possível criar um critério.');
+            return res.redirect('/admin/dashboard?tab=criterios');
+        }
+
+        const novo = new Criterio({
             nome,
-            peso: parseFloat(peso),
+            peso,
             observacao,
-            escolaId,
+            escolaId: adminEscolaId, // USANDO escolaId AQUI
             feira: feira._id
         });
-        await criterio.save();
+
+        await novo.save();
         req.flash('success_msg', 'Critério criado com sucesso!');
     } catch (err) {
         console.error('Erro ao criar critério:', err);
-        req.flash('error_msg', 'Erro ao criar critério.');
+        req.flash('error_msg', 'Erro ao criar critério. Detalhes: ' + err.message);
     }
+
     res.redirect('/admin/dashboard?tab=criterios');
 });
 
-// Editar Critério
+
+// Editar Critério (PUT)
 router.put('/criterios/:id', verificarAdminEscola, async (req, res) => {
     const { nome, peso, observacao } = req.body;
-    const escolaId = req.session.adminEscola.escolaId;
+    const adminEscolaId = req.session.adminEscola.escolaId;
+
+    // Validação de ID antes de tentar a operação no banco
+    if (!req.params.id || !mongoose.Types.ObjectId.isValid(req.params.id)) {
+        req.flash('error_msg', 'ID do critério inválido para edição.');
+        return res.redirect('/admin/dashboard?tab=criterios');
+    }
+
     try {
-        await Criterio.findOneAndUpdate(
-            { _id: req.params.id, escolaId },
-            { nome, peso: parseFloat(peso), observacao }
+        // Garante que o critério a ser atualizado pertence à escola do admin
+        const updatedCriterio = await Criterio.findOneAndUpdate(
+            { _id: req.params.id, escolaId: adminEscolaId }, // USANDO escolaId AQUI
+            { nome, peso, observacao }
         );
+
+        if (!updatedCriterio) {
+            req.flash('error_msg', 'Critério não encontrado ou você não tem permissão para editá-lo.');
+            return res.redirect('/admin/dashboard?tab=criterios');
+        }
+
         req.flash('success_msg', 'Critério atualizado com sucesso!');
     } catch (err) {
-        console.error('Erro ao atualizar critério:', err);
-        req.flash('error_msg', 'Erro ao atualizar critério.');
+        console.error('Erro ao editar critério:', err);
+        req.flash('error_msg', 'Erro ao editar critério. Detalhes: ' + err.message);
     }
+
     res.redirect('/admin/dashboard?tab=criterios');
 });
 
-// Excluir Critério
-router.delete('/criterios/:id', verificarAdminEscola, async (req, res) => {
+
+// Excluir Critério (DELETE)
+router.delete('/criterios/:id/excluir', verificarAdminEscola, async (req, res) => {
+    const adminEscolaId = req.session.adminEscola.escolaId;
+
+    // Validação de ID antes de tentar a operação no banco
+    if (!req.params.id || !mongoose.Types.ObjectId.isValid(req.params.id)) {
+        req.flash('error_msg', 'ID do critério inválido para exclusão.');
+        return res.redirect('/admin/dashboard?tab=criterios');
+    }
+
     try {
-        await Criterio.deleteOne({ _id: req.params.id });
+        // Encontra o critério e garante que pertence à escola do admin antes de excluir
+        const criterioParaExcluir = await Criterio.findOne({ _id: req.params.id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
+        if (!criterioParaExcluir) {
+            req.flash('error_msg', 'Critério não encontrado ou você não tem permissão para excluí-lo.');
+            return res.redirect('/admin/dashboard?tab=criterios');
+        }
+
+        await Criterio.deleteOne({ _id: req.params.id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
         req.flash('success_msg', 'Critério excluído com sucesso!');
     } catch (err) {
         console.error('Erro ao excluir critério:', err);
-        req.flash('error_msg', 'Erro ao excluir critério.');
+        req.flash('error_msg', 'Erro ao excluir critério. Detalhes: ' + err.message);
     }
+
     res.redirect('/admin/dashboard?tab=criterios');
 });
 
 
-
 // ===========================================
-// ROTAS DE CONFIGURAÇÃO DA FEIRA ATUAL
+// ROTAS DE RELATÓRIOS (PDF)
 // ===========================================
 
-// Rota para arquivar a feira atual
-router.post('/configuracoes/arquivar', verificarAdminEscola, async (req, res) => {
+// Rota para Resultados Finais
+router.get('/resultados-finais/pdf', verificarAdminEscola, async (req, res) => {
     try {
         const escolaId = req.session.adminEscola.escolaId;
-        const feiraAtual = await Feira.findOne({ escolaId: escolaId, status: 'ativa' });
+        const feiraAtual = await Feira.findOne({ status: 'ativa', escolaId: escolaId }); // USANDO escolaId AQUI
 
         if (!feiraAtual) {
-            req.flash('error_msg', 'Nenhuma feira ativa encontrada para arquivar.');
-            return res.redirect('/admin/dashboard?tab=tab-configuracoes');
+            req.flash('error_msg', 'Nenhuma feira ativa para esta escola para gerar o relatório de resultados finais.');
+            if (!res.headersSent) {
+                return res.redirect('/admin/dashboard?tab=relatorios');
+            }
         }
 
-        feiraAtual.status = 'arquivada';
-        feiraAtual.arquivadaEm = Date.now();
-        await feiraAtual.save();
+        const projetos = await Projeto.find({ feira: feiraAtual._id, escolaId: escolaId }) // USANDO escolaId AQUI
+            .populate('categoria')
+            .populate('criterios')
+            .lean();
 
-        req.flash('success_msg', `Feira "${feiraAtual.nome}" arquivada com sucesso!`);
-        res.redirect('/admin/dashboard?tab=tab-configuracoes');
-    } catch (err) {
-        console.error('Erro ao arquivar feira:', err);
-        req.flash('error_msg', 'Erro ao arquivar feira. Detalhes: ' + err.message);
-        res.redirect('/admin/dashboard?tab=tab-configuracoes');
-    }
-});
+        const avaliacoes = await Avaliacao.find({ feira: feiraAtual._id, escolaId: escolaId }).lean(); // USANDO escolaId AQUI
 
-// Rota para iniciar uma nova feira (arquiva a antiga e limpa projetos/avaliadores da feira antiga)
-router.post('/configuracoes/nova', verificarAdminEscola, async (req, res) => {
-    try {
-        const escolaId = req.session.adminEscola.escolaId;
-        const feiraAntiga = await Feira.findOne({ escolaId: escolaId, status: 'ativa' });
+        for (const projeto of projetos) {
+            let totalNotaPonderada = 0;
+            let totalPeso = 0;
+            let criteriosAvaliadosCount = new Set();
 
-        // Arquiva a feira antiga, se existir
-        if (feiraAntiga) {
-            feiraAntiga.status = 'arquivada';
-            feiraAntiga.arquivadaEm = Date.now();
-            await feiraAntiga.save();
+            if (projeto.criterios && Array.isArray(projeto.criterios)) {
+                for (const criterioProjeto of projeto.criterios) {
+                    const avaliacoesDoCriterio = avaliacoes.flatMap(avaliacao => {
+                        const notasArray = avaliacao.notas || avaliacao.itens;
+                        return (notasArray && Array.isArray(notasArray)) ? notasArray.filter(nota =>
+                            String(nota.criterio) === String(criterioProjeto._id) &&
+                            avaliacao.projeto && String(avaliacao.projeto) === String(projeto._id) &&
+                            nota.nota !== undefined && nota.nota !== null
+                        ) : [];
+                    });
 
-            // Opcional: Limpar projetos e avaliações da feira antiga (cuidado com dados históricos)
-            // Esta lógica já foi incluída na rota DELETE da feira, e geralmente não se apaga em 'nova feira',
-            // apenas associa-os à feira arquivada. Mantendo comentado por segurança.
-            // await Projeto.deleteMany({ feira: feiraAntiga._id, escolaId: escolaId });
-            // await Avaliador.deleteMany({ feira: feiraAntiga._id, escolaId: escolaId });
-            // await Avaliacao.deleteMany({ feira: feiraAntiga._id, escola: escolaId });
-            // await Categoria.deleteMany({ feira: feiraAntiga._id, escolaId: escolaId });
-            // await Criterio.deleteMany({ feira: feiraAntiga._id, escolaId: escolaId });
-            req.flash('info_msg', `Feira anterior ("${feiraAntiga.nome}") foi arquivada.`);
+                    if (avaliacoesDoCriterio.length > 0) {
+                        const sumNotasCriterio = avaliacoesDoCriterio.reduce((acc, curr) => acc + parseFloat(curr.nota), 0);
+                        const mediaCriterio = sumNotasCriterio / avaliacoesDoCriterio.length;
+                        totalNotaPonderada += mediaCriterio * criterioProjeto.peso;
+                        totalPeso += criterioProjeto.peso;
+                        criteriosAvaliadosCount.add(String(criterioProjeto._id));
+                    }
+                }
+            }
+            projeto.notaFinal = totalPeso > 0 ? parseFloat(totalNotaPonderada / totalPeso).toFixed(2) : 'N/A';
+            projeto.criteriosAvaliadosCount = criteriosAvaliadosCount.size;
+            projeto.totalCriterios = projeto.criterios ? projeto.criterios.length : 0;
         }
 
-        // Cria uma nova feira
-        const novaFeira = new Feira({
-            nome: `Feira ${new Date().getFullYear() + 1}`, // Nome padrão para a próxima feira
-            escolaId: escolaId,
-            status: 'ativa',
-            inicioFeira: new Date(),
-            fimFeira: new Date(new Date().setFullYear(new Date().getFullYear() + 1))
+        const projetosOrdenados = projetos.sort((a, b) => {
+            const notaA = parseFloat(a.notaFinal);
+            const notaB = parseFloat(b.notaFinal);
+            if (isNaN(notaA) && isNaN(notaB)) return 0;
+            if (isNaN(notaA)) return 1;
+            if (isNaN(notaB)) return -1;
+            return notaB - notaA;
         });
-        await novaFeira.save();
 
-        req.flash('success_msg', `Nova feira ("${novaFeira.nome}") iniciada com sucesso!`);
-        res.redirect('/admin/dashboard?tab=tab-configuracoes');
-    } catch (err) {
-        console.error('Erro ao iniciar nova feira:', err);
-        req.flash('error_msg', 'Erro ao iniciar nova feira. Detalhes: ' + err.message);
-        res.redirect('/admin/dashboard?tab=tab-configuracoes');
-    }
-});
+        const escola = await Escola.findById(escolaId) || { nome: "Nome da Escola", diretor: "Diretor da Escola" };
 
-// Rota para atualizar datas da feira atual
-router.post('/configuracoes/feiradata', verificarAdminEscola, async (req, res) => {
-    const { feiraId, inicioFeira, fimFeira } = req.body;
-    const escolaId = req.session.adminEscola.escolaId;
-
-    if (!feiraId || !mongoose.Types.ObjectId.isValid(feiraId)) {
-        req.flash('error_msg', 'ID da feira inválido para atualização de datas.');
-        return res.redirect('/admin/dashboard?tab=tab-configuracoes');
-    }
-
-    try {
-        const updatedFeira = await Feira.findOneAndUpdate(
-            { _id: feiraId, escolaId: escolaId },
-            { inicioFeira: inicioFeira || null, fimFeira: fimFeira || null },
-            { new: true }
-        );
-
-        if (!updatedFeira) {
-            req.flash('error_msg', 'Feira não encontrada ou você não tem permissão para atualizar suas datas.');
-            return res.redirect('/admin/dashboard?tab=tab-configuracoes');
-        }
-
-        req.flash('success_msg', 'Datas da feira atualizadas com sucesso!');
-        res.redirect('/admin/dashboard?tab=tab-configuracoes');
-    } catch (err) {
-        console.error('Erro ao atualizar datas da feira:', err);
-        req.flash('error_msg', 'Erro ao atualizar datas da feira. Detalhes: ' + err.message);
-        res.redirect('/admin/dashboard?tab=tab-configuracoes');
-    }
-});
-
-
-// ===========================================
-// ROTAS DE RELATÓRIOS (PDF) - COM PUPPETEER
-// ==========================================
-async function generatePdfReport(req, res, templateName, data, filename) {
-    let browser; // Declare browser fora do try para garantir acesso no finally
-    try {
-        const escolaId = req.session.adminEscola.escolaId;
-        const escola = await Escola.findById(escolaId).lean();
-        const feiraAtual = await Feira.findOne({ escolaId: escolaId, status: 'ativa' }).lean();
-
-        const html = await ejs.renderFile(path.join(__dirname, `../views/admin/${templateName}.ejs`), {
-            layout: false,
-            escola,
-            feiraAtual,
-            ...data,
-            formatarData: (dateString) => {
-                if (!dateString) return 'N/A';
-                const date = new Date(dateString);
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const day = String(date.getDate()).padStart(2, 0); // Correção aqui: padStart(2, '0')
-                return `${day}/${month}/${year}`;
+        const htmlContent = await ejs.renderFile(path.join(__dirname, '../views/admin/pdf-resultados.ejs'), {
+            titulo: 'Resultados Finais',
+            feira: feiraAtual,
+            nomeFeira: feiraAtual.nome,
+            projetos: projetosOrdenados,
+            escola: escola,
+            formatarData: (dataISO) => {
+                if (!dataISO) return '';
+                const data = new Date(dataISO);
+                return data.toLocaleDateString('pt-BR');
             }
         });
 
-        // =========================================================================
-        // <<< AS MUDANÇAS PRINCIPAIS ESTÃO AQUI >>>
-        browser = await puppeteer.launch({
-            args: [...chromium.args, '--hide-scrollbars', '--disable-web-security'], // Adiciona args do chromium E os seus
-            defaultViewport: chromium.defaultViewport, // Usa o viewport padrão do chromium
-            executablePath: await chromium.executablePath(), // Pega o caminho do executável do chromium fornecido pelo pacote
-            headless: chromium.headless, // Usa o modo headless do chromium (provavelmente 'new')
-            ignoreHTTPSErrors: true, // Boa prática para ambientes de desenvolvimento/produção com certificados self-signed
-            // Se você tinha outras opções aqui, mantenha-as se não entrarem em conflito.
+        const browser = await puppeteer.launch({
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
         });
-        // =========================================================================
-
         const page = await browser.newPage();
-        await page.setContent(html, { waitUntil: 'networkidle0' });
 
-        const pdf = await page.pdf({
+        await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+
+        const pdfBuffer = await page.pdf({
             format: 'A4',
             printBackground: true,
             displayHeaderFooter: true,
-            headerTemplate: `<div style="font-size: 8px; margin-left: 1cm; margin-right: 1cm; color: #777; text-align: right;">${filename.replace(/_/g, ' ').toUpperCase()}</div>`,
+            headerTemplate: `<div style="font-size: 8px; margin-left: 1cm; margin-right: 1cm; color: #777; text-align: right;">Relatório de Resultados Finais</div>`,
             footerTemplate: `<div style="font-size: 8px; margin-left: 1cm; margin-right: 1cm; color: #777; text-align: center;">Página <span class="pageNumber"></span> de <span class="totalPages"></span></div>`,
             margin: {
                 top: '2cm',
@@ -1535,109 +1558,20 @@ async function generatePdfReport(req, res, templateName, data, filename) {
                 left: '1cm'
             }
         });
+        await browser.close();
 
-        // O browser.close() já está no finally, o que é ótimo!
-        // await browser.close(); // Esta linha pode ser removida daqui, pois já está no finally
+        res.set({
+            'Content-Type': 'application/pdf',
+            'Content-Disposition': `attachment; filename="resultados-finais_${feiraAtual.nome}.pdf"`,
+            'Content-Length': pdfBuffer.length
+        });
 
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename="${filename}.pdf"`);
-        res.send(pdf);
+        res.send(pdfBuffer);
 
-    } catch (err) {
-        console.error(`Erro ao gerar PDF de ${filename}:`, err);
+    } catch (error) {
+        console.error('Erro ao gerar PDF de resultados finais:', error);
         if (!res.headersSent) {
-            req.flash('error_msg', `Erro ao gerar PDF de ${filename}. Detalhes: ` + err.message);
-            res.redirect('/admin/dashboard?tab=relatorios');
-        }
-    } finally {
-        if (browser) { // Certifica-se de fechar o navegador mesmo em caso de erro
-            await browser.close();
-        }
-    }
-}
-
-
-// Rota para Relatório Consolidado (PDF)
-router.get('/relatorio-consolidado/pdf', verificarAdminEscola, async (req, res) => {
-    try {
-        const escolaId = req.session.adminEscola.escolaId;
-        const feiraAtual = await Feira.findOne({ escolaId: escolaId, status: 'ativa' }).lean();
-        if (!feiraAtual) {
-            req.flash('error_msg', 'Nenhuma feira ativa para gerar o relatório consolidado.');
-            return res.redirect('/admin/dashboard?tab=relatorios');
-        }
-
-        const projetos = await Projeto.find({ escolaId: escolaId, feira: feiraAtual._id }).populate('categoria').lean();
-        const avaliacoes = await Avaliacao.find({ escola: escolaId, feira: feiraAtual._id }).lean();
-        const criterios = await Criterio.find({ escolaId: escolaId, feira: feiraAtual._id }).lean();
-
-        let relatorioDados = [];
-        for (const projeto of projetos) {
-            const avaliacoesDoProjeto = avaliacoes.filter(a => String(a.projeto) === String(projeto._id));
-            let totalPontuacao = 0;
-            let totalPesos = 0;
-
-            const criteriosOficiaisProjeto = criterios.filter(c => projeto.criterios.some(pc => String(pc) === String(c._id)));
-
-            const notasPorCriterio = {};
-            criteriosOficiaisProjeto.forEach(crit => {
-                notasPorCriterio[crit._id.toString()] = { nome: crit.nome, peso: crit.peso, notas: [] };
-            });
-
-            avaliacoesDoProjeto.forEach(aval => {
-                aval.itens.forEach(item => {
-                    if (item.nota !== undefined && item.nota !== null && notasPorCriterio[String(item.criterio)]) {
-                        notasPorCriterio[String(item.criterio)].notas.push(item.nota);
-                    }
-                });
-            });
-
-            for (const critId in notasPorCriterio) {
-                const critData = notasPorCriterio[critId];
-                if (critData.notas.length > 0) {
-                    const mediaCriterio = critData.notas.reduce((sum, current) => sum + current, 0) / critData.notas.length;
-                    totalPontuacao += mediaCriterio * critData.peso;
-                    totalPesos += critData.peso;
-                }
-            }
-
-            let mediaGeral = 0;
-            if (totalPesos > 0) {
-                mediaGeral = (totalPontuacao / totalPesos).toFixed(2);
-            }
-
-            relatorioDados.push({
-                titulo: projeto.titulo,
-                categoria: projeto.categoria ? projeto.categoria.nome : 'N/A',
-                turma: projeto.turma || 'N/A',
-                alunos: projeto.alunos ? projeto.alunos.join(', ') : 'N/A',
-                mediaGeral: parseFloat(mediaGeral),
-                numAvaliacoes: avaliacoesDoProjeto.length,
-                mediasCriterios: Object.fromEntries(
-                    Object.entries(notasPorCriterio).map(([critId, critData]) => [
-                        critId,
-                        critData.notas.length > 0 ? parseFloat(critData.notas.reduce((sum, current) => sum + current, 0) / critData.notas.length).toFixed(2) : 'N/A'
-                    ])
-                )
-            });
-        }
-        
-        // Ordena por média geral (maior para menor)
-        relatorioDados.sort((a, b) => b.mediaGeral - a.mediaGeral);
-
-        // AQUI ESTÁ A CORREÇÃO: Usando `relatorioFinalPorProjeto` e `criteriosOficiais` como o template espera
-        await generatePdfReport(req, res, 'pdf-consolidado', {
-            relatorioFinalPorProjeto: { 'Todos os Projetos': relatorioDados }, // Agrupa em uma categoria genérica se o template espera
-            criteriosOficiais: criterios, 
-            titulo: 'Relatório Consolidado de Projetos', 
-            nomeFeira: feiraAtual?.nome || 'Feira Atual'
-        }, 'relatorio_consolidado');
-
-    } catch (err) {
-        console.error('Erro ao gerar PDF do relatório consolidado:', err);
-        // Garante que a resposta só seja enviada uma vez
-        if (!res.headersSent) {
-            req.flash('error_msg', 'Erro ao gerar PDF do relatório consolidado. Detalhes: ' + err.message);
+            req.flash('error_msg', 'Erro ao gerar PDF de resultados finais. Detalhes: ' + error.message);
             res.redirect('/admin/dashboard?tab=relatorios');
         }
     }
@@ -1648,52 +1582,84 @@ router.get('/relatorio-consolidado/pdf', verificarAdminEscola, async (req, res) 
 router.get('/avaliacoes/pdf', verificarAdminEscola, async (req, res) => {
     try {
         const escolaId = req.session.adminEscola.escolaId;
-        const feiraAtual = await Feira.findOne({ escolaId: escolaId, status: 'ativa' }).lean();
+        const feiraAtual = await Feira.findOne({ status: 'ativa', escolaId: escolaId }); // USANDO escolaId AQUI
         if (!feiraAtual) {
-            req.flash('error_msg', 'Nenhuma feira ativa para gerar o relatório de avaliações.');
-            return res.redirect('/admin/dashboard?tab=relatorios');
+            req.flash('error_msg', 'Nenhuma feira ativa para esta escola para gerar o relatório de avaliações.');
+            if (!res.headersSent) {
+                return res.redirect('/admin/dashboard?tab=relatorios');
+            }
         }
 
-        const avaliacoes = await Avaliacao.find({ escola: escolaId, feira: feiraAtual._id })
-                                        .populate('projeto')
-                                        .populate('avaliador')
-                                        .populate({
-                                            path: 'itens.criterio',
-                                            model: 'Criterio'
-                                        })
-                                        .lean();
-        const criteriosOficiais = await Criterio.find({ escolaId: escolaId, feira: feiraAtual._id }).lean();
+        const avaliacoes = await Avaliacao.find({ feira: feiraAtual._id, escolaId: escolaId }) // USANDO escolaId AQUI
+            .populate('avaliador')
+            .populate({
+                path: 'projeto',
+                populate: { path: 'categoria' }
+            })
+            .lean();
 
-
-        // Organizar dados para o template PDF
-        let dadosRelatorio = [];
-        avaliacoes.forEach(aval => {
-            dadosRelatorio.push({
-                projeto: aval.projeto, // Passa o objeto projeto completo
-                avaliador: aval.avaliador, // Passa o objeto avaliador completo
-                mediaPonderada: aval.mediaPonderada, // Assumindo que esta média já existe na avaliação
-                itens: aval.itens.map(item => ({
-                    criterio: item.criterio, // Passa o objeto critério completo
-                    nota: item.nota,
-                    comentario: item.comentario
-                }))
-            });
+        const criteriosMap = {};
+        const todosCriterios = await Criterio.find({ feira: feiraAtual._id, escolaId: escolaId }).lean(); // USANDO escolaId AQUI
+        todosCriterios.forEach(c => {
+            criteriosMap[c._id.toString()] = c.nome;
         });
 
-        // AQUI ESTÁ A CORREÇÃO: Usando `avaliacoes` e `criteriosOficiais` como o template espera
-        await generatePdfReport(req, res, 'pdf-avaliacao', { 
-            avaliacoes: dadosRelatorio, 
-            criteriosOficiais: criteriosOficiais, // Adicionado para o template
-            feiraAtual: feiraAtual, 
-            titulo: 'Relatório de Avaliações Detalhado', 
-            nomeFeira: feiraAtual?.nome || 'Feira Atual' 
-        }, 'avaliacoes_completas');
+        const avaliacoesParaRelatorio = avaliacoes.map(avaliacao => {
+            const notasArray = avaliacao.notas || avaliacao.itens;
+            const notasComNomesDeCriterio = (notasArray || []).map(item => ({
+                criterioNome: criteriosMap[String(item.criterio)] || 'Critério Desconhecido',
+                valor: parseFloat(item.nota),
+                observacao: item.comentario || ''
+            }));
+            return {
+                ...avaliacao,
+                notasComNomesDeCriterio: notasComNomesDeCriterio
+            };
+        });
 
-    } catch (err) {
-        console.error('Erro ao gerar PDF de avaliações:', err);
-        // Garante que a resposta só seja enviada uma vez
+
+        const escola = await Escola.findById(escolaId) || { nome: "Nome da Escola" };
+
+        const htmlContent = await ejs.renderFile(path.join(__dirname, '../views/admin/pdf-avaliacoes.ejs'), {
+            titulo: 'Avaliações Completas',
+            feira: feiraAtual,
+            nomeFeira: feiraAtual.nome,
+            avaliacoes: avaliacoesParaRelatorio,
+            escola: escola,
+            formatarData: (dataISO) => {
+                if (!dataISO) return '';
+                const data = new Date(dataISO);
+                return data.toLocaleDateString('pt-BR');
+            }
+        });
+
+        const browser = await puppeteer.launch({
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+        });
+        const page = await browser.newPage();
+        await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+        const pdfBuffer = await page.pdf({
+            format: 'A4',
+            printBackground: true,
+            displayHeaderFooter: true,
+            headerTemplate: `<div style="font-size: 8px; margin-left: 1cm; margin-right: 1cm; color: #777; text-align: right;">Relatório de Avaliações</div>`,
+            footerTemplate: `<div style="font-size: 8px; margin-left: 1cm; margin-right: 1cm; color: #777; text-align: center;">Página <span class="pageNumber"></span> de <span class="totalPages"></span></div>`,
+            margin: { top: '2cm', right: '1cm', bottom: '2cm', left: '1cm' }
+        });
+        await browser.close();
+
+        res.set({
+            'Content-Type': 'application/pdf',
+            'Content-Disposition': `attachment; filename="avaliacoes_${feiraAtual.nome}.pdf"`,
+            'Content-Length': pdfBuffer.length
+        });
+        res.send(pdfBuffer);
+
+    } catch (error) {
+        console.error('Erro ao gerar PDF de avaliações:', error);
         if (!res.headersSent) {
-            req.flash('error_msg', 'Erro ao gerar PDF de avaliações. Detalhes: ' + err.message);
+            req.flash('error_msg', 'Erro ao gerar PDF de avaliações. Detalhes: ' + error.message);
             res.redirect('/admin/dashboard?tab=relatorios');
         }
     }
@@ -1703,104 +1669,111 @@ router.get('/avaliacoes/pdf', verificarAdminEscola, async (req, res) => {
 router.get('/projetos-sem-avaliacao/pdf', verificarAdminEscola, async (req, res) => {
     try {
         const escolaId = req.session.adminEscola.escolaId;
-        const feiraAtual = await Feira.findOne({ escolaId: escolaId, status: 'ativa' }).lean();
+        const feiraAtual = await Feira.findOne({ status: 'ativa', escolaId: escolaId }); // USANDO escolaId AQUI
         if (!feiraAtual) {
-            req.flash('error_msg', 'Nenhuma feira ativa para gerar o relatório de projetos sem avaliação.');
-            return res.redirect('/admin/dashboard?tab=relatorios');
+            req.flash('error_msg', 'Nenhuma feira ativa para esta escola para gerar o relatório de projetos sem avaliação.');
+            if (!res.headersSent) {
+                return res.redirect('/admin/dashboard?tab=relatorios');
+            }
         }
 
-        const projetos = await Projeto.find({ feira: feiraAtual._id, escolaId: escolaId }).lean();
-        const avaliacoes = await Avaliacao.find({ feira: feiraAtual._id, escola: escolaId }).lean();
-        const criteriosDaFeira = await Criterio.find({ feira: feiraAtual._id, escolaId: escolaId }).lean();
-        const totalCriteriosFeira = criteriosDaFeira.length;
-        const avaliadoresDaFeira = await Avaliador.find({ feira: feiraAtual._id, escolaId: escolaId }).lean();
+        const projetos = await Projeto.find({ feira: feiraAtual._id, escolaId: escolaId }).lean(); // USANDO escolaId AQUI
+        const avaliacoes = await Avaliacao.find({ feira: feiraAtual._id, escolaId: escolaId }).lean(); // USANDO escolaId AQUI
+        const avaliadores = await Avaliador.find({ feira: feiraAtual._id, escolaId: escolaId }).lean(); // USANDO escolaId AQUI
 
-        let projetosNaoAvaliados = [];
+        const projetosSemAvaliacao = [];
+
         for (const projeto of projetos) {
+            const numAvaliadoresAtribuidos = avaliadores.filter(av => av.projetosAtribuidos && av.projetosAtribuidos.some(pa => String(pa) === String(projeto._id))).length;
             const avaliacoesDoProjeto = avaliacoes.filter(a => a.projeto && String(a.projeto) === String(projeto._id));
-            
-            // Para este relatório, queremos projetos que não foram avaliados DE FORMA COMPLETA
-            // Ou que não possuem NENHUMA avaliação, ou que o número de avaliações é menor que o esperado
-            const avaliadoresAtribuidosAoProjeto = avaliadoresDaFeira.filter(av => av.projetosAtribuidos.some(pid => String(pid) === String(projeto._id)));
-            const numAvaliacoesEsperadas = avaliadoresAtribuidosAoProjeto.length;
 
-            let isFullyEvaluated = true; // Flag para verificar se o projeto está totalmente avaliado
-            if (numAvaliacoesEsperadas > 0) { // Se há avaliadores atribuídos
-                if (avaliacoesDoProjeto.length < numAvaliacoesEsperadas) {
-                    isFullyEvaluated = false; // Não atingiu o número de avaliações esperadas
-                } else {
-                    // Verifica se cada avaliação recebida é "completa" em termos de critérios
-                    for (const aval of avaliacoesDoProjeto) {
-                        const itensAvaliadosComNota = aval.itens.filter(item => 
-                            item.nota !== undefined && item.nota !== null && 
-                            criteriosDaFeira.some(crit => String(crit._id) === String(item.criterio))
-                        ).length;
-                        if (itensAvaliadosComNota !== totalCriteriosFeira) {
-                            isFullyEvaluated = false; // Alguma avaliação não está completa
-                            break;
-                        }
-                    }
-                }
-            } else if (avaliacoesDoProjeto.length === 0) { // Se não há avaliadores mas também não tem avaliação
-                isFullyEvaluated = false;
-            }
+            // Um projeto é considerado "sem avaliação" se não tem nenhuma avaliação
+            // ou se o número de avaliações recebidas é menor que o número de avaliadores atribuídos (parcialmente avaliado)
+            if (avaliacoesDoProjeto.length === 0 || avaliacoesDoProjeto.length < numAvaliadoresAtribuidos) {
+                // Fetch details of assigned evaluators
+                const assignedEvaluators = avaliadores
+                    .filter(av => av.projetosAtribuidos && av.projetosAtribuidos.some(pa => String(pa) === String(projeto._id)))
+                    .map(av => av.nome)
+                    .join(', ');
 
-            if (!isFullyEvaluated) {
-                const avaliadoresDesignadosNomes = avaliadoresAtribuidosAoProjeto.map(av => av.nome).join(', ');
-
-                projetosNaoAvaliados.push({
+                projetosSemAvaliacao.push({
                     titulo: projeto.titulo,
                     turma: projeto.turma,
-                    numAvaliacoesRecebidas: avaliacoesDoProjeto.length,
-                    totalCriteriosNecessarios: totalCriteriosFeira,
-                    avaliadoresDesignados: avaliadoresDesignadosNomes || 'Nenhum avaliador atribuído'
+                    totalAvaliadores: numAvaliadoresAtribuidos,
+                    avaliacoesRecebidas: avaliacoesDoProjeto.length,
+                    avaliadoresDesignados: assignedEvaluators || 'Nenhum avaliador atribuído'
                 });
             }
         }
 
-        // AQUI ESTÁ A CORREÇÃO: removendo a duplicação de `feiraAtual`
-        await generatePdfReport(req, res, 'pdf-projetos-sem-avaliacao', { 
-            projetosNaoAvaliados: projetosNaoAvaliados, 
-            feiraAtual: feiraAtual, 
-            titulo: 'Projetos sem Avaliação', 
-            nomeFeira: feiraAtual?.nome || 'Feira Atual' 
-        }, 'projetos_sem_avaliacao');
+        const escola = await Escola.findById(escolaId) || { nome: "Nome da Escola" };
 
-    } catch (err) {
-        console.error('Erro ao gerar PDF de projetos sem avaliação:', err);
-        // Garante que a resposta só seja enviada uma vez
+        const htmlContent = await ejs.renderFile(path.join(__dirname, '../views/admin/pdf-projetos-sem-avaliacao.ejs'), {
+            titulo: 'Projetos Sem Avaliação',
+            layout: false,
+            feira: feiraAtual,
+            nomeFeira: feiraAtual.nome, 
+            projetosNaoAvaliados: projetosSemAvaliacao, 
+            escola: escola,
+            formatarData: (dataISO) => {
+                if (!dataISO) return '';
+                const data = new Date(dataISO);
+                return data.toLocaleDateString('pt-BR');
+            }
+        });
+
+        const browser = await puppeteer.launch({
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+        });
+        const page = await browser.newPage();
+        await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+        const pdfBuffer = await page.pdf({
+            format: 'A4',
+            printBackground: true,
+            displayHeaderFooter: true,
+            headerTemplate: `<div style="font-size: 8px; margin-left: 1cm; margin-right: 1cm; color: #777; text-align: right;">Relatório de Projetos Sem Avaliação</div>`,
+            footerTemplate: `<div style="font-size: 8px; margin-left: 1cm; margin-right: 1cm; color: #777; text-align: center;">Página <span class="pageNumber"></span> de <span class="totalPages"></span></div>`,
+            margin: { top: '2cm', right: '1cm', bottom: '2cm', left: '1cm' }
+        });
+        await browser.close();
+
+        res.set({
+            'Content-Type': 'application/pdf',
+            'Content-Disposition': `attachment; filename="projetos-sem-avaliacao_${feiraAtual.nome}.pdf"`,
+            'Content-Length': pdfBuffer.length
+        });
+        res.send(pdfBuffer);
+
+    } catch (error) {
+        console.error('Erro ao gerar PDF de projetos sem avaliação:', error);
         if (!res.headersSent) {
-            req.flash('error_msg', 'Erro ao gerar PDF de projetos sem avaliação. Detalhes: ' + err.message);
+            req.flash('error_msg', 'Erro ao gerar PDF de projetos sem avaliação. Detalhes: ' + error.message);
             res.redirect('/admin/dashboard?tab=relatorios');
         }
     }
 });
 
-
 // Rota para PDF de Ranking por Categoria
 router.get('/ranking-categorias/pdf', verificarAdminEscola, async (req, res) => {
     try {
         const escolaId = req.session.adminEscola.escolaId;
-        const feiraAtual = await Feira.findOne({ escolaId: escolaId, status: 'ativa' }).lean();
+        const feiraAtual = await Feira.findOne({ status: 'ativa', escolaId: escolaId }); // USANDO escolaId AQUI
         if (!feiraAtual) {
-            req.flash('error_msg', 'Nenhuma feira ativa para gerar o ranking por categoria.');
-            return res.redirect('/admin/dashboard?tab=relatorios');
+            req.flash('error_msg', 'Nenhuma feira ativa para esta escola para gerar o ranking por categoria.');
+            if (!res.headersSent) {
+                return res.redirect('/admin/dashboard?tab=relatorios');
+            }
         }
 
-        const projetos = await Projeto.find({ escolaId: escolaId, feira: feiraAtual._id })
+        const projetos = await Projeto.find({ feira: feiraAtual._id, escolaId: escolaId }) // USANDO escolaId AQUI
             .populate('categoria')
             .populate('criterios')
             .lean();
-        const avaliacoes = await Avaliacao.find({ escola: escolaId, feira: feiraAtual._id }).lean();
-        const categorias = await Categoria.find({ escolaId: escolaId, feira: feiraAtual._id }).lean(); // Filtrar categorias pela feira e escola
-        const criteriosFeira = await Criterio.find({ escolaId: escolaId, feira: feiraAtual._id }).lean(); // Obter todos os critérios da feira
+        const avaliacoes = await Avaliacao.find({ feira: feiraAtual._id, escolaId: escolaId }).lean(); // USANDO escolaId AQUI
+        const categorias = await Categoria.find({ feira: feiraAtual._id, escolaId: escolaId }).lean(); // USANDO escolaId AQUI
 
         const rankingPorCategoria = {};
-
-        // Inicializa o ranking com todas as categorias existentes na feira atual
-        categorias.forEach(cat => {
-            rankingPorCategoria[cat.nome] = [];
-        });
 
         for (const projeto of projetos) {
             let totalNotaPonderada = 0;
@@ -1808,11 +1781,8 @@ router.get('/ranking-categorias/pdf', verificarAdminEscola, async (req, res) => 
             const avaliacoesDoProjeto = avaliacoes.filter(a => a.projeto && String(a.projeto) === String(projeto._id));
             const numAvaliacoes = avaliacoesDoProjeto.length; 
 
-            // Filtra os critérios que realmente pertencem ao projeto e são da feira atual
-            const criteriosDoProjetoNaFeira = criteriosFeira.filter(c => projeto.criterios.some(pc => String(pc) === String(c._id)));
-
-            if (criteriosDoProjetoNaFeira && Array.isArray(criteriosDoProjetoNaFeira)) {
-                for (const criterioProjeto of criteriosDoProjetoNaFeira) {
+            if (projeto.criterios && Array.isArray(projeto.criterios)) {
+                for (const criterioProjeto of projeto.criterios) {
                     const avaliacoesDoCriterio = avaliacoesDoProjeto.flatMap(avaliacao => {
                         const notasArray = avaliacao.notas || avaliacao.itens;
                         return (notasArray && Array.isArray(notasArray)) ? notasArray.filter(item => String(item.criterio) === String(criterioProjeto._id) && item.nota !== undefined && item.nota !== null) : [];
@@ -1821,103 +1791,107 @@ router.get('/ranking-categorias/pdf', verificarAdminEscola, async (req, res) => 
                     if (avaliacoesDoCriterio.length > 0) {
                         const sumNotasCriterio = avaliacoesDoCriterio.reduce((acc, curr) => acc + parseFloat(curr.nota), 0);
                         const mediaCriterio = sumNotasCriterio / avaliacoesDoCriterio.length;
-                        totalPontuacao += mediaCriterio * criterioProjeto.peso;
+                        totalNotaPonderada += mediaCriterio * criterioProjeto.peso;
                         totalPeso += criterioProjeto.peso;
                     }
                 }
             }
-            projeto.mediaGeral = totalPeso > 0 ? parseFloat(totalNotaPonderada / totalPeso).toFixed(2) : 'N/A';
+            projeto.notaFinal = totalPeso > 0 ? parseFloat(totalNotaPonderada / totalPeso).toFixed(2) : 'N/A';
             projeto.numAvaliacoes = numAvaliacoes;
-
-            const categoriaNome = projeto.categoria ? projeto.categoria.nome : 'Sem Categoria';
-            if (!rankingPorCategoria[categoriaNome]) { // Caso a categoria do projeto não esteja entre as categorias da feira
-                rankingPorCategoria[categoriaNome] = [];
-            }
-            rankingPorCategoria[categoriaNome].push(projeto);
         }
 
-        // Ordenar os projetos dentro de cada categoria
-        for (const categoria in rankingPorCategoria) {
-            rankingPorCategoria[categoria].sort((a, b) => {
-                const notaA = parseFloat(a.mediaGeral); // Alterado de notaFinal para mediaGeral
-                const notaB = parseFloat(b.mediaGeral); // Alterado de notaFinal para mediaGeral
-                if (isNaN(notaA) && isNaN(notaB)) return 0;
-                if (isNaN(notaA)) return 1;
-                if (isNaN(notaB)) return -1;
-                return notaB - notaA;
-            });
-        }
+        categorias.forEach(cat => {
+            rankingPorCategoria[cat.nome] = projetos
+                .filter(p => p.categoria && String(p.categoria._id) === String(cat._id))
+                .sort((a, b) => {
+                    const notaA = parseFloat(a.notaFinal);
+                    const notaB = parseFloat(b.notaFinal);
+                    if (isNaN(notaA) && isNaN(notaB)) return 0;
+                    if (isNaN(notaA)) return 1;
+                    if (isNaN(notaB)) return -1;
+                    return notaB - notaA;
+                });
+        });
 
-        // AQUI ESTÁ A CORREÇÃO: Usando `rankingPorCategoria` como o template espera
-        await generatePdfReport(req, res, 'pdf-ranking-categorias', { 
+        const escola = await Escola.findById(escolaId) || { nome: "Nome da Escola" };
+
+        const htmlContent = await ejs.renderFile(path.join(__dirname, '../views/admin/pdf-ranking-categorias.ejs'), {
+            titulo: 'Ranking por Categoria',
+            layout: false,
+            feira: feiraAtual,
+            nomeFeira: feiraAtual.nome, 
             rankingPorCategoria: rankingPorCategoria, 
-            feiraAtual: feiraAtual, 
-            titulo: 'Relatório de Ranking por Categoria', 
-            nomeFeira: feiraAtual?.nome || 'Feira Atual' 
-        }, 'ranking_por_categoria');
+            escola: escola,
+            formatarData: (dataISO) => {
+                if (!dataISO) return '';
+                const data = new Date(dataISO);
+                return data.toLocaleDateString('pt-BR');
+            }
+        });
 
-    } catch (err) {
-        console.error('Erro ao gerar PDF de ranking por categoria:', err);
-        // Garante que a resposta só seja enviada uma vez
+        const browser = await puppeteer.launch({
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+        });
+        const page = await browser.newPage();
+        await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+        const pdfBuffer = await page.pdf({
+            format: 'A4',
+            printBackground: true,
+            displayHeaderFooter: true,
+            headerTemplate: `<div style="font-size: 8px; margin-left: 1cm; margin-right: 1cm; color: #777; text-align: right;">Relatório de Ranking por Categoria</div>`,
+            footerTemplate: `<div style="font-size: 8px; margin-left: 1cm; margin-right: 1cm; color: #777; text-align: center;">Página <span class="pageNumber"></span> de <span class="totalPages"></span></div>`,
+            margin: { top: '2cm', right: '1cm', bottom: '2cm', left: '1cm' }
+        });
+        await browser.close();
+
+        res.set({
+            'Content-Type': 'application/pdf',
+            'Content-Disposition': `attachment; filename="ranking-categorias_${feiraAtual.nome}.pdf"`,
+            'Content-Length': pdfBuffer.length
+        });
+        res.send(pdfBuffer);
+
+    } catch (error) {
+        console.error('Erro ao gerar PDF de ranking por categoria:', error);
         if (!res.headersSent) {
-            req.flash('error_msg', 'Erro ao gerar PDF de ranking por categoria. Detalhes: ' + err.message);
+            req.flash('error_msg', 'Erro ao gerar PDF de ranking por categoria. Detalhes: ' + error.message);
             res.redirect('/admin/dashboard?tab=relatorios');
         }
     }
 });
 
-
 // Rota para PDF de Resumo de Avaliadores
 router.get('/resumo-avaliadores/pdf', verificarAdminEscola, async (req, res) => {
     try {
         const escolaId = req.session.adminEscola.escolaId;
-        const feiraAtual = await Feira.findOne({ escolaId: escolaId, status: 'ativa' }).lean();
+        const feiraAtual = await Feira.findOne({ status: 'ativa', escolaId: escolaId }); // USANDO escolaId AQUI
         if (!feiraAtual) {
-            req.flash('error_msg', 'Nenhuma feira ativa para gerar o resumo de avaliadores.');
-            return res.redirect('/admin/dashboard?tab=relatorios');
+            req.flash('error_msg', 'Nenhuma feira ativa para esta escola para gerar o relatório de resumo de avaliadores.');
+            if (!res.headersSent) {
+                return res.redirect('/admin/dashboard?tab=relatorios');
+            }
         }
 
-        const avaliadores = await Avaliador.find({ escolaId: escolaId, feira: feiraAtual._id }).populate('projetosAtribuidos').lean();
-        const avaliacoes = await Avaliacao.find({ escola: escolaId, feira: feiraAtual._id }).lean();
-        const criteriosDaFeira = await Criterio.find({ escolaId: escolaId, feira: feiraAtual._id }).lean();
-        const totalCriteriosFeira = criteriosDaFeira.length;
+        const avaliadores = await Avaliador.find({ feira: feiraAtual._id, escolaId: escolaId }).populate('projetosAtribuidos').lean(); // USANDO escolaId AQUI
+        const avaliacoes = await Avaliacao.find({ feira: feiraAtual._id, escolaId: escolaId }).lean(); // USANDO escolaId AQUI
+        const criterios = await Criterio.find({ feira: feiraAtual._id, escolaId: escolaId }).lean(); // USANDO escolaId AQUI
 
-        let resumoAvaliadores = [];
-        for (const avaliador of avaliadores) {
-            let numAvaliacoesCompletas = 0;
-            const projetosAtribuidosIds = avaliador.projetosAtribuidos.map(p => String(p._id));
-
+        const resumoAvaliadores = await Promise.all(avaliadores.map(async av => {
+            const avaliacoesDoAvaliador = avaliacoes.filter(a => String(a.avaliador) === String(av._id));
+            
+            let totalAtribuidos = av.projetosAtribuidos ? av.projetosAtribuidos.length : 0;
+            let totalAvaliados = 0;
             let projetosAvaliadosDetalhes = [];
 
-            if (avaliador.projetosAtribuidos && Array.isArray(avaliador.projetosAtribuidos)) {
-                for (const projetoAtribuido of avaliador.projetosAtribuidos) {
-                    const avaliacaoDoProjetoPeloAvaliador = avaliacoes.find(a => String(a.avaliador) === String(avaliador._id) && String(a.projeto) === String(projetoAtribuido._id));
+            if (av.projetosAtribuidos && Array.isArray(av.projetosAtribuidos)) {
+                for (const projetoAtribuido of av.projetosAtribuidos) {
+                    const avaliacaoDoProjeto = avaliacoesDoAvaliador.find(a => String(a.projeto) === String(projetoAtribuido._id));
                     let statusProjeto = 'Pendente';
-                    if (avaliacaoDoProjetoPeloAvaliador) {
-                        // Verifica se a avaliação está "completa" com base nos critérios da feira
-                        let isAvaliacaoCompleta = true;
-                        if (totalCriteriosFeira > 0) {
-                            const itensAvaliadosComNota = avaliacaoDoProjetoPeloAvaliador.itens.filter(item => 
-                                item.nota !== undefined && item.nota !== null && 
-                                criteriosDaFeira.some(crit => String(crit._id) === String(item.criterio))
-                            ).length;
-                            if (itensAvaliadosComNota !== totalCriteriosFeira) {
-                                isAvaliacaoCompleta = false;
-                            }
-                        } else { // Se não há critérios definidos, qualquer avaliação conta como "completa"
-                            if (avaliacaoDoProjetoPeloAvaliador.itens.length === 0) {
-                                isAvaliacaoCompleta = false;
-                            }
-                        }
-
-                        if (isAvaliacaoCompleta) {
-                             statusProjeto = '✅ Avaliado';
-                             numAvaliacoesCompletas++;
-                        } else {
-                            statusProjeto = '⏳ Em Andamento'; // Se existe a avaliação mas não está completa
-                        }
+                    if (avaliacaoDoProjeto && (avaliacaoDoProjeto.finalizadaPorAvaliador || (avaliacaoDoProjeto.notas || avaliacaoDoProjeto.itens).length > 0)) {
+                        totalAvaliados++;
+                        statusProjeto = '✅ Avaliado';
                     }
-                    
                     // Buscar o título do projeto para exibir na tabela
                     const projetoObj = await Projeto.findById(projetoAtribuido._id).lean();
                     if (projetoObj) {
@@ -1930,110 +1904,182 @@ router.get('/resumo-avaliadores/pdf', verificarAdminEscola, async (req, res) => 
             }
 
 
-            resumoAvaliadores.push({
-                nome: avaliador.nome,
-                email: avaliador.email,
-                pinAtivo: avaliador.pin, // Passando o PIN para o relatório, se necessário
-                ativo: avaliador.ativo,
-                totalAtribuidos: projetosAtribuidosIds.length,
-                totalAvaliados: numAvaliacoesCompletas,
+            return {
+                nome: av.nome,
+                email: av.email,
+                pinAtivo: av.pin, 
+                ativo: av.ativo,
+                totalAtribuidos: totalAtribuidos,
+                totalAvaliados: totalAvaliados,
                 projetos: projetosAvaliadosDetalhes 
-            });
-        }
-        await generatePdfReport(req, res, 'pdf-resumo-avaliadores', { 
-            avaliadores: resumoAvaliadores, // Corrigido para "avaliadores"
-            feiraAtual: feiraAtual, 
-            titulo: 'Relatório de Avaliadores', 
-            nomeFeira: feiraAtual?.nome || 'Feira Atual' 
-        }, 'resumo_avaliadores');
+            };
+        }));
 
-    } catch (err) {
-        console.error('Erro ao gerar PDF de resumo de avaliadores:', err);
-        // Garante que a resposta só seja enviada uma vez
+        const escola = await Escola.findById(escolaId) || { nome: "Nome da Escola" };
+
+        const htmlContent = await ejs.renderFile(path.join(__dirname, '../views/admin/pdf-resumo-avaliadores.ejs'), {
+            titulo: 'Resumo de Avaliadores',
+            layout: false,
+            feira: feiraAtual,
+            nomeFeira: feiraAtual.nome, 
+            avaliadores: resumoAvaliadores, 
+            escola: escola,
+            formatarData: (dataISO) => {
+                if (!dataISO) return '';
+                const data = new Date(dataISO);
+                return data.toLocaleDateString('pt-BR');
+            }
+        });
+
+        const browser = await puppeteer.launch({
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+        });
+        const page = await browser.newPage();
+        await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+        const pdfBuffer = await page.pdf({
+            format: 'A4',
+            printBackground: true,
+            displayHeaderFooter: true,
+            headerTemplate: `<div style="font-size: 8px; margin-left: 1cm; margin-right: 1cm; color: #777; text-align: right;">Relatório de Resumo de Avaliadores</div>`,
+            footerTemplate: `<div style="font-size: 8px; margin-left: 1cm; margin-right: 1cm; color: #777; text-align: center;">Página <span class="pageNumber"></span> de <span class="totalPages"></span></div>`,
+            margin: { top: '2cm', right: '1cm', bottom: '2cm', left: '1cm' }
+        });
+        await browser.close();
+
+        res.set({
+            'Content-Type': 'application/pdf',
+            'Content-Disposition': `attachment; filename="resumo-avaliadores_${feiraAtual.nome}.pdf"`,
+            'Content-Length': pdfBuffer.length
+        });
+        res.send(pdfBuffer);
+
+    } catch (error) {
+        console.error('Erro ao gerar PDF de resumo de avaliadores:', error);
         if (!res.headersSent) {
-            req.flash('error_msg', 'Erro ao gerar PDF de resumo de avaliadores. Detalhes: ' + err.message);
+            req.flash('error_msg', 'Erro ao gerar PDF de resumo de avaliadores. Detalhes: ' + error.message);
             res.redirect('/admin/dashboard?tab=relatorios');
         }
     }
 });
 
 
-// Rota para PDF de Resultados Finais
-router.get('/resultados-finais/pdf', verificarAdminEscola, async (req, res) => {
+// ROTA: Relatório Consolidado da Feira
+router.get('/relatorio-consolidado/pdf', verificarAdminEscola, async (req, res) => {
     try {
         const escolaId = req.session.adminEscola.escolaId;
-        const feiraAtual = await Feira.findOne({ escolaId: escolaId, status: 'ativa' }).lean();
+        const feiraAtual = await Feira.findOne({ status: 'ativa', escolaId: escolaId }); // USANDO escolaId AQUI
         if (!feiraAtual) {
-            req.flash('error_msg', 'Nenhuma feira ativa para gerar os resultados finais.');
-            return res.redirect('/admin/dashboard?tab=relatorios');
+            req.flash('error_msg', 'Nenhuma feira ativa para esta escola para gerar o relatório consolidado.');
+            if (!res.headersSent) {
+                return res.redirect('/admin/dashboard?tab=relatorios');
+            }
         }
 
-        const projetos = await Projeto.find({ escolaId: escolaId, feira: feiraAtual._id }).populate('categoria').lean();
-        const avaliacoes = await Avaliacao.find({ escola: escolaId, feira: feiraAtual._id }).lean();
-        const criterios = await Criterio.find({ escolaId: escolaId, feira: feiraAtual._id }).lean();
+        const projetos = await Projeto.find({ feira: feiraAtual._id, escolaId: escolaId }) // USANDO escolaId AQUI
+            .populate('categoria')
+            .populate('criterios')
+            .lean();
 
-        let resultadosFinais = [];
+        const avaliacoes = await Avaliacao.find({ feira: feiraAtual._id, escolaId: escolaId }).lean(); // USANDO escolaId AQUI
+
+        const criteriosOficiais = await Criterio.find({ feira: feiraAtual._id, escolaId: escolaId }).sort({ nome: 1 }).lean(); // USANDO escolaId AQUI
+
+        const relatorioFinalPorProjeto = {};
+
         for (const projeto of projetos) {
-            const avaliacoesDoProjeto = avaliacoes.filter(a => String(a.projeto) === String(projeto._id));
-            let totalPontuacao = 0;
-            let totalPesos = 0;
+            const categoriaNome = projeto.categoria ? projeto.categoria.nome : 'Sem Categoria';
+            if (!relatorioFinalPorProjeto[categoriaNome]) {
+                relatorioFinalPorProjeto[categoriaNome] = [];
+            }
 
-            const criteriosOficiaisProjeto = criterios.filter(c => projeto.criterios.some(pc => String(pc) === String(c._id)));
+            const avaliacoesDoProjeto = avaliacoes.filter(a => a.projeto && String(a.projeto) === String(projeto._id));
+            const numAvaliacoes = avaliacoesDoProjeto.length;
+            
+            const mediasCriterios = {};
+            let totalNotaPonderadaProjeto = 0;
+            let totalPesoProjeto = 0;
 
-            const notasPorCriterio = {};
-            criteriosOficiaisProjeto.forEach(crit => {
-                notasPorCriterio[crit._id.toString()] = { nome: crit.nome, peso: crit.peso, notas: [] };
-            });
-
-            avaliacoesDoProjeto.forEach(aval => {
-                aval.itens.forEach(item => {
-                    if (item.nota !== undefined && item.nota !== null && notasPorCriterio[String(item.criterio)]) {
-                        notasPorCriterio[String(item.criterio)].notas.push(item.nota);
-                    }
+            for (const criterioOficial of criteriosOficiais) {
+                const notasDoCriterioParaEsteProjeto = avaliacoesDoProjeto.flatMap(avaliacao => {
+                    const notasArray = avaliacao.notas || avaliacao.itens;
+                    
+                    return (notasArray && Array.isArray(notasArray)) ? notasArray.filter(item => {
+                        const isCriterioMatch = item.criterio && (String(item.criterio) === String(criterioOficial._id));
+                        const isValorValid = item.nota !== undefined && item.nota !== null && !isNaN(parseFloat(item.nota));
+                        
+                        return isCriterioMatch && isValorValid;
+                    }) : [];
                 });
-            });
 
-            for (const critId in notasPorCriterio) {
-                const critData = notasPorCriterio[critId];
-                if (critData.notas.length > 0) {
-                    const mediaCriterio = critData.notas.reduce((sum, current) => sum + current, 0) / critData.notas.length;
-                    totalPontuacao += mediaCriterio * critData.peso;
-                    totalPesos += critData.peso;
+                if (notasDoCriterioParaEsteProjeto.length > 0) {
+                    const sumNotas = notasDoCriterioParaEsteProjeto.reduce((acc, curr) => acc + parseFloat(curr.nota), 0);
+                    const mediaCriterio = sumNotas / notasDoCriterioParaEsteProjeto.length;
+                    mediasCriterios[String(criterioOficial._id)] = parseFloat(mediaCriterio).toFixed(2);
+
+                    const isCriterioAssociatedToProject = projeto.criterios.some(c => String(c._id) === String(criterioOficial._id));
+                    if (isCriterioAssociatedToProject) {
+                         totalNotaPonderadaProjeto += parseFloat(mediasCriterios[String(criterioOficial._id)]) * criterioOficial.peso;
+                         totalPesoProjeto += criterioOficial.peso;
+                    }
+
+                } else {
+                    mediasCriterios[String(criterioOficial._id)] = 'N/A';
                 }
             }
 
-            let mediaGeral = 0;
-            if (totalPesos > 0) {
-                mediaGeral = (totalPontuacao / totalPesos).toFixed(2);
-            }
+            const mediaGeralProjeto = totalPesoProjeto > 0 ? parseFloat(totalNotaPonderadaProjeto / totalPesoProjeto).toFixed(2) : 'N/A';
 
-            resultadosFinais.push({
+            relatorioFinalPorProjeto[categoriaNome].push({
                 titulo: projeto.titulo,
-                categoria: projeto.categoria ? projeto.categoria.nome : 'N/A',
-                turma: projeto.turma || 'N/A',
-                alunos: projeto.alunos ? projeto.alunos.join(', ') : 'N/A',
-                mediaGeral: parseFloat(mediaGeral),
-                numAvaliacoes: avaliacoesDoProjeto.length
+                numAvaliacoes: numAvaliacoes,
+                mediasCriterios: mediasCriterios,
+                mediaGeral: mediaGeralProjeto
             });
         }
-        
-        // Ordena por média geral (maior para menor)
-        resultadosFinais.sort((a, b) => b.mediaGeral - a.mediaGeral);
 
-        // AQUI ESTÁ A CORREÇÃO: Usando `resultadosFinais` e `criterios` como o template espera
-        await generatePdfReport(req, res, 'pdf-resultados', { 
-            projetos: resultadosFinais, 
-            feiraAtual: feiraAtual, 
-            titulo: 'Resultados Finais', 
-            nomeFeira: feiraAtual?.nome || 'Feira Atual', 
-            criterios: criterios 
-        }, 'resultados_finais');
+        const escola = await Escola.findById(escolaId) || { nome: "Nome da Escola" };
 
-    } catch (err) {
-        console.error('Erro ao gerar PDF de resultados finais:', err);
-        // Garante que a resposta só seja enviada uma vez
+        const htmlContent = await ejs.renderFile(path.join(__dirname, '../views/admin/pdf-consolidado.ejs'), {
+            titulo: 'Relatório Consolidado da Feira',
+            nomeFeira: feiraAtual.nome,
+            relatorioFinalPorProjeto: relatorioFinalPorProjeto,
+            criteriosOficiais: criteriosOficiais,
+            escola: escola,
+            formatarData: (dataISO) => {
+                if (!dataISO) return '';
+                const data = new Date(dataISO);
+                return data.toLocaleDateString('pt-BR');
+            }
+        });
+
+        const browser = await puppeteer.launch({
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+        });
+        const page = await browser.newPage();
+        await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+        const pdfBuffer = await page.pdf({
+            format: 'A4',
+            printBackground: true,
+            displayHeaderFooter: true,
+            headerTemplate: `<div style="font-size: 8px; margin-left: 1cm; margin-right: 1cm; color: #777; text-align: right;">Relatório Consolidado</div>`,
+            footerTemplate: `<div style="font-size: 8px; margin-left: 1cm; margin-right: 1cm; color: #777; text-align: center;">Página <span class="pageNumber"></span> de <span class="totalPages"></span></div>`,
+            margin: { top: '2cm', right: '1cm', bottom: '2cm', left: '1cm' }
+        });
+        await browser.close();
+
+        res.set({
+            'Content-Type': 'application/pdf',
+            'Content-Disposition': `attachment; filename="relatorio-consolidado_${feiraAtual.nome}.pdf"`,
+            'Content-Length': pdfBuffer.length
+        });
+        res.send(pdfBuffer);
+
+    } catch (error) {
+        console.error('Erro ao gerar PDF do relatório consolidado:', error);
         if (!res.headersSent) {
-            req.flash('error_msg', 'Erro ao gerar PDF de resultados finais. Detalhes: ' + err.message);
+            req.flash('error_msg', 'Erro ao gerar PDF do relatório consolidado. Detalhes: ' + error.message);
             res.redirect('/admin/dashboard?tab=relatorios');
         }
     }
@@ -2047,18 +2093,18 @@ router.get('/resultados-finais/pdf', verificarAdminEscola, async (req, res) => {
 // Atualizar informações da escola (POST)
 router.post('/escola', verificarAdminEscola, async (req, res) => {
     const { id, nome, endereco, telefone, email, descricao, diretor, responsavel } = req.body;
-    const escolaId = req.session.adminEscola.escolaId;
+    const adminEscolaId = req.session.adminEscola.escolaId;
 
     try {
         if (id) {
             // Garante que apenas a escola associada ao admin logado possa ser atualizada
-            const updatedEscola = await Escola.findOneAndUpdate({ _id: id, _id: escolaId }, { // Dupla verificação do ID da escola
+            const updatedEscola = await Escola.findOneAndUpdate({ _id: id, _id: adminEscolaId }, { // Dupla verificação do ID da escola
                 nome, endereco, telefone, email, descricao, diretor, responsavel
             }, { new: true });
 
             if (!updatedEscola) {
                 req.flash('error_msg', 'Informações da escola não encontradas ou você não tem permissão para editá-las.');
-                return res.redirect('/admin/dashboard?tab=tab-configuracoes');
+                return res.redirect('/admin/dashboard?tab=configuracoes');
             }
 
             req.flash('success_msg', 'Informações da escola atualizadas com sucesso!');
@@ -2070,49 +2116,49 @@ router.post('/escola', verificarAdminEscola, async (req, res) => {
             await newEscola.save();
 
             // Vincula esta nova escola ao admin logado
-            await Admin.findByIdAndUpdate(req.session.adminEscola.id, { escolaId: newEscola._id });
+            await Admin.findByIdAndUpdate(req.session.adminEscola.id, { escolaId: newEscola._id }); // USANDO escolaId AQUI
             req.session.adminEscola.escolaId = newEscola._id.toString(); // Atualiza a sessão imediatamente
 
             req.flash('success_msg', 'Informações da escola salvas com sucesso!');
         }
-        res.redirect('/admin/dashboard?tab=tab-configuracoes');
+        res.redirect('/admin/dashboard?tab=configuracoes');
     } catch (err) {
         console.error('Erro ao salvar informações da escola:', err);
         req.flash('error_msg', 'Erro ao salvar informações da escola. Detalhes: ' + err.message);
-        res.redirect('/admin/dashboard?tab=tab-configuracoes');
+        res.redirect('/admin/dashboard?tab=configuracoes');
     }
 });
 
 // Atualizar datas da feira ativa (POST)
 router.post('/configuracoes/feiradata', verificarAdminEscola, async (req, res) => {
     const { feiraId, inicioFeira, fimFeira } = req.body;
-    const escolaId = req.session.adminEscola.escolaId;
+    const adminEscolaId = req.session.adminEscola.escolaId;
 
     // Validação de ID antes de tentar a operação no banco
     if (!feiraId || !mongoose.Types.ObjectId.isValid(feiraId)) {
         req.flash('error_msg', 'ID da feira inválido para atualização de datas.');
-        return res.redirect('/admin/dashboard?tab=tab-configuracoes');
+        return res.redirect('/admin/dashboard?tab=configuracoes');
     }
 
     try {
         // Atualiza a feira, garantindo que ela pertence à escola do admin logado
         const updatedFeira = await Feira.findOneAndUpdate(
-            { _id: feiraId, escolaId: escolaId },
-            { inicioFeira: inicioFeira || null, fimFeira: fimFeira || null },
+            { _id: feiraId, escolaId: adminEscolaId }, // Encontra pelo ID E pela escola (USANDO escolaId AQUI)
+            { inicioFeira, fimFeira },
             { new: true }
         );
 
         if (!updatedFeira) {
             req.flash('error_msg', 'Feira não encontrada ou você não tem permissão para atualizar suas datas.');
-            return res.redirect('/admin/dashboard?tab=tab-configuracoes');
+            return res.redirect('/admin/dashboard?tab=configuracoes');
         }
 
         req.flash('success_msg', 'Datas da feira atualizadas com sucesso!');
-        res.redirect('/admin/dashboard?tab=tab-configuracoes');
+        res.redirect('/admin/dashboard?tab=configuracoes');
     } catch (err) {
         console.error('Erro ao atualizar datas da feira:', err);
         req.flash('error_msg', 'Erro ao atualizar datas da feira. Detalhes: ' + err.message);
-        res.redirect('/admin/dashboard?tab=tab-configuracoes');
+        res.redirect('/admin/dashboard?tab=configuracoes');
     }
 });
 
