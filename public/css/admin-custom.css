@@ -56,31 +56,20 @@
   }
 
   #sidebar {
-   transform: translateX(-100%);
-    position: fixed;
+   transform: translateX(0%);
+    position: relative;
     z-index: 40;
   }
   #sidebar.show {
     transform: translateX(0%);
   }
 
-  #sidebarToggle  {
-    position: fixed;
-    top: 1rem;
-    left: 1rem;
-    z-index: 50;
-    background-color: #2563eb;
-    color: white;
-    padding: 0.5rem;
-    border-radius: 0.5rem;
+  #sidebarToggle {
+    display: none;
   }
   #closeSidebar,
   #overlay {
     display: none !important;
-     position: fixed;
-    inset: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 30;
   }
   #overlay.active {
     display: block;
