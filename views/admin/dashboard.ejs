@@ -249,7 +249,7 @@
             </form>
         </div>
 
-        <div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200 <% if(activeTab !== 'dashboard-geral') { %>hidden<% } %>" id="dashboard-geral" role="tabpanel" aria-labelledby="dashboard-geral-tab">
+      <div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200 <% if(activeTab !== 'dashboard-geral') { %>hidden<% } %>" id="dashboard-geral" role="tabpanel" aria-labelledby="dashboard-geral-tab">
   <%- include('dashboard-geral-content', {
       projetosPorCategoria: projetosPorCategoria,
       avaliadores: avaliadores,
@@ -811,11 +811,21 @@
     <input type="text" name="nome" id="editarFeiraNome" required class="w-full border p-2 rounded" placeholder="Nome da Feira">
     <input type="date" name="inicioFeira" id="editarInicioFeira" required class="w-full border p-2 rounded">
     <input type="date" name="fimFeira" id="editarFimFeira" required class="w-full border p-2 rounded">
-    <div class="flex justify-end space-x-2">
+    <select name="status" id="editarFeiraStatus" class="w-full border p-2 rounded">
+      <option value="ativa">Ativa</option>
+      <option value="arquivada">Arquivada</option>
+    </select>
+    <div class="flex justify-between items-center pt-4">
       <button type="button" onclick="fecharModalEditarFeira()" class="bg-gray-500 text-white px-4 py-2 rounded">Cancelar</button>
-      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Salvar</button>
+      <div class="space-x-2">
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Salvar</button>
+        <form action="/admin/feiras/excluir" method="POST" onsubmit="return confirm('Deseja realmente excluir esta feira?')" class="inline">
+          <input type="hidden" name="feiraId" id="excluirFeiraId">
+          <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded">Excluir</button>
+        </form>
+      </div>
     </div>
-</form>
+  </form>
 </div>
 
     <div id="modalConfiguracoes" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden justify-center items-center z-50 p-4">
@@ -1159,19 +1169,18 @@
                 modalFeira.classList.add('hidden');
             });
 
-            document.querySelectorAll('.btn-editar-feira').forEach(button => {
-                button.addEventListener('click', (event) => {
-                    tituloModalFeira.textContent = 'Editar Feira';
-                    formFeira.action = `/admin/feiras/${event.target.dataset.id}?_method=PUT`; // Rota de edição
-                    feiraId.value = event.target.dataset.id;
-                    inputNomeFeira.value = event.target.dataset.nome;
-                    inputInicioFeiraModal.value = event.target.dataset.inicio;
-                    inputFimFeiraModal.value = event.target.dataset.fim;
-                    // selectStatusFeiraModal.value = feiraAtual.status; // Não está em dataset, precisa ser do contexto se necessário. Removido por simplicidade.
-                    modalFeira.classList.remove('hidden');
-                    modalFeira.classList.add('flex');
-                });
-            });
+            // ✅ Abrir modal e preencher dados
+  document.querySelectorAll('.btn-editar-feira').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('editarFeiraId').value = btn.dataset.id;
+      document.getElementById('editarFeiraNome').value = btn.dataset.nome;
+      document.getElementById('editarInicioFeira').value = btn.dataset.inicio.split('-').reverse().join('-');
+      document.getElementById('editarFimFeira').value = btn.dataset.fim.split('-').reverse().join('-');
+      document.getElementById('editarFeiraStatus').value = btn.dataset.status;
+      document.getElementById('excluirFeiraId').value = btn.dataset.id;
+      document.getElementById('modalEditarFeira').classList.remove('hidden');
+    });
+  });
 
             // Mostrar modal de Configurações (apenas datas)
             const modalConfiguracoes = document.getElementById('modalConfiguracoes');

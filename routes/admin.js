@@ -1082,7 +1082,7 @@ router.post('/feiras', verificarAdminEscola, async (req, res) => {
 
 // Editar Feira (PUT)
 router.post('/feiras/editar', verificarAdminEscola, async (req, res) => {
-  const { feiraId, nome, inicioFeira, fimFeira } = req.body;
+  const { feiraId, nome, inicioFeira, fimFeira, status } = req.body;
   const escolaId = req.session.adminEscola.escolaId;
 
   try {
@@ -1091,7 +1091,8 @@ router.post('/feiras/editar', verificarAdminEscola, async (req, res) => {
       {
         nome,
         inicioFeira: new Date(inicioFeira),
-        fimFeira: new Date(fimFeira)
+        fimFeira: new Date(fimFeira),
+        status
       }
     );
     req.flash('success_msg', 'Feira atualizada com sucesso!');
@@ -1099,6 +1100,21 @@ router.post('/feiras/editar', verificarAdminEscola, async (req, res) => {
   } catch (err) {
     console.error('Erro ao editar feira:', err);
     req.flash('error_msg', 'Erro ao editar feira. Tente novamente.');
+    res.redirect('/admin/dashboard?tab=feiras');
+  }
+});
+
+// Excluir Feira (POST)
+router.post('/feiras/excluir', verificarAdminEscola, async (req, res) => {
+  const { feiraId } = req.body;
+  const escolaId = req.session.adminEscola.escolaId;
+  try {
+    await Feira.deleteOne({ _id: feiraId, escolaId });
+    req.flash('success_msg', 'Feira excluída com sucesso.');
+    res.redirect('/admin/dashboard?tab=feiras');
+  } catch (err) {
+    console.error('Erro ao excluir feira:', err);
+    req.flash('error_msg', 'Erro ao excluir feira.');
     res.redirect('/admin/dashboard?tab=feiras');
   }
 });
