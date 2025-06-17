@@ -477,36 +477,36 @@
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
                             <% feiras.forEach(f => { %>
-                                <tr class="hover:bg-gray-100 transition duration-150 ease-in-out">
-                                    <td class="py-3 px-4 text-gray-800"><%= f.nome %></td>
-                                    <td class="py-3 px-4 text-gray-800"><%= f.inicioFeira ? formatarDatasParaInput(f.inicioFeira) : 'N/A' %></td>
-                                    <td class="py-3 px-4 text-gray-800"><%= f.fimFeira ? formatarDatasParaInput(f.fimFeira) : 'N/A' %></td>
-                                    <td class="py-3 px-4">
-                                        <span class="px-2 py-1 rounded-full text-xs font-semibold
-                                            <%= f.status === 'ativa' ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800' %>">
-                                            <%= f.status === 'ativa' ? 'Ativa' : 'Arquivada' %>
-                                        </span>
-                                    </td>
-                                    <td class="py-3 px-4 whitespace-nowrap">
-  <button class="btn-editar-feira bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1.5 px-3 rounded-md text-sm mr-2 shadow-sm transition duration-300 ease-in-out"
-    data-id="<%= f._id %>"
-    data-nome="<%= f.nome %>"
-    data-inicio="<%= f.inicioFeira ? formatarDatasParaInput(f.inicioFeira) : '' %>"
-    data-fim="<%= f.fimFeira ? formatarDatasParaInput(f.fimFeira) : '' %>"
-    data-status="<%= f.status %>">
-    <i class="fas fa-edit mr-1"></i>Editar
-  </button>
+  <tr class="hover:bg-gray-100 transition duration-150 ease-in-out">
+    <td class="py-3 px-4 text-gray-800"><%= f.nome %></td>
+    <td class="py-3 px-4 text-gray-800"><%= f.inicioFeira ? formatarDatasParaInput(f.inicioFeira) : 'N/A' %></td>
+    <td class="py-3 px-4 text-gray-800"><%= f.fimFeira ? formatarDatasParaInput(f.fimFeira) : 'N/A' %></td>
+    <td class="py-3 px-4">
+      <span class="px-2 py-1 rounded-full text-xs font-semibold
+        <%= f.status === 'ativa' ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800' %>">
+        <%= f.status === 'ativa' ? 'Ativa' : 'Arquivada' %>
+      </span>
+    </td>
+    <td class="py-3 px-4 whitespace-nowrap">
+      <button class="btn-editar-feira bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1.5 px-3 rounded-md text-sm mr-2 shadow-sm transition duration-300 ease-in-out"
+        data-id="<%= f._id %>"
+        data-nome="<%= f.nome %>"
+        data-inicio="<%= f.inicioFeira ? formatarDatasParaInput(f.inicioFeira) : '' %>"
+        data-fim="<%= f.fimFeira ? formatarDatasParaInput(f.fimFeira) : '' %>"
+        data-status="<%= f.status %>">
+        <i class="fas fa-edit mr-1"></i>Editar
+      </button>
 
-  <form method="POST" action="/admin/feiras/excluir" onsubmit="return confirm('Deseja realmente excluir esta feira?')" class="inline">
-    <input type="hidden" name="feiraId" value="<%= f._id %>">
-    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-md text-sm shadow-sm transition duration-300 ease-in-out">
-      <i class="fas fa-trash-alt mr-1"></i>Excluir
-    </button>
-  </form>
-</td>
+      <form method="POST" action="/admin/feiras/excluir" onsubmit="return confirm('Deseja realmente excluir esta feira?')" class="inline">
+        <input type="hidden" name="feiraId" value="<%= f._id %>">
+        <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-md text-sm shadow-sm transition duration-300 ease-in-out">
+          <i class="fas fa-trash-alt mr-1"></i>Excluir
+        </button>
+      </form>
+    </td>
+  </tr>
+<% }) %>
 
-                                </tr>
-                            <% }) %>
                         </tbody>
                     </table>
                 </div>
