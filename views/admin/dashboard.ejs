@@ -824,23 +824,6 @@
   </form>
 </div>
 
-<!-- ✅ 3. Botão de editar e excluir lado a lado -->
-<td class="py-3 px-4 whitespace-nowrap">
-  <button class="btn-editar-feira bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1.5 px-3 rounded-md text-sm mr-2 shadow-sm transition duration-300 ease-in-out"
-    data-id="<%= f._id %>"
-    data-nome="<%= f.nome %>"
-    data-inicio="<%= f.inicioFeira ? formatarDatasParaInput(f.inicioFeira) : '' %>"
-    data-fim="<%= f.fimFeira ? formatarDatasParaInput(f.fimFeira) : '' %>"
-    data-status="<%= f.status %>">
-    <i class="fas fa-edit mr-1"></i>Editar
-  </button>
-  <form action="/admin/feiras/excluir" method="POST" onsubmit="return confirm('Deseja realmente excluir esta feira?')" class="inline">
-    <input type="hidden" name="feiraId" value="<%= f._id %>">
-    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-md text-sm shadow-sm transition duration-300 ease-in-out">
-      <i class="fas fa-trash-alt mr-1"></i>Excluir
-    </button>
-  </form>
-</td>
         <!-- Formulário oculto para exclusão -->
 <form id="formExcluirFeira" action="/admin/feiras/excluir" method="POST" class="hidden">
   <input type="hidden" name="feiraId" id="excluirFeiraHidden">
