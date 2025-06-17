@@ -235,13 +235,12 @@
         <div class="mb-6 bg-white p-4 rounded-lg shadow-sm border border-gray-200">
             <form method="GET" action="/admin/dashboard" class="flex flex-wrap items-center gap-4">
                 <label for="feiraSelecionada" class="text-base font-medium text-gray-700">Selecionar Feira:</label>
-                <select name="feiraId" id="feiraSelecionada" class="flex-grow md:flex-grow-0 border border-gray-300 px-4 py-2 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out">
-                    <option value="">-- Selecione uma Feira --</option>
-                    <% feiras.forEach(f => { %>
+                <select name="feiraId" id="feiraSelecionada" class="...">
+                        <% feiras.forEach(f => { %>
                         <option value="<%= f._id %>" <%= feiraAtual._id && feiraAtual._id.toString() === f._id.toString() ? 'selected' : '' %>>
-                            <%= f.nome %> - <%= f.status === 'arquivada' ? 'Arquivada' : 'Ativa' %>
-                        </option>
-                    <% }) %>
+                        <%= f.nome %> - <%= f.status === 'arquivada' ? 'Arquivada' : 'Ativa' %>
+                     </option>
+                         <% }) %>
                 </select>
                 <button type="submit" class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition duration-300 ease-in-out shadow-md w-full md:w-auto">
                     <i class="fas fa-sync-alt mr-2"></i>Carregar
@@ -249,15 +248,16 @@
             </form>
         </div>
 
-   <!---   <div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200 <% if(activeTab !== 'dashboard-geral') { %>hidden<% } %>" id="dashboard-geral" role="tabpanel" aria-labelledby="dashboard-geral-tab">
-  <%- include('dashboard-geral-content', {
-      projetosPorCategoria: projetosPorCategoria,
-      avaliadores: avaliadores,
-      relatorioFinalPorProjeto: relatorioFinalPorProjeto,
-      criteriosOficiais: criterios,
-      formatarData: formatarDatasParaInput
-  }) %>
-</div>-->
+   <div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200 <%= activeTab !== 'dashboard-geral' ? 'hidden' : '' %>" id="dashboard-geral">
+    <%- include('dashboard-geral-content', {
+        projetosPorCategoria: projetosPorCategoria,
+        avaliadores: avaliadores,
+        relatorioFinalPorProjeto: relatorioFinalPorProjeto,
+        criteriosOficiais: criterios,
+        formatarData: formatarDatasParaInput
+    }) %>
+</div>
+
 
            
             <!-- ABA: PROJETOS -->
@@ -288,19 +288,15 @@
                                         <td class="py-3 px-4 text-gray-800"><%= projeto.turma || 'Não informado' %></td>
                                         <td class="py-3 px-4 whitespace-nowrap">
                                             <button class="btn-editar-projeto bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1.5 px-3 rounded-md text-sm mr-2 shadow-sm transition duration-300 ease-in-out"
-                                                data-id="<%= projeto._id %>"
-                                                data-titulo="<%= projeto.titulo %>"
-                                                data-descricao="<%= projeto.descricao %>"
-                                                data-categoria-id="<%= projeto.categoria ? projeto.categoria._id : '' %>"
-                                                data-criterios="<%= projeto.criterios && projeto.criterios.length > 0 ? projeto.criterios.map(c => c._id).join(',') : '' %>"
+                                                data-id="<%= projeto._id %>" 
+                                                data-titulo="<%= projeto.titulo %>" 
+                                                data-descricao="<%= projeto.descricao %>" 
+                                                data-categoria-id="<%= projeto.categoria ? projeto.categoria._id : '' %>" 
+                                                data-criterios="<%= projeto.criterios && projeto.criterios.length > 0 ? projeto.criterios.map(c => c._id).join(',') : '' %>" 
                                                 data-turma="<%= projeto.turma %>">
                                                 <i class="fas fa-edit mr-1"></i>Editar
                                             </button>
              
-                                            <form method="POST" action="/admin/projetos/<%= projeto._id %>?_method=DELETE" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar este projeto?');">
-                                                <input type="hidden"  name="_method" value="DELETE">
-                                                <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-md text-sm shadow-sm transition duration-300 ease-in-out">Deletar</button>
-                                            </form>
                                         </td>
                                     </tr>
                                 <% }) %>
@@ -616,7 +612,7 @@
     </div>
 
     <!-- Modals (permanecem os mesmos) -->
-    <div id="modalProjeto" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden justify-center items-center z-50 p-4">
+    <div id="modalProjeto" class="modal-scrollable p-4">
         <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-2xl relative">
             <h2 id="tituloModalProjeto" class="text-3xl font-extrabold mb-6 text-center text-gray-800">Adicionar Novo Projeto</h2>
             <button id="btnFecharModalProjeto" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-4xl leading-none transition duration-300 ease-in-out">&times;</button>
@@ -738,29 +734,7 @@
                 <input type="email" id="emailAvaliador" name="email" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out" required>
             </div>
 
-            <div class="mb-4">
-    <label for="escolaAvaliador" class="block text-gray-700 text-sm font-bold mb-2">Escola:</label>
-    <select id="escolaAvaliador" name="escolaId" class="shadow-sm border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out">
-        <option value="">Selecione a Escola</option>
-        <% if (escolas && escolas.length > 0) { %>
-            <% escolas.forEach(escola => { %>
-                <option value="<%= escola._id %>"><%= escola.nome %></option>
-            <% }) %>
-        <% } %>
-    </select>
-</div>
-
-<div class="mb-4">
-    <label for="feiraAvaliador" class="block text-gray-700 text-sm font-bold mb-2">Feira:</label>
-    <select id="feiraAvaliador" name="feira" class="shadow-sm border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out">
-        <option value="">Selecione a Feira</option>
-        <% if (feiras && feiras.length > 0) { %>
-            <% feiras.forEach(feira => { %>
-                <option value="<%= feira._id %>"><%= feira.nome %></option>
-            <% }) %>
-        <% } %>
-    </select>
-</div>
+            
             <div class="mb-4" id="pinDisplayDiv">
                 <label class="block text-gray-700 text-sm font-bold mb-2">PIN:</label>
                 <span id="avaliadorPinDisplay" class="block bg-gray-100 p-3 rounded-lg text-xl font-mono tracking-wider text-gray-800 border border-gray-200"></span>
