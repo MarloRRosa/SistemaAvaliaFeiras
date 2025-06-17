@@ -819,10 +819,14 @@
       <button type="button" onclick="fecharModalEditarFeira()" class="bg-gray-500 text-white px-4 py-2 rounded">Cancelar</button>
       <div class="space-x-2">
         <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Salvar</button>
-        <form action="/admin/feiras/excluir" method="POST" onsubmit="return confirm('Deseja realmente excluir esta feira?')" class="inline">
-          <input type="hidden" name="feiraId" id="excluirFeiraId">
-          <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded">Excluir</button>
-        </form>
+        <!-- Formulário oculto para exclusão -->
+<form id="formExcluirFeira" action="/admin/feiras/excluir" method="POST" class="hidden">
+  <input type="hidden" name="feiraId" id="excluirFeiraHidden">
+</form>
+
+<!-- Botão que dispara a exclusão -->
+<button type="button" onclick="confirmarExclusaoFeira()" class="bg-red-600 text-white px-4 py-2 rounded">Excluir</button>
+
       </div>
     </div>
   </form>
@@ -1229,6 +1233,13 @@
   function fecharModalEditarFeira() {
     document.getElementById('modalEditarFeira').classList.add('hidden');
   }
+  function confirmarExclusaoFeira() {
+  if (confirm('Deseja realmente excluir esta feira?')) {
+    document.getElementById('excluirFeiraHidden').value = document.getElementById('editarFeiraId').value;
+    document.getElementById('formExcluirFeira').submit();
+  }
+}
+
     </script>
 </body>
 </html>
