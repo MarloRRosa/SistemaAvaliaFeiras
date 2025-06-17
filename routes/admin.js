@@ -1053,28 +1053,28 @@ router.delete('/avaliadores/:id', verificarAdminEscola, async (req, res) => {
 // ROTAS CRUD - FEIRAS
 // ===========================================
 
-// Criar nova feira sem apagar dados anteriores
+// Criar nova feira sem excluir dados antigos
 router.post('/feiras', verificarAdminEscola, async (req, res) => {
     const { nome, inicioFeira, fimFeira } = req.body;
     const escolaId = req.session.adminEscola.escolaId;
 
     try {
-        // Arquiva todas as feiras anteriores
+        // Arquiva outras feiras da mesma escola
         await Feira.updateMany({ escolaId, status: 'ativa' }, { $set: { status: 'arquivada' } });
 
         const novaFeira = new Feira({
             nome,
-            inicioFeira: new Date(inicioFeira.split('-').reverse().join('-')), // Converte DD-MM-YYYY para YYYY-MM-DD
+            inicioFeira: new Date(inicioFeira.split('-').reverse().join('-')), // DD-MM-YYYY → Date
             fimFeira: new Date(fimFeira.split('-').reverse().join('-')),
             status: 'ativa',
             escolaId
         });
 
         await novaFeira.save();
-        req.flash('success_msg', 'Nova feira criada e feiras anteriores arquivadas com sucesso.');
+        req.flash('success_msg', 'Nova feira criada com sucesso!');
         res.redirect('/admin/dashboard?tab=feiras');
     } catch (err) {
-        console.error('Erro ao criar nova feira:', err);
+        console.error('Erro ao criar feira:', err);
         req.flash('error_msg', 'Erro ao criar nova feira. Tente novamente.');
         res.redirect('/admin/dashboard?tab=feiras');
     }
