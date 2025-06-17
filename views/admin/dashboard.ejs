@@ -296,6 +296,10 @@
                                                 data-turma="<%= projeto.turma %>">
                                                 <i class="fas fa-edit mr-1"></i>Editar
                                             </button>
+                                            <form method="POST" action="/admin/projetos/<%= projeto._id %>?_method=DELETE" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar este projeto?');">
+                                                <input type="hidden"  name="_method" value="DELETE">
+                                                <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-md text-sm shadow-sm transition duration-300 ease-in-out">Deletar</button>
+                                            </form>
              
                                         </td>
                                     </tr>
@@ -612,7 +616,7 @@
     </div>
 
     <!-- Modals (permanecem os mesmos) -->
-    <div id="modalProjeto" class="modal-scrollable p-4">
+    <div id="modalProjeto" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden justify-center items-center z-50 p-4">
         <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-2xl relative">
             <h2 id="tituloModalProjeto" class="text-3xl font-extrabold mb-6 text-center text-gray-800">Adicionar Novo Projeto</h2>
             <button id="btnFecharModalProjeto" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-4xl leading-none transition duration-300 ease-in-out">&times;</button>
@@ -802,9 +806,6 @@
 <form id="formExcluirFeira" action="/admin/feiras/excluir" method="POST" class="hidden">
   <input type="hidden" name="feiraId" id="excluirFeiraHidden">
 </form>
-
-<!-- Botão que dispara a exclusão -->
-<button type="button" onclick="confirmarExclusaoFeira()" class="bg-red-600 text-white px-4 py-2 rounded">Excluir</button>
 
       </div>
     </div>
