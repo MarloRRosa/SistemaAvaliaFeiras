@@ -223,7 +223,7 @@ router.post('/login', async (req, res) => {
         };
 
         req.flash('success_msg', 'Login de administrador realizado com sucesso!');
-        res.redirect('/dashboard');
+        res.redirect('/admin/dashboard');
 
     } catch (err) {
         console.error('Erro no login do admin:', err);
@@ -1524,6 +1524,82 @@ router.post('/usuarios/:id', verificarAdminEscola, async (req, res) => {
         res.redirect('/admin/dashboard?tab=tab-configuracoes');
     }
 });
+
+// Rota do painel principal (Dashboard Admin)
+router.get('/dashboard', verificarAdminEscola, async (req, res) => {
+    try {
+        const escolaId = req.session.adminEscola.escolaId;
+
+        const feiraAtual = await Feira.findOne({ escolaId: escolaId, status: 'ativa' }).lean();
+        const feiras = await Feira.find({ escolaId: escolaId }).sort({ inicioFeira: -1 }).lean();
+        const projetos = await Projeto.find({ escolaId: escolaId }).populate('categoria criterios').lean();
+        const categorias = await Categoria.find({ escolaId: escolaId }).lean();
+        const criterios = await Criterio.find({ escolaId: escolaId }).lean();
+        const avaliadores = await Avaliador.find({ escolaId: escolaId }).populate('projetosAtribuidos').lean();
+        const avaliacoes = await Avaliacao.find({ escolaId: escolaId }).lean();
+        const escolas = await Escola.find().lean();
+
+        // Agrupando projetos por categoria
+        const projetosPorCategoria = {};
+        projetos.forEach(p => {
+            const nomeCategoria = (p.categoria && p.categoria.nome) || 'Sem Categoria';
+            if (!projetosPorCategoria[nomeCategoria]) {
+                projetosPorCategoria[nomeCategoria] = [];
+            }
+            projetosPorCategoria[nomeCategoria].push(p);
+        });
+
+        const totalProjetos = projetos.length;
+        const totalAvaliadores = avaliadores.length;
+
+        const projetosAvaliadosCompletosCount = avaliacoes
+            .filter(a => a.finalizadaPorAvaliador || (a.notas && a.notas.length > 0))
+            .map(a => a.projeto.toString())
+            .filter((value, index, self) => self.indexOf(value) === index).length;
+
+        const projetosPendentesAvaliacaoCount = totalProjetos - projetosAvaliadosCompletosCount;
+
+        // Cálculo de média geral
+        let somaNotas = 0;
+        let totalNotas = 0;
+        avaliacoes.forEach(av => {
+            const notas = av.notas || av.itens || [];
+            notas.forEach(n => {
+                if (n.nota !== undefined && n.nota !== null) {
+                    somaNotas += parseFloat(n.nota);
+                    totalNotas++;
+                }
+            });
+        });
+
+        const mediaGeralAvaliacoes = totalNotas > 0 ? (somaNotas / totalNotas).toFixed(2) : 'N/A';
+
+        res.render('admin/dashboard', {
+            layout: 'layouts/admin',
+            titulo: 'Painel da Feira',
+            feiraAtual,
+            feiras,
+            projetos,
+            categorias,
+            criterios,
+            avaliadores,
+            avaliacoes,
+            escolas,
+            totalProjetos,
+            totalAvaliadores,
+            projetosAvaliadosCompletosCount,
+            projetosPendentesAvaliacaoCount,
+            mediaGeralAvaliacoes,
+            projetosPorCategoria
+        });
+
+    } catch (err) {
+        console.error('Erro ao carregar dashboard:', err);
+        req.flash('error_msg', 'Erro ao carregar o painel. Tente novamente.');
+        res.redirect('/admin/login');
+    }
+});
+
 
 
 module.exports = router;
