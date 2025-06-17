@@ -16,15 +16,30 @@
       border-color: #d1d5db;
     }
     .modal-full {
+      position: fixed;
       top: 0;
       left: 0;
       width: 100vw;
       height: 100vh;
+      z-index: 100;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal {
+      background-color: white;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      max-width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
     }
   </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
   <div id="overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-40" onclick="fecharSidebar()"></div>
+
   <button id="sidebarToggle" class="fixed top-4 left-4 z-50 p-2 bg-blue-600 text-white rounded-md shadow-md">
     <i class="fas fa-bars"></i>
   </button>
@@ -50,75 +65,75 @@
 
     <!-- Sidebar -->
     <aside id="sidebar" class="fixed top-0 left-0 h-full w-64 bg-gray-800 text-gray-100 transform -translate-x-full transition-transform duration-300 z-50">
-        <div class="p-4 text-center border-b border-gray-700 mb-4 flex justify-between items-center">
-            <h1 class="text-2xl font-extrabold tracking-tight text-white link-text">Painel Admin</h1>
-            <button id="sidebarToggle" class="text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-gray-600 rounded-md p-1">
-                <i class="fas fa-bars text-xl"></i>
-            </button>
-        </div>
+    <div class="p-4 text-center border-b border-gray-700 mb-4 flex justify-between items-center">
+      <h1 class="text-2xl font-extrabold tracking-tight text-white link-text">Painel Admin</h1>
+      <button id="sidebarToggle" class="text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-gray-600 rounded-md p-1">
+        <i class="fas fa-bars text-xl"></i>
+      </button>
+    </div>
 
-        <nav class="flex-grow">
-            <ul class="space-y-1">
-                <li>
-                    <a href="#" class="sidebar-link <% if(activeTab === 'dashboard-geral') { %>active<% } %>" data-tab="dashboard-geral">
-                        <span class="icon-wrapper"><i class="fas fa-tachometer-alt"></i></span>
-                        <span class="link-text">Visão Geral</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="sidebar-link <% if(activeTab === 'projetos') { %>active<% } %>" data-tab="projetos">
-                        <span class="icon-wrapper"><i class="fas fa-lightbulb"></i></span>
-                        <span class="link-text">Projetos</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="sidebar-link <% if(activeTab === 'categorias') { %>active<% } %>" data-tab="categorias">
-                        <span class="icon-wrapper"><i class="fas fa-tags"></i></span>
-                        <span class="link-text">Categorias</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="sidebar-link <% if(activeTab === 'criterios') { %>active<% } %>" data-tab="criterios">
-                        <span class="icon-wrapper"><i class="fas fa-clipboard-list"></i></span>
-                        <span class="link-text">Critérios</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="sidebar-link <% if(activeTab === 'avaliadores') { %>active<% } %>" data-tab="avaliadores">
-                        <span class="icon-wrapper"><i class="fas fa-user-tie"></i></span>
-                        <span class="link-text">Avaliadores</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="sidebar-link <% if(activeTab === 'feiras') { %>active<% } %>" data-tab="feiras">
-                        <span class="icon-wrapper"><i class="fas fa-calendar-alt"></i></span>
-                        <span class="link-text">Feiras</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="sidebar-link <% if(activeTab === 'relatorios') { %>active<% } %>" data-tab="relatorios">
-                        <span class="icon-wrapper"><i class="fas fa-file-pdf"></i></span>
-                        <span class="link-text">Relatórios</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="sidebar-link <% if(activeTab === 'tab-configuracoes') { %>active<% } %>" data-tab="tab-configuracoes">
-                        <span class="icon-wrapper"><i class="fas fa-cog"></i></span>
-                        <span class="link-text">Configurações</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
-        
-        <div class="mt-auto pt-4 border-t border-gray-700">
-            <form action="/admin/logout" method="POST" class="w-full">
-                <button type="submit" class="w-full bg-red-700 hover:bg-red-800 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out">
-                    <span class="icon-wrapper"><i class="fas fa-sign-out-alt"></i></span>
-                    <span class="link-text">Sair</span>
-                </button>
-            </form>
-        </div>
-    </aside>
+    <nav class="flex-grow">
+      <ul class="space-y-1">
+        <li>
+          <a href="#" class="sidebar-link <% if(activeTab === 'dashboard-geral') { %>active<% } %>" data-tab="dashboard-geral">
+            <span class="icon-wrapper"><i class="fas fa-tachometer-alt"></i></span>
+            <span class="link-text">Visão Geral</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" class="sidebar-link <% if(activeTab === 'projetos') { %>active<% } %>" data-tab="projetos">
+            <span class="icon-wrapper"><i class="fas fa-lightbulb"></i></span>
+            <span class="link-text">Projetos</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" class="sidebar-link <% if(activeTab === 'categorias') { %>active<% } %>" data-tab="categorias">
+            <span class="icon-wrapper"><i class="fas fa-tags"></i></span>
+            <span class="link-text">Categorias</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" class="sidebar-link <% if(activeTab === 'criterios') { %>active<% } %>" data-tab="criterios">
+            <span class="icon-wrapper"><i class="fas fa-clipboard-list"></i></span>
+            <span class="link-text">Critérios</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" class="sidebar-link <% if(activeTab === 'avaliadores') { %>active<% } %>" data-tab="avaliadores">
+            <span class="icon-wrapper"><i class="fas fa-user-tie"></i></span>
+            <span class="link-text">Avaliadores</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" class="sidebar-link <% if(activeTab === 'feiras') { %>active<% } %>" data-tab="feiras">
+            <span class="icon-wrapper"><i class="fas fa-calendar-alt"></i></span>
+            <span class="link-text">Feiras</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" class="sidebar-link <% if(activeTab === 'relatorios') { %>active<% } %>" data-tab="relatorios">
+            <span class="icon-wrapper"><i class="fas fa-file-pdf"></i></span>
+            <span class="link-text">Relatórios</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" class="sidebar-link <% if(activeTab === 'tab-configuracoes') { %>active<% } %>" data-tab="tab-configuracoes">
+            <span class="icon-wrapper"><i class="fas fa-cog"></i></span>
+            <span class="link-text">Configurações</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="mt-auto pt-4 border-t border-gray-700">
+      <form action="/admin/logout" method="POST" class="w-full">
+        <button type="submit" class="w-full bg-red-700 hover:bg-red-800 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out">
+          <span class="icon-wrapper"><i class="fas fa-sign-out-alt"></i></span>
+          <span class="link-text">Sair</span>
+        </button>
+      </form>
+    </div>
+  </aside>
 
     <!-- Main Content Area -->
     <div id="contentArea" class="p-6">
@@ -751,32 +766,95 @@
         </div>
     </div>
 
+    
     <script>
-      document.addEventListener('DOMContentLoaded', () => {
-      const sidebar = document.getElementById('sidebar');
-      const sidebarToggle = document.getElementById('sidebarToggle');
-      const overlay = document.getElementById('overlay');
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebar = document.getElementById('sidebar');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const contentArea = document.getElementById('contentArea');
+            const tabLinks = document.querySelectorAll('.sidebar-link');
+            const tabContents = document.querySelectorAll('.tab-content');
 
-      function abrirSidebar() {
-        sidebar.classList.remove('-translate-x-full');
-        overlay.classList.remove('hidden');
-      }
+            // Função para ativar a aba
+            const activateTab = (tabId) => {
+                tabLinks.forEach(link => {
+                    link.classList.remove('active');
+                });
+                tabContents.forEach(content => {
+                    content.classList.add('hidden');
+                });
 
-      function fecharSidebar() {
-        sidebar.classList.add('-translate-x-full');
-        overlay.classList.add('hidden');
-      }
+                const activeLink = document.querySelector(`.sidebar-link[data-tab="${tabId}"]`);
+                const activeContent = document.getElementById(tabId);
 
-      sidebarToggle.addEventListener('click', () => {
-        if (sidebar.classList.contains('-translate-x-full')) {
-          abrirSidebar();
-        } else {
-          fecharSidebar();
-        }
-      });
+                if (activeLink) {
+                    activeLink.classList.add('active');
+                }
+                if (activeContent) {
+                    activeContent.classList.remove('hidden');
+                }
+            };
 
-  overlay.addEventListener('click', fecharSidebar);
-});
+            // Lógica para abas e URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const initialTabFromUrl = urlParams.get('tab');
+            const savedTab = localStorage.getItem('activeTab');
+
+            const initialTab = initialTabFromUrl || savedTab || 'dashboard-geral';
+            activateTab(initialTab);
+
+            tabLinks.forEach(link => {
+                link.addEventListener('click', (event) => {
+                    event.preventDefault(); // Impede o comportamento padrão do link
+                    const tabId = link.dataset.tab;
+                    activateTab(tabId);
+                    localStorage.setItem('activeTab', tabId);
+                    // Atualiza a URL para que a aba seja mantida em caso de recarga
+                    const newUrl = new URL(window.location.href);
+                    newUrl.searchParams.set('tab', tabId);
+                    window.history.pushState({ path: newUrl.href }, '', newUrl.href);
+                });
+            });
+
+            // Lógica para recolher/expandir o sidebar
+            // Verifica a largura da tela ao carregar e ajusta o sidebar
+            const applySidebarState = () => {
+                if (window.innerWidth <= 768) { // Ex: para telas menores que md
+                    sidebar.classList.remove('collapsed');
+                    sidebar.classList.remove('show');
+                    contentArea.style.marginLeft = '0px';
+                    // Talvez esconder o toggle button ou mudá-lo para um menu hamburger flutuante
+                } else {
+                    const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+                    if (isCollapsed) {
+                        sidebar.classList.add('collapsed');
+                        contentArea.style.marginLeft = '64px'; // Largura do sidebar colapsado
+                    } else {
+                        sidebar.classList.remove('collapsed');
+                        contentArea.style.marginLeft = '250px'; // Largura do sidebar expandido
+                    }
+                     sidebar.classList.remove('show'); // Remove a classe 'show' se estiver em desktop
+                }
+            };
+
+            // Aplica o estado inicial do sidebar
+            applySidebarState();
+
+            // Adiciona evento de clique para o botão de toggle
+            sidebarToggle.addEventListener('click', () => {
+                const isCurrentlyCollapsed = sidebar.classList.toggle('collapsed');
+                localStorage.setItem('sidebarCollapsed', isCurrentlyCollapsed);
+                // Ajusta a margem do conteúdo principal
+                if (isCurrentlyCollapsed) {
+                    contentArea.style.marginLeft = '64px';
+                } else {
+                    contentArea.style.marginLeft = '250px';
+                }
+            });
+
+            // Adiciona um listener para redimensionamento de janela
+            window.addEventListener('resize', applySidebarState);
+
 
             // Funções para os modais (permanecem as mesmas)
 
@@ -1036,7 +1114,7 @@
                 modalConfiguracoes.classList.remove('flex');
                 modalConfiguracoes.classList.add('hidden');
             });
-    
+        });
 
         // Função auxiliar para formatar datas (se já não estiver definida globalmente)
         function formatarDatasParaInput(dateString) {
@@ -1081,7 +1159,6 @@ document.getElementById('selecionarTodosCriterios')?.addEventListener('change', 
     checkboxes.forEach(cb => cb.checked = this.checked);
 });
 
-
-    </script>
+     </script>
 </body>
 </html>
