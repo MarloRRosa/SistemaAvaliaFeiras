@@ -223,7 +223,7 @@ router.post('/login', async (req, res) => {
         };
 
         req.flash('success_msg', 'Login de administrador realizado com sucesso!');
-        res.redirect('/admin/dashboard');
+        res.redirect('/dashboard');
 
     } catch (err) {
         console.error('Erro no login do admin:', err);
