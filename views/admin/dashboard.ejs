@@ -1,33 +1,33 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= titulo %></title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="/css/admin-custom.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        /* Estilo para a barra de rolagem dos selects múltiplos */
-        #projetosAvaliador, #criteriosProjeto {
-            max-height: 200px;
-            overflow-y: auto; /* Garante a rolagem para selects múltiplos */
-            border-radius: 0.375rem; /* rounded-md */
-            border-color: #d1d5db; /* gray-300 */
-        }
-        .modal-full {
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-        }
-
-        
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= titulo %></title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="/css/admin-custom.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    #projetosAvaliador, #criteriosProjeto {
+      max-height: 200px;
+      overflow-y: auto;
+      border-radius: 0.375rem;
+      border-color: #d1d5db;
+    }
+    .modal-full {
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+    }
+  </style>
 </head>
-<body class="bg-gray-50 flex min-h-screen">
-    <div id="overlay" onclick="fecharSidebarMobile()"></div>
+<body class="bg-gray-50 min-h-screen">
+  <div id="overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-40" onclick="fecharSidebar()"></div>
+  <button id="sidebarToggle" class="fixed top-4 left-4 z-50 p-2 bg-blue-600 text-white rounded-md shadow-md">
+    <i class="fas fa-bars"></i>
+  </button>
 
     <%
         // Inicialização de variáveis para evitar 'is not defined'
@@ -49,7 +49,7 @@
     %>
 
     <!-- Sidebar -->
-    <aside id="sidebar" class="sidebar bg-gray-800 text-gray-300 p-4 shadow-lg relative flex flex-col">
+    <aside id="sidebar" class="fixed top-0 left-0 h-full w-64 bg-gray-800 text-gray-100 transform -translate-x-full transition-transform duration-300 z-50">
         <div class="p-4 text-center border-b border-gray-700 mb-4 flex justify-between items-center">
             <h1 class="text-2xl font-extrabold tracking-tight text-white link-text">Painel Admin</h1>
             <button id="sidebarToggle" class="text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-gray-600 rounded-md p-1">
@@ -121,7 +121,7 @@
     </aside>
 
     <!-- Main Content Area -->
-    <div id="contentArea" class="flex-grow p-6 bg-gray-50 main-content">
+    <div id="contentArea" class="p-6">
         <header class="bg-white p-4 shadow-md rounded-lg mb-6">
             <div class="container mx-auto flex justify-between items-center">
                 <h2 class="text-3xl font-extrabold text-gray-800">
@@ -753,56 +753,27 @@
 
     <script>
       document.addEventListener('DOMContentLoaded', () => {
-  const sidebar = document.getElementById('sidebar');
-  const sidebarToggle = document.getElementById('sidebarToggle');
-  const contentArea = document.getElementById('contentArea');
-  const overlay = document.getElementById('overlay');
-  const tabLinks = document.querySelectorAll('.sidebar-link');
-  const tabContents = document.querySelectorAll('.tab-content');
+      const sidebar = document.getElementById('sidebar');
+      const sidebarToggle = document.getElementById('sidebarToggle');
+      const overlay = document.getElementById('overlay');
 
-  // Ativa a aba correta
-  const activateTab = (tabId) => {
-    tabLinks.forEach(link => link.classList.remove('active'));
-    tabContents.forEach(content => content.classList.add('hidden'));
-    document.querySelector(`.sidebar-link[data-tab="${tabId}"]`)?.classList.add('active');
-    document.getElementById(tabId)?.classList.remove('hidden');
-  };
+      function abrirSidebar() {
+        sidebar.classList.remove('-translate-x-full');
+        overlay.classList.remove('hidden');
+      }
 
-  // Aba inicial
-  const urlParams = new URLSearchParams(window.location.search);
-  const initialTab = urlParams.get('tab') || localStorage.getItem('activeTab') || 'dashboard-geral';
-  activateTab(initialTab);
+      function fecharSidebar() {
+        sidebar.classList.add('-translate-x-full');
+        overlay.classList.add('hidden');
+      }
 
-  tabLinks.forEach(link => {
-    link.addEventListener('click', (event) => {
-      event.preventDefault();
-      const tabId = link.dataset.tab;
-      activateTab(tabId);
-      localStorage.setItem('activeTab', tabId);
-      const newUrl = new URL(window.location.href);
-      newUrl.searchParams.set('tab', tabId);
-      window.history.pushState({ path: newUrl.href }, '', newUrl.href);
-      fecharSidebar(); // Fecha ao trocar de aba
-    });
-  });
-
-  // Mostrar/esconder sidebar estilo app
-  const abrirSidebar = () => {
-    sidebar.classList.add('show');
-    overlay.classList.add('active');
-  };
-  const fecharSidebar = () => {
-    sidebar.classList.remove('show');
-    overlay.classList.remove('active');
-  };
-
-  sidebarToggle.addEventListener('click', () => {
-    if (sidebar.classList.contains('show')) {
-      fecharSidebar();
-    } else {
-      abrirSidebar();
-    }
-  });
+      sidebarToggle.addEventListener('click', () => {
+        if (sidebar.classList.contains('-translate-x-full')) {
+          abrirSidebar();
+        } else {
+          fecharSidebar();
+        }
+      });
 
   overlay.addEventListener('click', fecharSidebar);
 });
