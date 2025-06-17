@@ -144,7 +144,8 @@
         if (!mediaGeralAvaliacoes) { mediaGeralAvaliacoes = 'N/A'; }
         if (!projetosPorCategoria) { projetosPorCategoria = {}; }
         if (!relatorioFinalPorProjeto) { relatorioFinalPorProjeto = {}; }
-        if (!usuarioLogado) { usuarioLogado = {}; } // Garante que usuarioLogado exista para o select do Avaliador
+        if (!usuarioLogado) { usuarioLogado = {}; }
+        if (!relatorioFinalPorProjeto) { relatorioFinalPorProjeto = {}; }
 
         // Função auxiliar para formatar datas para o formato DD-MM-YYYY
         const formatarDatasParaDisplay = (dateString) => {

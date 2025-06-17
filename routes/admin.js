@@ -1575,23 +1575,35 @@ router.get('/dashboard', verificarAdminEscola, async (req, res) => {
         const mediaGeralAvaliacoes = totalNotas > 0 ? (somaNotas / totalNotas).toFixed(2) : 'N/A';
 
         res.render('admin/dashboard', {
-            layout: 'layouts/admin',
-            titulo: 'Painel da Feira',
-            feiraAtual,
-            feiras,
-            projetos,
-            categorias,
-            criterios,
-            avaliadores,
-            avaliacoes,
-            escolas,
-            totalProjetos,
-            totalAvaliadores,
-            projetosAvaliadosCompletosCount,
-            projetosPendentesAvaliacaoCount,
-            mediaGeralAvaliacoes,
-            projetosPorCategoria
-        });
+    layout: 'layouts/admin',
+    titulo: 'Painel da Feira',
+    feiraAtual,
+    feiras,
+    projetos,
+    categorias,
+    criterios,
+    avaliadores,
+    avaliacoes,
+    escolas,
+    totalProjetos,
+    totalAvaliadores,
+    projetosAvaliadosCompletosCount,
+    projetosPendentesAvaliacaoCount,
+    mediaGeralAvaliacoes,
+    projetosPorCategoria,
+    relatorioFinalPorProjeto: {}, // 👈 ESSA LINHA É A CORREÇÃO
+    criteriosOficiais: criterios, // 👈 USADO NO INCLUDE DO EJS
+    formatarDatasParaInput: (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${day}/${month}/${year}`;
+    }
+});
+
+
 
     } catch (err) {
         console.error('Erro ao carregar dashboard:', err);
