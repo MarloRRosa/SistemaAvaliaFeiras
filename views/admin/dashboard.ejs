@@ -752,93 +752,60 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const sidebar = document.getElementById('sidebar');
-            const sidebarToggle = document.getElementById('sidebarToggle');
-            const contentArea = document.getElementById('contentArea');
-            const tabLinks = document.querySelectorAll('.sidebar-link');
-            const tabContents = document.querySelectorAll('.tab-content');
+      document.addEventListener('DOMContentLoaded', () => {
+  const sidebar = document.getElementById('sidebar');
+  const sidebarToggle = document.getElementById('sidebarToggle');
+  const contentArea = document.getElementById('contentArea');
+  const overlay = document.getElementById('overlay');
+  const tabLinks = document.querySelectorAll('.sidebar-link');
+  const tabContents = document.querySelectorAll('.tab-content');
 
-            // Função para ativar a aba
-            const activateTab = (tabId) => {
-                tabLinks.forEach(link => {
-                    link.classList.remove('active');
-                });
-                tabContents.forEach(content => {
-                    content.classList.add('hidden');
-                });
+  // Ativa a aba correta
+  const activateTab = (tabId) => {
+    tabLinks.forEach(link => link.classList.remove('active'));
+    tabContents.forEach(content => content.classList.add('hidden'));
+    document.querySelector(`.sidebar-link[data-tab="${tabId}"]`)?.classList.add('active');
+    document.getElementById(tabId)?.classList.remove('hidden');
+  };
 
-                const activeLink = document.querySelector(`.sidebar-link[data-tab="${tabId}"]`);
-                const activeContent = document.getElementById(tabId);
+  // Aba inicial
+  const urlParams = new URLSearchParams(window.location.search);
+  const initialTab = urlParams.get('tab') || localStorage.getItem('activeTab') || 'dashboard-geral';
+  activateTab(initialTab);
 
-                if (activeLink) {
-                    activeLink.classList.add('active');
-                }
-                if (activeContent) {
-                    activeContent.classList.remove('hidden');
-                }
-            };
+  tabLinks.forEach(link => {
+    link.addEventListener('click', (event) => {
+      event.preventDefault();
+      const tabId = link.dataset.tab;
+      activateTab(tabId);
+      localStorage.setItem('activeTab', tabId);
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.set('tab', tabId);
+      window.history.pushState({ path: newUrl.href }, '', newUrl.href);
+      fecharSidebar(); // Fecha ao trocar de aba
+    });
+  });
 
-            // Lógica para abas e URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const initialTabFromUrl = urlParams.get('tab');
-            const savedTab = localStorage.getItem('activeTab');
+  // Mostrar/esconder sidebar estilo app
+  const abrirSidebar = () => {
+    sidebar.classList.add('show');
+    overlay.classList.add('active');
+  };
+  const fecharSidebar = () => {
+    sidebar.classList.remove('show');
+    overlay.classList.remove('active');
+  };
 
-            const initialTab = initialTabFromUrl || savedTab || 'dashboard-geral';
-            activateTab(initialTab);
+  sidebarToggle.addEventListener('click', () => {
+    if (sidebar.classList.contains('show')) {
+      fecharSidebar();
+    } else {
+      abrirSidebar();
+    }
+  });
 
-            tabLinks.forEach(link => {
-                link.addEventListener('click', (event) => {
-                    event.preventDefault(); // Impede o comportamento padrão do link
-                    const tabId = link.dataset.tab;
-                    activateTab(tabId);
-                    localStorage.setItem('activeTab', tabId);
-                    // Atualiza a URL para que a aba seja mantida em caso de recarga
-                    const newUrl = new URL(window.location.href);
-                    newUrl.searchParams.set('tab', tabId);
-                    window.history.pushState({ path: newUrl.href }, '', newUrl.href);
-                });
-            });
-
-            // Lógica para recolher/expandir o sidebar
-            // Verifica a largura da tela ao carregar e ajusta o sidebar
-            const applySidebarState = () => {
-                if (window.innerWidth <= 768) { // Ex: para telas menores que md
-                    sidebar.classList.remove('collapsed');
-                    sidebar.classList.remove('show');
-                    contentArea.style.marginLeft = '0px';
-                    // Talvez esconder o toggle button ou mudá-lo para um menu hamburger flutuante
-                } else {
-                    const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-                    if (isCollapsed) {
-                        sidebar.classList.add('collapsed');
-                        contentArea.style.marginLeft = '64px'; // Largura do sidebar colapsado
-                    } else {
-                        sidebar.classList.remove('collapsed');
-                        contentArea.style.marginLeft = '250px'; // Largura do sidebar expandido
-                    }
-                     sidebar.classList.remove('show'); // Remove a classe 'show' se estiver em desktop
-                }
-            };
-
-            // Aplica o estado inicial do sidebar
-            applySidebarState();
-
-            // Adiciona evento de clique para o botão de toggle
-            sidebarToggle.addEventListener('click', () => {
-                const isCurrentlyCollapsed = sidebar.classList.toggle('collapsed');
-                localStorage.setItem('sidebarCollapsed', isCurrentlyCollapsed);
-                // Ajusta a margem do conteúdo principal
-                if (isCurrentlyCollapsed) {
-                    contentArea.style.marginLeft = '64px';
-                } else {
-                    contentArea.style.marginLeft = '250px';
-                }
-            });
-
-            // Adiciona um listener para redimensionamento de janela
-            window.addEventListener('resize', applySidebarState);
-
+  overlay.addEventListener('click', fecharSidebar);
+});
 
             // Funções para os modais (permanecem as mesmas)
 
@@ -1098,7 +1065,7 @@
                 modalConfiguracoes.classList.remove('flex');
                 modalConfiguracoes.classList.add('hidden');
             });
-        });
+    
 
         // Função auxiliar para formatar datas (se já não estiver definida globalmente)
         function formatarDatasParaInput(dateString) {
@@ -1143,31 +1110,6 @@ document.getElementById('selecionarTodosCriterios')?.addEventListener('change', 
     checkboxes.forEach(cb => cb.checked = this.checked);
 });
 
- document.addEventListener('DOMContentLoaded', () => {
-    const sidebar = document.getElementById('sidebar');
-    const sidebarToggle = document.getElementById('sidebarToggle');
-    const overlay = document.getElementById('overlay');
-
-    function abrirSidebarMobile() {
-      sidebar.classList.add('show');
-      overlay.classList.add('active');
-    }
-
-    function fecharSidebarMobile() {
-      sidebar.classList.remove('show');
-      overlay.classList.remove('active');
-    }
-
-    sidebarToggle.addEventListener('click', () => {
-      if (sidebar.classList.contains('show')) {
-        fecharSidebarMobile();
-      } else {
-        abrirSidebarMobile();
-      }
-    });
-
-    window.fecharSidebarMobile = fecharSidebarMobile;
-  });
 
     </script>
 </body>
