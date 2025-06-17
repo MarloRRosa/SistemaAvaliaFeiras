@@ -293,7 +293,8 @@
                                                 data-descricao="<%= projeto.descricao %>" 
                                                 data-categoria-id="<%= projeto.categoria ? projeto.categoria._id : '' %>" 
                                                 data-criterios="<%= projeto.criterios && projeto.criterios.length > 0 ? projeto.criterios.map(c => c._id).join(',') : '' %>" 
-                                                data-turma="<%= projeto.turma %>">
+                                                data-turma="<%= projeto.turma %>"
+                                                data-alunos="<%= projeto.alunos ? projeto.alunos.join(',') : '' %>">                                                
                                                 <i class="fas fa-edit mr-1"></i>Editar
                                             </button>
                                             <form method="POST" action="/admin/projetos/<%= projeto._id %>?_method=DELETE" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar este projeto?');">
@@ -674,7 +675,7 @@
 
                 <div class="mb-4">
                     <label for="projetoIntegrantes" class="block text-sm font-medium text-gray-700">Integrantes</label>
-                    <textarea id="projetoIntegrantes" name="alunos" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"><%= projetoSelecionado?.alunos?.join('\n') || '' %></textarea>
+                    <textarea id="projetoIntegrantes" name="alunos" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"></textarea>
                     <p class="text-xs text-gray-500 mt-1">Digite um nome por linha.</p>
                 </div>
 
@@ -976,7 +977,9 @@
             });
 
             document.querySelectorAll('.btn-editar-projeto').forEach(button => {
-                button.addEventListener('click', (event) => {
+                button.addEventListener('click', () => {
+                    const alunos = btn.dataset.alunos || '';
+                    document.getElementById('projetoIntegrantes').value = alunos.split(',').join('\n');
                     tituloModalProjeto.textContent = 'Editar Projeto';
                     formProjeto.action = `/admin/projetos/${event.target.dataset.id}?_method=PUT`; // Rota de edição
                     projetoId.value = event.target.dataset.id;

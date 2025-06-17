@@ -793,7 +793,9 @@ router.post('/projetos', verificarAdminEscola, async (req, res) => {
             titulo,
             descricao,
             turma,
-            alunos: Array.isArray(alunos) ? alunos : (alunos ? [alunos] : []),
+            alunos: typeof alunos === 'string'
+            ? alunos.split('\n').map(a => a.trim()).filter(Boolean)
+            : Array.isArray(alunos) ? alunos : [],
             criterios: Array.isArray(criterios) ? criterios : (criterios ? [criterios] : []),
             categoria,
             escolaId: adminEscolaId, // Vincula à escola do admin logado (USANDO escolaId AQUI)
@@ -832,7 +834,9 @@ router.put('/projetos/:id', verificarAdminEscola, async (req, res) => {
                 descricao,
                 categoria,
                 turma,
-                alunos: Array.isArray(alunos) ? alunos : (alunos ? [alunos] : []),
+                alunos: typeof alunos === 'string'
+                ? alunos.split('\n').map(a => a.trim()).filter(Boolean)
+                : Array.isArray(alunos) ? alunos : [],
                 criterios: Array.isArray(criterios) ? criterios.filter(Boolean) : (criterios ? [criterios].filter(Boolean) : [])
             },
             { new: true }
