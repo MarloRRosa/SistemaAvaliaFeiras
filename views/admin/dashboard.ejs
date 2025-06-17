@@ -249,7 +249,7 @@
             </form>
         </div>
 
-      <div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200 <% if(activeTab !== 'dashboard-geral') { %>hidden<% } %>" id="dashboard-geral" role="tabpanel" aria-labelledby="dashboard-geral-tab">
+   <!---   <div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200 <% if(activeTab !== 'dashboard-geral') { %>hidden<% } %>" id="dashboard-geral" role="tabpanel" aria-labelledby="dashboard-geral-tab">
   <%- include('dashboard-geral-content', {
       projetosPorCategoria: projetosPorCategoria,
       avaliadores: avaliadores,
@@ -257,7 +257,7 @@
       criteriosOficiais: criterios,
       formatarData: formatarDatasParaInput
   }) %>
-</div>
+</div>-->
 
            
             <!-- ABA: PROJETOS -->
@@ -495,14 +495,8 @@
                                             data-fim="<%= f.fimFeira ? formatarDatasParaInput(f.fimFeira) : '' %>">
                                             <i class="fas fa-edit mr-1"></i>Editar
                                         </button>
-                                        <form action="/admin/feiras" method="POST">
-  <input type="text" name="nome" required>
-  <input type="date" name="inicioFeira" required>
-  <input type="date" name="fimFeira" required>
-  <button type="submit">Salvar</button>
-</form>
-
-                                    </td>
+                                        
+                                   </td>
                                 </tr>
                             <% }) %>
                         </tbody>
@@ -815,10 +809,30 @@
       <option value="ativa">Ativa</option>
       <option value="arquivada">Arquivada</option>
     </select>
-    <div class="flex justify-between items-center pt-4">
+    <div class="flex justify-end items-center pt-4">
       <button type="button" onclick="fecharModalEditarFeira()" class="bg-gray-500 text-white px-4 py-2 rounded">Cancelar</button>
-      <div class="space-x-2">
-        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Salvar</button>
+      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded ml-2">Salvar</button>
+    </div>
+  </form>
+</div>
+
+<!-- ✅ 3. Botão de editar e excluir lado a lado -->
+<td class="py-3 px-4 whitespace-nowrap">
+  <button class="btn-editar-feira bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1.5 px-3 rounded-md text-sm mr-2 shadow-sm transition duration-300 ease-in-out"
+    data-id="<%= f._id %>"
+    data-nome="<%= f.nome %>"
+    data-inicio="<%= f.inicioFeira ? formatarDatasParaInput(f.inicioFeira) : '' %>"
+    data-fim="<%= f.fimFeira ? formatarDatasParaInput(f.fimFeira) : '' %>"
+    data-status="<%= f.status %>">
+    <i class="fas fa-edit mr-1"></i>Editar
+  </button>
+  <form action="/admin/feiras/excluir" method="POST" onsubmit="return confirm('Deseja realmente excluir esta feira?')" class="inline">
+    <input type="hidden" name="feiraId" value="<%= f._id %>">
+    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-md text-sm shadow-sm transition duration-300 ease-in-out">
+      <i class="fas fa-trash-alt mr-1"></i>Excluir
+    </button>
+  </form>
+</td>
         <!-- Formulário oculto para exclusão -->
 <form id="formExcluirFeira" action="/admin/feiras/excluir" method="POST" class="hidden">
   <input type="hidden" name="feiraId" id="excluirFeiraHidden">
