@@ -1081,46 +1081,26 @@ router.post('/feiras', verificarAdminEscola, async (req, res) => {
 
 
 // Editar Feira (PUT)
-router.put('/feiras/:id', verificarAdminEscola, async (req, res) => {
-    const { id } = req.params;
-    const { nome, inicioFeira, fimFeira, status } = req.body;
-    const adminEscolaId = req.session.adminEscola.escolaId;
+router.post('/feiras/editar', verificarAdminEscola, async (req, res) => {
+  const { feiraId, nome, inicioFeira, fimFeira } = req.body;
+  const escolaId = req.session.adminEscola.escolaId;
 
-    // Validação de ID antes de tentar a operação no banco
-    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-        req.flash('error_msg', 'ID da feira inválido para edição.');
-        return res.redirect('/admin/dashboard?tab=feiras');
-    }
-
-    try {
-        // Se a feira que está sendo editada for ativada, desativa as outras feiras ATIVAS da mesma escola
-        if (status === 'ativa') {
-            // Garante que o ID usado no $ne é um ObjectId válido
-            await Feira.updateMany(
-                { _id: { $ne: new mongoose.Types.ObjectId(id) }, status: 'ativa', escolaId: adminEscolaId }, // USANDO escolaId AQUI
-                { status: 'arquivada' }
-            );
-        }
-
-        // Atualiza a feira, garantindo que ela pertence à escola do admin logado
-        const updatedFeira = await Feira.findOneAndUpdate(
-            { _id: id, escolaId: adminEscolaId }, // Encontra pelo ID E pela escola (USANDO escolaId AQUI)
-            { nome, inicioFeira, fimFeira, status },
-            { new: true }
-        );
-
-        if (!updatedFeira) {
-            req.flash('error_msg', 'Feira não encontrada ou você não tem permissão para editá-la.');
-            return res.redirect('/admin/dashboard?tab=feiras');
-        }
-
-        req.flash('success_msg', 'Feira atualizada com sucesso!');
-    } catch (err) {
-        console.error('Erro ao atualizar feira:', err);
-        req.flash('error_msg', 'Erro ao atualizar feira. Detalhes: ' + err.message);
-    }
-
+  try {
+    await Feira.updateOne(
+      { _id: feiraId, escolaId },
+      {
+        nome,
+        inicioFeira: new Date(inicioFeira),
+        fimFeira: new Date(fimFeira)
+      }
+    );
+    req.flash('success_msg', 'Feira atualizada com sucesso!');
     res.redirect('/admin/dashboard?tab=feiras');
+  } catch (err) {
+    console.error('Erro ao editar feira:', err);
+    req.flash('error_msg', 'Erro ao editar feira. Tente novamente.');
+    res.redirect('/admin/dashboard?tab=feiras');
+  }
 });
 
 // Mudar Status da Feira (POST - usando POST para simplicidade, idealmente PUT)
