@@ -251,17 +251,14 @@
 
         <div id="tab-content-container">
             <!-- ABA: DASHBOARD GERAL -->
-            <div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200" id="dashboard-geral" role="tabpanel" aria-labelledby="dashboard-geral-tab">
-                <%- include('dashboard-geral-content', {
-                    projetosPorCategoria: projetosPorCategoria,
-                    avaliadores: avaliadores,
-                    relatorioFinalPorProjeto: relatorioFinalPorProjeto,
-                    criteriosOficiais: criterios, 
-                    formatarData: formatarDatasParaInput,
-                    formatarDatasParaInput: formatarDataParaInput
+           <%- include('dashboard-geral-content', {
+    projetosPorCategoria: projetosPorCategoria,
+    avaliadores: avaliadores,
+    relatorioFinalPorProjeto: relatorioFinalPorProjeto,
+    criteriosOficiais: criterios, 
+    formatarData: formatarDatasParaInput
+}) %>
 
-                }) %>
-            </div>
            
             <!-- ABA: PROJETOS -->
             <div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200 hidden" id="projetos" role="tabpanel" aria-labelledby="projetos-tab">

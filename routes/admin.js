@@ -736,32 +736,31 @@ router.get('/dashboard', verificarAdminEscola, async (req, res) => {
 
         // Renderiza o dashboard principal e passa TODOS os dados necessários para as abas
         res.render('admin/dashboard', {
-            titulo: 'Dashboard Admin',
-            layout: false,
-            usuarioLogado: req.session.adminEscola,
-            activeTab: activeTab,
-            feiras,
-            escolas: escolas,
-            feiraAtual: feiraAtual ? feiraAtual.toObject() : null,
-            // Dados para a aba de Projetos, Categorias, Critérios, Avaliadores, Feiras
-            projetos: projetosFetched,
-            categorias: categoriasFetched,
-            criterios: criteriosOficiais,
-            avaliadores: avaliadoresFetched,
-            avaliacoes: avaliacoesFetched,
-            // Dados específicos para a aba Dashboard Geral (Visão Geral)
-            projetosPorCategoria: projetosPorCategoria,
-            avaliacoesPorAvaliadorCount: avaliacoesPorAvaliadorCount,
-            mediaAvaliacaoPorCriterio: mediaAvaliacaoPorCriterio,
-            statusProjetosCount: statusProjetosCount,
-            escola: escola,
-            totalProjetos: totalProjetos,
-            totalAvaliadores: totalAvaliadores,
-            projetosAvaliadosCompletosCount: projetosAvaliadosCompletosCount,
-            projetosPendentesAvaliacaoCount: projetosPendentesAvaliacaoCount,
-            mediaGeralAvaliacoes: mediaGeralAvaliacoes,
-            relatorioFinalPorProjeto: relatorioFinalPorProjeto
-        });
+    titulo: 'Dashboard Admin',
+    layout: false,
+    usuarioLogado: req.session.adminEscola,
+    activeTab: activeTab,
+    feiras,
+    escolas,
+    feiraAtual: feiraAtual ? feiraAtual.toObject() : null,
+    projetos: projetosFetched,
+    categorias: categoriasFetched,
+    criterios: criteriosOficiais,
+    avaliadores: avaliadoresFetched,
+    avaliacoes: avaliacoesFetched,
+    projetosPorCategoria,
+    avaliacoesPorAvaliadorCount,
+    mediaAvaliacaoPorCriterio,
+    statusProjetosCount,
+    escola,
+    totalProjetos,
+    totalAvaliadores,
+    projetosAvaliadosCompletosCount,
+    projetosPendentesAvaliacaoCount,
+    mediaGeralAvaliacoes,
+    relatorioFinalPorProjeto,
+    formatarDatasParaInput: formatarDataParaInput // ✅ ESSA LINHA corrige o erro
+});
 
     } catch (error) {
         console.error('Erro ao carregar dashboard do admin:', error);
