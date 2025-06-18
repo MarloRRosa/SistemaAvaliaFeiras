@@ -1,14 +1,22 @@
-/* Sidebar estilo app */
+/* admin-custom.css - Sidebar Responsivo Estilo App */
 
-/* Sidebar base */
+/* Layout base */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f9fafb;
+}
+
+/* Sidebar base (mobile fechado por padrão) */
 #sidebar {
   position: fixed;
   top: 0;
   left: 0;
   height: 100%;
   width: 250px;
-  background-color: #1f2937;
-  color: #d1d5db;
+  background-color: #1f2937; /* bg-gray-800 */
+  color: #d1d5db; /* text-gray-100 */
   transform: translateX(-100%);
   transition: transform 0.3s ease-in-out;
   z-index: 50;
@@ -17,7 +25,7 @@
   flex-direction: column;
 }
 
-/* Sidebar aberto no mobile */
+/* Sidebar visível no mobile */
 #sidebar.show {
   transform: translateX(0);
 }
@@ -35,7 +43,7 @@
   cursor: pointer;
 }
 
-/* Overlay escuro */
+/* Overlay escuro ao abrir o menu */
 #overlay {
   position: fixed;
   inset: 0;
@@ -50,10 +58,12 @@
   pointer-events: auto;
 }
 
-/* Área de conteúdo */
+/* Área de conteúdo geral */
 #contentArea {
+  flex-grow: 1;
   padding: 1rem;
   padding-top: 5rem;
+  transition: margin-left 0.3s ease-in-out;
 }
 
 /* Links da sidebar */
@@ -80,16 +90,46 @@
   margin-right: 0.5rem;
 }
 
-/* Desktop: sidebar sempre aberto */
+/* Botão Sair */
+#sidebar form button {
+  width: 100%;
+  padding: 0.75rem;
+  text-align: center;
+  font-weight: bold;
+}
+
+/* Inputs focados */
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.4);
+}
+
+/* Modals com rolagem interna */
+.modal-scrollable {
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* ------- RESPONSIVIDADE -------- */
+
+/* Desktop: Sidebar fixo e conteúdo com margem lateral */
 @media (min-width: 768px) {
   #sidebar {
-    transform: translateX(0);
+    transform: translateX(0) !important;
     position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    width: 250px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    z-index: 50;
   }
 
   #contentArea {
-    margin-left: 250px;
-    transition: none;
+    margin-left: 250px !important;
+    padding-left: 2rem;
+    padding-right: 2rem;
   }
 
   #sidebarToggle,
@@ -98,9 +138,11 @@
   }
 }
 
-/* Mobile: conteúdo ocupa tela cheia (sem margem) */
+/* Mobile: sidebar oculto e conteúdo centralizado */
 @media (max-width: 767px) {
   #contentArea {
     margin-left: 0 !important;
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
 }
