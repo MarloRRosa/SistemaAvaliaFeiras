@@ -23,16 +23,7 @@ const AvaliadorSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
-    escolaId: { // AGORA OBRIGATÓRIO e PADRONIZADO para 'escolaId'
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Escola',
-        required: true // TORNADO OBRIGATÓRIO
-    },
-    feira: { // AGORA OBRIGATÓRIO para a feira ativa
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Feira',
-        required: true // TORNADO OBRIGATÓRIO
-    },
+    
     projetosAtribuidos: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Projeto'
