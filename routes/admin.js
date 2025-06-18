@@ -894,12 +894,11 @@ router.delete('/projetos/:id', verificarAdminEscola, async (req, res) => {
 
 // Adicionar Avaliador (POST)
 router.post('/avaliadores', verificarAdminEscola, async (req, res) => {
-    const { nome, email, pin, ativo, projetosAtribuidos, feira } = req.body;
+    const { nome, email, pin, ativo, projetosAtribuidos } = req.body;
     const adminEscolaId = req.session.adminEscola.escolaId;
 
     try {
-        // Verifica se já existe um avaliador com este e-mail para ESTA ESCOLA
-        const existingAvaliador = await Avaliador.findOne({ email, escolaId: adminEscolaId }); // USANDO escolaId AQUI
+        const existingAvaliador = await Avaliador.findOne({ email, escolaId: adminEscolaId });
         if (existingAvaliador) {
             req.flash('error_msg', 'Já existe um avaliador com este e-mail nesta escola.');
             return res.redirect('/admin/dashboard?tab=avaliadores');
@@ -911,10 +910,13 @@ router.post('/avaliadores', verificarAdminEscola, async (req, res) => {
             email,
             pin: generatedPin,
             ativo: !!ativo,
-            // Garante que projetosAtribuidos é um array válido
-            projetosAtribuidos: Array.isArray(projetosAtribuidos) ? projetosAtribuidos : (projetosAtribuidos ? [projetosAtribuidos].filter(Boolean) : []),
-            escolaId: adminEscolaId, // Vincula SEMPRE à escola do admin logado (USANDO escolaId AQUI)
-            feira: feira // A feira deve ser passada pelo formulário (via modal)
+            projetosAtribuidos: Array.isArray(projetosAtribuidos)
+                ? projetosAtribuidos
+                : projetosAtribuidos
+                ? [projetosAtribuidos].filter(Boolean)
+                : [],
+            escolaId: adminEscolaId
+            // Removido: feira
         });
 
         await newAvaliador.save();
@@ -923,7 +925,7 @@ router.post('/avaliadores', verificarAdminEscola, async (req, res) => {
         if (emailSent) {
             req.flash('success_msg', `Avaliador ${newAvaliador.nome} adicionado e PIN enviado por e-mail.`);
         } else {
-            req.flash('success_msg', `Avaliador ${newAvaliador.nome} adicionado, mas falha ao enviar PIN por e-mail. Verifique as configurações.`);
+            req.flash('success_msg', `Avaliador ${newAvaliador.nome} adicionado, mas falha ao enviar PIN por e-mail.`);
         }
 
         res.redirect('/admin/dashboard?tab=avaliadores');
@@ -934,29 +936,30 @@ router.post('/avaliadores', verificarAdminEscola, async (req, res) => {
     }
 });
 
-// Editar Avaliador (PUT)
+
 router.put('/avaliadores/:id', verificarAdminEscola, async (req, res) => {
     const { id } = req.params;
-    const { nome, email, pin, ativo, projetosAtribuidos, feira } = req.body;
+    const { nome, email, pin, ativo, projetosAtribuidos } = req.body;
     const adminEscolaId = req.session.adminEscola.escolaId;
 
-    // Validação de ID antes de tentar a operação no banco
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
         req.flash('error_msg', 'ID do avaliador inválido para edição.');
         return res.redirect('/admin/dashboard?tab=avaliadores');
     }
 
     try {
-        // Encontra o avaliador e garante que ele pertence à escola do admin
-        const avaliador = await Avaliador.findOne({ _id: id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
+        const avaliador = await Avaliador.findOne({ _id: id, escolaId: adminEscolaId });
         if (!avaliador) {
             req.flash('error_msg', 'Avaliador não encontrado ou você não tem permissão para editá-lo.');
             return res.redirect('/admin/dashboard?tab=avaliadores');
         }
 
-        // Se o e-mail for alterado, verifica se já existe outro avaliador com ele nesta escola
         if (email !== avaliador.email) {
-            const existingAvaliador = await Avaliador.findOne({ email, _id: { $ne: id }, escolaId: adminEscolaId }); // USANDO escolaId AQUI
+            const existingAvaliador = await Avaliador.findOne({
+                email,
+                _id: { $ne: id },
+                escolaId: adminEscolaId
+            });
             if (existingAvaliador) {
                 req.flash('error_msg', 'Este e-mail já está em uso por outro avaliador nesta escola.');
                 return res.redirect('/admin/dashboard?tab=avaliadores');
@@ -965,10 +968,13 @@ router.put('/avaliadores/:id', verificarAdminEscola, async (req, res) => {
 
         avaliador.nome = nome;
         avaliador.email = email;
-        avaliador.pin = pin || avaliador.pin; // Mantém o PIN se não for alterado
+        avaliador.pin = pin || avaliador.pin;
         avaliador.ativo = !!ativo;
-        avaliador.projetosAtribuidos = Array.isArray(projetosAtribuidos) ? projetosAtribuidos : (projetosAtribuidos ? [projetosAtribuidos].filter(Boolean) : []);
-        avaliador.feira = feira; // NOTE: Se `feira` no Avaliador for `feiraId`, isso deve ser ajustado aqui também.
+        avaliador.projetosAtribuidos = Array.isArray(projetosAtribuidos)
+            ? projetosAtribuidos
+            : projetosAtribuidos
+            ? [projetosAtribuidos].filter(Boolean)
+            : [];
 
         await avaliador.save();
 
@@ -980,6 +986,7 @@ router.put('/avaliadores/:id', verificarAdminEscola, async (req, res) => {
         res.redirect('/admin/dashboard?tab=avaliadores');
     }
 });
+
 
 // Redefinir PIN do Avaliador (POST)
 router.post('/avaliadores/reset-pin/:id', verificarAdminEscola, async (req, res) => {
@@ -1021,36 +1028,21 @@ router.post('/avaliadores/reset-pin/:id', verificarAdminEscola, async (req, res)
 
 
 // Excluir Avaliador (DELETE)
-router.delete('/avaliadores/:id', verificarAdminEscola, async (req, res) => {
+router.post('/avaliadores/:id/excluir', verificarAdminEscola, async (req, res) => {
     const { id } = req.params;
-    const adminEscolaId = req.session.adminEscola.escolaId;
-
-    // Validação de ID antes de tentar a operação no banco
-    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-        req.flash('error_msg', 'ID do avaliador inválido para exclusão.');
-        return res.redirect('/admin/dashboard?tab=avaliadores');
-    }
+    const escolaId = req.session.adminEscola.escolaId;
 
     try {
-        // Encontra o avaliador e garante que ele pertence à escola do admin antes de excluir
-        const avaliadorParaExcluir = await Avaliador.findOne({ _id: id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
-        if (!avaliadorParaExcluir) {
-            req.flash('error_msg', 'Avaliador não encontrado ou você não tem permissão para excluí-lo.');
-            return res.redirect('/admin/dashboard?tab=avaliadores');
-        }
-        
-        // Exclui avaliações e depois o avaliador, filtrando por escola
-        await Avaliacao.deleteMany({ avaliador: id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
-        await Avaliador.deleteOne({ _id: id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
-
-        req.flash('success_msg', 'Avaliador e suas avaliações excluídos com sucesso!');
-        res.redirect('/admin/dashboard?tab=avaliadores');
-    } catch (err) {
-        console.error('Erro ao excluir avaliador:', err);
-        req.flash('error_msg', 'Erro ao excluir avaliador. Detalhes: ' + err.message);
-        res.redirect('/admin/dashboard?tab=avaliadores');
+        await Avaliador.deleteOne({ _id: id, escolaId });
+        req.flash('success_msg', 'Avaliador removido com sucesso!');
+    } catch (error) {
+        console.error('Erro ao excluir avaliador:', error);
+        req.flash('error_msg', 'Erro ao excluir avaliador.');
     }
+
+    res.redirect('/admin/dashboard?tab=avaliadores');
 });
+
 
 // ===========================================
 // ROTAS CRUD - FEIRAS
