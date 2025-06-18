@@ -1160,6 +1160,30 @@ document.getElementById('selecionarTodosCriterios')?.addEventListener('change', 
     checkboxes.forEach(cb => cb.checked = this.checked);
 });
 
+document.addEventListener('DOMContentLoaded', () => {
+  const sidebar = document.getElementById('sidebar');
+  const sidebarToggle = document.getElementById('sidebarToggle');
+  const overlay = document.getElementById('overlay');
+
+  sidebarToggle.addEventListener('click', () => {
+    sidebar.classList.toggle('show');
+    overlay.classList.toggle('active');
+  });
+
+  overlay.addEventListener('click', () => {
+    sidebar.classList.remove('show');
+    overlay.classList.remove('active');
+  });
+
+  document.querySelectorAll('.sidebar-link').forEach(link => {
+    link.addEventListener('click', () => {
+      sidebar.classList.remove('show');
+      overlay.classList.remove('active');
+    });
+  });
+});
+
+
      </script>
 </body>
 </html>
