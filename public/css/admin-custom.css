@@ -1,11 +1,5 @@
 /* admin-custom.css */
 
-body, html {
-  margin: 0;
-  padding: 0;
-}
-
-/* Layout principal */
 .app-container {
   display: flex;
   flex-direction: column;
@@ -13,7 +7,6 @@ body, html {
   background-color: #f9fafb;
 }
 
-/* Sidebar escondido por padrão */
 #sidebar {
   width: 256px;
   background-color: #1f2937;
@@ -30,28 +23,18 @@ body, html {
   transition: transform 0.3s ease-in-out;
 }
 
-/* Quando visível */
 #sidebar.show {
   transform: translateX(0%);
 }
 
-/* Botão do menu hamburguer */
 #sidebarToggle {
   display: block;
   position: fixed;
   top: 1rem;
   left: 1rem;
   z-index: 60;
-  background-color: #2563eb;
-  color: white;
-  padding: 0.5rem 0.75rem;
-  border-radius: 0.5rem;
-  font-size: 1.25rem;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-  cursor: pointer;
 }
 
-/* Overlay de fundo escuro */
 #overlay {
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 40;
@@ -67,7 +50,23 @@ body, html {
   pointer-events: auto;
 }
 
-/* Sidebar links */
+@media (min-width: 768px) {
+  .app-container {
+    flex-direction: row;
+  }
+
+  #sidebar {
+    position: relative;
+    transform: translateX(0%);
+  }
+
+  #sidebarToggle,
+  #closeSidebar,
+  #overlay {
+    display: none !important;
+  }
+}
+
 .sidebar-link {
   display: flex;
   align-items: center;
@@ -96,7 +95,7 @@ body, html {
   word-break: break-word;
 }
 
-/* Conteúdo principal */
+/* Conteúdo */
 #contentArea {
   flex-grow: 1;
   padding: 1rem;
@@ -115,8 +114,6 @@ input:focus, select:focus, textarea:focus {
   border-color: #2563eb;
   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.4);
 }
-
-/* Scroll em modais */
 .modal-scrollable {
   max-height: 90vh;
   overflow-y: auto;
