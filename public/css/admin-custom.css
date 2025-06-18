@@ -1,14 +1,14 @@
-/* admin-custom.css - Sidebar Responsivo Estilo App */
+/* Sidebar estilo app */
 
-/* Sidebar padrão (escondido em telas pequenas) */
+/* Sidebar base */
 #sidebar {
   position: fixed;
   top: 0;
   left: 0;
   height: 100%;
   width: 250px;
-  background-color: #1f2937; /* bg-gray-800 */
-  color: #d1d5db; /* text-gray-100 */
+  background-color: #1f2937;
+  color: #d1d5db;
   transform: translateX(-100%);
   transition: transform 0.3s ease-in-out;
   z-index: 50;
@@ -17,12 +17,12 @@
   flex-direction: column;
 }
 
-/* Sidebar visível (ao abrir no mobile) */
+/* Sidebar aberto no mobile */
 #sidebar.show {
   transform: translateX(0);
 }
 
-/* Botão Hamburger */
+/* Botão menu hamburger */
 #sidebarToggle {
   position: fixed;
   top: 1rem;
@@ -35,7 +35,7 @@
   cursor: pointer;
 }
 
-/* Overlay escuro ao abrir o menu no mobile */
+/* Overlay escuro */
 #overlay {
   position: fixed;
   inset: 0;
@@ -45,13 +45,18 @@
   transition: opacity 0.3s ease-in-out;
   z-index: 40;
 }
-
 #overlay.active {
   opacity: 1;
   pointer-events: auto;
 }
 
-/* Itens do menu */
+/* Área de conteúdo */
+#contentArea {
+  padding: 1rem;
+  padding-top: 5rem;
+}
+
+/* Links da sidebar */
 .sidebar-link {
   display: flex;
   align-items: center;
@@ -75,22 +80,27 @@
   margin-right: 0.5rem;
 }
 
-/* Desktop: sidebar sempre visível */
+/* Desktop: sidebar sempre aberto */
 @media (min-width: 768px) {
   #sidebar {
     transform: translateX(0);
-    position: relative;
+    position: fixed;
   }
-  #sidebarToggle,
-  #overlay {
-    display: none;
-  }
+
   #contentArea {
     margin-left: 250px;
+    transition: none;
+  }
+
+  #sidebarToggle,
+  #overlay {
+    display: none !important;
   }
 }
 
-/* Área de conteúdo */
-#contentArea {
-  transition: margin-left 0.3s ease-in-out;
+/* Mobile: conteúdo ocupa tela cheia (sem margem) */
+@media (max-width: 767px) {
+  #contentArea {
+    margin-left: 0 !important;
+  }
 }
