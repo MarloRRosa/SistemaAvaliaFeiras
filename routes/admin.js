@@ -1065,13 +1065,30 @@ router.post('/feiras', verificarAdminEscola, async (req, res) => {
         // Arquiva outras feiras da mesma escola
         await Feira.updateMany({ escolaId, status: 'ativa' }, { $set: { status: 'arquivada' } });
 
-        const novaFeira = new Feira({
-            nome,
-            inicioFeira: new Date(inicioFeira.split('-').reverse().join('-')), // DD-MM-YYYY → Date
-            fimFeira: new Date(fimFeira.split('-').reverse().join('-')),
-            status: 'ativa',
-            escolaId
-        });
+        function parseDateBR(dataString) {
+    if (!dataString || typeof dataString !== 'string') return null;
+    const partes = dataString.split('-');
+    if (partes.length !== 3) return null;
+    const [dia, mes, ano] = partes;
+    const data = new Date(`${ano}-${mes}-${dia}`);
+    return isNaN(data.getTime()) ? null : data;
+}
+
+const inicioDate = parseDateBR(inicioFeira);
+const fimDate = parseDateBR(fimFeira);
+
+if (!inicioDate || !fimDate) {
+    req.flash('error_msg', 'Data de início ou fim da feira inválida. Use o formato DD-MM-YYYY.');
+    return res.redirect('/admin/dashboard?tab=feiras');
+}
+
+const novaFeira = new Feira({
+    nome,
+    inicioFeira: inicioDate,
+    fimFeira: fimDate,
+    status: 'ativa',
+    escolaId
+});
 
         await novaFeira.save();
         req.flash('success_msg', 'Nova feira criada com sucesso!');
@@ -1090,15 +1107,34 @@ router.post('/feiras/editar', verificarAdminEscola, async (req, res) => {
   const escolaId = req.session.adminEscola.escolaId;
 
   try {
-    await Feira.updateOne(
-      { _id: feiraId, escolaId },
-      {
-        nome,
-        inicioFeira: new Date(inicioFeira),
-        fimFeira: new Date(fimFeira),
-        status
-      }
-    );
+    // Função segura para converter DD-MM-YYYY para Date
+function parseDateBR(dataString) {
+    if (!dataString || typeof dataString !== 'string') return null;
+    const partes = dataString.split('-');
+    if (partes.length !== 3) return null;
+    const [dia, mes, ano] = partes;
+    const data = new Date(`${ano}-${mes}-${dia}`);
+    return isNaN(data.getTime()) ? null : data;
+}
+
+const inicioDate = parseDateBR(inicioFeira);
+const fimDate = parseDateBR(fimFeira);
+
+if (!inicioDate || !fimDate) {
+    req.flash('error_msg', 'Data de início ou fim da feira inválida. Use o formato DD-MM-YYYY.');
+    return res.redirect('/admin/dashboard?tab=feiras');
+}
+
+await Feira.updateOne(
+  { _id: feiraId, escolaId },
+  {
+    nome,
+    inicioFeira: inicioDate,
+    fimFeira: fimDate,
+    status
+  }
+);
+
     req.flash('success_msg', 'Feira atualizada com sucesso!');
     res.redirect('/admin/dashboard?tab=feiras');
   } catch (err) {
