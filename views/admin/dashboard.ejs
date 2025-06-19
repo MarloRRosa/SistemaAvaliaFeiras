@@ -481,32 +481,12 @@
         <input type="text" name="nome" id="nome" value="<%= escola.nome %>" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-2">
       </div>
       <div>
-        <label for="email" class="block text-sm font-medium text-gray-600">Email</label>
-        <input type="email" name="email" id="email" value="<%= escola.email %>" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-2">
-      </div>
-      <div>
         <label for="telefone" class="block text-sm font-medium text-gray-600">Telefone</label>
         <input type="text" name="telefone" id="telefone" value="<%= escola.telefone %>" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-2">
       </div>
       <div>
-        <label for="diretor" class="block text-sm font-medium text-gray-600">Diretor</label>
-        <input type="text" name="diretor" id="diretor" value="<%= escola.diretor %>" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-2">
-      </div>
-      <div>
-        <label for="responsavel" class="block text-sm font-medium text-gray-600">Responsável pelo sistema</label>
-        <input type="text" name="responsavel" id="responsavel" value="<%= escola.responsavel %>" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-2">
-      </div>
-      <div>
         <label for="endereco" class="block text-sm font-medium text-gray-600">Endereço</label>
         <input type="text" name="endereco" id="endereco" value="<%= escola.endereco %>" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-2">
-      </div>
-      <div>
-        <label for="cnpj" class="block text-sm font-medium text-gray-600">CNPJ</label>
-        <input type="text" name="cnpj" id="cnpj" value="<%= escola.cnpj %>" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-2">
-      </div>
-      <div class="md:col-span-2">
-        <label for="descricao" class="block text-sm font-medium text-gray-600">Descrição</label>
-        <textarea name="descricao" id="descricao" rows="3" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-2"><%= escola.descricao %></textarea>
       </div>
     </div>
 
@@ -1071,17 +1051,7 @@ document.addEventListener('DOMContentLoaded', () => {
            
 
             // ✅ Abrir modal e preencher dados
-  document.querySelectorAll('.btn-editar-feira').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.getElementById('editarFeiraId').value = btn.dataset.id;
-      document.getElementById('editarFeiraNome').value = btn.dataset.nome;
-      document.getElementById('inicioFeira').value = btn.dataset.inicio;
-    document.getElementById('fimFeira').value = btn.dataset.fim;
-      document.getElementById('editarFeiraStatus').value = btn.dataset.status;
-      document.getElementById('excluirFeiraId').value = btn.dataset.id;
-      document.getElementById('modalEditarFeira').classList.remove('hidden');
-    });
-  });
+
 
             // Mostrar modal de Configurações (apenas datas)
             const modalConfiguracoes = document.getElementById('modalConfiguracoes');
