@@ -34,7 +34,7 @@
   border-radius: 0.5rem;
   padding: 1rem;
   width: 100%;
-  max-width: 700px; /* ou max-w-2xl */
+  max-width: 600px; /* ou max-w-2xl */
   max-height: 90vh;
   overflow-y: auto;
 }
@@ -538,7 +538,7 @@
 
     <!-- Modals (permanecem os mesmos) -->
   <div id="modalProjeto" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden z-50 overflow-y-auto">
-  <div class="min-h-screen flex items-center justify-center p-4">
+  <div class="flex justify-center pt-20 pb-10 min-h-screen">
     <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-2xl relative">
       <h2 id="tituloModalProjeto" class="text-3xl font-extrabold mb-6 text-center text-gray-800">Adicionar Novo Projeto</h2>
       <button id="btnFecharModalProjeto" type="button" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-4xl leading-none transition duration-300 ease-in-out">
@@ -866,63 +866,63 @@
             // Funções para os modais (permanecem as mesmas)
 
             // Mostrar modal de Projeto
-            const modalProjeto = document.getElementById('modalProjeto');
-            const btnAbrirModalProjeto = document.getElementById('btnAbrirModalProjeto');
-            const btnFecharModalProjeto = document.getElementById('btnFecharModalProjeto');
-            const formProjeto = document.getElementById('formProjeto');
-            const tituloModalProjeto = document.getElementById('tituloModalProjeto');
-            const projetoId = document.getElementById('projetoId');
-            const inputTitulo = document.getElementById('titulo');
-            const inputDescricao = document.getElementById('descricao');
-            const selectCategoria = document.getElementById('categoria');
-            const criteriosProjetoCheckboxesDiv = document.getElementById('criteriosProjetoCheckboxes');
-            const inputTurmaProjeto = document.getElementById('turmaProjeto');
+const modalProjeto = document.getElementById('modalProjeto');
+const btnAbrirModalProjeto = document.getElementById('btnAbrirModalProjeto');
+const btnFecharModalProjeto = document.getElementById('btnFecharModalProjeto');
+const formProjeto = document.getElementById('formProjeto');
+const tituloModalProjeto = document.getElementById('tituloModalProjeto');
+const projetoId = document.getElementById('projetoId');
+const inputTitulo = document.getElementById('titulo');
+const inputDescricao = document.getElementById('descricao');
+const selectCategoria = document.getElementById('categoria');
+const criteriosProjetoCheckboxesDiv = document.getElementById('criteriosProjetoCheckboxes');
+const inputTurmaProjeto = document.getElementById('turmaProjeto');
+const inputAlunos = document.getElementById('projetoIntegrantes');
 
-            btnAbrirModalProjeto.addEventListener('click', () => {
-                tituloModalProjeto.textContent = 'Adicionar Novo Projeto';
-                formProjeto.action = '/admin/projetos'; // Rota de criação
-                projetoId.value = '';
-                inputTitulo.value = '';
-                inputDescricao.value = '';
-                selectCategoria.value = '';
-                inputTurmaProjeto.value = '';
+btnAbrirModalProjeto.addEventListener('click', () => {
+    tituloModalProjeto.textContent = 'Adicionar Novo Projeto';
+    formProjeto.action = '/admin/projetos';
+    projetoId.value = '';
+    inputTitulo.value = '';
+    inputDescricao.value = '';
+    selectCategoria.value = '';
+    inputTurmaProjeto.value = '';
+    inputAlunos.value = '';
 
-                // Limpar todos os checkboxes de critérios
-                criteriosProjetoCheckboxesDiv.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                    checkbox.checked = false;
-                });
+    criteriosProjetoCheckboxesDiv.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+        checkbox.checked = false;
+    });
 
-                modalProjeto.classList.remove('hidden');
-                modalProjeto.classList.add('flex');
-            });
+    modalProjeto.classList.remove('hidden');
+    modalProjeto.classList.add('flex');
+});
 
-            btnFecharModalProjeto.addEventListener('click', () => {
-                modalProjeto.classList.remove('flex');
-                modalProjeto.classList.add('hidden');
-            });
+btnFecharModalProjeto.addEventListener('click', () => {
+    modalProjeto.classList.remove('flex');
+    modalProjeto.classList.add('hidden');
+});
 
-            document.querySelectorAll('.btn-editar-projeto').forEach(button => {
-                button.addEventListener('click', () => {
-                    const alunos = btn.dataset.alunos || '';
-                    document.getElementById('projetoIntegrantes').value = alunos.split(',').join('\n');
-                    tituloModalProjeto.textContent = 'Editar Projeto';
-                    formProjeto.action = `/admin/projetos/${event.target.dataset.id}?_method=PUT`; // Rota de edição
-                    projetoId.value = event.target.dataset.id;
-                    inputTitulo.value = event.target.dataset.titulo;
-                    inputDescricao.value = event.dataset.descricao; // Use .dataset.descricao
-                    selectCategoria.value = event.target.dataset.categoriaId;
-                    inputTurmaProjeto.value = event.target.dataset.turma;
+document.querySelectorAll('.btn-editar-projeto').forEach(button => {
+    button.addEventListener('click', () => {
+        tituloModalProjeto.textContent = 'Editar Projeto';
+        formProjeto.action = `/admin/projetos/${button.dataset.id}?_method=PUT`;
+        projetoId.value = button.dataset.id;
+        inputTitulo.value = button.dataset.titulo;
+        inputDescricao.value = button.dataset.descricao;
+        selectCategoria.value = button.dataset.categoriaId;
+        inputTurmaProjeto.value = button.dataset.turma;
+        inputAlunos.value = button.dataset.alunos ? button.dataset.alunos.split(',').join('\n') : '';
 
-                    // Marcar checkboxes de critérios
-                    const criteriosIds = event.target.dataset.criterios ? event.target.dataset.criterios.split(',') : [];
-                    criteriosProjetoCheckboxesDiv.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                        checkbox.checked = criteriosIds.includes(checkbox.value);
-                    });
+        const criteriosIds = button.dataset.criterios ? button.dataset.criterios.split(',') : [];
+        criteriosProjetoCheckboxesDiv.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.checked = criteriosIds.includes(checkbox.value);
+        });
 
-                    modalProjeto.classList.remove('hidden');
-                    modalProjeto.classList.add('flex');
-                });
-            });
+        modalProjeto.classList.remove('hidden');
+        modalProjeto.classList.add('flex');
+    });
+});
+
 
             // Mostrar modal de Categoria
             const modalCategoria = document.getElementById('modalCategoria');
