@@ -34,7 +34,7 @@
   border-radius: 0.5rem;
   padding: 1rem;
   width: 100%;
-  max-width: 600px; /* ou max-w-2xl */
+  max-width: 700px; /* ou max-w-2xl */
   max-height: 90vh;
   overflow-y: auto;
 }
@@ -1044,26 +1044,26 @@ document.querySelectorAll('.btn-editar-projeto').forEach(button => {
             });
 
             document.querySelectorAll('.btn-editar-avaliador').forEach(button => {
-                button.addEventListener('click', (event) => {
-                    tituloAvaliador.textContent = 'Editar Avaliador';
-                    formAvaliador.action = `/admin/avaliadores/${button.dataset.id}?_method=PUT`;
-                    avaliadorId.value = event.target.dataset.id;
-                    inputNomeAvaliador.value = event.target.dataset.nome;
-                    inputEmailAvaliador.value = event.target.dataset.email;
-                    inputAtivoAvaliador.checked = event.target.dataset.ativo === 'true';
-                    avaliadorPinDisplay.textContent = event.target.dataset.pin;
-                    pinDisplayDiv.classList.remove('hidden'); // Mostra o PIN para edição
+    button.addEventListener('click', () => {
+        tituloAvaliador.textContent = 'Editar Avaliador';
+        formAvaliador.action = `/admin/avaliadores/${button.dataset.id}?_method=PUT`;
+        avaliadorId.value = button.dataset.id;
+        inputNomeAvaliador.value = button.dataset.nome;
+        inputEmailAvaliador.value = button.dataset.email;
+        inputAtivoAvaliador.checked = button.dataset.ativo === 'true';
+        avaliadorPinDisplay.textContent = button.dataset.pin;
+        pinDisplayDiv.classList.remove('hidden');
 
-                    // Marcar checkboxes de projetos
-                    const projetosIds = event.target.dataset.projetos ? event.target.dataset.projetos.split(',') : [];
-                    projetosAvaliadorCheckboxesDiv.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                        checkbox.checked = projetosIds.includes(checkbox.value);
-                    });
+        const projetosIds = button.dataset.projetos ? button.dataset.projetos.split(',') : [];
+        projetosAvaliadorCheckboxesDiv.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.checked = projetosIds.includes(checkbox.value);
+        });
 
-                    modalAvaliador.classList.remove('hidden');
-                    modalAvaliador.classList.add('flex');
-                });
-            });
+        modalAvaliador.classList.remove('hidden');
+        modalAvaliador.classList.add('flex');
+    });
+});
+
 
             // Mostrar modal de Feira
             const modalFeira = document.getElementById('modalFeira');
