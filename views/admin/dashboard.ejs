@@ -732,9 +732,6 @@
   <input type="hidden" name="feiraId" id="excluirFeiraHidden">
 </form>
 
-<!-- Botão que dispara a exclusão -->
-<button type="button" onclick="confirmarExclusaoFeira()" class="bg-red-600 text-white px-4 py-2 rounded">Excluir</button>
-
       </div>
     </div>
   </form>
@@ -1083,11 +1080,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 modalFeira.classList.add('hidden');
             });
 
-             // Selecionar todos critérios (checkbox)
-    document.getElementById('selecionarTodosCriterios')?.addEventListener('change', function () {
-        const checkboxes = document.querySelectorAll('input[name="criterios"]');
-        checkboxes.forEach(cb => cb.checked = this.checked);
-    });
+           
 
             // ✅ Abrir modal e preencher dados
   document.querySelectorAll('.btn-editar-feira').forEach(btn => {
@@ -1155,6 +1148,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('formExcluirFeira').submit();
   }
 }
+  // Selecionar todos critérios (checkbox)
+    document.getElementById('selecionarTodosCriterios')?.addEventListener('change', function () {
+        const checkboxes = document.querySelectorAll('input[name="criterios"]');
+        checkboxes.forEach(cb => cb.checked = this.checked);
+    });
 </script>
 
 </body>
