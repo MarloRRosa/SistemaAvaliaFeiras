@@ -72,7 +72,7 @@ function formatarDataParaInput(dateString) {
 
 // Função para enviar e-mail de redefinição de PIN para avaliador
 async function sendResetPinEmail(avaliador) {
-    const transporter = nodemailer.createTransport({
+    cport({
         host: process.env.EMAIL_HOST,
         port: process.env.EMAIL_PORT,
         secure: process.env.EMAIL_SECURE === 'true',
