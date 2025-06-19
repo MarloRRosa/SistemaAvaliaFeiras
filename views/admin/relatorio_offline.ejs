@@ -69,7 +69,7 @@
     <header>
         <h1>Relatório de Avaliação Offline</h1>
         <h2>Feira: <%= feira.nome %></h2>
-        <p>Período: <%= formatarDataParaInput(feira.inicioFeira) %> a <%= formatarDataParaInput(feira.fimFeira) %></p>
+        <p>Período: <%= formatarData(feira.inicioFeira) %> a <%= formatarData(feira.fimFeira) %></p>
         <% if (avaliador) { %>
             <div class="avaliador-info">Relatório para Avaliador: **<%= avaliador.nome %>**</div>
         <% } %>
