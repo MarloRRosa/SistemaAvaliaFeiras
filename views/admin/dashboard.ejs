@@ -207,20 +207,19 @@
                                         <td class="py-3 px-4 text-gray-800"><%= projeto.turma || 'Não informado' %></td>
                                         <td class="py-3 px-4 whitespace-nowrap">
                                             <button class="btn-editar-projeto bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1.5 px-3 rounded-md text-sm mr-2 shadow-sm transition duration-300 ease-in-out"
-                                                data-id="<%= projeto._id %>" 
-                                                data-titulo="<%= projeto.titulo %>" 
-                                                data-descricao="<%= projeto.descricao %>" 
-                                                data-categoria-id="<%= projeto.categoria ? projeto.categoria._id : '' %>" 
-                                                data-criterios="<%= projeto.criterios && projeto.criterios.length > 0 ? projeto.criterios.map(c => c._id).join(',') : '' %>" 
-                                                data-turma="<%= projeto.turma %>"
-                                                data-alunos="<%= projeto.alunos ? projeto.alunos.join(',') : '' %>">                                                
+                                                data-id="<%= projeto._id %>"
+                                                data-titulo="<%= projeto.titulo %>"
+                                                data-descricao="<%= projeto.descricao %>"
+                                                data-categoria-id="<%= projeto.categoria ? projeto.categoria._id : '' %>"
+                                                data-criterios="<%= projeto.criterios && projeto.criterios.length > 0 ? projeto.criterios.map(c => c._id).join(',') : '' %>"
+                                                data-turma="<%= projeto.turma %>">
                                                 <i class="fas fa-edit mr-1"></i>Editar
                                             </button>
+             
                                             <form method="POST" action="/admin/projetos/<%= projeto._id %>?_method=DELETE" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar este projeto?');">
                                                 <input type="hidden"  name="_method" value="DELETE">
                                                 <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-md text-sm shadow-sm transition duration-300 ease-in-out">Deletar</button>
                                             </form>
-             
                                         </td>
                                     </tr>
                                 <% }) %>
@@ -364,10 +363,11 @@
                                             data-projetos="<%= avaliador.projetosAtribuidos.map(p => p._id).join(',') %>">
                                             <i class="fas fa-edit mr-1"></i>Editar
                                         </button>
-                                        <form action="/admin/avaliadores/<%= avaliador._id %>?_method=DELETE" method="POST" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar este avaliador?');">
-                                            <button type="submit" class="text-red-600 hover:underline">Excluir</button>
+                                        <form action="/admin/avaliadores/<%= avaliador._id %>/excluir" method="POST" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar este avaliador?');">
+                                            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-md text-sm shadow-sm transition duration-300 ease-in-out">
+                                                <i class="fas fa-trash-alt mr-1"></i>Deletar
+                                            </button>
                                         </form>
-
                                     </td>
                                 </tr>
                             <% }) %>
@@ -535,13 +535,10 @@
     </div>
 
     <!-- Modals (permanecem os mesmos) -->
-  <div id="modalProjeto" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden z-50 overflow-y-auto">
-  <div class="flex justify-center pt-20 pb-10 min-h-screen">
-    <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-2xl relative">
-      <h2 id="tituloModalProjeto" class="text-3xl font-extrabold mb-6 text-center text-gray-800">Adicionar Novo Projeto</h2>
-      <button id="btnFecharModalProjeto" type="button" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-4xl leading-none transition duration-300 ease-in-out">
-        &times;
-      </button>
+    <div id="modalProjeto" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden justify-center items-center z-50 p-4">
+        <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-2xl relative">
+            <h2 id="tituloModalProjeto" class="text-3xl font-extrabold mb-6 text-center text-gray-800">Adicionar Novo Projeto</h2>
+            <button id="btnFecharModalProjeto" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-4xl leading-none transition duration-300 ease-in-out">&times;</button>
 
             <form id="formProjeto" action="/admin/projetos" method="POST">
                 <input type="hidden" id="projetoId" name="id">
@@ -568,14 +565,7 @@
 
                 <div class="mb-6">
                     <label class="block text-gray-700 text-sm font-bold mb-2">Critérios de Avaliação:</label>
-                     <div class="mb-2">
-                            <label class="inline-flex items-center">
-                                <input type="checkbox" id="selecionarTodosCriterios" class="form-checkbox h-4 w-4 text-blue-600">
-                                <span class="ml-2 text-sm text-gray-700">Selecionar todos os critérios</span>
-                            </label>
-                        </div>
                     <div id="criteriosProjetoCheckboxes" class="max-h-48 overflow-y-auto border border-gray-300 p-3 rounded-lg bg-gray-50 shadow-inner">
-
                         <% if (criterios && criterios.length > 0) { %>
                             <% criterios.forEach(criterio => { %>
                                 <div class="flex items-center mb-2">
@@ -592,12 +582,6 @@
                 <div class="mb-4">
                     <label for="turmaProjeto" class="block text-gray-700 text-sm font-bold mb-2">Turma:</label>
                     <input type="text" id="turmaProjeto" name="turma" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out" required>
-                </div>
-
-                <div class="mb-4">
-                    <label for="projetoIntegrantes" class="block text-sm font-medium text-gray-700">Integrantes</label>
-                    <textarea id="projetoIntegrantes" name="alunos" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"></textarea>
-                    <p class="text-xs text-gray-500 mt-1">Digite um nome por linha.</p>
                 </div>
 
                 <div class="flex items-center justify-end mt-6">
@@ -673,7 +657,29 @@
                 <input type="email" id="emailAvaliador" name="email" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out" required>
             </div>
 
-            
+            <div class="mb-4">
+    <label for="escolaAvaliador" class="block text-gray-700 text-sm font-bold mb-2">Escola:</label>
+    <select id="escolaAvaliador" name="escolaId" class="shadow-sm border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out">
+        <option value="">Selecione a Escola</option>
+        <% if (escolas && escolas.length > 0) { %>
+            <% escolas.forEach(escola => { %>
+                <option value="<%= escola._id %>"><%= escola.nome %></option>
+            <% }) %>
+        <% } %>
+    </select>
+</div>
+
+<div class="mb-4">
+    <label for="feiraAvaliador" class="block text-gray-700 text-sm font-bold mb-2">Feira:</label>
+    <select id="feiraAvaliador" name="feira" class="shadow-sm border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out">
+        <option value="">Selecione a Feira</option>
+        <% if (feiras && feiras.length > 0) { %>
+            <% feiras.forEach(feira => { %>
+                <option value="<%= feira._id %>"><%= feira.nome %></option>
+            <% }) %>
+        <% } %>
+    </select>
+</div>
             <div class="mb-4" id="pinDisplayDiv">
                 <label class="block text-gray-700 text-sm font-bold mb-2">PIN:</label>
                 <span id="avaliadorPinDisplay" class="block bg-gray-100 p-3 rounded-lg text-xl font-mono tracking-wider text-gray-800 border border-gray-200"></span>
@@ -742,6 +748,9 @@
   <input type="hidden" name="feiraId" id="excluirFeiraHidden">
 </form>
 
+<!-- Botão que dispara a exclusão -->
+<button type="button" onclick="confirmarExclusaoFeira()" class="bg-red-600 text-white px-4 py-2 rounded">Excluir</button>
+
       </div>
     </div>
   </form>
@@ -769,6 +778,7 @@
             </form>
         </div>
     </div>
+
 
     
     <script>
