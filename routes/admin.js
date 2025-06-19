@@ -1809,17 +1809,18 @@ router.get('/relatorio/avaliacao-offline/:feiraId/:avaliadorId', verificarAdminE
         console.log('Quantidade de projetos atribuídos no Avaliador:', avaliador.projetosAtribuidos ? avaliador.projetosAtribuidos.length : 0);
 
         let projetosQuery = { 
-            feira: feira._id, // CORREÇÃO ANTERIOR: "feira" e não "feiraId"
+            // CORRIGIDO: Deve ser "feira", não "feiraId" para corresponder ao seu modelo Projeto
+            feira: feira._id, 
             escolaId: adminEscolaId,
             _id: { $in: avaliador.projetosAtribuidos || [] }
         };
 
         console.log('Query para buscar projetos:', JSON.stringify(projetosQuery, null, 2));
         
-        // ADICIONADO: .populate('escolaId') para obter o nome da escola do projeto
         const projetos = await Projeto.find(projetosQuery)
                                       .populate('categoria')
-                                      .populate('escolaId') // Adicionado para popular os dados da escola
+                                      // CORRIGIDO: Adicionado populate para escolaId
+                                      .populate('escolaId') 
                                       .lean();
 
         console.log('Projetos encontrados pela query (títulos):', projetos.map(p => p.titulo));
@@ -1851,22 +1852,22 @@ router.get('/relatorio/avaliacao-offline/:feiraId/:avaliadorId', verificarAdminE
                 return {
                     ...p,
                     criteriosAvaliacao: categoriaCriterios,
-                    // Mapeia o nome da escola do objeto populado
+                    // ADICIONADO: Mapeamento para o nome da escola populado
                     escolaNome: p.escolaId ? p.escolaId.nome : 'N/A', 
-                    // Mapeia alunos - assumindo que 'alunos' é um array de nomes ou objetos com propriedade 'nome'
+                    // ADICIONADO: Mapeamento para formatar a lista de alunos
                     alunos: p.alunos && p.alunos.length > 0 
                                 ? p.alunos.map(aluno => typeof aluno === 'object' && aluno !== null && aluno.nome ? aluno.nome : aluno).join(', ') 
                                 : 'N/A',
-                    // Mapeia 'resumo' do EJS para 'descricao' do modelo Projeto
+                    // ADICIONADO: Mapeamento de 'descricao' para 'resumo' do EJS
                     resumo: p.descricao || 'N/A', 
-                    // Garante que 'numero' e 'area' são passados se existirem no modelo Projeto
-                    // Caso não existam, o fallback 'N/A' no EJS se aplica
+                    // ADICIONADO: Garantindo que numero e area sejam passados (ou N/A)
                     numero: p.numero || 'N/A',
                     area: p.area || 'N/A'
                 };
             }),
             avaliador: avaliador,
-            formatarData: formatarData // <--- Função passada para o EJS
+            // ADICIONADO: Passando a função formatarData para o EJS
+            formatarData: formatarData 
         };
 
         const filename = `relatorio_avaliacao_offline_${feira.nome.replace(/\s/g, '_')}_${avaliador.nome.replace(/\s/g, '_').substring(0, 20)}`;
@@ -1924,6 +1925,7 @@ console.log('Quantidade de projetos atribuídos no Avaliador:', avaliador.projet
         
         const projetos = await Projeto.find(projetosQuery)
                                       .populate('categoria')
+                                      .populate('escolaId')
                                       .lean();
 
         console.log('Projetos encontrados pela query (títulos):', projetos.map(p => p.titulo));

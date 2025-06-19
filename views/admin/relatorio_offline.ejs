@@ -6,18 +6,18 @@
     <title>Relatório de Avaliação Offline - <%= feira.nome %></title>
     <style>
         body {
-      font-family: 'Arial', sans-serif;
-      font-size: 11px; /* Tamanho de fonte um pouco menor para PDFs */
-      margin: 25px; /* Margens maiores para o PDF */
-      color: #333;
-    }
+            font-family: 'Arial', sans-serif;
+            font-size: 11px; /* Tamanho de fonte um pouco menor para PDFs */
+            margin: 25px; /* Margens maiores para o PDF */
+            color: #333;
+        }
         header {
             text-align: center;
             margin-bottom: 20px;
             border-bottom: 2px solid #ccc;
             padding-bottom: 10px;
         }
-        h1, h2, h3 {
+        h1, h2, h3, h4 {
             color: #2c3e50;
             margin-top: 0;
             margin-bottom: 10px;
@@ -28,19 +28,20 @@
             border: 1px solid #eee;
             border-radius: 8px;
             background-color: #f9f9f9;
-            page-break-inside: avoid;
+            page-break-inside: avoid; /* Tenta evitar quebrar a seção no meio da página */
         }
-        .project-details {
-            margin-bottom: 15px;
+        .project-details p {
+            margin-bottom: 5px; /* Espaço menor entre os parágrafos de detalhes do projeto */
         }
         .criteria-table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
+            font-size: 10.5px; /* Um pouco menor para a tabela de critérios */
         }
         .criteria-table th, .criteria-table td {
             border: 1px solid #ddd;
-            padding: 8px;
+            padding: 6px 8px; /* Padding ajustado */
             text-align: left;
             vertical-align: top;
         }
@@ -50,18 +51,45 @@
         }
         .input-box {
             border: 1px dashed #999; /* Borda tracejada para indicar campo a ser preenchido */
-            min-height: 25px;
-            padding: 5px;
-            margin-top: 5px;
+            min-height: 20px; /* Altura mínima para a nota */
+            padding: 3px; /* Padding interno */
+            margin-top: 2px;
             background-color: #fff;
+            box-sizing: border-box; /* Garante que padding e border estão inclusos na largura/altura */
+            line-height: 1.2; /* Ajusta a altura da linha para texto dentro da caixa */
+        }
+        .notes-input-box {
+            min-height: 40px; /* Altura maior para observações do critério */
+        }
+        .total-score-box {
+            min-height: 25px;
+            width: 80px; /* Largura específica para a nota geral */
+            display: inline-block; /* Para que a caixa fique ao lado do texto */
+            vertical-align: middle;
+            margin-left: 5px;
+        }
+        .general-comments-box {
+            min-height: 80px; /* Altura para os comentários gerais */
+            width: 100%;
         }
         .page-break {
-            page-break-before: always;
+            page-break-before: always; /* Força uma nova página antes de cada projeto (exceto o primeiro) */
         }
         .avaliador-info {
             text-align: right;
             font-style: italic;
             margin-bottom: 15px;
+            font-size: 12px;
+        }
+        .assinatura-area {
+            margin-top: 50px;
+            text-align: center;
+            page-break-inside: avoid; /* Tenta manter a área de assinatura na mesma página */
+        }
+        .assinatura-line {
+            border-bottom: 1px solid #000;
+            width: 250px; /* Largura da linha de assinatura */
+            margin: 0 auto 5px auto;
         }
     </style>
 </head>
@@ -71,7 +99,7 @@
         <h2>Feira: <%= feira.nome %></h2>
         <p>Período: <%= formatarData(feira.inicioFeira) %> a <%= formatarData(feira.fimFeira) %></p>
         <% if (avaliador) { %>
-            <div class="avaliador-info">Relatório para Avaliador: **<%= avaliador.nome %>**</div>
+            <div class="avaliador-info">Relatório para Avaliador: <strong><%= avaliador.nome %></strong></div>
         <% } %>
     </header>
 
@@ -81,11 +109,13 @@
         </div>
     <% } else { %>
         <% projetos.forEach((projeto, index) => { %>
+            <% if (index > 0) { %>
+                <div class="page-break"></div> <% } %>
             <div class="section">
-                <h3>Projeto: <%= projeto.titulo %> (<%= projeto.numero || 'N/A' %>)</h3>
+                <h3>Projeto: <%= projeto.titulo %> (Código: <%= projeto.numero || 'N/A' %>)</h3>
                 <div class="project-details">
                     <p><strong>Escola:</strong> <%= projeto.escolaNome || 'N/A' %></p>
-                    <p><strong>Alunos:</strong> <%= projeto.alunos && projeto.alunos.length > 0 ? projeto.alunos.map(aluno => aluno.nome).join(', ') : 'N/A' %></p>
+                    <p><strong>Alunos:</strong> <%= projeto.alunos || 'N/A' %></p>
                     <p><strong>Área:</strong> <%= projeto.area || 'N/A' %></p>
                     <p><strong>Categoria:</strong> <%= projeto.categoria ? projeto.categoria.nome : 'N/A' %></p>
                     <p><strong>Resumo:</strong> <%= projeto.resumo || 'N/A' %></p>
@@ -96,21 +126,21 @@
                     <table class="criteria-table">
                         <thead>
                             <tr>
-                                <th style="width: 60%;">Critério</th>
-                                <th style="width: 15%;">Nota (0-10)</th>
-                                <th style="width: 25%;">Observações</th>
+                                <th style="width: 50%;">Critério</th>
+                                <th style="width: 15%;">Nota (5-10)</th> <th style="width: 35%;">Observações</th>
                             </tr>
                         </thead>
                         <tbody>
                             <% projeto.criteriosAvaliacao.forEach(criterio => { %>
                                 <tr>
-                                    <td><%= criterio.nome %>
+                                    <td>
+                                        <%= criterio.nome %>
                                         <% if (criterio.descricao) { %>
                                             <br><small><%= criterio.descricao %></small>
                                         <% } %>
                                     </td>
                                     <td><div class="input-box"></div></td>
-                                    <td><div class="input-box" style="min-height: 50px;"></div></td>
+                                    <td><div class="input-box notes-input-box"></div></td>
                                 </tr>
                             <% }) %>
                         </tbody>
@@ -120,15 +150,17 @@
                 <% } %>
 
                 <h4 style="margin-top: 20px;">Notas Finais:</h4>
-                <p><strong>Nota Geral do Projeto:</strong> <div class="input-box" style="width: 100px;"></div></p>
+                <p><strong>Nota Geral do Projeto:</strong> <div class="input-box total-score-box"></div></p>
 
-                <h4 style="margin-top: 20px;">Comentários Gerais do Avaliador:</h4>
-                <div class="input-box" style="min-height: 100px;"></div>
+                <h4 style="margin-top: 20px;">Comentários Gerais do Avaliador para este Projeto:</h4>
+                <div class="input-box general-comments-box"></div>
             </div>
-            <% if (index < projetos.length - 1) { %>
-                <div class="page-break"></div>
-            <% } %>
-        <% }) %>
+        <% }); %>
     <% } %>
+
+    <div class="assinatura-area">
+        <div class="assinatura-line"></div>
+        <p>Assinatura do Avaliador</p>
+    </div>
 </body>
 </html>
