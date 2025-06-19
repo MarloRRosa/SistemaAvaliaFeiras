@@ -1065,30 +1065,13 @@ router.post('/feiras', verificarAdminEscola, async (req, res) => {
         // Arquiva outras feiras da mesma escola
         await Feira.updateMany({ escolaId, status: 'ativa' }, { $set: { status: 'arquivada' } });
 
-        function parseDateBR(dataString) {
-    if (!dataString || typeof dataString !== 'string') return null;
-    const partes = dataString.split('-');
-    if (partes.length !== 3) return null;
-    const [dia, mes, ano] = partes;
-    const data = new Date(`${ano}-${mes}-${dia}`);
-    return isNaN(data.getTime()) ? null : data;
-}
-
-const inicioDate = parseDateBR(inicioFeira);
-const fimDate = parseDateBR(fimFeira);
-
-if (!inicioDate || !fimDate) {
-    req.flash('error_msg', 'Data de início ou fim da feira inválida. Use o formato DD-MM-YYYY.');
-    return res.redirect('/admin/dashboard?tab=feiras');
-}
-
-const novaFeira = new Feira({
-    nome,
-    inicioFeira: inicioDate,
-    fimFeira: fimDate,
-    status: 'ativa',
-    escolaId
-});
+        const novaFeira = new Feira({
+            nome,
+            inicioFeira: new Date(inicioFeira.split('-').reverse().join('-')), // DD-MM-YYYY → Date
+            fimFeira: new Date(fimFeira.split('-').reverse().join('-')),
+            status: 'ativa',
+            escolaId
+        });
 
         await novaFeira.save();
         req.flash('success_msg', 'Nova feira criada com sucesso!');
@@ -1107,34 +1090,15 @@ router.post('/feiras/editar', verificarAdminEscola, async (req, res) => {
   const escolaId = req.session.adminEscola.escolaId;
 
   try {
-    // Função segura para converter DD-MM-YYYY para Date
-function parseDateBR(dataString) {
-    if (!dataString || typeof dataString !== 'string') return null;
-    const partes = dataString.split('-');
-    if (partes.length !== 3) return null;
-    const [dia, mes, ano] = partes;
-    const data = new Date(`${ano}-${mes}-${dia}`);
-    return isNaN(data.getTime()) ? null : data;
-}
-
-const inicioDate = parseDateBR(inicioFeira);
-const fimDate = parseDateBR(fimFeira);
-
-if (!inicioDate || !fimDate) {
-    req.flash('error_msg', 'Data de início ou fim da feira inválida. Use o formato DD-MM-YYYY.');
-    return res.redirect('/admin/dashboard?tab=feiras');
-}
-
-await Feira.updateOne(
-  { _id: feiraId, escolaId },
-  {
-    nome,
-    inicioFeira: inicioDate,
-    fimFeira: fimDate,
-    status
-  }
-);
-
+    await Feira.updateOne(
+      { _id: feiraId, escolaId },
+      {
+        nome,
+        inicioFeira: new Date(inicioFeira),
+        fimFeira: new Date(fimFeira),
+        status
+      }
+    );
     req.flash('success_msg', 'Feira atualizada com sucesso!');
     res.redirect('/admin/dashboard?tab=feiras');
   } catch (err) {
@@ -1218,33 +1182,33 @@ router.post('/configuracoes/nova', verificarAdminEscola, async (req, res) => {
     const adminEscolaId = req.session.adminEscola.escolaId;
 
     try {
-        const feiraAtual = await Feira.findOne({ status: 'ativa', escolaId: adminEscolaId });
+        const feiraAtual = await Feira.findOne({ status: 'ativa', escolaId: adminEscolaId }); // USANDO escolaId AQUI
 
         if (feiraAtual) {
-            // Arquiva a feira atual
+            // 1. Arquiva a feira atual
             feiraAtual.status = 'arquivada';
             feiraAtual.arquivadaEm = Date.now();
             await feiraAtual.save();
 
             // 2. Apaga projetos, avaliadores, categorias, critérios e avaliações associados à feira arquivada
             // Filtrando por feira E escola para garantir isolamento
-           //await Projeto.deleteMany({ feira: feiraAtual._id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
-            //await Avaliador.deleteMany({ feira: feiraAtual._id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
-           // await Avaliacao.deleteMany({ feira: feiraAtual._id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
-            //await Categoria.deleteMany({ feira: feiraAtual._id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
-            //await Criterio.deleteMany({ feira: feiraAtual._id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
+            await Projeto.deleteMany({ feira: feiraAtual._id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
+            await Avaliador.deleteMany({ feira: feiraAtual._id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
+            await Avaliacao.deleteMany({ feira: feiraAtual._id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
+            await Categoria.deleteMany({ feira: feiraAtual._id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
+            await Criterio.deleteMany({ feira: feiraAtual._id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
         }
         
         // 3. Cria uma nova feira (com nome padrão e status 'ativa')
-         const novaFeira = new Feira({
-            nome: `Feira de Ciências ${new Date().getFullYear()}`,
+        const novaFeira = new Feira({
+            nome: `Feira de Ciências ${new Date().getFullYear()}`, // Nome padrão
             status: 'ativa',
-            escolaId: adminEscolaId
+            escolaId: adminEscolaId // Vincula à escola do admin logado (USANDO escolaId AQUI)
         });
         await novaFeira.save();
 
-        req.flash('success_msg', 'Nova feira iniciada com sucesso! A anterior foi arquivada.');
-        res.redirect('/admin/dashboard?tab=feiras');
+        req.flash('success_msg', 'Nova feira iniciada com sucesso! A feira anterior foi arquivada.');
+        res.redirect('/admin/dashboard?tab=feiras'); // Redireciona para a aba de feiras
     } catch (err) {
         console.error('Erro ao iniciar nova feira:', err);
         req.flash('error_msg', 'Erro ao iniciar nova feira. Detalhes: ' + err.message);

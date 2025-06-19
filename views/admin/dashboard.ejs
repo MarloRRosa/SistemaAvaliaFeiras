@@ -700,18 +700,14 @@
   <form method="POST" action="/admin/feiras" class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md space-y-4">
     <h2 class="text-xl font-bold text-gray-700">Adicionar Nova Feira</h2>
     <input type="text" name="nome" placeholder="Nome da Feira" required class="w-full border border-gray-300 p-2 rounded">
-    
-    <!-- Campos com tipo "date" -->
-    <input type="date" name="inicioFeira" required class="w-full border border-gray-300 p-2 rounded">
-    <input type="date" name="fimFeira" required class="w-full border border-gray-300 p-2 rounded">
-
+    <input type="text" name="inicioFeira" placeholder="Início (DD-MM-YYYY)" required class="w-full border border-gray-300 p-2 rounded" pattern="\d{2}-\d{2}-\d{4}">
+    <input type="text" name="fimFeira" placeholder="Fim (DD-MM-YYYY)" required class="w-full border border-gray-300 p-2 rounded" pattern="\d{2}-\d{2}-\d{4}">
     <div class="flex justify-end space-x-2">
       <button type="button" onclick="fecharModalFeira()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded">Cancelar</button>
       <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Salvar</button>
     </div>
   </form>
 </div>
-
 
 <div id="modalEditarFeira" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
   <form method="POST" action="/admin/feiras/editar" class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md space-y-4">
@@ -1057,78 +1053,73 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Mostrar modal de Feira
             const modalFeira = document.getElementById('modalFeira');
-const btnAbrirModalFeira = document.getElementById('btnAbrirModalFeira');
-const btnFecharModalFeira = document.getElementById('btnFecharModalFeira');
-const formFeira = document.getElementById('formFeira');
-const tituloModalFeira = document.getElementById('tituloModalFeira');
-const feiraId = document.getElementById('feiraId');
-const inputNomeFeira = document.getElementById('nomeFeira');
-const inputInicioFeiraModal = document.getElementById('inicioFeiraModal');
-const inputFimFeiraModal = document.getElementById('fimFeiraModal');
-const selectStatusFeiraModal = document.getElementById('statusFeiraModal');
+            const btnAbrirModalFeira = document.getElementById('btnAbrirModalFeira');
+            const btnFecharModalFeira = document.getElementById('btnFecharModalFeira');
+            const formFeira = document.getElementById('formFeira');
+            const tituloModalFeira = document.getElementById('tituloModalFeira');
+            const feiraId = document.getElementById('feiraId');
+            const inputNomeFeira = document.getElementById('nomeFeira');
+            const inputInicioFeiraModal = document.getElementById('inicioFeiraModal');
+            const inputFimFeiraModal = document.getElementById('fimFeiraModal');
+            const selectStatusFeiraModal = document.getElementById('statusFeiraModal');
 
-            if (btnAbrirModalFeira && modalFeira) {
-  btnAbrirModalFeira.addEventListener('click', () => {
-    tituloModalFeira.textContent = 'Adicionar Nova Feira';
-    formFeira.action = '/admin/feiras';
-    feiraId.value = '';
-    inputNomeFeira.value = '';
-    inputInicioFeiraModal.value = '';
-    inputFimFeiraModal.value = '';
-    selectStatusFeiraModal.value = 'ativa';
-    modalFeira.classList.remove('hidden');
-    modalFeira.classList.add('flex');
-  });
-}
+            btnAbrirModalFeira.addEventListener('click', () => {
+                tituloModalFeira.textContent = 'Adicionar Nova Feira';
+                formFeira.action = '/admin/feiras'; // Rota de criação (ajustei para /admin/feiras conforme seu admin.js)
+                feiraId.value = '';
+                inputNomeFeira.value = '';
+                inputInicioFeiraModal.value = '';
+                inputFimFeiraModal.value = '';
+                selectStatusFeiraModal.value = 'ativa'; // Nova feira é ativa por padrão
+                modalFeira.classList.remove('hidden');
+                modalFeira.classList.add('flex');
+            });
 
-          if (btnFecharModalFeira && modalFeira) {
-  btnFecharModalFeira.addEventListener('click', () => {
-    modalFeira.classList.remove('flex');
-    modalFeira.classList.add('hidden');
-  });
-}
+            btnFecharModalFeira.addEventListener('click', () => {
+                modalFeira.classList.remove('flex');
+                modalFeira.classList.add('hidden');
+            });
 
+           
+
+            // ✅ Abrir modal e preencher dados
   document.querySelectorAll('.btn-editar-feira').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.getElementById('editarFeiraId').value = btn.dataset.id;
-    document.getElementById('editarFeiraNome').value = btn.dataset.nome;
-    document.getElementById('editarInicioFeira').value = formatarParaInputDate(btn.dataset.inicio);
-    document.getElementById('editarFimFeira').value = formatarParaInputDate(btn.dataset.fim);
-    document.getElementById('editarFeiraStatus').value = btn.dataset.status;
-    document.getElementById('excluirFeiraId').value = btn.dataset.id;
-    document.getElementById('modalEditarFeira').classList.remove('hidden');
+    btn.addEventListener('click', () => {
+      document.getElementById('editarFeiraId').value = btn.dataset.id;
+      document.getElementById('editarFeiraNome').value = btn.dataset.nome;
+      document.getElementById('editarInicioFeira').value = btn.dataset.inicio.split('-').reverse().join('-');
+      document.getElementById('editarFimFeira').value = btn.dataset.fim.split('-').reverse().join('-');
+      document.getElementById('editarFeiraStatus').value = btn.dataset.status;
+      document.getElementById('excluirFeiraId').value = btn.dataset.id;
+      document.getElementById('modalEditarFeira').classList.remove('hidden');
+    });
   });
-});
 
             // Mostrar modal de Configurações (apenas datas)
-           const modalConfiguracoes = document.getElementById('modalConfiguracoes');
-const btnAbrirModalConfiguracoes = document.getElementById('btnAbrirModalConfiguracoes');
-const btnFecharModalConfiguracoes = document.getElementById('btnFecharModalConfiguracoes');
+            const modalConfiguracoes = document.getElementById('modalConfiguracoes');
+            const btnAbrirModalConfiguracoes = document.getElementById('btnAbrirModalConfiguracoes');
+            const btnFecharModalConfiguracoes = document.getElementById('btnFecharModalConfiguracoes');
 
-if (btnAbrirModalConfiguracoes && modalConfiguracoes) {
-  btnAbrirModalConfiguracoes.addEventListener('click', () => {
-    modalConfiguracoes.classList.remove('hidden');
-    modalConfiguracoes.classList.add('flex');
-  });
-}
+            btnAbrirModalConfiguracoes.addEventListener('click', () => {
+                modalConfiguracoes.classList.remove('hidden');
+                modalConfiguracoes.classList.add('flex');
+            });
 
-            if (btnFecharModalConfiguracoes && modalConfiguracoes) {
-  btnFecharModalConfiguracoes.addEventListener('click', () => {
-    modalConfiguracoes.classList.remove('flex');
-    modalConfiguracoes.classList.add('hidden');
-  });
-}
+            btnFecharModalConfiguracoes.addEventListener('click', () => {
+                modalConfiguracoes.classList.remove('flex');
+                modalConfiguracoes.classList.add('hidden');
+            });
         });
 
-        // Função auxiliar para formatar datas 
-         function formatarParaInputDate(dateString) {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  }
+        // Função auxiliar para formatar datas (se já não estiver definida globalmente)
+        function formatarDatasParaInput(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${day}-${month}-${year}`;
+        }
 
         document.getElementById('btnAbrirModalFeira').addEventListener('click', function () {
         document.getElementById('modalFeira').classList.remove('hidden');
@@ -1157,20 +1148,6 @@ if (btnAbrirModalConfiguracoes && modalConfiguracoes) {
     document.getElementById('formExcluirFeira').submit();
   }
 }
-
-window.fecharModalEditarFeira = function () {
-    document.getElementById('modalEditarFeira').classList.add('hidden');
-  }
-
-  window.fecharModalFeira = function () {
-    document.getElementById('modalFeira').classList.add('hidden');
-  }
-
-  window.confirmarExclusaoFeira = function () {
-    if (confirm('Deseja realmente excluir esta feira?')) {
-      document.getElementById('excluirFeiraHidden').value = document.getElementById('editarFeiraId').value;
-      document.getElementById('formExcluirFeira').submit();
-    }}
   // Selecionar todos critérios (checkbox)
     document.getElementById('selecionarTodosCriterios')?.addEventListener('change', function () {
         const checkboxes = document.querySelectorAll('input[name="criterios"]');
