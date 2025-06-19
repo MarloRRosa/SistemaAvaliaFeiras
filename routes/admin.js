@@ -1809,7 +1809,6 @@ router.get('/relatorio/avaliacao-offline/:feiraId/:avaliadorId', verificarAdminE
         console.log('Quantidade de projetos atribuídos no Avaliador:', avaliador.projetosAtribuidos ? avaliador.projetosAtribuidos.length : 0);
 
         let projetosQuery = { 
-            // CORRIGIDO: Deve ser "feira", não "feiraId" para corresponder ao seu modelo Projeto
             feira: feira._id, 
             escolaId: adminEscolaId,
             _id: { $in: avaliador.projetosAtribuidos || [] }
@@ -1819,7 +1818,6 @@ router.get('/relatorio/avaliacao-offline/:feiraId/:avaliadorId', verificarAdminE
         
         const projetos = await Projeto.find(projetosQuery)
                                       .populate('categoria')
-                                      // CORRIGIDO: Adicionado populate para escolaId
                                       .populate('escolaId') 
                                       .lean();
 
@@ -1866,101 +1864,7 @@ router.get('/relatorio/avaliacao-offline/:feiraId/:avaliadorId', verificarAdminE
                 };
             }),
             avaliador: avaliador,
-            // ADICIONADO: Passando a função formatarData para o EJS
             formatarData: formatarData 
-        };
-
-        const filename = `relatorio_avaliacao_offline_${feira.nome.replace(/\s/g, '_')}_${avaliador.nome.replace(/\s/g, '_').substring(0, 20)}`;
-        await generatePdfReport(req, res, 'relatorio_offline', dataForReport, filename);
-
-    } catch (err) {
-        console.error('Erro ao gerar relatório de avaliação offline (avaliador específico):', err);
-        if (!res.headersSent) {
-            req.flash('error_msg', 'Erro ao gerar o relatório. Detalhes: ' + err.message);
-            res.redirect('/admin/dashboard?tab=relatorios');
-        }
-    }
-});
-
-// Rota para gerar o relatório de avaliação offline para uma feira E UM AVALIADOR ESPECÍFICO
-router.get('/relatorio/avaliacao-offline/:feiraId/:avaliadorId', verificarAdminEscola, async (req, res) => {
-    const { feiraId, avaliadorId } = req.params;
-    const adminEscolaId = req.session.adminEscola.escolaId;
-
-    try {
-        if (!feiraId || !mongoose.Types.ObjectId.isValid(feiraId)) {
-            req.flash('error_msg', 'ID da feira inválido para o relatório.');
-            return res.redirect('/admin/dashboard?tab=relatorios');
-        }
-        if (!avaliadorId || !mongoose.Types.ObjectId.isValid(avaliadorId)) {
-            req.flash('error_msg', 'ID do avaliador inválido para o relatório.');
-            return res.redirect('/admin/dashboard?tab=relatorios');
-        }
-
-        const feira = await Feira.findOne({ _id: feiraId, escolaId: adminEscolaId }).lean();
-        if (!feira) {
-            req.flash('error_msg', 'Feira não encontrada ou você não tem permissão para acessá-la.');
-            return res.redirect('/admin/dashboard?tab=relatorios');
-        }
-
-        let avaliador = await Avaliador.findOne({ _id: avaliadorId, escolaId: adminEscolaId }).lean();
-        if (!avaliador) {
-            req.flash('error_msg', 'Avaliador não encontrado ou não pertence a esta escola.');
-            return res.redirect('/admin/dashboard?tab=relatorios');
-        }
-
-        console.log('--- DEPURANDO RELATÓRIO DE AVALIADOR ---');
-console.log('ID do Avaliador recebido na rota:', avaliadorId);
-console.log('Nome do Avaliador encontrado:', avaliador.nome);
-console.log('Projetos Atribuídos (IDs crus do banco de dados):', avaliador.projetosAtribuidos);
-console.log('Quantidade de projetos atribuídos no Avaliador:', avaliador.projetosAtribuidos ? avaliador.projetosAtribuidos.length : 0);
-
-        let projetosQuery = { 
-            feiraId: feira._id, 
-            escolaId: adminEscolaId,
-            _id: { $in: avaliador.projetosAtribuidos || [] }
-        };
-
-        console.log('Query para buscar projetos:', JSON.stringify(projetosQuery, null, 2));
-        
-        const projetos = await Projeto.find(projetosQuery)
-                                      .populate('categoria')
-                                      .populate('escolaId')
-                                      .lean();
-
-        console.log('Projetos encontrados pela query (títulos):', projetos.map(p => p.titulo));
-console.log('Quantidade de projetos encontrados pela query:', projetos.length);
-console.log('--- FIM DA SEÇÃO DE DEPURACÃO ---');
-
-        const categoriaIds = [...new Set(projetos.map(p => p.categoria && p.categoria._id).filter(Boolean))];
-        const criteriosPorCategoria = {};
-        if (categoriaIds.length > 0) {
-            const criterios = await Criterio.find({ 
-                escolaId: adminEscolaId, 
-                categoriaId: { $in: categoriaIds } 
-            }).lean();
-
-            criterios.forEach(criterio => {
-                const catId = criterio.categoriaId.toString();
-                if (!criteriosPorCategoria[catId]) {
-                    criteriosPorCategoria[catId] = [];
-                }
-                criteriosPorCategoria[catId].push(criterio);
-            });
-        }
-
-        const dataForReport = {
-            titulo: `Relatório de Avaliação Offline - ${feira.nome}`,
-            feira: feira,
-            projetos: projetos.map(p => {
-                const categoriaCriterios = p.categoria ? criteriosPorCategoria[p.categoria._id.toString()] || [] : [];
-                return {
-                    ...p,
-                    criteriosAvaliacao: categoriaCriterios
-                };
-            }),
-            avaliador: avaliador,
-            // REMOVIDO: formatarDatasParaInput não precisa ser passado aqui
         };
 
         const filename = `relatorio_avaliacao_offline_${feira.nome.replace(/\s/g, '_')}_${avaliador.nome.replace(/\s/g, '_').substring(0, 20)}`;
