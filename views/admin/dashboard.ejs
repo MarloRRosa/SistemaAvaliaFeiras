@@ -884,10 +884,10 @@ btnFecharModalProjeto.addEventListener('click', () => {
     modalProjeto.classList.add('hidden');
 });
 
- document.querySelectorAll('.btn-editar-projeto').forEach(button => {
+  document.querySelectorAll('.btn-editar-projeto').forEach(button => {
         button.addEventListener('click', () => {
-            activateTab('tab-projetos');
-            localStorage.setItem('activeTab', 'tab-projetos');
+            activateTab('projetos');
+            localStorage.setItem('activeTab', 'projetos');
 
             document.getElementById('tituloModalProjeto').textContent = 'Editar Projeto';
             document.getElementById('formProjeto').action = `/admin/projetos/${button.dataset.id}?_method=PUT`;
@@ -901,6 +901,7 @@ btnFecharModalProjeto.addEventListener('click', () => {
             document.querySelectorAll('#criteriosProjetoCheckboxes input[type="checkbox"]').forEach(cb => {
                 cb.checked = criteriosIds.includes(cb.value);
             });
+
             document.getElementById('modalProjeto').classList.remove('hidden');
             document.getElementById('modalProjeto').classList.add('flex');
         });
@@ -932,13 +933,14 @@ btnFecharModalProjeto.addEventListener('click', () => {
 
             document.querySelectorAll('.btn-editar-categoria').forEach(button => {
         button.addEventListener('click', () => {
-            activateTab('tab-categorias');
-            localStorage.setItem('activeTab', 'tab-categorias');
+            activateTab('categorias');
+            localStorage.setItem('activeTab', 'categorias');
 
             document.getElementById('tituloModalCategoria').textContent = 'Editar Categoria';
             document.getElementById('formCategoria').action = `/admin/categorias/${button.dataset.id}?_method=PUT`;
             document.getElementById('categoriaId').value = button.dataset.id;
             document.getElementById('nomeCategoria').value = button.dataset.nome;
+
             document.getElementById('modalCategoria').classList.remove('hidden');
             document.getElementById('modalCategoria').classList.add('flex');
         });
@@ -980,8 +982,8 @@ btnFecharModalProjeto.addEventListener('click', () => {
 
             document.querySelectorAll('.btn-editar-criterio').forEach(button => {
         button.addEventListener('click', () => {
-            activateTab('tab-criterios');
-            localStorage.setItem('activeTab', 'tab-criterios');
+            activateTab('criterios');
+            localStorage.setItem('activeTab', 'criterios');
 
             document.getElementById('tituloModalCriterio').textContent = 'Editar Critério';
             document.getElementById('formCriterio').action = `/admin/criterios/${button.dataset.id}?_method=PUT`;
@@ -989,6 +991,7 @@ btnFecharModalProjeto.addEventListener('click', () => {
             document.getElementById('nomeCriterio').value = button.dataset.nome;
             document.getElementById('pesoCriterio').value = button.dataset.peso;
             document.getElementById('observacaoCriterio').value = button.dataset.observacao;
+
             document.getElementById('modalCriterio').classList.remove('hidden');
             document.getElementById('modalCriterio').classList.add('flex');
         });
@@ -1034,8 +1037,8 @@ btnFecharModalProjeto.addEventListener('click', () => {
 
             document.querySelectorAll('.btn-editar-avaliador').forEach(button => {
         button.addEventListener('click', () => {
-            activateTab('tab-avaliadores');
-            localStorage.setItem('activeTab', 'tab-avaliadores');
+            activateTab('avaliadores');
+            localStorage.setItem('activeTab', 'avaliadores');
 
             document.getElementById('tituloAvaliador').textContent = 'Editar Avaliador';
             document.getElementById('formAvaliador').action = `/admin/avaliadores/${button.dataset.id}?_method=PUT`;
