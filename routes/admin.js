@@ -11,6 +11,7 @@ const Criterio = require('../models/Criterio');
 const Avaliador = require('../models/Avaliador');
 const Avaliacao = require('../models/Avaliacao');
 const Admin = require('../models/Admin');
+const generatePIN = () => Math.floor(1000 + Math.random() * 9000).toString();
 
 const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
@@ -894,97 +895,89 @@ router.delete('/projetos/:id', verificarAdminEscola, async (req, res) => {
 
 // Adicionar Avaliador (POST)
 router.post('/avaliadores', verificarAdminEscola, async (req, res) => {
-    const { nome, email, pin, ativo, projetosAtribuidos } = req.body;
-    const adminEscolaId = req.session.adminEscola.escolaId;
+  const { nome, email, projetosAtribuidos } = req.body;
+  const escolaId = req.session.adminEscola.escolaId;
 
-    try {
-        const existingAvaliador = await Avaliador.findOne({ email, escolaId: adminEscolaId });
-        if (existingAvaliador) {
-            req.flash('error_msg', 'Já existe um avaliador com este e-mail nesta escola.');
-            return res.redirect('/admin/dashboard?tab=avaliadores');
-        }
-
-        const generatedPin = pin || generateUniquePin();
-        const newAvaliador = new Avaliador({
-            nome,
-            email,
-            pin: generatedPin,
-            ativo: !!ativo,
-            projetosAtribuidos: Array.isArray(projetosAtribuidos)
-                ? projetosAtribuidos
-                : projetosAtribuidos
-                ? [projetosAtribuidos].filter(Boolean)
-                : [],
-            escolaId: adminEscolaId
-            // Removido: feira
-        });
-
-        await newAvaliador.save();
-
-        const emailSent = await sendResetPinEmail(newAvaliador);
-        if (emailSent) {
-            req.flash('success_msg', `Avaliador ${newAvaliador.nome} adicionado e PIN enviado por e-mail.`);
-        } else {
-            req.flash('success_msg', `Avaliador ${newAvaliador.nome} adicionado, mas falha ao enviar PIN por e-mail.`);
-        }
-
-        res.redirect('/admin/dashboard?tab=avaliadores');
-    } catch (err) {
-        console.error('Erro ao adicionar avaliador:', err);
-        req.flash('error_msg', 'Erro ao adicionar avaliador. Detalhes: ' + err.message);
-        res.redirect('/admin/dashboard?tab=avaliadores');
+  try {
+    const feira = await Feira.findOne({ status: 'ativa', escolaId });
+    if (!feira) {
+      req.flash('error_msg', 'Nenhuma feira ativa encontrada para a escola.');
+      return res.redirect('/admin/dashboard?tab=avaliadores');
     }
+
+    const pin = generatePIN();
+
+    const novoAvaliador = new Avaliador({
+      nome,
+      email,
+      pin,
+      escolaId,
+      feira: feira._id,
+      projetosAtribuidos: Array.isArray(projetosAtribuidos) ? projetosAtribuidos : [projetosAtribuidos]
+    });
+
+    await novoAvaliador.save();
+
+    // Envio de e-mail usando remetente validado (SendGrid via Nodemailer)
+    const transporter = nodemailer.createTransport({
+      service: 'SendGrid',
+      auth: {
+        user: 'apikey',
+        pass: process.env.SENDGRID_API_KEY
+      }
+    });
+
+    await transporter.sendMail({
+      from: 'AvaliaFeiras <docsrosas@gmail.com>', // remetente verificado
+      to: email,
+      subject: 'Bem-vindo ao AvaliaFeiras',
+      html: `<p>Olá ${nome},</p>
+             <p>Você foi cadastrado como avaliador no sistema AvaliaFeiras.</p>
+             <p><strong>PIN de acesso:</strong> ${pin}</p>
+             <p>Acesse o sistema e utilize seu PIN para avaliar os projetos atribuídos.</p>`
+    });
+
+    req.flash('success_msg', 'Avaliador cadastrado e e-mail enviado com sucesso.');
+  } catch (err) {
+    console.error('Erro ao cadastrar avaliador:', err);
+    req.flash('error_msg', 'Erro ao cadastrar avaliador. Detalhes: ' + err.message);
+  }
+
+  res.redirect('/admin/dashboard?tab=avaliadores');
 });
 
-
 router.put('/avaliadores/:id', verificarAdminEscola, async (req, res) => {
-    const { id } = req.params;
-    const { nome, email, pin, ativo, projetosAtribuidos } = req.body;
-    const adminEscolaId = req.session.adminEscola.escolaId;
+  const { id } = req.params;
+  const { nome, email, projetosAtribuidos } = req.body;
+  const escolaId = req.session.adminEscola.escolaId;
 
-    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-        req.flash('error_msg', 'ID do avaliador inválido para edição.');
-        return res.redirect('/admin/dashboard?tab=avaliadores');
+  if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+    req.flash('error_msg', 'ID do avaliador inválido para edição.');
+    return res.redirect('/admin/dashboard?tab=avaliadores');
+  }
+
+  try {
+    const avaliadorAtualizado = await Avaliador.findOneAndUpdate(
+      { _id: id, escolaId },
+      {
+        nome,
+        email,
+        projetosAtribuidos: Array.isArray(projetosAtribuidos) ? projetosAtribuidos : [projetosAtribuidos]
+      },
+      { new: true }
+    );
+
+    if (!avaliadorAtualizado) {
+      req.flash('error_msg', 'Avaliador não encontrado ou não pertence à sua escola.');
+    } else {
+      req.flash('success_msg', 'Avaliador atualizado com sucesso.');
     }
+  } catch (err) {
+    console.error('Erro ao atualizar avaliador:', err);
+    req.flash('error_msg', 'Erro ao atualizar avaliador. Detalhes: ' + err.message);
+  }
 
-    try {
-        const avaliador = await Avaliador.findOne({ _id: id, escolaId: adminEscolaId });
-        if (!avaliador) {
-            req.flash('error_msg', 'Avaliador não encontrado ou você não tem permissão para editá-lo.');
-            return res.redirect('/admin/dashboard?tab=avaliadores');
-        }
-
-        if (email !== avaliador.email) {
-            const existingAvaliador = await Avaliador.findOne({
-                email,
-                _id: { $ne: id },
-                escolaId: adminEscolaId
-            });
-            if (existingAvaliador) {
-                req.flash('error_msg', 'Este e-mail já está em uso por outro avaliador nesta escola.');
-                return res.redirect('/admin/dashboard?tab=avaliadores');
-            }
-        }
-
-        avaliador.nome = nome;
-        avaliador.email = email;
-        avaliador.pin = pin || avaliador.pin;
-        avaliador.ativo = !!ativo;
-        avaliador.projetosAtribuidos = Array.isArray(projetosAtribuidos)
-            ? projetosAtribuidos
-            : projetosAtribuidos
-            ? [projetosAtribuidos].filter(Boolean)
-            : [];
-
-        await avaliador.save();
-
-        req.flash('success_msg', 'Avaliador atualizado com sucesso!');
-        res.redirect('/admin/dashboard?tab=avaliadores');
-    } catch (err) {
-        console.error('Erro ao atualizar avaliador:', err);
-        req.flash('error_msg', 'Erro ao atualizar avaliador. Detalhes: ' + err.message);
-        res.redirect('/admin/dashboard?tab=avaliadores');
-    }
+  res.redirect('/admin/dashboard?tab=avaliadores');
 });
 
 
@@ -1028,19 +1021,28 @@ router.post('/avaliadores/reset-pin/:id', verificarAdminEscola, async (req, res)
 
 
 // Excluir Avaliador (DELETE)
-router.post('/avaliadores/:id/excluir', verificarAdminEscola, async (req, res) => {
-    const { id } = req.params;
-    const escolaId = req.session.adminEscola.escolaId;
+router.delete('/avaliadores/:id', verificarAdminEscola, async (req, res) => {
+  const { id } = req.params;
+  const escolaId = req.session.adminEscola.escolaId;
 
-    try {
-        await Avaliador.deleteOne({ _id: id, escolaId });
-        req.flash('success_msg', 'Avaliador removido com sucesso!');
-    } catch (error) {
-        console.error('Erro ao excluir avaliador:', error);
-        req.flash('error_msg', 'Erro ao excluir avaliador.');
+  if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+    req.flash('error_msg', 'ID do avaliador inválido para exclusão.');
+    return res.redirect('/admin/dashboard?tab=avaliadores');
+  }
+
+  try {
+    const resultado = await Avaliador.deleteOne({ _id: id, escolaId });
+    if (resultado.deletedCount === 0) {
+      req.flash('error_msg', 'Avaliador não encontrado ou não pertence à sua escola.');
+    } else {
+      req.flash('success_msg', 'Avaliador excluído com sucesso.');
     }
+  } catch (err) {
+    console.error('Erro ao excluir avaliador:', err);
+    req.flash('error_msg', 'Erro ao excluir avaliador. Detalhes: ' + err.message);
+  }
 
-    res.redirect('/admin/dashboard?tab=avaliadores');
+  res.redirect('/admin/dashboard?tab=avaliadores');
 });
 
 

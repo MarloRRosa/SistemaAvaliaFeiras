@@ -1040,7 +1040,7 @@
             document.querySelectorAll('.btn-editar-avaliador').forEach(button => {
                 button.addEventListener('click', (event) => {
                     tituloAvaliador.textContent = 'Editar Avaliador';
-                    formAvaliador.action = `/admin/avaliadores/${event.target.dataset.id}?_method=PUT`; // Rota de edição
+                    formAvaliador.action = `/admin/avaliadores/${button.dataset.id}?_method=PUT`;
                     avaliadorId.value = event.target.dataset.id;
                     inputNomeAvaliador.value = event.target.dataset.nome;
                     inputEmailAvaliador.value = event.target.dataset.email;
