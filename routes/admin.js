@@ -1027,7 +1027,7 @@ router.post('/avaliadores/reset-pin/:id', verificarAdminEscola, async (req, res)
 
 
 // Excluir Avaliador (DELETE)
-router.delete('/avaliadores/:id', verificarAdminEscola, async (req, res) => {
+router.post('/avaliadores/:id/excluir', verificarAdminEscola, async (req, res) => {
   const { id } = req.params;
   const escolaId = req.session.adminEscola.escolaId;
 
