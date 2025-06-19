@@ -1942,7 +1942,10 @@ router.post('/configuracoes/feiradata', verificarAdminEscola, async (req, res) =
 // Atualizar dados da escola (POST)
 router.post('/escola/atualizar', verificarAdminEscola, async (req, res) => {
     const escolaId = req.session.adminEscola.escolaId;
-    const { nome, email, telefone, diretor, responsavel } = req.body;
+    const {
+        nome, email, telefone, diretor, responsavel,
+        endereco, cnpj, descricao
+    } = req.body;
 
     try {
         await Escola.findByIdAndUpdate(escolaId, {
@@ -1950,7 +1953,10 @@ router.post('/escola/atualizar', verificarAdminEscola, async (req, res) => {
             email,
             telefone,
             diretor,
-            responsavel
+            responsavel,
+            endereco: endereco || '',
+            cnpj: cnpj || '',
+            descricao: descricao || ''
         });
 
         req.flash('success_msg', 'Dados da escola atualizados com sucesso!');
@@ -1961,6 +1967,7 @@ router.post('/escola/atualizar', verificarAdminEscola, async (req, res) => {
         res.redirect('/admin/dashboard?tab=tab-configuracoes');
     }
 });
+
 
 
 
