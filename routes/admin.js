@@ -1021,12 +1021,12 @@ router.post('/avaliadores/reset-pin/:id', verificarAdminEscola, async (req, res)
 
 
 // Excluir Avaliador (DELETE)
-router.post('/avaliadores/:id/excluir', verificarAdminEscola, async (req, res) => {
+router.delete('/avaliadores/:id', verificarAdminEscola, async (req, res) => {
   const { id } = req.params;
   const escolaId = req.session.adminEscola.escolaId;
 
   if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-    req.flash('error_msg', 'ID inválido para exclusão de avaliador.');
+    req.flash('error_msg', 'ID do avaliador inválido para exclusão.');
     return res.redirect('/admin/dashboard?tab=avaliadores');
   }
 
@@ -1044,6 +1044,7 @@ router.post('/avaliadores/:id/excluir', verificarAdminEscola, async (req, res) =
 
   res.redirect('/admin/dashboard?tab=avaliadores');
 });
+
 
 // ===========================================
 // ROTAS CRUD - FEIRAS
