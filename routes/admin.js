@@ -1833,7 +1833,7 @@ router.get('/relatorio/avaliacao-offline/:feiraId', verificarAdminEscola, async 
         };
 
         const filename = `relatorio_avaliacao_offline_${feira.nome.replace(/\s/g, '_')}`;
-        await generatePdfReport(req, res, 'relatorios/relatorio_offline', dataForReport, filename);
+        await generatePdfReport(req, res, 'relatorio_offline', dataForReport, filename);
 
     } catch (err) {
         console.error('Erro ao gerar relatório de avaliação offline (todos os projetos):', err);
@@ -1913,7 +1913,7 @@ router.get('/relatorio/avaliacao-offline/:feiraId/:avaliadorId', verificarAdminE
         };
 
         const filename = `relatorio_avaliacao_offline_${feira.nome.replace(/\s/g, '_')}_${avaliador.nome.replace(/\s/g, '_').substring(0, 20)}`;
-        await generatePdfReport(req, res, 'relatorios/relatorio_offline', dataForReport, filename);
+        await generatePdfReport(req, res, 'relatorio_offline', dataForReport, filename);
 
     } catch (err) {
         console.error('Erro ao gerar relatório de avaliação offline (avaliador específico):', err);
