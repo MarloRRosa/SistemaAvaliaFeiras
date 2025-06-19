@@ -774,13 +774,9 @@
 
     
     <script>
-document.addEventListener('DOMContentLoaded', () => {
-    const sidebar = document.getElementById('sidebar');
-    const sidebarToggle = document.getElementById('sidebarToggle');
-    const contentArea = document.getElementById('contentArea');
+        document.addEventListener('DOMContentLoaded', () => {
     const tabLinks = document.querySelectorAll('.sidebar-link');
     const tabContents = document.querySelectorAll('.tab-content');
-    const overlay = document.getElementById('overlay');
 
     const activateTab = (tabId) => {
         tabLinks.forEach(link => link.classList.remove('active'));
@@ -809,294 +805,352 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    const applySidebarState = () => {
-        if (window.innerWidth <= 768) {
-            sidebar.classList.remove('collapsed', 'show');
-            contentArea.style.marginLeft = '0px';
-        } else {
-            const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-            sidebar.classList.toggle('collapsed', isCollapsed);
-            contentArea.style.marginLeft = isCollapsed ? '64px' : '250px';
-            sidebar.classList.remove('show');
-        }
-    };
+            // Lógica para recolher/expandir o sidebar
+            // Verifica a largura da tela ao carregar e ajusta o sidebar
+            const applySidebarState = () => {
+                if (window.innerWidth <= 768) { // Ex: para telas menores que md
+                    sidebar.classList.remove('collapsed');
+                    sidebar.classList.remove('show');
+                    contentArea.style.marginLeft = '0px';
+                    // Talvez esconder o toggle button ou mudá-lo para um menu hamburger flutuante
+                } else {
+                    const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+                    if (isCollapsed) {
+                        sidebar.classList.add('collapsed');
+                        contentArea.style.marginLeft = '64px'; // Largura do sidebar colapsado
+                    } else {
+                        sidebar.classList.remove('collapsed');
+                        contentArea.style.marginLeft = '250px'; // Largura do sidebar expandido
+                    }
+                     sidebar.classList.remove('show'); // Remove a classe 'show' se estiver em desktop
+                }
+            };
 
-    applySidebarState();
+            // Aplica o estado inicial do sidebar
+            applySidebarState();
 
-    sidebarToggle.addEventListener('click', () => {
-        const isCurrentlyCollapsed = sidebar.classList.toggle('collapsed');
-        localStorage.setItem('sidebarCollapsed', isCurrentlyCollapsed);
-        contentArea.style.marginLeft = isCurrentlyCollapsed ? '64px' : '250px';
+            // Adiciona evento de clique para o botão de toggle
+            sidebarToggle.addEventListener('click', () => {
+                const isCurrentlyCollapsed = sidebar.classList.toggle('collapsed');
+                localStorage.setItem('sidebarCollapsed', isCurrentlyCollapsed);
+                // Ajusta a margem do conteúdo principal
+                if (isCurrentlyCollapsed) {
+                    contentArea.style.marginLeft = '64px';
+                } else {
+                    contentArea.style.marginLeft = '250px';
+                }
+            });
+
+            // Adiciona um listener para redimensionamento de janela
+            window.addEventListener('resize', applySidebarState);
+
+
+            // Funções para os modais (permanecem as mesmas)
+
+            // Mostrar modal de Projeto
+const modalProjeto = document.getElementById('modalProjeto');
+const btnAbrirModalProjeto = document.getElementById('btnAbrirModalProjeto');
+const btnFecharModalProjeto = document.getElementById('btnFecharModalProjeto');
+const formProjeto = document.getElementById('formProjeto');
+const tituloModalProjeto = document.getElementById('tituloModalProjeto');
+const projetoId = document.getElementById('projetoId');
+const inputTitulo = document.getElementById('titulo');
+const inputDescricao = document.getElementById('descricao');
+const selectCategoria = document.getElementById('categoria');
+const criteriosProjetoCheckboxesDiv = document.getElementById('criteriosProjetoCheckboxes');
+const inputTurmaProjeto = document.getElementById('turmaProjeto');
+const inputAlunos = document.getElementById('projetoIntegrantes');
+
+btnAbrirModalProjeto.addEventListener('click', () => {
+    tituloModalProjeto.textContent = 'Adicionar Novo Projeto';
+    formProjeto.action = '/admin/projetos';
+    projetoId.value = '';
+    inputTitulo.value = '';
+    inputDescricao.value = '';
+    selectCategoria.value = '';
+    inputTurmaProjeto.value = '';
+    inputAlunos.value = '';
+
+    criteriosProjetoCheckboxesDiv.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+        checkbox.checked = false;
     });
 
-    window.addEventListener('resize', applySidebarState);
+    modalProjeto.classList.remove('hidden');
+    modalProjeto.classList.add('flex');
+});
 
-    // Modal de Projeto
-    const modalProjeto = document.getElementById('modalProjeto');
-    const btnAbrirModalProjeto = document.getElementById('btnAbrirModalProjeto');
-    const btnFecharModalProjeto = document.getElementById('btnFecharModalProjeto');
-    const formProjeto = document.getElementById('formProjeto');
-    const tituloModalProjeto = document.getElementById('tituloModalProjeto');
-    const projetoId = document.getElementById('projetoId');
-    const inputTitulo = document.getElementById('titulo');
-    const inputDescricao = document.getElementById('descricao');
-    const selectCategoria = document.getElementById('categoria');
-    const criteriosProjetoCheckboxesDiv = document.getElementById('criteriosProjetoCheckboxes');
-    const inputTurmaProjeto = document.getElementById('turmaProjeto');
-    const inputAlunos = document.getElementById('projetoIntegrantes');
+btnFecharModalProjeto.addEventListener('click', () => {
+    modalProjeto.classList.remove('flex');
+    modalProjeto.classList.add('hidden');
+});
 
-    btnAbrirModalProjeto.addEventListener('click', () => {
-        tituloModalProjeto.textContent = 'Adicionar Novo Projeto';
-        formProjeto.action = '/admin/projetos';
-        projetoId.value = '';
-        inputTitulo.value = '';
-        inputDescricao.value = '';
-        selectCategoria.value = '';
-        inputTurmaProjeto.value = '';
-        inputAlunos.value = '';
-        criteriosProjetoCheckboxesDiv.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
-        modalProjeto.classList.remove('hidden');
-        modalProjeto.classList.add('flex');
-    });
-
-    btnFecharModalProjeto.addEventListener('click', () => {
-        modalProjeto.classList.remove('flex');
-        modalProjeto.classList.add('hidden');
-    });
-
-    document.querySelectorAll('.btn-editar-projeto').forEach(button => {
+ document.querySelectorAll('.btn-editar-projeto').forEach(button => {
         button.addEventListener('click', () => {
-            tituloModalProjeto.textContent = 'Editar Projeto';
-            formProjeto.action = `/admin/projetos/${button.dataset.id}?_method=PUT`;
-            projetoId.value = button.dataset.id;
-            inputTitulo.value = button.dataset.titulo;
-            inputDescricao.value = button.dataset.descricao;
-            selectCategoria.value = button.dataset.categoriaId;
-            inputTurmaProjeto.value = button.dataset.turma;
-            inputAlunos.value = button.dataset.alunos ? button.dataset.alunos.split(',').join('\n') : '';
+            activateTab('tab-projetos');
+            localStorage.setItem('activeTab', 'tab-projetos');
+
+            document.getElementById('tituloModalProjeto').textContent = 'Editar Projeto';
+            document.getElementById('formProjeto').action = `/admin/projetos/${button.dataset.id}?_method=PUT`;
+            document.getElementById('projetoId').value = button.dataset.id;
+            document.getElementById('titulo').value = button.dataset.titulo;
+            document.getElementById('descricao').value = button.dataset.descricao;
+            document.getElementById('categoria').value = button.dataset.categoriaId;
+            document.getElementById('turmaProjeto').value = button.dataset.turma;
+            document.getElementById('projetoIntegrantes').value = button.dataset.alunos?.split(',').join('\n') || '';
             const criteriosIds = button.dataset.criterios ? button.dataset.criterios.split(',') : [];
-            criteriosProjetoCheckboxesDiv.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+            document.querySelectorAll('#criteriosProjetoCheckboxes input[type="checkbox"]').forEach(cb => {
                 cb.checked = criteriosIds.includes(cb.value);
             });
-            modalProjeto.classList.remove('hidden');
-            modalProjeto.classList.add('flex');
+            document.getElementById('modalProjeto').classList.remove('hidden');
+            document.getElementById('modalProjeto').classList.add('flex');
         });
     });
 
-    // Modal de Categoria
-    const modalCategoria = document.getElementById('modalCategoria');
-    const btnAbrirModalCategoria = document.getElementById('btnAbrirModalCategoria');
-    const btnFecharModalCategoria = document.getElementById('btnFecharModalCategoria');
-    const formCategoria = document.getElementById('formCategoria');
-    const tituloModalCategoria = document.getElementById('tituloModalCategoria');
-    const categoriaId = document.getElementById('categoriaId');
-    const inputNomeCategoria = document.getElementById('nomeCategoria');
 
-    btnAbrirModalCategoria.addEventListener('click', () => {
-        tituloModalCategoria.textContent = 'Adicionar Nova Categoria';
-        formCategoria.action = '/admin/categorias';
-        categoriaId.value = '';
-        inputNomeCategoria.value = '';
-        modalCategoria.classList.remove('hidden');
-        modalCategoria.classList.add('flex');
-    });
+            // Mostrar modal de Categoria
+            const modalCategoria = document.getElementById('modalCategoria');
+            const btnAbrirModalCategoria = document.getElementById('btnAbrirModalCategoria');
+            const btnFecharModalCategoria = document.getElementById('btnFecharModalCategoria');
+            const formCategoria = document.getElementById('formCategoria');
+            const tituloModalCategoria = document.getElementById('tituloModalCategoria');
+            const categoriaId = document.getElementById('categoriaId');
+            const inputNomeCategoria = document.getElementById('nomeCategoria');
 
-    btnFecharModalCategoria.addEventListener('click', () => {
-        modalCategoria.classList.remove('flex');
-        modalCategoria.classList.add('hidden');
-    });
+            btnAbrirModalCategoria.addEventListener('click', () => {
+                tituloModalCategoria.textContent = 'Adicionar Nova Categoria';
+                formCategoria.action = '/admin/categorias'; // Rota de criação
+                categoriaId.value = '';
+                inputNomeCategoria.value = '';
+                modalCategoria.classList.remove('hidden');
+                modalCategoria.classList.add('flex');
+            });
 
-    document.querySelectorAll('.btn-editar-categoria').forEach(button => {
-        button.addEventListener('click', (event) => {
-            tituloModalCategoria.textContent = 'Editar Categoria';
-            formCategoria.action = `/admin/categorias/${event.target.dataset.id}?_method=PUT`;
-            categoriaId.value = event.target.dataset.id;
-            inputNomeCategoria.value = event.target.dataset.nome;
-            modalCategoria.classList.remove('hidden');
-            modalCategoria.classList.add('flex');
+            btnFecharModalCategoria.addEventListener('click', () => {
+                modalCategoria.classList.remove('flex');
+                modalCategoria.classList.add('hidden');
+            });
+
+            document.querySelectorAll('.btn-editar-categoria').forEach(button => {
+        button.addEventListener('click', () => {
+            activateTab('tab-categorias');
+            localStorage.setItem('activeTab', 'tab-categorias');
+
+            document.getElementById('tituloModalCategoria').textContent = 'Editar Categoria';
+            document.getElementById('formCategoria').action = `/admin/categorias/${button.dataset.id}?_method=PUT`;
+            document.getElementById('categoriaId').value = button.dataset.id;
+            document.getElementById('nomeCategoria').value = button.dataset.nome;
+            document.getElementById('modalCategoria').classList.remove('hidden');
+            document.getElementById('modalCategoria').classList.add('flex');
         });
     });
 
-    // Modal de Critério
-    const modalCriterio = document.getElementById('modalCriterio');
-    const btnAbrirModalCriterio = document.getElementById('btnAbrirModalCriterio');
-    const btnFecharModalCriterio = document.getElementById('btnFecharModalCriterio');
-    const btnCancelarModalCriterio = document.getElementById('btnCancelarModalCriterio');
-    const formCriterio = document.getElementById('formCriterio');
-    const tituloModalCriterio = document.getElementById('tituloModalCriterio');
-    const criterioId = document.getElementById('criterioId');
-    const inputNomeCriterio = document.getElementById('nomeCriterio');
-    const inputPesoCriterio = document.getElementById('pesoCriterio');
-    const inputObservacaoCriterio = document.getElementById('observacaoCriterio');
+            // Mostrar modal de Critério
+            const modalCriterio = document.getElementById('modalCriterio');
+            const btnAbrirModalCriterio = document.getElementById('btnAbrirModalCriterio');
+            const btnFecharModalCriterio = document.getElementById('btnFecharModalCriterio');
+            const btnCancelarModalCriterio = document.getElementById('btnCancelarModalCriterio');
+            const formCriterio = document.getElementById('formCriterio');
+            const tituloModalCriterio = document.getElementById('tituloModalCriterio');
+            const criterioId = document.getElementById('criterioId');
+            const inputNomeCriterio = document.getElementById('nomeCriterio');
+            const inputPesoCriterio = document.getElementById('pesoCriterio');
+            const inputObservacaoCriterio = document.getElementById('observacaoCriterio');
 
-    btnAbrirModalCriterio.addEventListener('click', () => {
-        tituloModalCriterio.textContent = 'Adicionar Novo Critério';
-        formCriterio.action = '/admin/criterios';
-        criterioId.value = '';
-        inputNomeCriterio.value = '';
-        inputPesoCriterio.value = '';
-        inputObservacaoCriterio.value = '';
-        modalCriterio.classList.remove('hidden');
-        modalCriterio.classList.add('flex');
-    });
 
-    btnFecharModalCriterio.addEventListener('click', () => {
-        modalCriterio.classList.remove('flex');
-        modalCriterio.classList.add('hidden');
-    });
+            btnAbrirModalCriterio.addEventListener('click', () => {
+                tituloModalCriterio.textContent = 'Adicionar Novo Critério';
+                formCriterio.action = '/admin/criterios'; // Rota de criação
+                criterioId.value = '';
+                inputNomeCriterio.value = '';
+                inputPesoCriterio.value = '';
+                inputObservacaoCriterio.value = '';
+                modalCriterio.classList.remove('hidden');
+                modalCriterio.classList.add('flex');
+            });
 
-    btnCancelarModalCriterio.addEventListener('click', () => {
-        modalCriterio.classList.remove('flex');
-        modalCriterio.classList.add('hidden');
-    });
+            btnFecharModalCriterio.addEventListener('click', () => {
+                modalCriterio.classList.remove('flex');
+                modalCriterio.classList.add('hidden');
+            });
 
-    document.querySelectorAll('.btn-editar-criterio').forEach(button => {
-        button.addEventListener('click', (event) => {
-            tituloModalCriterio.textContent = 'Editar Critério';
-            formCriterio.action = `/admin/criterios/${event.target.dataset.id}?_method=PUT`;
-            criterioId.value = event.target.dataset.id;
-            inputNomeCriterio.value = event.target.dataset.nome;
-            inputPesoCriterio.value = event.target.dataset.peso;
-            inputObservacaoCriterio.value = event.target.dataset.observacao;
-            modalCriterio.classList.remove('hidden');
-            modalCriterio.classList.add('flex');
+            btnCancelarModalCriterio.addEventListener('click', () => {
+                modalCriterio.classList.remove('flex');
+                modalCriterio.classList.add('hidden');
+            });
+
+            document.querySelectorAll('.btn-editar-criterio').forEach(button => {
+        button.addEventListener('click', () => {
+            activateTab('tab-criterios');
+            localStorage.setItem('activeTab', 'tab-criterios');
+
+            document.getElementById('tituloModalCriterio').textContent = 'Editar Critério';
+            document.getElementById('formCriterio').action = `/admin/criterios/${button.dataset.id}?_method=PUT`;
+            document.getElementById('criterioId').value = button.dataset.id;
+            document.getElementById('nomeCriterio').value = button.dataset.nome;
+            document.getElementById('pesoCriterio').value = button.dataset.peso;
+            document.getElementById('observacaoCriterio').value = button.dataset.observacao;
+            document.getElementById('modalCriterio').classList.remove('hidden');
+            document.getElementById('modalCriterio').classList.add('flex');
         });
     });
 
-    // Modal de Avaliador - CORRIGIDO
-    const modalAvaliador = document.getElementById('modalAvaliador');
-    const btnAbrirModalAvaliador = document.getElementById('btnAbrirModalAvaliador');
-    const btnFecharAvaliador = document.getElementById('btnFecharAvaliador');
-    const formAvaliador = document.getElementById('formAvaliador');
-    const tituloAvaliador = document.getElementById('tituloAvaliador');
-    const avaliadorId = document.getElementById('avaliadorId');
-    const inputNomeAvaliador = document.getElementById('nomeAvaliador');
-    const inputEmailAvaliador = document.getElementById('emailAvaliador');
-    const inputAtivoAvaliador = document.getElementById('ativoAvaliador');
-    const avaliadorPinDisplay = document.getElementById('avaliadorPinDisplay');
-    const pinDisplayDiv = document.getElementById('pinDisplayDiv');
-    const projetosAvaliadorCheckboxesDiv = document.getElementById('projetosAvaliadorCheckboxes');
+            // Mostrar modal de Avaliador
+            const modalAvaliador = document.getElementById('modalAvaliador');
+            const btnAbrirModalAvaliador = document.getElementById('btnAbrirModalAvaliador');
+            const btnFecharAvaliador = document.getElementById('btnFecharAvaliador');
+            const formAvaliador = document.getElementById('formAvaliador');
+            const tituloAvaliador = document.getElementById('tituloAvaliador');
+            const avaliadorId = document.getElementById('avaliadorId');
+            const inputNomeAvaliador = document.getElementById('nomeAvaliador');
+            const inputEmailAvaliador = document.getElementById('emailAvaliador');
+            const inputAtivoAvaliador = document.getElementById('ativoAvaliador');
+            const avaliadorPinDisplay = document.getElementById('avaliadorPinDisplay');
+            const pinDisplayDiv = document.getElementById('pinDisplayDiv');
+            const projetosAvaliadorCheckboxesDiv = document.getElementById('projetosAvaliadorCheckboxes');
 
-    btnAbrirModalAvaliador.addEventListener('click', () => {
-        tituloAvaliador.textContent = 'Adicionar Novo Avaliador';
-        formAvaliador.action = '/admin/avaliadores';
-        avaliadorId.value = '';
-        inputNomeAvaliador.value = '';
-        inputEmailAvaliador.value = '';
-        inputAtivoAvaliador.checked = true;
-        avaliadorPinDisplay.textContent = 'Gerado Automaticamente';
-        pinDisplayDiv.classList.remove('hidden');
-        projetosAvaliadorCheckboxesDiv.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
-        modalAvaliador.classList.remove('hidden');
-        modalAvaliador.classList.add('flex');
-    });
+            btnAbrirModalAvaliador.addEventListener('click', () => {
+                tituloAvaliador.textContent = 'Adicionar Novo Avaliador';
+                formAvaliador.action = '/admin/avaliadores'; // Rota de criação
+                avaliadorId.value = '';
+                inputNomeAvaliador.value = '';
+                inputEmailAvaliador.value = '';
+                inputAtivoAvaliador.checked = true; // Novo avaliador é ativo por padrão
+                avaliadorPinDisplay.textContent = 'Gerado Automaticamente';
+                pinDisplayDiv.classList.remove('hidden'); // Esconde o PIN para novos
 
-    btnFecharAvaliador.addEventListener('click', () => {
-        modalAvaliador.classList.remove('flex');
-        modalAvaliador.classList.add('hidden');
-    });
+                // Limpar todos os checkboxes de projetos
+                projetosAvaliadorCheckboxesDiv.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                    checkbox.checked = false;
+                });
 
-    document.querySelectorAll('.btn-editar-avaliador').forEach(button => {
+                modalAvaliador.classList.remove('hidden');
+                modalAvaliador.classList.add('flex');
+            });
+
+            btnFecharAvaliador.addEventListener('click', () => {
+                modalAvaliador.classList.remove('flex');
+                modalAvaliador.classList.add('hidden');
+            });
+
+            document.querySelectorAll('.btn-editar-avaliador').forEach(button => {
         button.addEventListener('click', () => {
             activateTab('tab-avaliadores');
             localStorage.setItem('activeTab', 'tab-avaliadores');
-            tituloAvaliador.textContent = 'Editar Avaliador';
-            formAvaliador.action = `/admin/avaliadores/${button.dataset.id}?_method=PUT`;
-            avaliadorId.value = button.dataset.id;
-            inputNomeAvaliador.value = button.dataset.nome;
-            inputEmailAvaliador.value = button.dataset.email;
-            inputAtivoAvaliador.checked = button.dataset.ativo === 'true';
-            avaliadorPinDisplay.textContent = button.dataset.pin;
-            pinDisplayDiv.classList.remove('hidden');
+
+            document.getElementById('tituloAvaliador').textContent = 'Editar Avaliador';
+            document.getElementById('formAvaliador').action = `/admin/avaliadores/${button.dataset.id}?_method=PUT`;
+            document.getElementById('avaliadorId').value = button.dataset.id;
+            document.getElementById('nomeAvaliador').value = button.dataset.nome;
+            document.getElementById('emailAvaliador').value = button.dataset.email;
+            document.getElementById('ativoAvaliador').checked = button.dataset.ativo === 'true';
+            document.getElementById('avaliadorPinDisplay').textContent = button.dataset.pin;
+            document.getElementById('pinDisplayDiv').classList.remove('hidden');
+
             const projetosIds = button.dataset.projetos ? button.dataset.projetos.split(',') : [];
-            projetosAvaliadorCheckboxesDiv.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+            document.querySelectorAll('#projetosAvaliadorCheckboxes input[type="checkbox"]').forEach(cb => {
                 cb.checked = projetosIds.includes(cb.value);
             });
-            modalAvaliador.classList.remove('hidden');
-            modalAvaliador.classList.add('flex');
+
+            document.getElementById('modalAvaliador').classList.remove('hidden');
+            document.getElementById('modalAvaliador').classList.add('flex');
         });
     });
 
-    // Modal de Feira
-    const modalFeira = document.getElementById('modalFeira');
-    const btnAbrirModalFeira = document.getElementById('btnAbrirModalFeira');
-    const btnFecharModalFeira = document.getElementById('btnFecharModalFeira');
-    const formFeira = document.getElementById('formFeira');
-    const tituloModalFeira = document.getElementById('tituloModalFeira');
-    const feiraId = document.getElementById('feiraId');
-    const inputNomeFeira = document.getElementById('nomeFeira');
-    const inputInicioFeiraModal = document.getElementById('inicioFeiraModal');
-    const inputFimFeiraModal = document.getElementById('fimFeiraModal');
-    const selectStatusFeiraModal = document.getElementById('statusFeiraModal');
 
-    btnAbrirModalFeira.addEventListener('click', () => {
-        tituloModalFeira.textContent = 'Adicionar Nova Feira';
-        formFeira.action = '/admin/feiras';
-        feiraId.value = '';
-        inputNomeFeira.value = '';
-        inputInicioFeiraModal.value = '';
-        inputFimFeiraModal.value = '';
-        selectStatusFeiraModal.value = 'ativa';
-        modalFeira.classList.remove('hidden');
-        modalFeira.classList.add('flex');
+            // Mostrar modal de Feira
+            const modalFeira = document.getElementById('modalFeira');
+            const btnAbrirModalFeira = document.getElementById('btnAbrirModalFeira');
+            const btnFecharModalFeira = document.getElementById('btnFecharModalFeira');
+            const formFeira = document.getElementById('formFeira');
+            const tituloModalFeira = document.getElementById('tituloModalFeira');
+            const feiraId = document.getElementById('feiraId');
+            const inputNomeFeira = document.getElementById('nomeFeira');
+            const inputInicioFeiraModal = document.getElementById('inicioFeiraModal');
+            const inputFimFeiraModal = document.getElementById('fimFeiraModal');
+            const selectStatusFeiraModal = document.getElementById('statusFeiraModal');
+
+            btnAbrirModalFeira.addEventListener('click', () => {
+                tituloModalFeira.textContent = 'Adicionar Nova Feira';
+                formFeira.action = '/admin/feiras'; // Rota de criação (ajustei para /admin/feiras conforme seu admin.js)
+                feiraId.value = '';
+                inputNomeFeira.value = '';
+                inputInicioFeiraModal.value = '';
+                inputFimFeiraModal.value = '';
+                selectStatusFeiraModal.value = 'ativa'; // Nova feira é ativa por padrão
+                modalFeira.classList.remove('hidden');
+                modalFeira.classList.add('flex');
+            });
+
+            btnFecharModalFeira.addEventListener('click', () => {
+                modalFeira.classList.remove('flex');
+                modalFeira.classList.add('hidden');
+            });
+
+            // ✅ Abrir modal e preencher dados
+  document.querySelectorAll('.btn-editar-feira').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('editarFeiraId').value = btn.dataset.id;
+      document.getElementById('editarFeiraNome').value = btn.dataset.nome;
+      document.getElementById('editarInicioFeira').value = btn.dataset.inicio.split('-').reverse().join('-');
+      document.getElementById('editarFimFeira').value = btn.dataset.fim.split('-').reverse().join('-');
+      document.getElementById('editarFeiraStatus').value = btn.dataset.status;
+      document.getElementById('excluirFeiraId').value = btn.dataset.id;
+      document.getElementById('modalEditarFeira').classList.remove('hidden');
     });
+  });
 
-    btnFecharModalFeira.addEventListener('click', () => {
-        modalFeira.classList.remove('flex');
-        modalFeira.classList.add('hidden');
-    });
+            // Mostrar modal de Configurações (apenas datas)
+            const modalConfiguracoes = document.getElementById('modalConfiguracoes');
+            const btnAbrirModalConfiguracoes = document.getElementById('btnAbrirModalConfiguracoes');
+            const btnFecharModalConfiguracoes = document.getElementById('btnFecharModalConfiguracoes');
 
-    document.querySelectorAll('.btn-editar-feira').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.getElementById('editarFeiraId').value = btn.dataset.id;
-            document.getElementById('editarFeiraNome').value = btn.dataset.nome;
-            document.getElementById('editarInicioFeira').value = btn.dataset.inicio.split('-').reverse().join('-');
-            document.getElementById('editarFimFeira').value = btn.dataset.fim.split('-').reverse().join('-');
-            document.getElementById('editarFeiraStatus').value = btn.dataset.status;
-            document.getElementById('excluirFeiraId').value = btn.dataset.id;
-            document.getElementById('modalEditarFeira').classList.remove('hidden');
+            btnAbrirModalConfiguracoes.addEventListener('click', () => {
+                modalConfiguracoes.classList.remove('hidden');
+                modalConfiguracoes.classList.add('flex');
+            });
+
+            btnFecharModalConfiguracoes.addEventListener('click', () => {
+                modalConfiguracoes.classList.remove('flex');
+                modalConfiguracoes.classList.add('hidden');
+            });
         });
+
+        // Função auxiliar para formatar datas (se já não estiver definida globalmente)
+        function formatarDatasParaInput(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        document.getElementById('btnAbrirModalFeira').addEventListener('click', function () {
+        document.getElementById('modalFeira').classList.remove('hidden');
+        });
+        function fecharModalFeira() {
+        document.getElementById('modalFeira').classList.add('hidden');
+        }
+
+        // ✅ Abrir modal e preencher dados
+  document.querySelectorAll('.btn-editar-feira').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('editarFeiraId').value = btn.dataset.id;
+      document.getElementById('editarFeiraNome').value = btn.dataset.nome;
+      document.getElementById('editarInicioFeira').value = btn.dataset.inicio.split('-').reverse().join('-');
+      document.getElementById('editarFimFeira').value = btn.dataset.fim.split('-').reverse().join('-');
+      document.getElementById('modalEditarFeira').classList.remove('hidden');
     });
+  });
 
-    // Modal de Configurações
-    const modalConfiguracoes = document.getElementById('modalConfiguracoes');
-    const btnAbrirModalConfiguracoes = document.getElementById('btnAbrirModalConfiguracoes');
-    const btnFecharModalConfiguracoes = document.getElementById('btnFecharModalConfiguracoes');
-
-    btnAbrirModalConfiguracoes.addEventListener('click', () => {
-        modalConfiguracoes.classList.remove('hidden');
-        modalConfiguracoes.classList.add('flex');
-    });
-
-    btnFecharModalConfiguracoes.addEventListener('click', () => {
-        modalConfiguracoes.classList.remove('flex');
-        modalConfiguracoes.classList.add('hidden');
-    });
-});
-
-// Funções auxiliares
-function formatarDatasParaInput(dateString) {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-}
-
-function fecharModalFeira() {
-    document.getElementById('modalFeira').classList.add('hidden');
-}
-
-function fecharModalEditarFeira() {
+  function fecharModalEditarFeira() {
     document.getElementById('modalEditarFeira').classList.add('hidden');
-}
-
-function confirmarExclusaoFeira() {
-    if (confirm('Deseja realmente excluir esta feira?')) {
-        document.getElementById('excluirFeiraHidden').value = document.getElementById('editarFeiraId').value;
-        document.getElementById('formExcluirFeira').submit();
-    }
+  }
+  function confirmarExclusaoFeira() {
+  if (confirm('Deseja realmente excluir esta feira?')) {
+    document.getElementById('excluirFeiraHidden').value = document.getElementById('editarFeiraId').value;
+    document.getElementById('formExcluirFeira').submit();
+  }
 }
 
 document.getElementById('selecionarTodosCriterios')?.addEventListener('change', function () {
@@ -1105,30 +1159,32 @@ document.getElementById('selecionarTodosCriterios')?.addEventListener('change', 
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-    const sidebar = document.getElementById('sidebar');
-    const sidebarToggle = document.getElementById('sidebarToggle');
-    const overlay = document.getElementById('overlay');
+  const sidebar = document.getElementById('sidebar');
+  const sidebarToggle = document.getElementById('sidebarToggle');
+  const overlay = document.getElementById('overlay');
 
-    sidebarToggle.addEventListener('click', () => {
-        sidebar.classList.toggle('show');
-        overlay.classList.toggle('active');
-    });
+  sidebarToggle.addEventListener('click', () => {
+    sidebar.classList.toggle('show');
+    overlay.classList.toggle('active');
+  });
 
-    overlay.addEventListener('click', () => {
-        sidebar.classList.remove('show');
-        overlay.classList.remove('active');
-    });
+  overlay.addEventListener('click', () => {
+    sidebar.classList.remove('show');
+    overlay.classList.remove('active');
+  });
 
-    document.querySelectorAll('.sidebar-link').forEach(link => {
-        link.addEventListener('click', () => {
-            if (window.innerWidth < 768) {
-                sidebar.classList.remove('show');
-                overlay.classList.remove('active');
-            }
-        });
-    });
+  document.querySelectorAll('.sidebar-link').forEach(link => {
+  link.addEventListener('click', () => {
+    if (window.innerWidth < 768) {
+      sidebar.classList.remove('show');
+      overlay.classList.remove('active');
+    }
+  });
 });
-</script>
 
+});
+
+
+     </script>
 </body>
 </html>
