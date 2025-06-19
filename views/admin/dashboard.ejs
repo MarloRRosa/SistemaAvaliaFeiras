@@ -565,6 +565,11 @@
 
                 <div class="mb-6">
                     <label class="block text-gray-700 text-sm font-bold mb-2">Critérios de Avaliação:</label>
+                     <div class="mb-2">
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" id="selecionarTodosCriterios" class="form-checkbox h-4 w-4 text-blue-600">
+                                <span class="ml-2 text-sm text-gray-700">Selecionar todos os critérios</span>
+                            </label>
                     <div id="criteriosProjetoCheckboxes" class="max-h-48 overflow-y-auto border border-gray-300 p-3 rounded-lg bg-gray-50 shadow-inner">
                         <% if (criterios && criterios.length > 0) { %>
                             <% criterios.forEach(criterio => { %>
@@ -657,29 +662,6 @@
                 <input type="email" id="emailAvaliador" name="email" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out" required>
             </div>
 
-            <div class="mb-4">
-    <label for="escolaAvaliador" class="block text-gray-700 text-sm font-bold mb-2">Escola:</label>
-    <select id="escolaAvaliador" name="escolaId" class="shadow-sm border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out">
-        <option value="">Selecione a Escola</option>
-        <% if (escolas && escolas.length > 0) { %>
-            <% escolas.forEach(escola => { %>
-                <option value="<%= escola._id %>"><%= escola.nome %></option>
-            <% }) %>
-        <% } %>
-    </select>
-</div>
-
-<div class="mb-4">
-    <label for="feiraAvaliador" class="block text-gray-700 text-sm font-bold mb-2">Feira:</label>
-    <select id="feiraAvaliador" name="feira" class="shadow-sm border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out">
-        <option value="">Selecione a Feira</option>
-        <% if (feiras && feiras.length > 0) { %>
-            <% feiras.forEach(feira => { %>
-                <option value="<%= feira._id %>"><%= feira.nome %></option>
-            <% }) %>
-        <% } %>
-    </select>
-</div>
             <div class="mb-4" id="pinDisplayDiv">
                 <label class="block text-gray-700 text-sm font-bold mb-2">PIN:</label>
                 <span id="avaliadorPinDisplay" class="block bg-gray-100 p-3 rounded-lg text-xl font-mono tracking-wider text-gray-800 border border-gray-200"></span>
