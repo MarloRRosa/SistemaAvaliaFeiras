@@ -1828,8 +1828,7 @@ router.get('/relatorio/avaliacao-offline/:feiraId', verificarAdminEscola, async 
                 };
             }),
             avaliador: avaliador,
-            // REMOVIDO: formatarDatasParaInput não precisa ser passado aqui,
-            // pois generatePdfReport já injeta 'formatarData'
+            
         };
 
         const filename = `relatorio_avaliacao_offline_${feira.nome.replace(/\s/g, '_')}`;
@@ -1871,15 +1870,27 @@ router.get('/relatorio/avaliacao-offline/:feiraId/:avaliadorId', verificarAdminE
             return res.redirect('/admin/dashboard?tab=relatorios');
         }
 
+        console.log('--- DEPURANDO RELATÓRIO DE AVALIADOR ---');
+console.log('ID do Avaliador recebido na rota:', avaliadorId);
+console.log('Nome do Avaliador encontrado:', avaliador.nome);
+console.log('Projetos Atribuídos (IDs crus do banco de dados):', avaliador.projetosAtribuidos);
+console.log('Quantidade de projetos atribuídos no Avaliador:', avaliador.projetosAtribuidos ? avaliador.projetosAtribuidos.length : 0);
+
         let projetosQuery = { 
             feiraId: feira._id, 
             escolaId: adminEscolaId,
             _id: { $in: avaliador.projetosAtribuidos || [] }
         };
+
+        console.log('Query para buscar projetos:', JSON.stringify(projetosQuery, null, 2));
         
         const projetos = await Projeto.find(projetosQuery)
                                       .populate('categoria')
                                       .lean();
+
+        console.log('Projetos encontrados pela query (títulos):', projetos.map(p => p.titulo));
+console.log('Quantidade de projetos encontrados pela query:', projetos.length);
+console.log('--- FIM DA SEÇÃO DE DEPURACÃO ---');
 
         const categoriaIds = [...new Set(projetos.map(p => p.categoria && p.categoria._id).filter(Boolean))];
         const criteriosPorCategoria = {};
