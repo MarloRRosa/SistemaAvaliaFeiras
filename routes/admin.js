@@ -1939,5 +1939,30 @@ router.post('/configuracoes/feiradata', verificarAdminEscola, async (req, res) =
     }
 });
 
+// Atualizar dados da escola (POST)
+router.post('/escola/atualizar', verificarAdminEscola, async (req, res) => {
+    const escolaId = req.session.adminEscola.escolaId;
+    const { nome, email, telefone, diretor, responsavel } = req.body;
+
+    try {
+        await Escola.findByIdAndUpdate(escolaId, {
+            nome,
+            email,
+            telefone,
+            diretor,
+            responsavel
+        });
+
+        req.flash('success_msg', 'Dados da escola atualizados com sucesso!');
+        res.redirect('/admin/dashboard?tab=tab-configuracoes');
+    } catch (err) {
+        console.error('Erro ao atualizar dados da escola:', err);
+        req.flash('error_msg', 'Erro ao atualizar os dados da escola.');
+        res.redirect('/admin/dashboard?tab=tab-configuracoes');
+    }
+});
+
+
+
 
 module.exports = router;
