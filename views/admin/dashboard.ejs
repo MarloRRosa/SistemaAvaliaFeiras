@@ -1048,21 +1048,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 modalFeira.classList.add('hidden');
             });
 
-           
-
-            // ✅ Abrir modal e preencher dados
-  document.querySelectorAll('.btn-editar-feira').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.getElementById('editarFeiraId').value = btn.dataset.id;
-      document.getElementById('editarFeiraNome').value = btn.dataset.nome;
-       document.getElementById('editarInicioFeira').value = btn.dataset.inicio.split('-').reverse().join('-');
-      document.getElementById('editarFimFeira').value = btn.dataset.fim.split('-').reverse().join('-');
-      document.getElementById('editarFeiraStatus').value = btn.dataset.status;
-      document.getElementById('excluirFeiraId').value = btn.dataset.id;
-      document.getElementById('modalEditarFeira').classList.remove('hidden');
-    });
-  });
-
             // Mostrar modal de Configurações (apenas datas)
             const modalConfiguracoes = document.getElementById('modalConfiguracoes');
             const btnAbrirModalConfiguracoes = document.getElementById('btnAbrirModalConfiguracoes');
@@ -1095,6 +1080,17 @@ document.addEventListener('DOMContentLoaded', () => {
         function fecharModalFeira() {
         document.getElementById('modalFeira').classList.add('hidden');
         }
+
+        // ✅ Abrir modal e preencher dados
+  document.querySelectorAll('.btn-editar-feira').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('editarFeiraId').value = btn.dataset.id;
+      document.getElementById('editarFeiraNome').value = btn.dataset.nome;
+      document.getElementById('editarInicioFeira').value = btn.dataset.inicio;
+      document.getElementById('editarFimFeira').value = btn.dataset.fim;
+      document.getElementById('modalEditarFeira').classList.remove('hidden');
+    });
+  });
 
   function fecharModalEditarFeira() {
     document.getElementById('modalEditarFeira').classList.add('hidden');
