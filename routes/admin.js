@@ -67,7 +67,7 @@ function formatarDataParaInput(dateString) {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
-    return `${day}-${month}-${year}`;
+    return `${year}-${month}-${day}`;
 }
 
 // Função para enviar e-mail de redefinição de PIN para avaliador
@@ -905,6 +905,12 @@ router.post('/avaliadores', verificarAdminEscola, async (req, res) => {
       return res.redirect('/admin/dashboard?tab=avaliadores');
     }
 
+    const emailExistente = await Avaliador.findOne({ email, escolaId });
+    if (emailExistente) {
+      req.flash('error_msg', 'Já existe um avaliador com este e-mail cadastrado para sua escola.');
+      return res.redirect('/admin/dashboard?tab=avaliadores');
+    }
+
     const pin = generatePIN();
 
     const novoAvaliador = new Avaliador({
@@ -928,7 +934,7 @@ router.post('/avaliadores', verificarAdminEscola, async (req, res) => {
     });
 
     await transporter.sendMail({
-      from: 'AvaliaFeiras <docsrosas@gmail.com>', // remetente verificado
+      from: 'AvaliaFeiras <docsrosas@gmail.com>', 
       to: email,
       subject: 'Bem-vindo ao AvaliaFeiras',
       html: `<p>Olá ${nome},</p>
