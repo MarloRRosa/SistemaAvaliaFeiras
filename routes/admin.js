@@ -523,7 +523,15 @@ router.get('/dashboard', verificarAdminEscola, async (req, res) => {
         const escolaId = req.session.adminEscola.escolaId;
 
         // Filtra todas as consultas por escolaId
-        const feiraAtual = await Feira.findOne({ status: 'ativa', escolaId: escolaId }); // USANDO escolaId AQUI
+        const feiraIdSelecionada = req.query.feiraId;
+let feiraAtual;
+
+if (feiraIdSelecionada && mongoose.Types.ObjectId.isValid(feiraIdSelecionada)) {
+    feiraAtual = await Feira.findOne({ _id: feiraIdSelecionada, escolaId });
+} else {
+    feiraAtual = await Feira.findOne({ status: 'ativa', escolaId });
+}
+
         const feiras = await Feira.find({ escolaId: escolaId }).sort({ inicioFeira: -1 }); // USANDO escolaId AQUI
 
         const escolaDoAdmin = await Escola.findById(escolaId); // Pega a escola do admin logado
@@ -1056,14 +1064,7 @@ router.post('/avaliadores/:id/excluir', verificarAdminEscola, async (req, res) =
 // ROTAS CRUD - FEIRAS
 // ===========================================
 
-const feiraIdSelecionada = req.query.feiraId;
-let feiraAtual;
 
-if (feiraIdSelecionada && mongoose.Types.ObjectId.isValid(feiraIdSelecionada)) {
-  feiraAtual = await Feira.findOne({ _id: feiraIdSelecionada, escolaId });
-} else {
-  feiraAtual = await Feira.findOne({ status: 'ativa', escolaId });
-}
 
 // Criar nova feira sem excluir dados antigos
 router.post('/feiras', verificarAdminEscola, async (req, res) => {
