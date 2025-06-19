@@ -433,41 +433,72 @@
             <!-- FIM ABA: FEIRAS -->
 
             <!-- ABA DE RELATÓRIOS -->
-            <div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200 hidden" id="relatorios" role="tabpanel" aria-labelledby="relatorios-tab">
-                <h3 class="text-2xl font-bold mb-5 text-gray-700">Relatórios Gerenciais</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <a href="/admin/relatorio-consolidado/pdf" target="_blank" class="block p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out text-center">
-                        <i class="fas fa-file-invoice text-indigo-600 text-4xl mb-3"></i>
-                        <h4 class="text-lg font-semibold text-gray-800">Relatório Consolidado</h4>
-                        <p class="text-sm text-gray-600">Gera um relatório detalhado de projetos e avaliações.</p>
-                    </a>
-                    <a href="/admin/avaliacoes/pdf" target="_blank" class="block p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out text-center">
-                        <i class="fas fa-file-alt text-blue-600 text-4xl mb-3"></i>
-                        <h4 class="text-lg font-semibold text-gray-800">Avaliações Completas</h4>
-                        <p class="text-sm text-gray-600">Gera um PDF com detalhes de todas as avaliações.</p>
-                    </a>
-                    <a href="/admin/projetos-sem-avaliacao/pdf" target="_blank" class="block p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out text-center">
-                        <i class="fas fa-exclamation-triangle text-orange-600 text-4xl mb-3"></i>
-                        <h4 class="text-lg font-semibold text-gray-800">Projetos Sem Avaliação</h4>
-                        <p class="text-sm text-gray-600">Lista de projetos que ainda não foram avaliados.</p>
-                    </a>
-                    <a href="/admin/ranking-categorias/pdf" target="_blank" class="block p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out text-center">
-                        <i class="fas fa-trophy text-purple-600 text-4xl mb-3"></i>
-                        <h4 class="text-lg font-semibold text-gray-800">Ranking por Categoria</h4>
-                        <p class="text-sm text-gray-600">Classificação de projetos por categoria.</p>
-                    </a>
-                    <a href="/admin/resumo-avaliadores/pdf" target="_blank" class="block p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out text-center">
-                        <i class="fas fa-users text-green-600 text-4xl mb-3"></i>
-                        <h4 class="text-lg font-semibold text-gray-800">Resumo de Avaliadores</h4>
-                        <p class="text-sm text-gray-600">Status e atividades dos avaliadores.</p>
-                    </a>
-                    <a href="/admin/resultados-finais/pdf" target="_blank" class="block p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out text-center">
-                        <i class="fas fa-chart-bar text-red-600 text-4xl mb-3"></i>
-                        <h4 class="text-lg font-semibold text-gray-800">Resultados Finais</h4>
-                        <p class="text-sm text-gray-600">Relatório de resultados finais dos projetos.</p>
-                    </a>
-                </div>
-            </div>
+           <div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200 hidden" id="relatorios" role="tabpanel" aria-labelledby="relatorios-tab">
+    <h3 class="text-2xl font-bold mb-5 text-gray-700">Relatórios Gerenciais</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <a href="/admin/relatorio-consolidado/pdf" target="_blank" class="block p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out text-center">
+            <i class="fas fa-file-invoice text-indigo-600 text-4xl mb-3"></i>
+            <h4 class="text-lg font-semibold text-gray-800">Relatório Consolidado</h4>
+            <p class="text-sm text-gray-600">Gera um relatório detalhado de projetos e avaliações.</p>
+        </a>
+        <a href="/admin/avaliacoes/pdf" target="_blank" class="block p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out text-center">
+            <i class="fas fa-file-alt text-blue-600 text-4xl mb-3"></i>
+            <h4 class="text-lg font-semibold text-gray-800">Avaliações Completas</h4>
+            <p class="text-sm text-gray-600">Gera um PDF com detalhes de todas as avaliações.</p>
+        </a>
+        <a href="/admin/projetos-sem-avaliacao/pdf" target="_blank" class="block p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out text-center">
+            <i class="fas fa-exclamation-triangle text-orange-600 text-4xl mb-3"></i>
+            <h4 class="text-lg font-semibold text-gray-800">Projetos Sem Avaliação</h4>
+            <p class="text-sm text-gray-600">Lista de projetos que ainda não foram avaliados.</p>
+        </a>
+        <a href="/admin/ranking-categorias/pdf" target="_blank" class="block p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out text-center">
+            <i class="fas fa-trophy text-purple-600 text-4xl mb-3"></i>
+            <h4 class="text-lg font-semibold text-gray-800">Ranking por Categoria</h4>
+            <p class="text-sm text-gray-600">Classificação de projetos por categoria.</p>
+        </a>
+        <a href="/admin/resumo-avaliadores/pdf" target="_blank" class="block p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out text-center">
+            <i class="fas fa-users text-green-600 text-4xl mb-3"></i>
+            <h4 class="text-lg font-semibold text-gray-800">Resumo de Avaliadores</h4>
+            <p class="text-sm text-gray-600">Status e atividades dos avaliadores.</p>
+        </a>
+        <a href="/admin/resultados-finais/pdf" target="_blank" class="block p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out text-center">
+            <i class="fas fa-chart-bar text-red-600 text-4xl mb-3"></i>
+            <h4 class="text-lg font-semibold text-gray-800">Resultados Finais</h4>
+            <p class="text-sm text-gray-600">Relatório de resultados finais dos projetos.</p>
+        </a>
+
+        <a href="#" id="btnAbrirModalRelatorioOffline" class="block p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out text-center">
+            <i class="fas fa-clipboard-list text-gray-600 text-4xl mb-3"></i> <h4 class="text-lg font-semibold text-gray-800">Relatório Avaliação Offline</h4>
+            <p class="text-sm text-gray-600">Gera um relatório para avaliação manual (offline).</p>
+        </a>
+    </div>
+</div>
+<div id="modalRelatorioOffline" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden flex items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-lg shadow-xl w-1/3">
+        <h3 class="text-lg font-semibold mb-4">Gerar Relatório de Avaliação Offline</h3>
+        <div class="mb-4">
+            <label for="selectFeiraRelatorio" class="block text-gray-700 text-sm font-bold mb-2">Selecione a Feira:</label>
+            <select id="selectFeiraRelatorio" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                <% feiras.forEach(feira => { %>
+                    <option value="<%= feira._id %>" <%= feira.status === 'ativa' ? 'selected' : '' %>><%= feira.nome %></option>
+                <% }); %>
+            </select>
+        </div>
+        <div class="mb-6">
+            <label for="selectAvaliadorRelatorio" class="block text-gray-700 text-sm font-bold mb-2">Selecione o Avaliador (Opcional):</label>
+            <select id="selectAvaliadorRelatorio" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                <option value="">Todos os Avaliadores</option>
+                <% avaliadores.forEach(avaliador => { %>
+                    <option value="<%= avaliador._id %>"><%= avaliador.nome %> (<%= avaliador.email %>)</option>
+                <% }); %>
+            </select>
+        </div>
+        <div class="flex justify-end">
+            <button id="btnGerarRelatorioOfflineConfirm" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mr-2">Gerar PDF</button>
+            <button type="button" onclick="fecharModalRelatorioOffline()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">Cancelar</button>
+        </div>
+    </div>
+</div>
             <!-- FIM DA ABA DE RELATÓRIOS -->
 
             <!-- ABA: CONFIGURAÇÕES -->
@@ -1106,6 +1137,46 @@ document.addEventListener('DOMContentLoaded', () => {
         const checkboxes = document.querySelectorAll('input[name="criterios"]');
         checkboxes.forEach(cb => cb.checked = this.checked);
     });
+
+    // Lógica para o modal de Relatório Offline
+const modalRelatorioOffline = document.getElementById('modalRelatorioOffline');
+const btnAbrirModalRelatorioOffline = document.getElementById('btnAbrirModalRelatorioOffline');
+const btnGerarRelatorioOfflineConfirm = document.getElementById('btnGerarRelatorioOfflineConfirm');
+const selectFeiraRelatorio = document.getElementById('selectFeiraRelatorio');
+const selectAvaliadorRelatorio = document.getElementById('selectAvaliadorRelatorio');
+
+if (btnAbrirModalRelatorioOffline) {
+    btnAbrirModalRelatorioOffline.addEventListener('click', (event) => {
+        event.preventDefault(); // Impede o comportamento padrão do link
+        modalRelatorioOffline.classList.remove('hidden');
+        modalRelatorioOffline.classList.add('flex');
+    });
+}
+
+function fecharModalRelatorioOffline() {
+    modalRelatorioOffline.classList.remove('flex');
+    modalRelatorioOffline.classList.add('hidden');
+}
+
+if (btnGerarRelatorioOfflineConfirm) {
+    btnGerarRelatorioOfflineConfirm.addEventListener('click', () => {
+        const feiraId = selectFeiraRelatorio.value;
+        const avaliadorId = selectAvaliadorRelatorio.value;
+
+        if (!feiraId) {
+            alert('Por favor, selecione uma feira.');
+            return;
+        }
+
+        let url = `/admin/relatorio/avaliacao-offline/${feiraId}`;
+        if (avaliadorId) {
+            url += `/${avaliadorId}`;
+        }
+
+        window.open(url, '_blank'); // Abre o PDF em uma nova aba
+        fecharModalRelatorioOffline();
+    });
+}
 </script>
 
 </body>
