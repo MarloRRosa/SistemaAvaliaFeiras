@@ -1056,6 +1056,15 @@ router.post('/avaliadores/:id/excluir', verificarAdminEscola, async (req, res) =
 // ROTAS CRUD - FEIRAS
 // ===========================================
 
+const feiraIdSelecionada = req.query.feiraId;
+let feiraAtual;
+
+if (feiraIdSelecionada && mongoose.Types.ObjectId.isValid(feiraIdSelecionada)) {
+  feiraAtual = await Feira.findOne({ _id: feiraIdSelecionada, escolaId });
+} else {
+  feiraAtual = await Feira.findOne({ status: 'ativa', escolaId });
+}
+
 // Criar nova feira sem excluir dados antigos
 router.post('/feiras', verificarAdminEscola, async (req, res) => {
     const { nome, inicioFeira, fimFeira } = req.body;
@@ -1192,11 +1201,11 @@ router.post('/configuracoes/nova', verificarAdminEscola, async (req, res) => {
 
             // 2. Apaga projetos, avaliadores, categorias, critérios e avaliações associados à feira arquivada
             // Filtrando por feira E escola para garantir isolamento
-            await Projeto.deleteMany({ feira: feiraAtual._id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
-            await Avaliador.deleteMany({ feira: feiraAtual._id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
-            await Avaliacao.deleteMany({ feira: feiraAtual._id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
-            await Categoria.deleteMany({ feira: feiraAtual._id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
-            await Criterio.deleteMany({ feira: feiraAtual._id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
+            //await Projeto.deleteMany({ feira: feiraAtual._id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
+            //await Avaliador.deleteMany({ feira: feiraAtual._id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
+            //await Avaliacao.deleteMany({ feira: feiraAtual._id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
+            //await Categoria.deleteMany({ feira: feiraAtual._id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
+            //  await Criterio.deleteMany({ feira: feiraAtual._id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
         }
         
         // 3. Cria uma nova feira (com nome padrão e status 'ativa')
