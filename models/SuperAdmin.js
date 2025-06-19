@@ -10,7 +10,7 @@ const SuperAdminSchema = new Schema({
     email: {
         type: String,
         required: true,
-        unique: true, // Garante que cada e-mail de Super Admin seja único
+        //unique: true, // Garante que cada e-mail de Super Admin seja único
         lowercase: true, // Armazena o e-mail em minúsculas
         trim: true // Remove espaços em branco antes e depois
     },
