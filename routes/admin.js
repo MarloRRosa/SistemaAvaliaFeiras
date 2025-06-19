@@ -1776,13 +1776,17 @@ router.get('/resumo-avaliadores/pdf', verificarAdminEscola, async (req, res) => 
 // ===============================================
 // ROTA PARA RELATÓRIO DE AVALIAÇÃO OFFLINE
 // ===============================================
-router.get('/relatorio/avaliacao-offline/:feiraId', verificarAdminEscola, async (req, res) => {
-    const { feiraId } = req.params;
+router.get('/relatorio/avaliacao-offline/:feiraId/:avaliadorId', verificarAdminEscola, async (req, res) => {
+    const { feiraId, avaliadorId } = req.params;
     const adminEscolaId = req.session.adminEscola.escolaId;
 
     try {
         if (!feiraId || !mongoose.Types.ObjectId.isValid(feiraId)) {
             req.flash('error_msg', 'ID da feira inválido para o relatório.');
+            return res.redirect('/admin/dashboard?tab=relatorios');
+        }
+        if (!avaliadorId || !mongoose.Types.ObjectId.isValid(avaliadorId)) {
+            req.flash('error_msg', 'ID do avaliador inválido para o relatório.');
             return res.redirect('/admin/dashboard?tab=relatorios');
         }
 
@@ -1792,13 +1796,34 @@ router.get('/relatorio/avaliacao-offline/:feiraId', verificarAdminEscola, async 
             return res.redirect('/admin/dashboard?tab=relatorios');
         }
 
-        let avaliador = null;
+        let avaliador = await Avaliador.findOne({ _id: avaliadorId, escolaId: adminEscolaId }).lean();
+        if (!avaliador) {
+            req.flash('error_msg', 'Avaliador não encontrado ou não pertence a esta escola.');
+            return res.redirect('/admin/dashboard?tab=relatorios');
+        }
 
-        let projetosQuery = { feira: feira._id, escolaId: adminEscolaId };
-        
+        console.log('--- DEPURANDO RELATÓRIO DE AVALIADOR ---');
+        console.log('ID do Avaliador recebido na rota:', avaliadorId);
+        console.log('Nome do Avaliador encontrado:', avaliador.nome);
+        console.log('Projetos Atribuídos (IDs crus do banco de dados):', avaliador.projetosAtribuidos);
+        console.log('Quantidade de projetos atribuídos no Avaliador:', avaliador.projetosAtribuidos ? avaliador.projetosAtribuidos.length : 0);
+
+        let projetosQuery = { 
+            // **** AQUI ESTÁ A ÚNICA E PRINCIPAL CORREÇÃO ****
+            feira: feira._id, // <--- MUDANÇA DE 'feiraId' PARA 'feira'
+            escolaId: adminEscolaId,
+            _id: { $in: avaliador.projetosAtribuidos || [] }
+        };
+
+        console.log('Query para buscar projetos:', JSON.stringify(projetosQuery, null, 2));
+
         const projetos = await Projeto.find(projetosQuery)
                                       .populate('categoria')
                                       .lean();
+
+        console.log('Projetos encontrados pela query (títulos):', projetos.map(p => p.titulo));
+        console.log('Quantidade de projetos encontrados pela query:', projetos.length);
+        console.log('--- FIM DA SEÇÃO DE DEPURACÃO ---');
 
         const categoriaIds = [...new Set(projetos.map(p => p.categoria && p.categoria._id).filter(Boolean))];
         const criteriosPorCategoria = {};
@@ -1828,14 +1853,13 @@ router.get('/relatorio/avaliacao-offline/:feiraId', verificarAdminEscola, async 
                 };
             }),
             avaliador: avaliador,
-            
         };
 
-        const filename = `relatorio_avaliacao_offline_${feira.nome.replace(/\s/g, '_')}`;
+        const filename = `relatorio_avaliacao_offline_${feira.nome.replace(/\s/g, '_')}_${avaliador.nome.replace(/\s/g, '_').substring(0, 20)}`;
         await generatePdfReport(req, res, 'relatorio_offline', dataForReport, filename);
 
     } catch (err) {
-        console.error('Erro ao gerar relatório de avaliação offline (todos os projetos):', err);
+        console.error('Erro ao gerar relatório de avaliação offline (avaliador específico):', err);
         if (!res.headersSent) {
             req.flash('error_msg', 'Erro ao gerar o relatório. Detalhes: ' + err.message);
             res.redirect('/admin/dashboard?tab=relatorios');
