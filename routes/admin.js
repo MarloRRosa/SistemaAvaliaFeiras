@@ -1182,33 +1182,33 @@ router.post('/configuracoes/nova', verificarAdminEscola, async (req, res) => {
     const adminEscolaId = req.session.adminEscola.escolaId;
 
     try {
-        const feiraAtual = await Feira.findOne({ status: 'ativa', escolaId: adminEscolaId }); // USANDO escolaId AQUI
+        const feiraAtual = await Feira.findOne({ status: 'ativa', escolaId: adminEscolaId });
 
         if (feiraAtual) {
-            // 1. Arquiva a feira atual
+            // Arquiva a feira atual
             feiraAtual.status = 'arquivada';
             feiraAtual.arquivadaEm = Date.now();
             await feiraAtual.save();
 
             // 2. Apaga projetos, avaliadores, categorias, critérios e avaliações associados à feira arquivada
             // Filtrando por feira E escola para garantir isolamento
-            await Projeto.deleteMany({ feira: feiraAtual._id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
-            await Avaliador.deleteMany({ feira: feiraAtual._id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
-            await Avaliacao.deleteMany({ feira: feiraAtual._id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
-            await Categoria.deleteMany({ feira: feiraAtual._id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
-            await Criterio.deleteMany({ feira: feiraAtual._id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
+           //await Projeto.deleteMany({ feira: feiraAtual._id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
+            //await Avaliador.deleteMany({ feira: feiraAtual._id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
+           // await Avaliacao.deleteMany({ feira: feiraAtual._id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
+            //await Categoria.deleteMany({ feira: feiraAtual._id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
+            //await Criterio.deleteMany({ feira: feiraAtual._id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
         }
         
         // 3. Cria uma nova feira (com nome padrão e status 'ativa')
-        const novaFeira = new Feira({
-            nome: `Feira de Ciências ${new Date().getFullYear()}`, // Nome padrão
+         const novaFeira = new Feira({
+            nome: `Feira de Ciências ${new Date().getFullYear()}`,
             status: 'ativa',
-            escolaId: adminEscolaId // Vincula à escola do admin logado (USANDO escolaId AQUI)
+            escolaId: adminEscolaId
         });
         await novaFeira.save();
 
-        req.flash('success_msg', 'Nova feira iniciada com sucesso! A feira anterior foi arquivada.');
-        res.redirect('/admin/dashboard?tab=feiras'); // Redireciona para a aba de feiras
+        req.flash('success_msg', 'Nova feira iniciada com sucesso! A anterior foi arquivada.');
+        res.redirect('/admin/dashboard?tab=feiras');
     } catch (err) {
         console.error('Erro ao iniciar nova feira:', err);
         req.flash('error_msg', 'Erro ao iniciar nova feira. Detalhes: ' + err.message);
