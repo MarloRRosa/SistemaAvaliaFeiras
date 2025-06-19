@@ -1045,8 +1045,6 @@ router.post('/avaliadores/:id/excluir', verificarAdminEscola, async (req, res) =
   res.redirect('/admin/dashboard?tab=avaliadores');
 });
 
-
-
 // ===========================================
 // ROTAS CRUD - FEIRAS
 // ===========================================
