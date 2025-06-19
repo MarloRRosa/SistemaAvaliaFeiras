@@ -1794,7 +1794,7 @@ router.get('/relatorio/avaliacao-offline/:feiraId', verificarAdminEscola, async 
 
         let avaliador = null;
 
-        let projetosQuery = { feiraId: feira, escolaId: adminEscolaId };
+        let projetosQuery = { feira: feira._id, escolaId: adminEscolaId };
         
         const projetos = await Projeto.find(projetosQuery)
                                       .populate('categoria')
