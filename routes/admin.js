@@ -1777,35 +1777,29 @@ router.get('/resumo-avaliadores/pdf', verificarAdminEscola, async (req, res) => 
 // ROTA PARA RELATÓRIO DE AVALIAÇÃO OFFLINE
 // ===============================================
 router.get('/relatorio/avaliacao-offline/:feiraId', verificarAdminEscola, async (req, res) => {
-    const { feiraId } = req.params; // AvaliadorId não está presente nesta rota
-    const avaliadorId = null; // Definido como null para esta rota
+    const { feiraId } = req.params;
     const adminEscolaId = req.session.adminEscola.escolaId;
 
     try {
-        // 1. Validação de ID da Feira
         if (!feiraId || !mongoose.Types.ObjectId.isValid(feiraId)) {
             req.flash('error_msg', 'ID da feira inválido para o relatório.');
             return res.redirect('/admin/dashboard?tab=relatorios');
         }
 
-        // 2. Buscar a Feira (e garantir que pertence à escola do admin)
         const feira = await Feira.findOne({ _id: feiraId, escolaId: adminEscolaId }).lean();
         if (!feira) {
             req.flash('error_msg', 'Feira não encontrada ou você não tem permissão para acessá-la.');
             return res.redirect('/admin/dashboard?tab=relatorios');
         }
 
-        // 3. Avaliador é null nesta rota
         let avaliador = null;
 
-        // 4. Buscar os projetos relevantes (todos da feira)
         let projetosQuery = { feiraId: feira._id, escolaId: adminEscolaId };
         
         const projetos = await Projeto.find(projetosQuery)
                                       .populate('categoria')
                                       .lean();
 
-        // 5. Buscar os critérios de avaliação para as categorias envolvidas
         const categoriaIds = [...new Set(projetos.map(p => p.categoria && p.categoria._id).filter(Boolean))];
         const criteriosPorCategoria = {};
         if (categoriaIds.length > 0) {
@@ -1823,7 +1817,6 @@ router.get('/relatorio/avaliacao-offline/:feiraId', verificarAdminEscola, async 
             });
         }
 
-        // 6. Preparar dados para o template EJS
         const dataForReport = {
             titulo: `Relatório de Avaliação Offline - ${feira.nome}`,
             feira: feira,
@@ -1835,10 +1828,10 @@ router.get('/relatorio/avaliacao-offline/:feiraId', verificarAdminEscola, async 
                 };
             }),
             avaliador: avaliador,
-            formatarDatasParaInput: formatarDatasParaInput
+            // REMOVIDO: formatarDatasParaInput não precisa ser passado aqui,
+            // pois generatePdfReport já injeta 'formatarData'
         };
 
-        // 7. Chamar sua função generatePdfReport
         const filename = `relatorio_avaliacao_offline_${feira.nome.replace(/\s/g, '_')}`;
         await generatePdfReport(req, res, 'relatorios/relatorio_offline', dataForReport, filename);
 
@@ -1853,11 +1846,10 @@ router.get('/relatorio/avaliacao-offline/:feiraId', verificarAdminEscola, async 
 
 // Rota para gerar o relatório de avaliação offline para uma feira E UM AVALIADOR ESPECÍFICO
 router.get('/relatorio/avaliacao-offline/:feiraId/:avaliadorId', verificarAdminEscola, async (req, res) => {
-    const { feiraId, avaliadorId } = req.params; // Ambos feiraId e avaliadorId estão presentes
+    const { feiraId, avaliadorId } = req.params;
     const adminEscolaId = req.session.adminEscola.escolaId;
 
     try {
-        // 1. Validação de IDs
         if (!feiraId || !mongoose.Types.ObjectId.isValid(feiraId)) {
             req.flash('error_msg', 'ID da feira inválido para o relatório.');
             return res.redirect('/admin/dashboard?tab=relatorios');
@@ -1867,32 +1859,28 @@ router.get('/relatorio/avaliacao-offline/:feiraId/:avaliadorId', verificarAdminE
             return res.redirect('/admin/dashboard?tab=relatorios');
         }
 
-        // 2. Buscar a Feira (e garantir que pertence à escola do admin)
         const feira = await Feira.findOne({ _id: feiraId, escolaId: adminEscolaId }).lean();
         if (!feira) {
             req.flash('error_msg', 'Feira não encontrada ou você não tem permissão para acessá-la.');
             return res.redirect('/admin/dashboard?tab=relatorios');
         }
 
-        // 3. Buscar o Avaliador
         let avaliador = await Avaliador.findOne({ _id: avaliadorId, escolaId: adminEscolaId }).lean();
         if (!avaliador) {
             req.flash('error_msg', 'Avaliador não encontrado ou não pertence a esta escola.');
             return res.redirect('/admin/dashboard?tab=relatorios');
         }
 
-        // 4. Buscar os projetos relevantes (apenas os atribuídos a este avaliador e da feira atual)
         let projetosQuery = { 
             feiraId: feira._id, 
             escolaId: adminEscolaId,
-            _id: { $in: avaliador.projetosAtribuidos || [] } // Filtra por projetos atribuídos
+            _id: { $in: avaliador.projetosAtribuidos || [] }
         };
         
         const projetos = await Projeto.find(projetosQuery)
                                       .populate('categoria')
                                       .lean();
 
-        // 5. Buscar os critérios de avaliação para as categorias envolvidas
         const categoriaIds = [...new Set(projetos.map(p => p.categoria && p.categoria._id).filter(Boolean))];
         const criteriosPorCategoria = {};
         if (categoriaIds.length > 0) {
@@ -1910,7 +1898,6 @@ router.get('/relatorio/avaliacao-offline/:feiraId/:avaliadorId', verificarAdminE
             });
         }
 
-        // 6. Preparar dados para o template EJS
         const dataForReport = {
             titulo: `Relatório de Avaliação Offline - ${feira.nome}`,
             feira: feira,
@@ -1922,10 +1909,9 @@ router.get('/relatorio/avaliacao-offline/:feiraId/:avaliadorId', verificarAdminE
                 };
             }),
             avaliador: avaliador,
-            formatarDatasParaInput: formatarDatasParaInput
+            // REMOVIDO: formatarDatasParaInput não precisa ser passado aqui
         };
 
-        // 7. Chamar sua função generatePdfReport
         const filename = `relatorio_avaliacao_offline_${feira.nome.replace(/\s/g, '_')}_${avaliador.nome.replace(/\s/g, '_').substring(0, 20)}`;
         await generatePdfReport(req, res, 'relatorios/relatorio_offline', dataForReport, filename);
 
