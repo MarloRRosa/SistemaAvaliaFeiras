@@ -362,7 +362,7 @@
                                             data-projetos="<%= avaliador.projetosAtribuidos.map(p => p._id).join(',') %>">
                                             <i class="fas fa-edit mr-1"></i>Editar
                                         </button>
-                                        <form action="/admin/avaliadores/<%= avaliador._id %>/excluir" method="POST" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar este avaliador?');">
+                                        <form action="/admin/avaliadores/<%= avaliador._id %>?_method=DELETE" method="POST">
                                             <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-md text-sm shadow-sm transition duration-300 ease-in-out">
                                                 <i class="fas fa-trash-alt mr-1"></i>Deletar
                                             </button>
