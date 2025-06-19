@@ -1108,8 +1108,8 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', () => {
       document.getElementById('editarFeiraId').value = btn.dataset.id;
       document.getElementById('editarFeiraNome').value = btn.dataset.nome;
-      document.getElementById('inicioFeira').value = btn.dataset.inicio;
-    document.getElementById('fimFeira').value = btn.dataset.fim;
+      document.getElementById('editarInicioFeira').value = btn.dataset.inicio.split('-').reverse().join('-');
+      document.getElementById('editarFimFeira').value = btn.dataset.fim.split('-').reverse().join('-');
       document.getElementById('modalEditarFeira').classList.remove('hidden');
     });
   });
