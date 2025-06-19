@@ -889,15 +889,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 modalProjeto.classList.add('hidden');
             });
 
-            document.querySelectorAll('.btn-editar-projeto').forEach(button => {
-                button.addEventListener('click', (event) => {
-                    tituloModalProjeto.textContent = 'Editar Projeto';
-                    formProjeto.action = `/admin/projetos/${event.target.dataset.id}?_method=PUT`; // Rota de edição
-                    projetoId.value = event.target.dataset.id;
-                    inputTitulo.value = event.target.dataset.titulo;
-                    inputDescricao.value = event.dataset.descricao; // Use .dataset.descricao
-                    selectCategoria.value = event.target.dataset.categoriaId;
-                    inputTurmaProjeto.value = event.target.dataset.turma;
+           document.querySelectorAll('.btn-editar-projeto').forEach(button => {
+    button.addEventListener('click', (event) => {
+        tituloModalProjeto.textContent = 'Editar Projeto';
+        formProjeto.action = `/admin/projetos/${event.target.dataset.id}/editar`; // Use POST com rota personalizada
+        projetoId.value = event.target.dataset.id;
+        inputTitulo.value = event.target.dataset.titulo;
+        inputDescricao.value = event.target.dataset.descricao; // CORRIGIDO AQUI
+        selectCategoria.value = event.target.dataset.categoriaId;
+        inputTurmaProjeto.value = event.target.dataset.turma;
 
                     // Marcar checkboxes de critérios
                     const criteriosIds = event.target.dataset.criterios ? event.target.dataset.criterios.split(',') : [];
