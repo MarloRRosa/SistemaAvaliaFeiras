@@ -815,7 +815,7 @@ router.post('/projetos', verificarAdminEscola, async (req, res) => {
 
 
 // Editar Projeto (PUT)
-router.put('/projetos/:id', verificarAdminEscola, async (req, res) => {
+router.post('/projetos/:id/editar', verificarAdminEscola, async (req, res) => {
     const { id } = req.params;
     const { titulo, descricao, categoria, turma, alunos, criterios } = req.body;
     const adminEscolaId = req.session.adminEscola.escolaId;
