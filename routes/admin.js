@@ -731,13 +731,32 @@ if (feiraIdSelecionada && mongoose.Types.ObjectId.isValid(feiraIdSelecionada)) {
         // Ordenar projetos dentro de cada categoria por média geral (notaFinal)
         for (const categoria in relatorioFinalPorProjeto) {
             relatorioFinalPorProjeto[categoria].sort((a, b) => {
-                const notaA = parseFloat(a.mediaGeral);
-                const notaB = parseFloat(b.mediaGeral);
-                if (isNaN(notaA) && isNaN(notaB)) return 0;
-                if (isNaN(notaA)) return 1;
-                if (isNaN(notaB)) return -1;
-                return notaB - notaA; // Ordem decrescente
-            });
+    const notaA = parseFloat(a.mediaGeral);
+    const notaB = parseFloat(b.mediaGeral);
+    if (isNaN(notaA) && isNaN(notaB)) return 0;
+    if (isNaN(notaA)) return 1;
+    if (isNaN(notaB)) return -1;
+    
+    // 1. Primeiro, comparar a média geral (notaFinal)
+    if (notaB !== notaA) return notaB - notaA;
+
+    // 2. Se empatar, comparar pela ordem dos critérios de desempate
+    for (const criterio of criteriosOficiais
+        .filter(c => c.ordemDesempate > 0)
+        .sort((x, y) => x.ordemDesempate - y.ordemDesempate)) {
+
+        const notaCriterioA = parseFloat(a.mediasCriterios[criterio._id.toString()]);
+        const notaCriterioB = parseFloat(b.mediasCriterios[criterio._id.toString()]);
+
+        if (!isNaN(notaCriterioA) && !isNaN(notaCriterioB) && notaCriterioA !== notaCriterioB) {
+            return notaCriterioB - notaCriterioA;
+        }
+    }
+
+    // 3. Se continuar empate, mantém a ordem
+    return 0;
+});
+
         }
         // --- FIM: PREPARAÇÃO DE DADOS PARA O DASHBOARD GERAL ---
 
@@ -1381,11 +1400,11 @@ router.delete('/categorias/:id/excluir', verificarAdminEscola, async (req, res) 
 
 // Adicionar Critério (POST)
 router.post('/criterios', verificarAdminEscola, async (req, res) => {
-    const { nome, peso, observacao } = req.body;
+    const { nome, peso, observacao, ordemDesempate } = req.body;
     const adminEscolaId = req.session.adminEscola.escolaId;
 
     try {
-        const feira = await Feira.findOne({ status: 'ativa', escolaId: adminEscolaId }); // USANDO escolaId AQUI
+        const feira = await Feira.findOne({ status: 'ativa', escolaId: adminEscolaId });
 
         if (!feira) {
             req.flash('error_msg', 'Nenhuma feira ativa encontrada para esta escola. Não é possível criar um critério.');
@@ -1396,7 +1415,8 @@ router.post('/criterios', verificarAdminEscola, async (req, res) => {
             nome,
             peso,
             observacao,
-            escolaId: adminEscolaId, // USANDO escolaId AQUI
+            ordemDesempate: parseInt(ordemDesempate || 0, 10),
+            escolaId: adminEscolaId,
             feira: feira._id
         });
 
@@ -1413,20 +1433,23 @@ router.post('/criterios', verificarAdminEscola, async (req, res) => {
 
 // Editar Critério (PUT)
 router.put('/criterios/:id', verificarAdminEscola, async (req, res) => {
-    const { nome, peso, observacao } = req.body;
+    const { nome, peso, observacao, ordemDesempate } = req.body;
     const adminEscolaId = req.session.adminEscola.escolaId;
 
-    // Validação de ID antes de tentar a operação no banco
     if (!req.params.id || !mongoose.Types.ObjectId.isValid(req.params.id)) {
         req.flash('error_msg', 'ID do critério inválido para edição.');
         return res.redirect('/admin/dashboard?tab=criterios');
     }
 
     try {
-        // Garante que o critério a ser atualizado pertence à escola do admin
         const updatedCriterio = await Criterio.findOneAndUpdate(
-            { _id: req.params.id, escolaId: adminEscolaId }, // USANDO escolaId AQUI
-            { nome, peso, observacao }
+            { _id: req.params.id, escolaId: adminEscolaId },
+            {
+                nome,
+                peso,
+                observacao,
+                ordemDesempate: parseInt(ordemDesempate || 0, 10)
+            }
         );
 
         if (!updatedCriterio) {

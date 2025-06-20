@@ -13,20 +13,24 @@ const CriterioSchema = new mongoose.Schema({
     observacao: {
         type: String
     },
-    categoriaId: { // Opcional: Critério pode pertencer a uma categoria específica
+    categoriaId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Categoria',
         default: null
     },
-    escolaId: { // Mantenha se ainda for útil para alguma query global
+    escolaId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Escola',
         required: true
     },
-    feira: { // NOVO CAMPO: Referência à Feira
+    feira: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Feira',
         required: true
+    },
+    ordemDesempate: {
+        type: Number, // 0 = não será usado para desempate, 1 = maior prioridade, etc.
+        default: 0
     },
     dataCadastro: {
         type: Date,
