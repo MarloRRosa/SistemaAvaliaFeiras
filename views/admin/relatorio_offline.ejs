@@ -184,10 +184,10 @@
   <% } %>
 
   <% if (avaliador) { %>
-    <div class="avaliador-info">Relatório para Avaliador: <strong><%= avaliador.nome %></strong></div>
+    <div class="avaliador-info" style="font-size: 20px; text-align: center;">Relatório para Avaliador: <strong><%= avaliador.nome %></strong></div>
 
     <% if (avaliador.qrcode) { %>
-      <div style="text-align: center; margin-bottom: 20px;">
+      <div style="text-align: center; margin-bottom: 20px; font-size: 15px;">
         <p><strong>PIN de Acesso:</strong> <%= avaliador.pin %></p>
         <img src="<%= avaliador.qrcode %>" alt="QR Code de acesso" style="height: 180px; width: 180px;">
         <p style="font-size: 10px; color: #555;">Escaneie este código para acessar a tela de avaliação.</p>
