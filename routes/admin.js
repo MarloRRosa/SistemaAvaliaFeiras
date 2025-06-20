@@ -2012,7 +2012,7 @@ router.get('/relatorio/avaliacao-offline/:feiraId/:avaliadorId', verificarAdminE
         const criterios = await Criterio.find({ escolaId: adminEscolaId }).lean();
 
         const dataForReport = {
-    titulo: `Relatório de Avaliação Offline - ${feira.nome}`,
+    titulo: `Relatório de Avaliação - ${feira.nome}`,
     feira: feira,
     projetos: projetos.map(p => {
         const criteriosIds = p.criterios || [];

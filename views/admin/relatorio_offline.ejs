@@ -176,8 +176,8 @@
 <body>
   <header>
   <h1>Relatório de Avaliação</h1>
-  <h2>Feira: <%= feira.nome %></h2>
-  <p>Período: <%= formatarData(feira.inicioFeira) %> a <%= formatarData(feira.fimFeira) %></p>
+  <h2 style="font-size: 40px;"> <%= feira.nome %></h2>
+  <p style="font-size: 34px;"><%= formatarData(feira.inicioFeira) %> à <%= formatarData(feira.fimFeira) %></p>
 
   <% if (escola.logo) { %>
     <img src="<%= escola.logo %>" alt="Logo da Escola" style="max-height: 180px; max-width: 300px; margin-bottom: 10px;">
