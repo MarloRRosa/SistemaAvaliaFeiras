@@ -104,10 +104,14 @@
     <% avaliacoes.forEach(avaliacao => { %>
       <div class="avaliacao-section">
         <h2 class="avaliacao-header">
-          Projeto: <%= avaliacao.projeto.titulo %> (<%= avaliacao.projeto.categoria ? avaliacao.projeto.categoria.nome : 'Sem Categoria' %>)
+          Projeto: <%= avaliacao.projeto && avaliacao.projeto.titulo ? avaliacao.projeto.titulo : 'Projeto Removido' %> 
+(<%= avaliacao.projeto && avaliacao.projeto.categoria && avaliacao.projeto.categoria.nome ? avaliacao.projeto.categoria.nome : 'Sem Categoria' %>)
         </h2>
         <div class="avaliacao-details">
-          <p>Avaliador: <strong><%= avaliacao.avaliador.nome %> (<%= avaliacao.avaliador.email %>)</strong></p>
+          <p>Avaliador: <strong>
+  <%= avaliacao.avaliador && avaliacao.avaliador.nome ? avaliacao.avaliador.nome : 'Avaliador Removido' %> 
+  (<%= avaliacao.avaliador && avaliacao.avaliador.email ? avaliacao.avaliador.email : '-' %>)
+</strong></p>
           <p>Data da Avaliação: <strong><%= formatarData(avaliacao.createdAt) %></strong></p>
           <p>Status: <strong class="<%= avaliacao.finalizadaPorAvaliador ? 'status-finalizada' : 'status-pendente' %>">
             <%= avaliacao.finalizadaPorAvaliador ? 'Finalizada' : 'Em Andamento' %>

@@ -1580,7 +1580,7 @@ router.get('/avaliacoes/pdf', verificarAdminEscola, async (req, res) => {
         const feiraAtual = await Feira.findOne({ status: 'ativa', escolaId: escolaId });
         if (!feiraAtual) {
             req.flash('error_msg', 'Nenhuma feira ativa para esta escola para gerar o relatório de avaliações.');
-            if (!res.headersSent) { return res.redirect('/admin/dashboard?tab=relatorios'); }
+            if (!res.headersSent) return res.redirect('/admin/dashboard?tab=relatorios');
         }
 
         const avaliacoes = await Avaliacao.find({ feira: feiraAtual._id, escolaId: escolaId })
@@ -1588,18 +1588,38 @@ router.get('/avaliacoes/pdf', verificarAdminEscola, async (req, res) => {
             .populate({ path: 'projeto', populate: { path: 'categoria' } })
             .lean();
 
+        // Puxar critérios ordenados por ordemDesempate
+        const criteriosOrdenados = await Criterio.find({ feira: feiraAtual._id, escolaId: escolaId })
+            .sort({ ordemDesempate: 1, nome: 1 })
+            .lean();
+
         const criteriosMap = {};
-        const todosCriterios = await Criterio.find({ feira: feiraAtual._id, escolaId: escolaId }).lean();
-        todosCriterios.forEach(c => { criteriosMap[c._id.toString()] = c.nome; });
+        criteriosOrdenados.forEach(c => {
+            criteriosMap[c._id.toString()] = {
+                nome: c.nome,
+                ordemDesempate: c.ordemDesempate || 999
+            };
+        });
 
         const avaliacoesParaRelatorio = avaliacoes.map(avaliacao => {
             const notasArray = avaliacao.notas || avaliacao.itens;
-            const notasComNomesDeCriterio = (notasArray || []).map(item => ({
-                criterioNome: criteriosMap[String(item.criterio)] || 'Critério Desconhecido',
-                valor: parseFloat(item.nota),
-                observacao: item.comentario || ''
-            }));
-            return { ...avaliacao, notasComNomesDeCriterio: notasComNomesDeCriterio };
+            const notasComNomesDeCriterio = (notasArray || [])
+                .map(item => {
+                    const cInfo = criteriosMap[String(item.criterio)] || { nome: 'Critério Desconhecido', ordemDesempate: 999 };
+                    return {
+                        criterioNome: cInfo.nome,
+                        valor: parseFloat(item.nota),
+                        observacao: item.comentario || '',
+                        ordemDesempate: cInfo.ordemDesempate
+                    };
+                })
+                .sort((a, b) => a.ordemDesempate - b.ordemDesempate || a.criterioNome.localeCompare(b.criterioNome));
+
+            return {
+                ...avaliacao,
+                avaliador: avaliacao.avaliador || { nome: 'Avaliador Removido', email: '-' },
+                notasComNomesDeCriterio
+            };
         });
 
         const escola = await Escola.findById(escolaId).lean() || { nome: "Nome da Escola" };
@@ -1619,6 +1639,7 @@ router.get('/avaliacoes/pdf', verificarAdminEscola, async (req, res) => {
         }
     }
 });
+
 
 // Rota para PDF de Projetos Sem Avaliação
 router.get('/projetos-sem-avaliacao/pdf', verificarAdminEscola, async (req, res) => {

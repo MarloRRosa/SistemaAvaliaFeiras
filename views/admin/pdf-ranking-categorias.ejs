@@ -113,7 +113,7 @@
             <tr>
               <td><%= index + 1 %>º</td>
               <td><%= proj.titulo %></td>
-              <td><%= proj.mediaGeral %></td>
+              <td><%= proj.notaFinal && proj.notaFinal !== 'N/A' ? proj.notaFinal: 'N/A' %></td>
               <td><%= proj.numAvaliacoes %></td>
             </tr>
           <% }) %>
