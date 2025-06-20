@@ -52,19 +52,6 @@ if (!Feira || typeof Feira.findOne !== 'function' ||
 // FUNÇÕES AUXILIARES
 // ===========================================
 
-// Configuração do multer (armazenamento local em /public/uploads)
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const uploadDir = path.join(__dirname, '../public/uploads');
-    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-    cb(null, uploadDir);
-  },
-  filename: function (req, file, cb) {
-    const uniqueName = Date.now() + '-' + file.originalname;
-    cb(null, uniqueName);
-  }
-});
-
 // Função para gerar PIN alfanumérico único
 function generateUniquePin(length = 6) {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -2152,7 +2139,7 @@ router.post('/escola/atualizar', verificarAdminEscola, upload.single('logo'), as
     // Se enviou imagem, converte para base64
     if (req.file) {
       const logoBase64 = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
-      updateData.logoBase64 = logoBase64;
+      updateData.logo = logoBase64;
     }
 
     await Escola.findByIdAndUpdate(escolaId, updateData);
@@ -2165,10 +2152,6 @@ router.post('/escola/atualizar', verificarAdminEscola, upload.single('logo'), as
     res.redirect('/admin/dashboard?tab=tab-configuracoes');
   }
 });
-
-
-
-
 
 
 module.exports = router;

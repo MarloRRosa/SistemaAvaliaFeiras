@@ -549,27 +549,33 @@
   <h3 class="text-2xl font-bold mb-5 text-gray-700">Configurações da Escola</h3>
 
   <form action="/admin/escola/atualizar" method="POST" enctype="multipart/form-data" class="space-y-6">
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <div>
-      <label for="nome" class="block text-sm font-medium text-gray-600">Nome da Escola</label>
-      <input type="text" name="nome" id="nome" value="<%= escola.nome %>" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-2">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <label for="nome" class="block text-sm font-medium text-gray-600">Nome da Escola</label>
+        <input type="text" name="nome" id="nome" value="<%= escola.nome %>" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-2">
+      </div>
+      <div>
+        <label for="telefone" class="block text-sm font-medium text-gray-600">Telefone</label>
+        <input type="text" name="telefone" id="telefone" value="<%= escola.telefone %>" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-2">
+      </div>
+      <div>
+        <label for="endereco" class="block text-sm font-medium text-gray-600">Endereço</label>
+        <input type="text" name="endereco" id="endereco" value="<%= escola.endereco %>" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-2">
+      </div>
+      <div>
+        <label for="logo" class="block text-sm font-medium text-gray-600">Logo da Escola (opcional)</label>
+        <input type="file" name="logo" id="logo" accept="image/*" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-2">
+
+        <% if (escola.logo) { %>
+          <img src="<%= escola.logo %>" alt="Logo da escola" class="mt-2 max-h-20">
+        <% } %>
+      </div>
     </div>
     <div>
-      <label for="telefone" class="block text-sm font-medium text-gray-600">Telefone</label>
-      <input type="text" name="telefone" id="telefone" value="<%= escola.telefone %>" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-2">
+      <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Salvar Alterações</button>
     </div>
-    <div>
-      <label for="endereco" class="block text-sm font-medium text-gray-600">Endereço</label>
-      <input type="text" name="endereco" id="endereco" value="<%= escola.endereco %>" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-2">
-    </div>
-    <div>
-      <label for="logo" class="block text-sm font-medium text-gray-600">Logo da Escola (opcional)</label>
-      <input type="file" name="logo" id="logo" accept="image/*" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-2">
-      <% if (escola.logoBase64) { %>
-        <img src="<%= escola.logoBase64 %>" alt="Logo da escola" class="mt-2 max-h-20">
-      <% } %>
-    </div>
-  </div>
+  </form>
+</div>
 
   <div class="pt-6">
     <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-md shadow-md">

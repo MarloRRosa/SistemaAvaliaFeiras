@@ -47,7 +47,10 @@ const escolaSchema = new mongoose.Schema({
     },
     arquivadaEm: { 
         type: Date 
-    }
+    },
+    logo: {
+  type: String
+}
 });
 
 module.exports = mongoose.model('Escola', escolaSchema);
