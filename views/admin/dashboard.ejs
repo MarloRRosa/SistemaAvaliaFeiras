@@ -357,15 +357,17 @@
                                         <% } %>
                                     </td>
                                     <td class="py-3 px-4 whitespace-nowrap">
-                                        <button class="btn-editar-avaliador bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1.5 px-3 rounded-md text-sm mr-2 shadow-sm transition duration-300 ease-in-out"
-                                            data-id="<%= avaliador._id %>"
-                                            data-nome="<%= avaliador.nome %>"
-                                            data-email="<%= avaliador.email %>"
-                                            data-pin="<%= avaliador.pin %>"
-                                            data-ativo="<%= avaliador.ativo %>"
-                                            data-projetos="<%= avaliador.projetosAtribuidos.map(p => p._id).join(',') %>">
-                                            <i class="fas fa-edit mr-1"></i>Editar
-                                        </button>
+                                        <button class="btn-editar-avaliador"
+    data-id="<%= avaliador._id %>"
+    data-nome="<%= avaliador.nome %>"
+    data-email="<%= avaliador.email %>"
+    data-pin="<%= avaliador.pin %>"
+    data-ativo="<%= avaliador.ativo %>"
+    data-projetos="<%= avaliador.projetosAtribuidos.join(',') %>"
+    data-qrcode="<%= avaliador.qrcode %>">
+    <i class="fas fa-edit"></i> Editar
+</button>
+
                                         <form action="/admin/avaliadores/<%= avaliador._id %>/excluir" method="POST" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar este avaliador?');">
                                             <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-md text-sm shadow-sm transition duration-300 ease-in-out">
                                                 <i class="fas fa-trash-alt mr-1"></i>Deletar
@@ -699,6 +701,14 @@
                 <label class="block text-gray-700 text-sm font-bold mb-2">PIN:</label>
                 <span id="avaliadorPinDisplay" class="block bg-gray-100 p-3 rounded-lg text-xl font-mono tracking-wider text-gray-800 border border-gray-200"></span>
             </div>
+            <div id="qrCodePreview" class="mb-4 hidden">
+    <label class="block text-gray-700 text-sm font-bold mb-2">QR Code:</label>
+    <div class="bg-gray-100 p-3 rounded-lg text-center border border-gray-200">
+        <img id="qrCodeImage" src="" alt="QR Code do Avaliador" class="mx-auto h-32">
+        <p class="text-xs text-gray-500 mt-2">Escaneie para acessar a tela de avaliação.</p>
+    </div>
+</div>
+
             <div class="mb-4 flex items-center">
                 <input type="checkbox" id="ativoAvaliador" name="ativo" class="mr-2 h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
                 <label for="ativoAvaliador" class="text-gray-700 text-base font-bold">Ativo</label>
@@ -1082,6 +1092,16 @@ const inputAlunos = document.getElementById('alunosTextArea');
 
                     modalAvaliador.classList.remove('hidden');
                     modalAvaliador.classList.add('flex');
+
+                    // Exibir o QR Code se existir
+const qrCodeUrl = event.target.dataset.qrcode;
+if (qrCodeUrl) {
+    document.getElementById('qrCodeImage').src = qrCodeUrl;
+    document.getElementById('qrCodePreview').classList.remove('hidden');
+} else {
+    document.getElementById('qrCodePreview').classList.add('hidden');
+}
+
                 });
             });
 
