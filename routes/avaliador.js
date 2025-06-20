@@ -403,5 +403,31 @@ router.get('/agradecimento', (req, res) => {
     });
 });
 
+// Acesso direto via link com PIN (sem login)
+router.get('/acesso-direto/:pin', async (req, res) => {
+  try {
+    const { pin } = req.params;
+
+    const avaliador = await Avaliador.findOne({ pin, ativo: true }).populate('projetosAtribuidos');
+
+    if (!avaliador) {
+      return res.status(404).send('PIN inválido ou avaliador desativado.');
+    }
+
+    // Define sessão como se tivesse feito login normalmente
+    req.session.avaliador = {
+      id: avaliador._id,
+      nome: avaliador.nome,
+      escolaId: avaliador.escolaId.toString(),
+      feira: avaliador.feira.toString()
+    };
+
+    return res.redirect('/avaliador/dashboard');
+  } catch (err) {
+    console.error('Erro no acesso direto via PIN:', err);
+    res.status(500).send('Erro ao acessar o sistema.');
+  }
+});
+
 
 module.exports = router;
