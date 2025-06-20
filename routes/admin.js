@@ -1896,11 +1896,13 @@ router.get('/relatorio/avaliacao-offline/:feiraId/:avaliadorId', verificarAdminE
             req.flash('error_msg', 'Feira não encontrada ou você não tem permissão para acessá-la.');
             return res.redirect('/admin/dashboard?tab=relatorios');
         }
+        
 
         const avaliador = await Avaliador.findOne({ _id: avaliadorId, escolaId: adminEscolaId }).lean();
         if (!avaliador) {
             req.flash('error_msg', 'Avaliador não encontrado ou não pertence a esta escola.');
             return res.redirect('/admin/dashboard?tab=relatorios');
+            
         }
 
         let projetosQuery = { 

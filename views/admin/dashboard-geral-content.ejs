@@ -28,27 +28,6 @@
 </head>
 <body class="min-h-screen p-8 font-sans antialiased text-gray-800">
 
-  <header class="text-center mb-12">
-    <h1 class="text-4xl font-light text-gray-800 tracking-wide">Dashboard Geral da Feira</h1>
-    <p class="text-lg text-gray-600 mt-2">Visão consolidada dos dados da feira</p>
-  </header>
-
-  <form id="reportForm" action="" method="GET" target="_blank" class="max-w-4xl mx-auto mb-12 text-center">
-    <label for="tipoRelatorio" class="text-lg font-medium text-gray-700 mr-2">Escolha o relatório:</label>
-    <select name="tipo" id="tipoRelatorio" class="border border-gray-300 rounded px-3 py-2 text-gray-800">
-      <option value="">-- Selecione um relatório --</option>
-      <option value="/admin/relatorio-consolidado/pdf">Relatório Consolidado (PDF)</option>
-      <option value="/admin/resultados-finais/pdf">Resultados Finais (PDF)</option>
-      <option value="/admin/ranking-categorias/pdf">Ranking por Categoria (PDF)</option>
-      <option value="/admin/avaliacoes/pdf">Avaliações Detalhadas (PDF)</option>
-      <option value="/admin/resumo-avaliadores/pdf">Resumo por Avaliador (PDF)</option>
-      <option value="/admin/projetos-sem-avaliacao/pdf">Projetos sem Avaliação (PDF)</option>
-    </select>
-    <button type="submit" class="ml-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-      Gerar Relatório
-    </button>
-  </form>
-
   <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
     <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
