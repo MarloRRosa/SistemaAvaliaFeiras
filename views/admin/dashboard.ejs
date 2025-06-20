@@ -487,7 +487,7 @@
         </div>
         <div class="mb-6">
     <label class="block text-gray-700 text-sm font-bold mb-2">Selecione o(s) Avaliador(es):</label>
-    
+
     <div class="mb-2">
         <label class="inline-flex items-center">
             <input type="checkbox" id="selecionarTodosAvaliadores" class="form-checkbox h-4 w-4 text-blue-600">
@@ -1168,8 +1168,14 @@ const modalRelatorioOffline = document.getElementById('modalRelatorioOffline');
 const btnAbrirModalRelatorioOffline = document.getElementById('btnAbrirModalRelatorioOffline');
 const btnGerarRelatorioOfflineConfirm = document.getElementById('btnGerarRelatorioOfflineConfirm');
 const selectFeiraRelatorio = document.getElementById('selectFeiraRelatorio');
-const selectAvaliadorRelatorio = document.getElementById('selectAvaliadorRelatorio');
 
+// REMOVEMOS: const selectAvaliadorRelatorio = document.getElementById('selectAvaliadorRelatorio');
+
+// NOVAS CONSTANTES para os checkboxes de avaliadores
+const selecionarTodosAvaliadoresCheckbox = document.getElementById('selecionarTodosAvaliadores');
+const avaliadoresCheckboxesDiv = document.getElementById('avaliadoresCheckboxes');
+
+// Lógica para abrir o modal
 if (btnAbrirModalRelatorioOffline) {
     btnAbrirModalRelatorioOffline.addEventListener('click', (event) => {
         event.preventDefault(); // Impede o comportamento padrão do link
@@ -1178,28 +1184,81 @@ if (btnAbrirModalRelatorioOffline) {
     });
 }
 
+// Lógica para fechar o modal
 function fecharModalRelatorioOffline() {
     modalRelatorioOffline.classList.remove('flex');
     modalRelatorioOffline.classList.add('hidden');
 }
 
+// Lógica para o checkbox "Selecionar todos os avaliadores"
+if (selecionarTodosAvaliadoresCheckbox && avaliadoresCheckboxesDiv) {
+    selecionarTodosAvaliadoresCheckbox.addEventListener('change', function() {
+        // Seleciona todos os checkboxes *dentro* da div de avaliadores
+        const todosOsCheckboxesAvaliadores = avaliadoresCheckboxesDiv.querySelectorAll('input[type="checkbox"]');
+        const isChecked = this.checked; // Verifica se o "Selecionar Todos" está marcado ou desmarcado
+
+        todosOsCheckboxesAvaliadores.forEach(checkbox => {
+            checkbox.checked = isChecked;
+        });
+    });
+}
+
+// Lógica para o botão "Gerar PDF"
 if (btnGerarRelatorioOfflineConfirm) {
-    btnGerarRelatorioOfflineConfirm.addEventListener('click', () => {
+    btnGerarRelatorioOfflineConfirm.addEventListener('click', async () => {
         const feiraId = selectFeiraRelatorio.value;
-        const avaliadorId = selectAvaliadorRelatorio.value;
+
+        // Coletar todos os IDs dos avaliadores selecionados dos checkboxes
+        const avaliadoresSelecionados = [];
+        if (avaliadoresCheckboxesDiv) { // Garante que a div existe
+            avaliadoresCheckboxesDiv.querySelectorAll('input[type="checkbox"]:checked').forEach(checkbox => {
+                // Adiciona apenas os checkboxes que são de avaliadores individuais (pelo atributo 'name')
+                if (checkbox.name === 'avaliadoresSelecionados') {
+                    avaliadoresSelecionados.push(checkbox.value);
+                }
+            });
+        }
 
         if (!feiraId) {
             alert('Por favor, selecione uma feira.');
             return;
         }
 
-        let url = `/admin/relatorio/avaliacao-offline/${feiraId}`;
-        if (avaliadorId) {
-            url += `/${avaliadorId}`;
-        }
+        // Usar fetch para enviar os dados via POST (mais robusto para arrays)
+        try {
+            const response = await fetch('/admin/relatorio/avaliacao-offline', { // Confirme esta URL com sua rota de backend
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    feiraId: feiraId,
+                    avaliadoresIds: avaliadoresSelecionados // Envia um ARRAY de IDs
+                }),
+            });
 
-        window.open(url, '_blank'); // Abre o PDF em uma nova aba
-        fecharModalRelatorioOffline();
+            if (response.ok) {
+                // Se o backend retornar um PDF, lida com ele como um blob
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Relatorio_Avaliacao_Offline_${feiraId}.pdf`; // Nome do arquivo
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url); // Limpa o objeto URL
+                
+                alert('Relatório gerado com sucesso!');
+                fecharModalRelatorioOffline(); // Fecha o modal após o sucesso
+            } else {
+                const errorData = await response.json(); // Tenta ler a mensagem de erro do backend
+                alert(`Erro ao gerar relatório: ${errorData.message || response.statusText}`);
+            }
+        } catch (error) {
+            console.error('Erro na requisição para gerar relatório:', error);
+            alert('Ocorreu um erro ao gerar o relatório. Verifique o console para mais detalhes.');
+        }
     });
 }
 </script>
