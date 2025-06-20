@@ -364,9 +364,10 @@
     data-pin="<%= avaliador.pin %>"
     data-ativo="<%= avaliador.ativo %>"
     data-projetos="<%= avaliador.projetosAtribuidos.join(',') %>"
-    data-qrcode="<%- JSON.stringify(avaliador.qrcode || '') %>">
+    data-qrcode="<%= avaliador.qrcode || '' %>">
     <i class="fas fa-edit"></i> Editar
 </button>
+
 
                                         <form action="/admin/avaliadores/<%= avaliador._id %>/excluir" method="POST" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar este avaliador?');">
                                             <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-md text-sm shadow-sm transition duration-300 ease-in-out">
@@ -376,10 +377,11 @@
                                     </td>
                                     <td class="py-3 px-4 text-center">
   <% if (avaliador.qrcode) { %>
-    <img src="<%= avaliador.qrcode %>" alt="QR Code" class="h-12 mx-auto">
-  <% } else { %>
-    <span class="text-gray-400 italic text-sm">Não gerado</span>
-  <% } %>
+  <img src="<%= avaliador.qrcode %>" alt="QR Code" class="h-12 mx-auto">
+<% } else { %>
+  <span class="text-gray-400 italic text-sm">Não gerado</span>
+<% } %>
+
 </td>
 
                                 </tr>
@@ -1094,7 +1096,7 @@ const inputAlunos = document.getElementById('alunosTextArea');
                     modalAvaliador.classList.add('flex');
 
                     // Exibir o QR Code se existir
-const qrCodeUrl = JSON.parse(event.target.dataset.qrcode || '""');
+const qrCodeUrl = event.target.dataset.qrcode || '';
 if (qrCodeUrl) {
     document.getElementById('qrCodeImage').src = qrCodeUrl;
     document.getElementById('qrCodePreview').classList.remove('hidden');
