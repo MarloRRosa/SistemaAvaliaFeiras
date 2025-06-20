@@ -212,7 +212,8 @@
                                                 data-descricao="<%= projeto.descricao %>"
                                                 data-categoria-id="<%= projeto.categoria ? projeto.categoria._id : '' %>"
                                                 data-criterios="<%= projeto.criterios && projeto.criterios.length > 0 ? projeto.criterios.map(c => c._id).join(',') : '' %>"
-                                                data-turma="<%= projeto.turma %>">
+                                                data-turma="<%= projeto.turma %>">"
+                                                data-alunos="<%= projeto.alunos.join(',') %>"
                                                 <i class="fas fa-edit mr-1"></i>Editar
                                             </button>
              
@@ -561,7 +562,6 @@
                         <% }) %>
                     </select>
                 </div>
-
                 <div class="mb-6">
                     <label class="block text-gray-700 text-sm font-bold mb-2">Critérios de Avaliação:</label>
                      <div class="mb-2">
@@ -588,6 +588,10 @@
                 <div class="mb-4">
                     <label for="turmaProjeto" class="block text-gray-700 text-sm font-bold mb-2">Turma:</label>
                     <input type="text" id="turmaProjeto" name="turma" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out" required>
+                </div>
+                <div class="mb-4">
+                    <label for="alunosTextArea" class="block text-gray-700 text-sm font-bold mb-2">Alunos (um por linha):</label>
+                    <textarea id="alunosTextArea" name="alunos" rows="4" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out"></textarea>
                 </div>
 
                 <div class="flex items-center justify-end mt-6">
@@ -897,6 +901,7 @@ document.addEventListener('DOMContentLoaded', () => {
         inputDescricao.value = event.target.dataset.descricao; // CORRIGIDO AQUI
         selectCategoria.value = event.target.dataset.categoriaId;
         inputTurmaProjeto.value = event.target.dataset.turma;
+        inputAlunos.value = event.target.dataset.alunos ? event.target.dataset.alunos.split(',').join('\n') : '';
 
                     // Marcar checkboxes de critérios
                     const criteriosIds = event.target.dataset.criterios ? event.target.dataset.criterios.split(',') : [];
