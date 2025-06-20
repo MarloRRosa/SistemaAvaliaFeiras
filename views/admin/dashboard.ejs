@@ -1203,37 +1203,42 @@ if (selecionarTodosAvaliadoresCheckbox && avaliadoresCheckboxesDiv) {
 // Gerar relatórios (um por avaliador selecionado)
 if (btnGerarRelatorioOfflineConfirm) {
     btnGerarRelatorioOfflineConfirm.addEventListener('click', () => {
-        const feiraId = selectFeiraRelatorio.value;
+    const feiraId = selectFeiraRelatorio.value;
 
-        const avaliadoresSelecionados = [];
-        if (avaliadoresCheckboxesDiv) {
-            avaliadoresCheckboxesDiv.querySelectorAll('input[type="checkbox"][name="avaliadoresSelecionados"]:checked')
-                .forEach(checkbox => {
-                    avaliadoresSelecionados.push(checkbox.value);
-                });
+    const avaliadoresSelecionados = [];
+    if (avaliadoresCheckboxesDiv) {
+        avaliadoresCheckboxesDiv
+            .querySelectorAll('input[type="checkbox"][name="avaliadoresSelecionados"]:checked')
+            .forEach(checkbox => {
+                avaliadoresSelecionados.push(checkbox.value);
+            });
+    }
+
+    if (!feiraId || avaliadoresSelecionados.length === 0) {
+        alert('Por favor, selecione uma feira e pelo menos um avaliador.');
+        return;
+    }
+
+    btnGerarRelatorioOfflineConfirm.disabled = true;
+
+    // Abrir cada aba de forma síncrona (dentro do clique)
+    for (let i = 0; i < avaliadoresSelecionados.length; i++) {
+        const avaliadorId = avaliadoresSelecionados[i];
+        const url = `/admin/relatorio/avaliacao-offline/${feiraId}/${avaliadorId}`;
+
+        const novaAba = window.open(url, '_blank');
+        if (!novaAba) {
+            console.warn(`A aba para o avaliador ${avaliadorId} foi bloqueada pelo navegador.`);
         }
+    }
 
-        if (!feiraId || avaliadoresSelecionados.length === 0) {
-            alert('Por favor, selecione uma feira e pelo menos um avaliador.');
-            return;
-        }
+    setTimeout(() => {
+        btnGerarRelatorioOfflineConfirm.disabled = false;
+    }, 3000);
 
-        // Desabilita o botão para evitar cliques múltiplos
-        btnGerarRelatorioOfflineConfirm.disabled = true;
+    fecharModalRelatorioOffline();
+});
 
-        // Abre uma nova aba para cada relatório individual
-        avaliadoresSelecionados.forEach(avaliadorId => {
-            const url = `/admin/relatorio/avaliacao-offline/${feiraId}/${avaliadorId}`;
-            window.open(url, '_blank');
-        });
-
-        // Reabilita o botão após alguns segundos (opcional)
-        setTimeout(() => {
-            btnGerarRelatorioOfflineConfirm.disabled = false;
-        }, 3000);
-
-        fecharModalRelatorioOffline();
-    });
 }
 
 </script>

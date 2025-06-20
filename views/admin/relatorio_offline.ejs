@@ -111,6 +111,22 @@
             width: 250px;
             margin: 0 auto 5px auto;
         }
+        .project-wrapper {
+    page-break-inside: avoid;
+    max-height: 100%;
+}
+
+@media print {
+    .section {
+        max-height: 95vh;
+        overflow: hidden;
+    }
+
+    .page-break {
+        page-break-before: always;
+    }
+}
+
     </style>
 </head>
 <body>
@@ -129,10 +145,11 @@
         </div>
     <% } else { %>
         <% projetos.forEach((projeto, index) => { %>
-            <% if (index > 0) { %>
-                <div class="page-break"></div>
-            <% } %>
-            <div class="section">
+    <% if (index > 0) { %>
+        <div class="page-break"></div>
+    <% } %>
+    <div class="project-wrapper">
+        <div class="section">
                 <h3>Projeto: <%= projeto.titulo %> (Código: <%= projeto.numero || 'N/A' %>)</h3>
                 <div class="project-details">
                     <p><strong>Escola:</strong> <%= projeto.escolaNome || 'N/A' %></p>
@@ -144,22 +161,26 @@
                 <h4>Critérios de Avaliação:</h4>
                 <% if (projeto.criteriosAvaliacao && projeto.criteriosAvaliacao.length > 0) { %>
                     <% projeto.criteriosAvaliacao.forEach(criterio => { %>
-                        <div class="criteria-group">
-                            <div class="criteria-title"><%= criterio.nome %></div>
-                            <% if (criterio.descricao) { %>
-                                <div class="criteria-description"><%= criterio.descricao %></div>
-                            <% } %>
-                            <div class="radio-scale">
-                                <% for (let i = 5; i <= 10; i++) { %>
-                                    <label>
-                                        <span><%= i %></span>
-                                        <input type="radio" name="criterio_<%= criterio._id %>" value="<%= i %>" />
-                                    </label>
-                                <% } %>
-                            </div>
-                            <textarea class="input-box notes-input-box"></textarea>
-                        </div>
-                    <% }); %>
+    <div class="criteria-group">
+        <div class="criteria-title"><%= criterio.nome %></div>
+        <% if (criterio.descricao) { %>
+            <div class="criteria-description"><%= criterio.descricao %></div>
+        <% } %>
+        <% if (criterio.observacao) { %>
+            <div class="criteria-description"><em>Obs:</em> <%= criterio.observacao %></div>
+        <% } %>
+        <div class="radio-scale">
+            <% for (let i = 5; i <= 10; i++) { %>
+                <label>
+                    <span><%= i %></span>
+                    <input type="radio" name="criterio_<%= criterio._id %>" value="<%= i %>" />
+                </label>
+            <% } %>
+        </div>
+        <textarea class="input-box notes-input-box"></textarea>
+    </div>
+<% }) %>
+
                 <% } else { %>
                     <p>Nenhum critério de avaliação encontrado para a categoria deste projeto.</p>
                 <% } %>
