@@ -858,25 +858,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Mostrar modal de Projeto
             const modalProjeto = document.getElementById('modalProjeto');
-            const btnAbrirModalProjeto = document.getElementById('btnAbrirModalProjeto');
-            const btnFecharModalProjeto = document.getElementById('btnFecharModalProjeto');
-            const formProjeto = document.getElementById('formProjeto');
-            const tituloModalProjeto = document.getElementById('tituloModalProjeto');
-            const projetoId = document.getElementById('projetoId');
-            const inputTitulo = document.getElementById('titulo');
-            const inputDescricao = document.getElementById('descricao');
-            const selectCategoria = document.getElementById('categoria');
-            const criteriosProjetoCheckboxesDiv = document.getElementById('criteriosProjetoCheckboxes');
-            const inputTurmaProjeto = document.getElementById('turmaProjeto');
+const btnAbrirModalProjeto = document.getElementById('btnAbrirModalProjeto');
+const btnFecharModalProjeto = document.getElementById('btnFecharModalProjeto');
+const formProjeto = document.getElementById('formProjeto');
+const tituloModalProjeto = document.getElementById('tituloModalProjeto');
+const projetoId = document.getElementById('projetoId');
+const inputTitulo = document.getElementById('titulo');
+const inputDescricao = document.getElementById('descricao');
+const selectCategoria = document.getElementById('categoria');
+const criteriosProjetoCheckboxesDiv = document.getElementById('criteriosProjetoCheckboxes');
+const inputTurmaProjeto = document.getElementById('turmaProjeto');
+const inputAlunos = document.getElementById('alunosTextArea'); 
 
             btnAbrirModalProjeto.addEventListener('click', () => {
-                tituloModalProjeto.textContent = 'Adicionar Novo Projeto';
-                formProjeto.action = '/admin/projetos'; // Rota de criação
-                projetoId.value = '';
-                inputTitulo.value = '';
-                inputDescricao.value = '';
-                selectCategoria.value = '';
-                inputTurmaProjeto.value = '';
+    tituloModalProjeto.textContent = 'Adicionar Novo Projeto';
+    formProjeto.action = '/admin/projetos'; // Rota de criação
+    projetoId.value = '';
+    inputTitulo.value = '';
+    inputDescricao.value = '';
+    selectCategoria.value = '';
+    inputTurmaProjeto.value = '';
+    inputAlunos.value = '';
 
                 // Limpar todos os checkboxes de critérios
                 criteriosProjetoCheckboxesDiv.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
