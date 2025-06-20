@@ -1169,33 +1169,30 @@ const btnAbrirModalRelatorioOffline = document.getElementById('btnAbrirModalRela
 const btnGerarRelatorioOfflineConfirm = document.getElementById('btnGerarRelatorioOfflineConfirm');
 const selectFeiraRelatorio = document.getElementById('selectFeiraRelatorio');
 
-// REMOVEMOS: const selectAvaliadorRelatorio = document.getElementById('selectAvaliadorRelatorio');
-
 // NOVAS CONSTANTES para os checkboxes de avaliadores
 const selecionarTodosAvaliadoresCheckbox = document.getElementById('selecionarTodosAvaliadores');
 const avaliadoresCheckboxesDiv = document.getElementById('avaliadoresCheckboxes');
 
-// Lógica para abrir o modal
+// Abrir o modal
 if (btnAbrirModalRelatorioOffline) {
     btnAbrirModalRelatorioOffline.addEventListener('click', (event) => {
-        event.preventDefault(); // Impede o comportamento padrão do link
+        event.preventDefault();
         modalRelatorioOffline.classList.remove('hidden');
         modalRelatorioOffline.classList.add('flex');
     });
 }
 
-// Lógica para fechar o modal
+// Fechar o modal
 function fecharModalRelatorioOffline() {
     modalRelatorioOffline.classList.remove('flex');
     modalRelatorioOffline.classList.add('hidden');
 }
 
-// Lógica para o checkbox "Selecionar todos os avaliadores"
+// "Selecionar todos os avaliadores"
 if (selecionarTodosAvaliadoresCheckbox && avaliadoresCheckboxesDiv) {
-    selecionarTodosAvaliadoresCheckbox.addEventListener('change', function() {
-        // Seleciona todos os checkboxes *dentro* da div de avaliadores
-        const todosOsCheckboxesAvaliadores = avaliadoresCheckboxesDiv.querySelectorAll('input[type="checkbox"]');
-        const isChecked = this.checked; // Verifica se o "Selecionar Todos" está marcado ou desmarcado
+    selecionarTodosAvaliadoresCheckbox.addEventListener('change', function () {
+        const todosOsCheckboxesAvaliadores = avaliadoresCheckboxesDiv.querySelectorAll('input[type="checkbox"][name="avaliadoresSelecionados"]');
+        const isChecked = this.checked;
 
         todosOsCheckboxesAvaliadores.forEach(checkbox => {
             checkbox.checked = isChecked;
@@ -1203,64 +1200,42 @@ if (selecionarTodosAvaliadoresCheckbox && avaliadoresCheckboxesDiv) {
     });
 }
 
-// Lógica para o botão "Gerar PDF"
+// Gerar relatórios (um por avaliador selecionado)
 if (btnGerarRelatorioOfflineConfirm) {
-    btnGerarRelatorioOfflineConfirm.addEventListener('click', async () => {
+    btnGerarRelatorioOfflineConfirm.addEventListener('click', () => {
         const feiraId = selectFeiraRelatorio.value;
 
-        // Coletar todos os IDs dos avaliadores selecionados dos checkboxes
         const avaliadoresSelecionados = [];
-        if (avaliadoresCheckboxesDiv) { // Garante que a div existe
-            avaliadoresCheckboxesDiv.querySelectorAll('input[type="checkbox"]:checked').forEach(checkbox => {
-                // Adiciona apenas os checkboxes que são de avaliadores individuais (pelo atributo 'name')
-                if (checkbox.name === 'avaliadoresSelecionados') {
+        if (avaliadoresCheckboxesDiv) {
+            avaliadoresCheckboxesDiv.querySelectorAll('input[type="checkbox"][name="avaliadoresSelecionados"]:checked')
+                .forEach(checkbox => {
                     avaliadoresSelecionados.push(checkbox.value);
-                }
-            });
+                });
         }
 
-        if (!feiraId) {
-            alert('Por favor, selecione uma feira.');
+        if (!feiraId || avaliadoresSelecionados.length === 0) {
+            alert('Por favor, selecione uma feira e pelo menos um avaliador.');
             return;
         }
 
-        // Usar fetch para enviar os dados via POST (mais robusto para arrays)
-        try {
-            const response = await fetch('/admin/relatorio/avaliacao-offline', { // Confirme esta URL com sua rota de backend
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    feiraId: feiraId,
-                    avaliadoresIds: avaliadoresSelecionados // Envia um ARRAY de IDs
-                }),
-            });
+        // Desabilita o botão para evitar cliques múltiplos
+        btnGerarRelatorioOfflineConfirm.disabled = true;
 
-            if (response.ok) {
-                // Se o backend retornar um PDF, lida com ele como um blob
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `Relatorio_Avaliacao_Offline_${feiraId}.pdf`; // Nome do arquivo
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-                window.URL.revokeObjectURL(url); // Limpa o objeto URL
-                
-                alert('Relatório gerado com sucesso!');
-                fecharModalRelatorioOffline(); // Fecha o modal após o sucesso
-            } else {
-                const errorData = await response.json(); // Tenta ler a mensagem de erro do backend
-                alert(`Erro ao gerar relatório: ${errorData.message || response.statusText}`);
-            }
-        } catch (error) {
-            console.error('Erro na requisição para gerar relatório:', error);
-            alert('Ocorreu um erro ao gerar o relatório. Verifique o console para mais detalhes.');
-        }
+        // Abre uma nova aba para cada relatório individual
+        avaliadoresSelecionados.forEach(avaliadorId => {
+            const url = `/admin/relatorio/avaliacao-offline/${feiraId}/${avaliadorId}`;
+            window.open(url, '_blank');
+        });
+
+        // Reabilita o botão após alguns segundos (opcional)
+        setTimeout(() => {
+            btnGerarRelatorioOfflineConfirm.disabled = false;
+        }, 3000);
+
+        fecharModalRelatorioOffline();
     });
 }
+
 </script>
 
 </body>
