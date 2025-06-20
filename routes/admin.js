@@ -1831,92 +1831,110 @@ router.get('/resumo-avaliadores/pdf', verificarAdminEscola, async (req, res) => 
 });
 
 // ROTA: Relatório Consolidado da Feira
-router.get('/relatorio-consolidado/pdf', verificarAdminEscola, async (req, res) => {
+router.get('/relatorios/consolidado/pdf', verificarAdminEscola, async (req, res) => {
     try {
         const escolaId = req.session.adminEscola.escolaId;
-        const feiraAtual = await Feira.findOne({ status: 'ativa', escolaId: escolaId });
+        const feiraAtual = await Feira.findOne({ status: 'ativa', escolaId });
+
         if (!feiraAtual) {
-            req.flash('error_msg', 'Nenhuma feira ativa para esta escola para gerar o relatório consolidado.');
-            if (!res.headersSent) { return res.redirect('/admin/dashboard?tab=relatorios'); }
+            req.flash('error_msg', 'Nenhuma feira ativa encontrada.');
+            return res.redirect('/admin/dashboard?tab=relatorios');
         }
 
-        const projetos = await Projeto.find({ feira: feiraAtual._id, escolaId: escolaId })
-            .populate('categoria')
-            .populate('criterios')
-            .lean();
-
-        const avaliacoes = await Avaliacao.find({ feira: feiraAtual._id, escolaId: escolaId }).lean();
-        const criteriosOficiais = await Criterio.find({ feira: feiraAtual._id, escolaId: escolaId }).sort({ nome: 1 }).lean();
+        const [projetos, avaliacoes, categorias, criteriosOficiais] = await Promise.all([
+            Projeto.find({ feira: feiraAtual._id, escolaId }).populate('categoria').lean(),
+            Avaliacao.find({ feira: feiraAtual._id, escolaId }).lean(),
+            Categoria.find({ feira: feiraAtual._id, escolaId }).lean(),
+            Criterio.find({ feira: feiraAtual._id, escolaId }).sort({ ordemDesempate: 1, nome: 1 }).lean()
+        ]);
 
         const relatorioFinalPorProjeto = {};
 
         for (const projeto of projetos) {
-            const categoriaNome = projeto.categoria ? projeto.categoria.nome : 'Sem Categoria';
+            const avaliacoesDoProjeto = avaliacoes.filter(a => String(a.projeto) === String(projeto._id));
+            const numAvaliacoes = avaliacoesDoProjeto.length;
+            const mediasCriterios = {};
+            let totalPeso = 0;
+            let totalNotaPonderada = 0;
+
+            for (const criterio of criteriosOficiais) {
+                const notasCriterio = avaliacoesDoProjeto.flatMap(avaliacao =>
+                    (avaliacao.itens || []).filter(item =>
+                        String(item.criterio) === String(criterio._id) &&
+                        item.nota !== undefined && item.nota !== null
+                    )
+                );
+
+                if (notasCriterio.length > 0) {
+                    const soma = notasCriterio.reduce((acc, cur) => acc + parseFloat(cur.nota), 0);
+                    const media = soma / notasCriterio.length;
+                    mediasCriterios[criterio._id.toString()] = media.toFixed(2);
+
+                    totalNotaPonderada += media * criterio.peso;
+                    totalPeso += criterio.peso;
+                } else {
+                    mediasCriterios[criterio._id.toString()] = '-';
+                }
+            }
+
+            const mediaGeral = totalPeso > 0 ? (totalNotaPonderada / totalPeso).toFixed(2) : '-';
+
+            const categoriaNome = projeto.categoria?.nome || 'Sem Categoria';
             if (!relatorioFinalPorProjeto[categoriaNome]) {
                 relatorioFinalPorProjeto[categoriaNome] = [];
             }
 
-            const avaliacoesDoProjeto = avaliacoes.filter(a => a.projeto && String(a.projeto) === String(projeto._id));
-            const numAvaliacoes = avaliacoesDoProjeto.length;
-            
-            const mediasCriterios = {};
-            let totalNotaPonderadaProjeto = 0;
-            let totalPesoProjeto = 0;
-
-            for (const criterioOficial of criteriosOficiais) {
-                const notasDoCriterioParaEsteProjeto = avaliacoesDoProjeto.flatMap(avaliacao => {
-                    const notasArray = avaliacao.notas || avaliacao.itens;
-                    return (notasArray && Array.isArray(notasArray)) ? notasArray.filter(item => {
-                        const isCriterioMatch = item.criterio && (String(item.criterio) === String(criterioOficial._id));
-                        const isValorValid = item.nota !== undefined && item.nota !== null && !isNaN(parseFloat(item.nota));
-                        return isCriterioMatch && isValorValid;
-                    }) : [];
-                });
-
-                if (notasDoCriterioParaEsteProjeto.length > 0) {
-                    const sumNotas = notasDoCriterioParaEsteProjeto.reduce((acc, curr) => acc + parseFloat(curr.nota), 0);
-                    const mediaCriterio = sumNotas / notasDoCriterioParaEsteProjeto.length;
-                    mediasCriterios[String(criterioOficial._id)] = parseFloat(mediaCriterio).toFixed(2);
-
-                    const isCriterioAssociatedToProject = projeto.criterios.some(c => String(c._id) === String(criterioOficial._id));
-                    if (isCriterioAssociatedToProject) {
-                         totalNotaPonderadaProjeto += parseFloat(mediasCriterios[String(criterioOficial._id)]) * criterioOficial.peso;
-                         totalPesoProjeto += criterioOficial.peso;
-                    }
-
-                } else {
-                    mediasCriterios[String(criterioOficial._id)] = 'N/A';
-                }
-            }
-
-            const mediaGeralProjeto = totalPesoProjeto > 0 ? parseFloat(totalNotaPonderadaProjeto / totalPesoProjeto).toFixed(2) : 'N/A';
-
             relatorioFinalPorProjeto[categoriaNome].push({
-                titulo: projeto.titulo,
-                numAvaliacoes: numAvaliacoes,
-                mediasCriterios: mediasCriterios,
-                mediaGeral: mediaGeralProjeto
+                ...projeto,
+                numAvaliacoes,
+                mediaGeral,
+                mediasCriterios
             });
         }
 
-        const escola = await Escola.findById(escolaId).lean() || { nome: "Nome da Escola" };
+        // Classificar por categoria com desempate usando ordem dos critérios
+        Object.keys(relatorioFinalPorProjeto).forEach(categoria => {
+            relatorioFinalPorProjeto[categoria].sort((a, b) => {
+                const notaA = parseFloat(a.mediaGeral);
+                const notaB = parseFloat(b.mediaGeral);
 
-        await generatePdfReport(req, res, 'pdf-consolidado', {
-            titulo: 'Relatório Consolidado da Feira',
+                if (!isNaN(notaA) && !isNaN(notaB)) {
+                    if (notaB !== notaA) return notaB - notaA;
+                } else if (!isNaN(notaA)) return -1;
+                else if (!isNaN(notaB)) return 1;
+
+                // Desempate por critérios definidos
+                for (const criterio of criteriosOficiais) {
+                    const nA = parseFloat(a.mediasCriterios[criterio._id.toString()]);
+                    const nB = parseFloat(b.mediasCriterios[criterio._id.toString()]);
+                    if (!isNaN(nA) && !isNaN(nB) && nB !== nA) return nB - nA;
+                    else if (!isNaN(nA)) return -1;
+                    else if (!isNaN(nB)) return 1;
+                }
+
+                return 0; // completamente empatado
+            });
+        });
+
+        const escola = await Escola.findById(escolaId).lean();
+
+        await generatePdfReport(req, res, 'pdf-relatorio-consolidado', {
+            titulo: 'Relatório Consolidado de Avaliações',
             nomeFeira: feiraAtual.nome,
-            relatorioFinalPorProjeto: relatorioFinalPorProjeto,
-            criteriosOficiais: criteriosOficiais,
-            escola: escola
-        }, `relatorio-consolidado_${feiraAtual.nome}`);
+            criteriosOficiais,
+            relatorioFinalPorProjeto,
+            escola: escola || { nome: "Nome da Escola" }
+        }, `relatorio_consolidado_${feiraAtual.nome}`);
 
-    } catch (error) {
-        console.error('Erro ao gerar PDF do relatório consolidado:', error);
+    } catch (err) {
+        console.error('Erro ao gerar relatório consolidado:', err);
         if (!res.headersSent) {
-            req.flash('error_msg', 'Erro ao gerar PDF do relatório consolidado. Detalhes: ' + error.message);
+            req.flash('error_msg', 'Erro ao gerar relatório consolidado. ' + err.message);
             res.redirect('/admin/dashboard?tab=relatorios');
         }
     }
 });
+
 
 // ===============================================
 // ROTA PARA RELATÓRIO DE AVALIAÇÃO OFFLINE
