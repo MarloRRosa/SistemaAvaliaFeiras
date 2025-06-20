@@ -8,7 +8,7 @@
     body {
       font-family: 'Arial', sans-serif;
       font-size: 11px;
-      margin: 25px;
+      margin: 25px; /* Margem padrão para o documento */
       color: #333;
     }
     header {
@@ -16,6 +16,7 @@
       margin-bottom: 20px;
       border-bottom: 2px solid #ccc;
       padding-bottom: 10px;
+      /* page-break-after: always; /* Opcional: Garante que o cabeçalho fique em sua própria página, ou que o conteúdo comece em uma nova */
     }
     h1, h2, h3, h4 {
       color: #2c3e50;
@@ -28,12 +29,22 @@
       border: 1px solid #eee;
       border-radius: 8px;
       background-color: #f9f9f9;
+      /* Ajuste para evitar quebrar seções muito grandes */
+      page-break-inside: avoid; /* Mantém a seção unida, se possível */
+      break-inside: avoid;
     }
     .project-wrapper {
-      page-break-inside: avoid;
-      break-inside: avoid;
       margin-bottom: 30px;
+      page-break-inside: avoid; /* Tenta manter todo o projeto junto */
+      break-inside: avoid;
+      /* Adiciona uma quebra de página antes de cada novo projeto (você já tem isso no EJS, mas aqui reforça a regra CSS) */
+      /* page-break-before: always; */ 
     }
+    /* Para o primeiro projeto não ter uma quebra de página inicial desnecessária */
+    /* .project-wrapper:first-of-type {
+        page-break-before: auto;
+    } */
+
     .project-details p {
       margin-bottom: 5px;
     }
@@ -43,8 +54,15 @@
       padding: 12px;
       border: 1px solid #ddd;
       border-radius: 6px;
-      page-break-inside: avoid;
+      
+      /* ESTES SÃO OS PONTOS MAIS IMPORTANTES PARA CRITÉRIOS */
+      page-break-inside: avoid; /* Tenta evitar quebrar um critério no meio */
       break-inside: avoid;
+      page-break-after: auto; /* Não força quebra depois de cada critério */
+
+      /* Adicionando um mínimo de altura para quebra, se necessário. */
+      /* Isso é mais avançado e pode exigir testes. */
+      /* min-height: 120px; /* Exemplo: se um critério for menor que 120px, ele provavelmente não será quebrado */
     }
     .criteria-title {
       font-weight: bold;
@@ -81,7 +99,7 @@
       width: 100%;
     }
     .notes-input-box {
-      min-height: 40px;
+      min-height: 40px; /* Aumentado um pouco para ter mais visibilidade */
     }
     .total-score-box {
       min-height: 25px;
@@ -97,11 +115,11 @@
       width: 100%;
       border: 1px dashed #999;
       padding: 4px;
-      page-break-inside: avoid;
+      page-break-inside: avoid; /* Tenta manter a caixa de comentários gerais unida */
       break-inside: avoid;
     }
     .page-break {
-      page-break-before: always;
+      page-break-before: always; /* Força uma nova página */
     }
     .avaliador-info {
       text-align: right;
@@ -112,7 +130,9 @@
     .assinatura-area {
       margin-top: 50px;
       text-align: center;
-      page-break-inside: avoid;
+      page-break-inside: avoid; /* Mantém a área de assinatura unida */
+      break-inside: avoid;
+      page-break-before: avoid; /* Evita uma quebra de página imediatamente antes, se houver espaço */
     }
     .assinatura-line {
       border-bottom: 1px solid #000;
@@ -120,13 +140,32 @@
       margin: 0 auto 5px auto;
     }
 
+    /* Regras específicas para impressão/PDF */
     @media print {
-      .section {
-        max-height: 95vh;
-        overflow: hidden;
+      body {
+        margin: 15mm; /* Margens em milímetros, mais precisas para impressão */
       }
-      .page-break {
-        page-break-before: always;
+      header {
+        position: relative; /* ou fixed */
+        top: 0;
+        left: 0;
+        right: 0;
+        /* height: auto; /* Defina uma altura se for fixo */
+        /* background-color: white; /* Garante que não haja transparência */
+      }
+
+      /* Esta regra é mais agressiva e garante que NENHUM elemento com .criteria-group seja cortado.
+         Se um critério não couber na página atual, ele será movido para a próxima. */
+      .criteria-group {
+        page-break-after: auto; /* Não força quebra depois de cada critério */
+        page-break-before: auto; /* Não força quebra antes de cada critério */
+        orphans: 3; /* Impede que uma linha fique sozinha no final de uma página */
+        widows: 3;  /* Impede que uma linha fique sozinha no início de uma página */
+      }
+
+      /* Tenta mover um critério para a próxima página se ele for cortado */
+      .criteria-group:not(:first-child) { /* Aplica a todos menos o primeiro critério */
+          margin-top: 15px; /* Adiciona um pouco de espaço entre critérios */
       }
     }
   </style>
