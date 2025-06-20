@@ -951,10 +951,17 @@ novoAvaliador.qrcode = qrCodeBase64;
       from: 'AvaliaFeiras <docsrosas@gmail.com>', 
       to: email,
       subject: 'Bem-vindo ao AvaliaFeiras',
-      html: `<p>Olá ${nome},</p>
-             <p>Você foi cadastrado como avaliador no sistema AvaliaFeiras.</p>
-             <p><strong>PIN de acesso:</strong> ${pin}</p>
-             <p>Acesse o sistema e utilize seu PIN para avaliar os projetos atribuídos.</p>`
+      html: `
+  <p>Olá ${nome},</p>
+  <p>Você foi cadastrado como avaliador no sistema AvaliaFeiras.</p>
+  <p><strong>PIN de acesso:</strong> ${pin}</p>
+  <p><strong>Link direto:</strong> <a href="${url}">${url}</a></p>
+  <p>Acesse o sistema e utilize seu PIN ou escaneie o QR Code abaixo para avaliar os projetos atribuídos.</p>
+  <p style="text-align: center;">
+    <img src="${qrCodeBase64}" alt="QR Code de acesso" style="height: 200px; width: 200px;"/>
+  </p>
+`
+
     });
 
     req.flash('success_msg', 'Avaliador cadastrado e e-mail enviado com sucesso.');

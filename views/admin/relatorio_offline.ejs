@@ -172,13 +172,23 @@
 </head>
 <body>
   <header>
-    <h1>Relatório de Avaliação Offline</h1>
-    <h2>Feira: <%= feira.nome %></h2>
-    <p>Período: <%= formatarData(feira.inicioFeira) %> a <%= formatarData(feira.fimFeira) %></p>
-    <% if (avaliador) { %>
-      <div class="avaliador-info">Relatório para Avaliador: <strong><%= avaliador.nome %></strong></div>
+  <h1>Relatório de Avaliação Offline</h1>
+  <h2>Feira: <%= feira.nome %></h2>
+  <p>Período: <%= formatarData(feira.inicioFeira) %> a <%= formatarData(feira.fimFeira) %></p>
+
+  <% if (avaliador) { %>
+    <div class="avaliador-info">Relatório para Avaliador: <strong><%= avaliador.nome %></strong></div>
+
+    <% if (avaliador.qrcode) { %>
+      <div style="text-align: center; margin-bottom: 20px;">
+        <p><strong>PIN de Acesso:</strong> <%= avaliador.pin %></p>
+        <img src="<%= avaliador.qrcode %>" alt="QR Code de acesso" style="height: 120px;">
+        <p style="font-size: 10px; color: #555;">Escaneie este código para acessar a tela de avaliação.</p>
+      </div>
     <% } %>
-  </header>
+  <% } %>
+</header>
+
 
   <% if (projetos.length === 0) { %>
     <div class="section">
