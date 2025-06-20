@@ -901,15 +901,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Adiciona evento de clique para o botão de toggle
             sidebarToggle.addEventListener('click', () => {
-                const isCurrentlyCollapsed = sidebar.classList.toggle('collapsed');
-                localStorage.setItem('sidebarCollapsed', isCurrentlyCollapsed);
-                // Ajusta a margem do conteúdo principal
-                if (isCurrentlyCollapsed) {
-                    contentArea.style.marginLeft = '64px';
-                } else {
-                    contentArea.style.marginLeft = '250px';
-                }
-            });
+    if (window.innerWidth <= 768) {
+        // Em telas pequenas, mostra o menu como sobreposição
+        sidebar.classList.add('show');
+        document.getElementById('overlay').classList.add('active');
+    } else {
+        // Comportamento de colapsar/expandir para desktop
+        const isCurrentlyCollapsed = sidebar.classList.toggle('collapsed');
+        localStorage.setItem('sidebarCollapsed', isCurrentlyCollapsed);
+        if (isCurrentlyCollapsed) {
+            contentArea.style.marginLeft = '64px';
+        } else {
+            contentArea.style.marginLeft = '250px';
+        }
+    }
+});
 
             const sidebarClose = document.getElementById('sidebarClose');
 if (sidebarClose) {
