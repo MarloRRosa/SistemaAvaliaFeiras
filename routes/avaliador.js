@@ -7,6 +7,8 @@ const Avaliacao = require('../models/Avaliacao');
 const Criterio = require('../models/Criterio');
 const Feira = require('../models/Feira'); // Importe o modelo Feira
 const Escola = require('../models/Escola'); // Importe o modelo Escola
+const QRCode = require('qrcode');
+
 
 // Middleware para verificar sessão do avaliador e se o PIN está ativo
 async function verificarAvaliador(req, res, next) {

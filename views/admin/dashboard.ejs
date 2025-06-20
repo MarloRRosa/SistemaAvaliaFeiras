@@ -364,7 +364,7 @@
     data-pin="<%= avaliador.pin %>"
     data-ativo="<%= avaliador.ativo %>"
     data-projetos="<%= avaliador.projetosAtribuidos.join(',') %>"
-    data-qrcode="<%= avaliador.qrcode %>">
+    data-qrcode="<%- JSON.stringify(avaliador.qrcode || '') %>">
     <i class="fas fa-edit"></i> Editar
 </button>
 
@@ -1094,7 +1094,7 @@ const inputAlunos = document.getElementById('alunosTextArea');
                     modalAvaliador.classList.add('flex');
 
                     // Exibir o QR Code se existir
-const qrCodeUrl = event.target.dataset.qrcode;
+const qrCodeUrl = JSON.parse(event.target.dataset.qrcode || '""');
 if (qrCodeUrl) {
     document.getElementById('qrCodeImage').src = qrCodeUrl;
     document.getElementById('qrCodePreview').classList.remove('hidden');

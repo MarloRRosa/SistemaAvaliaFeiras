@@ -929,6 +929,12 @@ router.post('/avaliadores', verificarAdminEscola, async (req, res) => {
       feira: feira._id,
       projetosAtribuidos: Array.isArray(projetosAtribuidos) ? projetosAtribuidos : [projetosAtribuidos]
     });
+    const urlParaAvaliacao = `https://sistemaavalia.onrender.com/avaliar/${novoAvaliador._id}?pin=${novoAvaliador.pin}`;
+const qrCodeBase64 = await QRCode.toDataURL(urlParaAvaliacao);
+
+novoAvaliador.qrcode = qrCodeBase64;
+await novoAvaliador.save();
+
 
     await novoAvaliador.save();
 
