@@ -18,10 +18,12 @@ const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const puppeteer = require('puppeteer');
 const chromium = require('@sparticuz/chromium');
+const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
 const ejs = require('ejs');
 const QRCode = require('qrcode');
+const upload = multer({ storage: multer.memoryStorage() });
 
 // Carrega variáveis de ambiente (garante que estão disponíveis para este arquivo)
 require('dotenv').config();
@@ -49,6 +51,19 @@ if (!Feira || typeof Feira.findOne !== 'function' ||
 // ===========================================
 // FUNÇÕES AUXILIARES
 // ===========================================
+
+// Configuração do multer (armazenamento local em /public/uploads)
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadDir = path.join(__dirname, '../public/uploads');
+    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueName = Date.now() + '-' + file.originalname;
+    cb(null, uniqueName);
+  }
+});
 
 // Função para gerar PIN alfanumérico único
 function generateUniquePin(length = 6) {
@@ -2123,33 +2138,34 @@ router.post('/configuracoes/feiradata', verificarAdminEscola, async (req, res) =
 });
 
 // Atualizar dados da escola (POST)
-router.post('/escola/atualizar', verificarAdminEscola, async (req, res) => {
-    const escolaId = req.session.adminEscola.escolaId;
-    const {
-        nome, email, telefone, diretor, responsavel,
-        endereco, cnpj, descricao
-    } = req.body;
+router.post('/escola/atualizar', verificarAdminEscola, upload.single('logo'), async (req, res) => {
+  const escolaId = req.session.adminEscola.escolaId;
+  const { nome, telefone, endereco } = req.body;
 
-    try {
-        await Escola.findByIdAndUpdate(escolaId, {
-            nome,
-            email,
-            telefone,
-            diretor,
-            responsavel,
-            endereco: endereco || '',
-            cnpj: cnpj || '',
-            descricao: descricao || ''
-        });
+  try {
+    const updateData = {
+      nome,
+      telefone,
+      endereco
+    };
 
-        req.flash('success_msg', 'Dados da escola atualizados com sucesso!');
-        res.redirect('/admin/dashboard?tab=tab-configuracoes');
-    } catch (err) {
-        console.error('Erro ao atualizar dados da escola:', err);
-        req.flash('error_msg', 'Erro ao atualizar os dados da escola.');
-        res.redirect('/admin/dashboard?tab=tab-configuracoes');
+    // Se enviou imagem, converte para base64
+    if (req.file) {
+      const logoBase64 = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+      updateData.logoBase64 = logoBase64;
     }
+
+    await Escola.findByIdAndUpdate(escolaId, updateData);
+
+    req.flash('success_msg', 'Dados da escola atualizados com sucesso!');
+    res.redirect('/admin/dashboard?tab=tab-configuracoes');
+  } catch (err) {
+    console.error('Erro ao atualizar dados da escola:', err);
+    req.flash('error_msg', 'Erro ao atualizar os dados da escola.');
+    res.redirect('/admin/dashboard?tab=tab-configuracoes');
+  }
 });
+
 
 
 

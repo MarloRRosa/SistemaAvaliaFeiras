@@ -175,6 +175,10 @@
   <h1>Relatório de Avaliação Offline</h1>
   <h2>Feira: <%= feira.nome %></h2>
   <p>Período: <%= formatarData(feira.inicioFeira) %> a <%= formatarData(feira.fimFeira) %></p>
+  <% if (escola.logoBase64) { %>
+  <img src="<%= escola.logoBase64 %>" alt="Logo da Escola" style="max-height: 80px; margin-bottom: 10px;">
+<% } %>
+
 
   <% if (avaliador) { %>
     <div class="avaliador-info">Relatório para Avaliador: <strong><%= avaliador.nome %></strong></div>
