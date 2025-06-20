@@ -828,102 +828,49 @@
     
     <script>
 document.addEventListener('DOMContentLoaded', () => {
-            const sidebar = document.getElementById('sidebar');
-            const sidebarToggle = document.getElementById('sidebarToggle');
-            const contentArea = document.getElementById('contentArea');
-            const tabLinks = document.querySelectorAll('.sidebar-link');
-            const tabContents = document.querySelectorAll('.tab-content');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarIcon = sidebarToggle.querySelector('i');
+    const overlay = document.getElementById('overlay');
+    const tabLinks = document.querySelectorAll('.sidebar-link');
 
-            // Função para ativar a aba
-            const activateTab = (tabId) => {
-                tabLinks.forEach(link => {
-                    link.classList.remove('active');
-                });
-                tabContents.forEach(content => {
-                    content.classList.add('hidden');
-                });
-
-                const activeLink = document.querySelector(`.sidebar-link[data-tab="${tabId}"]`);
-                const activeContent = document.getElementById(tabId);
-
-                if (activeLink) {
-                    activeLink.classList.add('active');
-                }
-                if (activeContent) {
-                    activeContent.classList.remove('hidden');
-                }
-            };
-
-            // Lógica para abas e URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const initialTabFromUrl = urlParams.get('tab');
-            const savedTab = localStorage.getItem('activeTab');
-
-            const initialTab = initialTabFromUrl || savedTab || 'dashboard-geral';
-            activateTab(initialTab);
-
-            tabLinks.forEach(link => {
-                link.addEventListener('click', (event) => {
-                    event.preventDefault(); // Impede o comportamento padrão do link
-                    const tabId = link.dataset.tab;
-                    activateTab(tabId);
-                    localStorage.setItem('activeTab', tabId);
-                    // Atualiza a URL para que a aba seja mantida em caso de recarga
-                    const newUrl = new URL(window.location.href);
-                    newUrl.searchParams.set('tab', tabId);
-                    window.history.pushState({ path: newUrl.href }, '', newUrl.href);
-                });
-            });
-
-            // Lógica para recolher/expandir o sidebar
-            // Verifica a largura da tela ao carregar e ajusta o sidebar
-            const applySidebarState = () => {
-                if (window.innerWidth <= 768) { // Ex: para telas menores que md
-                    sidebar.classList.remove('collapsed');
-                    sidebar.classList.remove('show');
-                    contentArea.style.marginLeft = '0px';
-                    // Talvez esconder o toggle button ou mudá-lo para um menu hamburger flutuante
-                } else {
-                    const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-                    if (isCollapsed) {
-                        sidebar.classList.add('collapsed');
-                        contentArea.style.marginLeft = '64px'; // Largura do sidebar colapsado
-                    } else {
-                        sidebar.classList.remove('collapsed');
-                        contentArea.style.marginLeft = '250px'; // Largura do sidebar expandido
-                    }
-                     sidebar.classList.remove('show'); // Remove a classe 'show' se estiver em desktop
-                }
-            };
-
-            // Aplica o estado inicial do sidebar
-            applySidebarState();
-
-            // Adiciona evento de clique para o botão de toggle
-            sidebarToggle.addEventListener('click', () => {
-    if (window.innerWidth <= 768) {
-        // Em telas pequenas, mostra o menu como sobreposição
-        sidebar.classList.add('show');
-        document.getElementById('overlay').classList.add('active');
-    } else {
-        // Comportamento de colapsar/expandir para desktop
-        const isCurrentlyCollapsed = sidebar.classList.toggle('collapsed');
-        localStorage.setItem('sidebarCollapsed', isCurrentlyCollapsed);
-        if (isCurrentlyCollapsed) {
-            contentArea.style.marginLeft = '64px';
+    const toggleSidebarMobile = () => {
+        const isOpen = sidebar.classList.contains('show');
+        if (isOpen) {
+            sidebar.classList.remove('show');
+            overlay.classList.remove('active');
+            sidebarIcon.classList.remove('fa-times');
+            sidebarIcon.classList.add('fa-bars');
         } else {
-            contentArea.style.marginLeft = '250px';
+            sidebar.classList.add('show');
+            overlay.classList.add('active');
+            sidebarIcon.classList.remove('fa-bars');
+            sidebarIcon.classList.add('fa-times');
         }
-    }
-});
+    };
 
-            const sidebarClose = document.getElementById('sidebarClose');
-if (sidebarClose) {
-  sidebarClose.addEventListener('click', () => {
-    sidebar.classList.remove('show');
-    document.getElementById('overlay').classList.remove('active');
-  });
-}
+    sidebarToggle.addEventListener('click', () => {
+        if (window.innerWidth <= 768) {
+            toggleSidebarMobile();
+        }
+    });
+
+    tabLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                toggleSidebarMobile();
+            }
+        });
+    });
+
+    if (overlay) {
+        overlay.addEventListener('click', () => {
+            sidebar.classList.remove('show');
+            overlay.classList.remove('active');
+            sidebarIcon.classList.remove('fa-times');
+            sidebarIcon.classList.add('fa-bars');
+        });
+    }
 
             // Adiciona um listener para redimensionamento de janela
             window.addEventListener('resize', applySidebarState);
