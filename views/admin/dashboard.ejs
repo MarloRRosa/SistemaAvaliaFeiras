@@ -830,52 +830,127 @@
 document.addEventListener('DOMContentLoaded', () => {
     const sidebar = document.getElementById('sidebar');
     const sidebarToggle = document.getElementById('sidebarToggle');
-    const sidebarIcon = sidebarToggle.querySelector('i');
-    const overlay = document.getElementById('overlay');
+    const sidebarIcon = sidebarToggle.querySelector('i'); // ícone do botão
+    const contentArea = document.getElementById('contentArea');
     const tabLinks = document.querySelectorAll('.sidebar-link');
+    const tabContents = document.querySelectorAll('.tab-content');
+    const overlay = document.getElementById('overlay');
 
-    const toggleSidebarMobile = () => {
-        const isOpen = sidebar.classList.contains('show');
-        if (isOpen) {
-            sidebar.classList.remove('show');
-            overlay.classList.remove('active');
-            sidebarIcon.classList.remove('fa-times');
-            sidebarIcon.classList.add('fa-bars');
-        } else {
-            sidebar.classList.add('show');
-            overlay.classList.add('active');
-            sidebarIcon.classList.remove('fa-bars');
-            sidebarIcon.classList.add('fa-times');
-        }
+    // Função para ativar a aba
+    const activateTab = (tabId) => {
+        tabLinks.forEach(link => link.classList.remove('active'));
+        tabContents.forEach(content => content.classList.add('hidden'));
+
+        const activeLink = document.querySelector(`.sidebar-link[data-tab="${tabId}"]`);
+        const activeContent = document.getElementById(tabId);
+
+        if (activeLink) activeLink.classList.add('active');
+        if (activeContent) activeContent.classList.remove('hidden');
     };
 
-    sidebarToggle.addEventListener('click', () => {
-        if (window.innerWidth <= 768) {
-            toggleSidebarMobile();
-        }
-    });
+    // Abas + URL persistência
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialTabFromUrl = urlParams.get('tab');
+    const savedTab = localStorage.getItem('activeTab');
+    const initialTab = initialTabFromUrl || savedTab || 'dashboard-geral';
+    activateTab(initialTab);
 
     tabLinks.forEach(link => {
-        link.addEventListener('click', () => {
+        link.addEventListener('click', (event) => {
+            event.preventDefault();
+            const tabId = link.dataset.tab;
+            activateTab(tabId);
+            localStorage.setItem('activeTab', tabId);
+            const newUrl = new URL(window.location.href);
+            newUrl.searchParams.set('tab', tabId);
+            window.history.pushState({ path: newUrl.href }, '', newUrl.href);
+
+            // Fecha o menu no mobile ao clicar em uma aba
             if (window.innerWidth <= 768) {
-                toggleSidebarMobile();
+                closeSidebarMobile();
             }
         });
     });
 
-    if (overlay) {
-        overlay.addEventListener('click', () => {
+    // Aplica estado do sidebar ao carregar
+    const applySidebarState = () => {
+        if (window.innerWidth <= 768) {
+            sidebar.classList.remove('collapsed');
             sidebar.classList.remove('show');
-            overlay.classList.remove('active');
+            contentArea.style.marginLeft = '0px';
+            resetHamburgerIcon();
+        } else {
+            const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+            if (isCollapsed) {
+                sidebar.classList.add('collapsed');
+                contentArea.style.marginLeft = '64px';
+            } else {
+                sidebar.classList.remove('collapsed');
+                contentArea.style.marginLeft = '250px';
+            }
+            sidebar.classList.remove('show');
+            resetHamburgerIcon();
+        }
+    };
+
+    // Alterna sidebar no mobile
+    const toggleSidebarMobile = () => {
+        const isOpen = sidebar.classList.contains('show');
+        if (isOpen) {
+            closeSidebarMobile();
+        } else {
+            sidebar.classList.add('show');
+            overlay.classList.add('active');
+            if (sidebarIcon) {
+                sidebarIcon.classList.remove('fa-bars');
+                sidebarIcon.classList.add('fa-times');
+            }
+        }
+    };
+
+    const closeSidebarMobile = () => {
+        sidebar.classList.remove('show');
+        overlay.classList.remove('active');
+        resetHamburgerIcon();
+    };
+
+    const resetHamburgerIcon = () => {
+        if (sidebarIcon) {
             sidebarIcon.classList.remove('fa-times');
             sidebarIcon.classList.add('fa-bars');
+        }
+    };
+
+    // Botão de abrir/fechar sidebar
+    sidebarToggle.addEventListener('click', () => {
+        if (window.innerWidth <= 768) {
+            toggleSidebarMobile();
+        } else {
+            const isCurrentlyCollapsed = sidebar.classList.toggle('collapsed');
+            localStorage.setItem('sidebarCollapsed', isCurrentlyCollapsed);
+            contentArea.style.marginLeft = isCurrentlyCollapsed ? '64px' : '250px';
+        }
+    });
+
+    // Overlay fecha o menu
+    if (overlay) {
+        overlay.addEventListener('click', () => {
+            closeSidebarMobile();
         });
     }
 
-            // Adiciona um listener para redimensionamento de janela
-            window.addEventListener('resize', applySidebarState);
+    // Botão "X" se existir (opcional)
+    const sidebarClose = document.getElementById('sidebarClose');
+    if (sidebarClose) {
+        sidebarClose.addEventListener('click', () => {
+            closeSidebarMobile();
+        });
+    }
 
-
+    // Responsivo ao redimensionamento
+    window.addEventListener('resize', applySidebarState);
+    applySidebarState(); // aplicar ao iniciar
+    
             // Funções para os modais (permanecem as mesmas)
 
             // Mostrar modal de Projeto
