@@ -7,8 +7,8 @@
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            font-size: 11px; /* Tamanho de fonte um pouco menor para PDFs */
-            margin: 25px; /* Margens maiores para o PDF */
+            font-size: 11px;
+            margin: 25px;
             color: #333;
         }
         header {
@@ -28,52 +28,72 @@
             border: 1px solid #eee;
             border-radius: 8px;
             background-color: #f9f9f9;
-            page-break-inside: avoid; /* Tenta evitar quebrar a seção no meio da página */
+            page-break-inside: avoid;
         }
         .project-details p {
-            margin-bottom: 5px; /* Espaço menor entre os parágrafos de detalhes do projeto */
+            margin-bottom: 5px;
         }
-        .criteria-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-            font-size: 10.5px; /* Um pouco menor para a tabela de critérios */
-        }
-        .criteria-table th, .criteria-table td {
+        .criteria-group {
+            margin-bottom: 20px;
+            background-color: #fff;
+            padding: 12px;
             border: 1px solid #ddd;
-            padding: 6px 8px; /* Padding ajustado */
-            text-align: left;
-            vertical-align: top;
+            border-radius: 6px;
         }
-        .criteria-table th {
-            background-color: #e0e0e0;
+        .criteria-title {
             font-weight: bold;
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+        .criteria-description {
+            font-size: 11px;
+            margin-bottom: 6px;
+            color: #666;
+        }
+        .radio-scale {
+            display: flex;
+            gap: 8px;
+            margin: 6px 0;
+        }
+        .radio-scale label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 10px;
+        }
+        .radio-scale input[type="radio"] {
+            margin-top: 2px;
         }
         .input-box {
-            border: 1px dashed #999; /* Borda tracejada para indicar campo a ser preenchido */
-            min-height: 20px; /* Altura mínima para a nota */
-            padding: 3px; /* Padding interno */
-            margin-top: 2px;
+            border: 1px dashed #999;
+            min-height: 20px;
+            padding: 4px;
+            margin-top: 4px;
             background-color: #fff;
-            box-sizing: border-box; /* Garante que padding e border estão inclusos na largura/altura */
-            line-height: 1.2; /* Ajusta a altura da linha para texto dentro da caixa */
+            box-sizing: border-box;
+            line-height: 1.2;
+            width: 100%;
         }
         .notes-input-box {
-            min-height: 40px; /* Altura maior para observações do critério */
+            min-height: 40px;
         }
         .total-score-box {
             min-height: 25px;
-            width: 80px; /* Largura específica para a nota geral */
-            display: inline-block; /* Para que a caixa fique ao lado do texto */
+            width: 80px;
+            display: inline-block;
             vertical-align: middle;
             margin-left: 5px;
+            border: 1px dashed #999;
+            padding: 4px;
         }
         .general-comments-box {
-            min-height: 80px; /* Altura para os comentários gerais */
+            min-height: 80px;
             width: 100%;
+            border: 1px dashed #999;
+            padding: 4px;
         }
         .page-break {
-            page-break-before: always; /* Força uma nova página antes de cada projeto (exceto o primeiro) */
+            page-break-before: always;
         }
         .avaliador-info {
             text-align: right;
@@ -84,11 +104,11 @@
         .assinatura-area {
             margin-top: 50px;
             text-align: center;
-            page-break-inside: avoid; /* Tenta manter a área de assinatura na mesma página */
+            page-break-inside: avoid;
         }
         .assinatura-line {
             border-bottom: 1px solid #000;
-            width: 250px; /* Largura da linha de assinatura */
+            width: 250px;
             margin: 0 auto 5px auto;
         }
     </style>
@@ -110,7 +130,8 @@
     <% } else { %>
         <% projetos.forEach((projeto, index) => { %>
             <% if (index > 0) { %>
-                <div class="page-break"></div> <% } %>
+                <div class="page-break"></div>
+            <% } %>
             <div class="section">
                 <h3>Projeto: <%= projeto.titulo %> (Código: <%= projeto.numero || 'N/A' %>)</h3>
                 <div class="project-details">
@@ -123,37 +144,32 @@
 
                 <h4>Critérios de Avaliação:</h4>
                 <% if (projeto.criteriosAvaliacao && projeto.criteriosAvaliacao.length > 0) { %>
-                    <table class="criteria-table">
-                        <thead>
-                            <tr>
-                                <th style="width: 50%;">Critério</th>
-                                <th style="width: 15%;">Nota (5-10)</th> <th style="width: 35%;">Observações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% projeto.criteriosAvaliacao.forEach(criterio => { %>
-                                <tr>
-                                    <td>
-                                        <%= criterio.nome %>
-                                        <% if (criterio.descricao) { %>
-                                            <br><small><%= criterio.descricao %></small>
-                                        <% } %>
-                                    </td>
-                                    <td><div class="input-box"></div></td>
-                                    <td><div class="input-box notes-input-box"></div></td>
-                                </tr>
-                            <% }) %>
-                        </tbody>
-                    </table>
+                    <% projeto.criteriosAvaliacao.forEach(criterio => { %>
+                        <div class="criteria-group">
+                            <div class="criteria-title"><%= criterio.nome %></div>
+                            <% if (criterio.descricao) { %>
+                                <div class="criteria-description"><%= criterio.descricao %></div>
+                            <% } %>
+                            <div class="radio-scale">
+                                <% for (let i = 5; i <= 10; i++) { %>
+                                    <label>
+                                        <span><%= i %></span>
+                                        <input type="radio" name="criterio_<%= criterio._id %>" value="<%= i %>" />
+                                    </label>
+                                <% } %>
+                            </div>
+                            <textarea class="input-box notes-input-box" placeholder="Observações..."></textarea>
+                        </div>
+                    <% }); %>
                 <% } else { %>
                     <p>Nenhum critério de avaliação encontrado para a categoria deste projeto.</p>
                 <% } %>
 
-                <h4 style="margin-top: 20px;">Notas Finais:</h4>
-                <p><strong>Nota Geral do Projeto:</strong> <div class="input-box total-score-box"></div></p>
+                <h4 style="margin-top: 20px;">Nota Geral do Projeto:</h4>
+                <div class="total-score-box"></div>
 
                 <h4 style="margin-top: 20px;">Comentários Gerais do Avaliador para este Projeto:</h4>
-                <div class="input-box general-comments-box"></div>
+                <div class="general-comments-box"></div>
             </div>
         <% }); %>
     <% } %>

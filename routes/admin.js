@@ -1773,6 +1773,94 @@ router.get('/resumo-avaliadores/pdf', verificarAdminEscola, async (req, res) => 
     }
 });
 
+// ROTA: Relatório Consolidado da Feira
+router.get('/relatorio-consolidado/pdf', verificarAdminEscola, async (req, res) => {
+    try {
+        const escolaId = req.session.adminEscola.escolaId;
+        const feiraAtual = await Feira.findOne({ status: 'ativa', escolaId: escolaId });
+        if (!feiraAtual) {
+            req.flash('error_msg', 'Nenhuma feira ativa para esta escola para gerar o relatório consolidado.');
+            if (!res.headersSent) { return res.redirect('/admin/dashboard?tab=relatorios'); }
+        }
+
+        const projetos = await Projeto.find({ feira: feiraAtual._id, escolaId: escolaId })
+            .populate('categoria')
+            .populate('criterios')
+            .lean();
+
+        const avaliacoes = await Avaliacao.find({ feira: feiraAtual._id, escolaId: escolaId }).lean();
+        const criteriosOficiais = await Criterio.find({ feira: feiraAtual._id, escolaId: escolaId }).sort({ nome: 1 }).lean();
+
+        const relatorioFinalPorProjeto = {};
+
+        for (const projeto of projetos) {
+            const categoriaNome = projeto.categoria ? projeto.categoria.nome : 'Sem Categoria';
+            if (!relatorioFinalPorProjeto[categoriaNome]) {
+                relatorioFinalPorProjeto[categoriaNome] = [];
+            }
+
+            const avaliacoesDoProjeto = avaliacoes.filter(a => a.projeto && String(a.projeto) === String(projeto._id));
+            const numAvaliacoes = avaliacoesDoProjeto.length;
+            
+            const mediasCriterios = {};
+            let totalNotaPonderadaProjeto = 0;
+            let totalPesoProjeto = 0;
+
+            for (const criterioOficial of criteriosOficiais) {
+                const notasDoCriterioParaEsteProjeto = avaliacoesDoProjeto.flatMap(avaliacao => {
+                    const notasArray = avaliacao.notas || avaliacao.itens;
+                    return (notasArray && Array.isArray(notasArray)) ? notasArray.filter(item => {
+                        const isCriterioMatch = item.criterio && (String(item.criterio) === String(criterioOficial._id));
+                        const isValorValid = item.nota !== undefined && item.nota !== null && !isNaN(parseFloat(item.nota));
+                        return isCriterioMatch && isValorValid;
+                    }) : [];
+                });
+
+                if (notasDoCriterioParaEsteProjeto.length > 0) {
+                    const sumNotas = notasDoCriterioParaEsteProjeto.reduce((acc, curr) => acc + parseFloat(curr.nota), 0);
+                    const mediaCriterio = sumNotas / notasDoCriterioParaEsteProjeto.length;
+                    mediasCriterios[String(criterioOficial._id)] = parseFloat(mediaCriterio).toFixed(2);
+
+                    const isCriterioAssociatedToProject = projeto.criterios.some(c => String(c._id) === String(criterioOficial._id));
+                    if (isCriterioAssociatedToProject) {
+                         totalNotaPonderadaProjeto += parseFloat(mediasCriterios[String(criterioOficial._id)]) * criterioOficial.peso;
+                         totalPesoProjeto += criterioOficial.peso;
+                    }
+
+                } else {
+                    mediasCriterios[String(criterioOficial._id)] = 'N/A';
+                }
+            }
+
+            const mediaGeralProjeto = totalPesoProjeto > 0 ? parseFloat(totalNotaPonderadaProjeto / totalPesoProjeto).toFixed(2) : 'N/A';
+
+            relatorioFinalPorProjeto[categoriaNome].push({
+                titulo: projeto.titulo,
+                numAvaliacoes: numAvaliacoes,
+                mediasCriterios: mediasCriterios,
+                mediaGeral: mediaGeralProjeto
+            });
+        }
+
+        const escola = await Escola.findById(escolaId).lean() || { nome: "Nome da Escola" };
+
+        await generatePdfReport(req, res, 'pdf-consolidado', {
+            titulo: 'Relatório Consolidado da Feira',
+            nomeFeira: feiraAtual.nome,
+            relatorioFinalPorProjeto: relatorioFinalPorProjeto,
+            criteriosOficiais: criteriosOficiais,
+            escola: escola
+        }, `relatorio-consolidado_${feiraAtual.nome}`);
+
+    } catch (error) {
+        console.error('Erro ao gerar PDF do relatório consolidado:', error);
+        if (!res.headersSent) {
+            req.flash('error_msg', 'Erro ao gerar PDF do relatório consolidado. Detalhes: ' + error.message);
+            res.redirect('/admin/dashboard?tab=relatorios');
+        }
+    }
+});
+
 // ===============================================
 // ROTA PARA RELATÓRIO DE AVALIAÇÃO OFFLINE
 // ===============================================
