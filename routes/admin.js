@@ -21,6 +21,7 @@ const chromium = require('@sparticuz/chromium');
 const fs = require('fs');
 const path = require('path');
 const ejs = require('ejs');
+const QRCode = require('qrcode');
 
 // Carrega variáveis de ambiente (garante que estão disponíveis para este arquivo)
 require('dotenv').config();
@@ -922,19 +923,18 @@ router.post('/avaliadores', verificarAdminEscola, async (req, res) => {
     const pin = generatePIN();
 
     const novoAvaliador = new Avaliador({
-      nome,
-      email,
-      pin,
-      escolaId,
-      feira: feira._id,
-      projetosAtribuidos: Array.isArray(projetosAtribuidos) ? projetosAtribuidos : [projetosAtribuidos]
-    });
-    const urlParaAvaliacao = `https://sistemaavalia.onrender.com/avaliar/${novoAvaliador._id}?pin=${novoAvaliador.pin}`;
-const qrCodeBase64 = await QRCode.toDataURL(urlParaAvaliacao);
+  nome,
+  email,
+  pin,
+  escolaId,
+  feira: feira._id,
+  projetosAtribuidos: Array.isArray(projetosAtribuidos) ? projetosAtribuidos : [projetosAtribuidos]
+});
 
+// Geração do QR Code após salvar o PIN
+const url = `${process.env.APP_URL || 'http://localhost:3000'}/avaliador/acesso-direto/${pin}`;
+const qrCodeBase64 = await QRCode.toDataURL(url);
 novoAvaliador.qrcode = qrCodeBase64;
-await novoAvaliador.save();
-
 
     await novoAvaliador.save();
 

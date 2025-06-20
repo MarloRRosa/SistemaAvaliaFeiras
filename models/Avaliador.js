@@ -39,6 +39,9 @@ const AvaliadorSchema = new mongoose.Schema({
   dataCadastro: {
     type: Date,
     default: Date.now
+  },
+  qrcode: {
+    type: String // <- adicionado
   }
 });
 
