@@ -1943,20 +1943,27 @@ router.get('/relatorio/avaliacao-offline/:feiraId/:avaliadorId', verificarAdminE
         const dataForReport = {
             titulo: `Relatório de Avaliação Offline - ${feira.nome}`,
             feira: feira,
-            projetos: projetos.map(p => {
-                const categoriaCriterios = p.categoria ? criteriosPorCategoria[p.categoria._id.toString()] || [] : [];
-                return {
-                    ...p,
-                    criteriosAvaliacao: categoriaCriterios,
-                    escolaNome: p.escolaId ? p.escolaId.nome : 'N/A',
-                    alunos: p.alunos && p.alunos.length > 0 
-                        ? p.alunos.map(aluno => typeof aluno === 'object' && aluno !== null && aluno.nome ? aluno.nome : aluno).join(', ') 
-                        : 'N/A',
-                    resumo: p.descricao || 'N/A',
-                    numero: p.numero || 'N/A',
-                    area: p.area || 'N/A'
-                };
-            }),
+            // Filtra os critérios da escola
+const criterios = await Criterio.find({ escolaId: adminEscolaId }).lean();
+
+projetos: projetos.map(p => {
+    const criteriosIds = p.criterios || [];
+    const criteriosDoProjeto = criteriosIds.length > 0
+        ? criterios.filter(c => criteriosIds.some(id => String(id) === String(c._id)))
+        : [];
+
+    return {
+        ...p,
+        criteriosAvaliacao: criteriosDoProjeto,
+        escolaNome: p.escolaId ? p.escolaId.nome : 'N/A',
+        alunos: p.alunos && p.alunos.length > 0 
+            ? p.alunos.map(aluno => typeof aluno === 'object' && aluno !== null && aluno.nome ? aluno.nome : aluno).join(', ') 
+            : 'N/A',
+        resumo: p.descricao || 'N/A',
+        numero: p.numero || 'N/A',
+        area: p.area || 'N/A'
+    };
+}),
             avaliador: avaliador,
             formatarData // ✅ Passa a função para o EJS
         };
