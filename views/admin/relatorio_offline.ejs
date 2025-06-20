@@ -136,6 +136,7 @@
                 <h3>Projeto: <%= projeto.titulo %> (Código: <%= projeto.numero || 'N/A' %>)</h3>
                 <div class="project-details">
                     <p><strong>Escola:</strong> <%= projeto.escolaNome || 'N/A' %></p>
+                    <p><strong>Alunos:</strong> <%= projeto.alunos || 'N/A' %></p>
                     <p><strong>Categoria:</strong> <%= projeto.categoria ? projeto.categoria.nome : 'N/A' %></p>
                     <p><strong>Resumo:</strong> <%= projeto.resumo || 'N/A' %></p>
                 </div>
@@ -162,7 +163,6 @@
                 <% } else { %>
                     <p>Nenhum critério de avaliação encontrado para a categoria deste projeto.</p>
                 <% } %>
-
 
                 <h4 style="margin-top: 20px;">Comentários Gerais do Avaliador para este Projeto:</h4>
                 <div class="general-comments-box"></div>

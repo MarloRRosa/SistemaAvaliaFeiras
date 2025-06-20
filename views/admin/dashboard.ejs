@@ -486,14 +486,32 @@
             </select>
         </div>
         <div class="mb-6">
-            <label for="selectAvaliadorRelatorio" class="block text-gray-700 text-sm font-bold mb-2">Selecione o Avaliador (Opcional):</label>
-            <select id="selectAvaliadorRelatorio" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                <option value="">Todos os Avaliadores</option>
-                <% avaliadores.forEach(avaliador => { %>
-                    <option value="<%= avaliador._id %>"><%= avaliador.nome %> (<%= avaliador.email %>)</option>
-                <% }); %>
-            </select>
-        </div>
+    <label class="block text-gray-700 text-sm font-bold mb-2">Selecione o(s) Avaliador(es):</label>
+    
+    <div class="mb-2">
+        <label class="inline-flex items-center">
+            <input type="checkbox" id="selecionarTodosAvaliadores" class="form-checkbox h-4 w-4 text-blue-600">
+            <span class="ml-2 text-sm text-gray-700">Selecionar todos os avaliadores</span>
+        </label>
+    </div>
+
+    <div id="avaliadoresCheckboxes" class="max-h-48 overflow-y-auto border border-gray-300 p-3 rounded-lg bg-gray-50 shadow-inner">
+        <% if (avaliadores && avaliadores.length > 0) { %>
+            <% avaliadores.forEach(avaliador => { %>
+                <div class="flex items-center mb-2">
+                    <input type="checkbox" id="avaliador_<%= avaliador._id %>" 
+                           name="avaliadoresSelecionados" value="<%= avaliador._id %>" 
+                           class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                    <label for="avaliador_<%= avaliador._id %>" class="text-gray-700 text-base">
+                        <%= avaliador.nome %> (<%= avaliador.email %>)
+                    </label>
+                </div>
+            <% }); %>
+        <% } else { %>
+            <p class="text-gray-500">Nenhum avaliador disponível.</p>
+        <% } %>
+    </div>
+</div>
         <div class="flex justify-end">
             <button id="btnGerarRelatorioOfflineConfirm" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mr-2">Gerar PDF</button>
             <button type="button" onclick="fecharModalRelatorioOffline()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">Cancelar</button>
