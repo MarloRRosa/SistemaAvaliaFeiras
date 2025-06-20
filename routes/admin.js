@@ -1831,7 +1831,7 @@ router.get('/resumo-avaliadores/pdf', verificarAdminEscola, async (req, res) => 
 });
 
 // ROTA: Relatório Consolidado da Feira
-router.get('/relatorios/consolidado/pdf', verificarAdminEscola, async (req, res) => {
+router.get('/pdr-consolidado/pdf', verificarAdminEscola, async (req, res) => {
     try {
         const escolaId = req.session.adminEscola.escolaId;
         const feiraAtual = await Feira.findOne({ status: 'ativa', escolaId });
@@ -1918,7 +1918,7 @@ router.get('/relatorios/consolidado/pdf', verificarAdminEscola, async (req, res)
 
         const escola = await Escola.findById(escolaId).lean();
 
-        await generatePdfReport(req, res, 'pdf-relatorio-consolidado', {
+        await generatePdfReport(req, res, 'pdf-consolidado', {
             titulo: 'Relatório Consolidado de Avaliações',
             nomeFeira: feiraAtual.nome,
             criteriosOficiais,
