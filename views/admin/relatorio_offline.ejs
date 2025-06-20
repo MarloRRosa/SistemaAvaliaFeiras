@@ -18,7 +18,10 @@
       padding-bottom: 10px;
       /* page-break-after: always; /* Opcional: Garante que o cabeçalho fique em sua própria página, ou que o conteúdo comece em uma nova */
     }
-    h1, h2, h3, h4 {
+    h1 {
+    font-size: 48px; /* Usando pixels para um tamanho fixo */
+}
+    h2, h3, h4 {
       color: #2c3e50;
       margin-top: 0;
       margin-bottom: 10px;
@@ -172,12 +175,12 @@
 </head>
 <body>
   <header>
-  <h1>Relatório de Avaliação Offline</h1>
+  <h1>Relatório de Avaliação</h1>
   <h2>Feira: <%= feira.nome %></h2>
   <p>Período: <%= formatarData(feira.inicioFeira) %> a <%= formatarData(feira.fimFeira) %></p>
 
   <% if (escola.logo) { %>
-    <img src="<%= escola.logo %>" alt="Logo da Escola" style="max-height: 80px; margin-bottom: 10px;">
+    <img src="<%= escola.logo %>" alt="Logo da Escola" style="max-height: 180px; max-width: 300px; margin-bottom: 10px;">
   <% } %>
 
   <% if (avaliador) { %>
@@ -186,14 +189,12 @@
     <% if (avaliador.qrcode) { %>
       <div style="text-align: center; margin-bottom: 20px;">
         <p><strong>PIN de Acesso:</strong> <%= avaliador.pin %></p>
-        <img src="<%= avaliador.qrcode %>" alt="QR Code de acesso" style="height: 120px;">
+        <img src="<%= avaliador.qrcode %>" alt="QR Code de acesso" style="height: 180px; width: 180px;">
         <p style="font-size: 10px; color: #555;">Escaneie este código para acessar a tela de avaliação.</p>
       </div>
     <% } %>
   <% } %>
 </header>
-
-
 
   <% if (projetos.length === 0) { %>
     <div class="section">
