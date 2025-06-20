@@ -10,6 +10,7 @@
     "node": ">=18"
   },
   "dependencies": {
+    "@sparticuz/chromium": "^126.0.0",
     "bcryptjs": "^2.4.3",
     "connect-flash": "^0.1.1",
     "connect-mongodb-session": "^5.0.0",
@@ -21,13 +22,12 @@
     "method-override": "^3.0.0",
     "mongoose": "^8.15.1",
     "nodemailer": "^7.0.3",
-    "puppeteer": "^24.10.1",
-    "@sparticuz/chromium": "^126.0.0" 
+    "puppeteer": "^24.10.1"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.21",
     "postcss": "^8.4.39",
-    "tailwindcss": "^3.4.4"
+    "tailwindcss": "^3.4.17"
   },
   "repository": {
     "type": "git",
