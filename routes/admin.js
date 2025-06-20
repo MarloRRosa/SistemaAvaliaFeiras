@@ -1940,33 +1940,32 @@ router.get('/relatorio/avaliacao-offline/:feiraId/:avaliadorId', verificarAdminE
             return `${day}/${month}/${year}`;
         };
 
+        const criterios = await Criterio.find({ escolaId: adminEscolaId }).lean();
+
         const dataForReport = {
-            titulo: `Relatório de Avaliação Offline - ${feira.nome}`,
-            feira: feira,
-            // Filtra os critérios da escola
-const criterios = await Criterio.find({ escolaId: adminEscolaId }).lean();
+    titulo: `Relatório de Avaliação Offline - ${feira.nome}`,
+    feira: feira,
+    projetos: projetos.map(p => {
+        const criteriosIds = p.criterios || [];
+        const criteriosDoProjeto = criteriosIds.length > 0
+            ? criterios.filter(c => criteriosIds.some(id => String(id) === String(c._id)))
+            : [];
 
-projetos: projetos.map(p => {
-    const criteriosIds = p.criterios || [];
-    const criteriosDoProjeto = criteriosIds.length > 0
-        ? criterios.filter(c => criteriosIds.some(id => String(id) === String(c._id)))
-        : [];
-
-    return {
-        ...p,
-        criteriosAvaliacao: criteriosDoProjeto,
-        escolaNome: p.escolaId ? p.escolaId.nome : 'N/A',
-        alunos: p.alunos && p.alunos.length > 0 
-            ? p.alunos.map(aluno => typeof aluno === 'object' && aluno !== null && aluno.nome ? aluno.nome : aluno).join(', ') 
-            : 'N/A',
-        resumo: p.descricao || 'N/A',
-        numero: p.numero || 'N/A',
-        area: p.area || 'N/A'
-    };
-}),
-            avaliador: avaliador,
-            formatarData // ✅ Passa a função para o EJS
+        return {
+            ...p,
+            criteriosAvaliacao: criteriosDoProjeto,
+            escolaNome: p.escolaId ? p.escolaId.nome : 'N/A',
+            alunos: p.alunos && p.alunos.length > 0 
+                ? p.alunos.map(aluno => typeof aluno === 'object' && aluno !== null && aluno.nome ? aluno.nome : aluno).join(', ') 
+                : 'N/A',
+            resumo: p.descricao || 'N/A',
+            numero: p.numero || 'N/A',
+            area: p.area || 'N/A'
         };
+    }),
+    avaliador: avaliador,
+    formatarData
+};
 
         const filename = `relatorio_avaliacao_offline_${feira.nome.replace(/\s/g, '_')}_${avaliador.nome.replace(/\s/g, '_').substring(0, 20)}`;
         await generatePdfReport(req, res, 'relatorio_offline', dataForReport, filename);
