@@ -140,6 +140,25 @@
                     class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" 
                 ><%= typeof mensagem != 'undefined' ? mensagem : '' %></textarea>
             </div>
+
+            <div class="bg-gray-50 border border-gray-300 p-4 rounded-lg text-sm text-gray-700 mt-6">
+  <h4 class="text-base font-semibold text-gray-800 mb-2">Termo de Uso do AvaliaFeiras</h4>
+  <div class="h-40 overflow-y-scroll p-3 border rounded bg-white mb-4">
+    <p class="mb-2">Ao solicitar o acesso ao sistema AvaliaFeiras, o(a) responsável declara estar ciente de que:</p>
+    <ul class="list-disc pl-5 mb-3 space-y-2">
+      <li>As informações fornecidas são verdadeiras e de responsabilidade da escola.</li>
+      <li>O sistema será utilizado apenas para fins educacionais e institucionais.</li>
+      <li>Os dados informados serão utilizados exclusivamente para contato e gestão da feira.</li>
+      <li>O uso indevido da plataforma poderá acarretar na suspensão do acesso.</li>
+      <li>Este aceite poderá ser registrado com data, horário e endereço IP para fins legais.</li>
+    </ul>
+    <p>Se não concordar com os termos, não continue com o envio desta solicitação.</p>
+  </div>
+  <label class="inline-flex items-start gap-2">
+    <input type="checkbox" id="aceiteTermo" name="aceiteTermo" class="form-checkbox h-4 w-4 text-blue-600">
+    <span>Declaro que li e aceito os termos de uso do AvaliaFeiras.</span>
+  </label>
+</div>
             
             <button 
                 type="submit" 
@@ -156,3 +175,24 @@
 
     </div>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const checkbox = document.getElementById('aceiteTermo');
+    const btnSubmit = document.querySelector('form button[type="submit"]');
+
+    // Desativa o botão inicialmente
+    btnSubmit.disabled = true;
+    btnSubmit.classList.add('opacity-50', 'cursor-not-allowed');
+
+    checkbox.addEventListener('change', () => {
+      if (checkbox.checked) {
+        btnSubmit.disabled = false;
+        btnSubmit.classList.remove('opacity-50', 'cursor-not-allowed');
+      } else {
+        btnSubmit.disabled = true;
+        btnSubmit.classList.add('opacity-50', 'cursor-not-allowed');
+      }
+    });
+  });
+</script>

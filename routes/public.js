@@ -51,25 +51,31 @@ router.post('/solicitar-acesso', async (req, res) => {
     const {
         nomeEscola, cnpj, endereco, telefoneEscola,
         nomeResponsavel, emailContato, cargoResponsavel, telefoneContato,
-        tipoEvento, previsaoUso, mensagem
+        tipoEvento, previsaoUso, mensagem,
+        aceiteTermo
     } = req.body;
 
     let errors = [];
 
-    // Validações (mantenha como está, ou adicione mais se quiser)
+    // Validações
     if (!nomeEscola || nomeEscola.trim().length < 3) errors.push('Nome da escola é obrigatório e deve ter pelo menos 3 caracteres.');
     if (!endereco || endereco.trim().length < 5) errors.push('Endereço é obrigatório.');
     if (!telefoneEscola || !/^\d{10,11}$/.test(telefoneEscola.replace(/\D/g, ''))) errors.push('Telefone da escola é obrigatório e deve ter 10 ou 11 dígitos.');
-    
+
     if (!nomeResponsavel || nomeResponsavel.trim().length < 3) errors.push('Nome do responsável é obrigatório.');
     if (!emailContato || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailContato)) errors.push('E-mail de contato inválido.');
     if (!cargoResponsavel || cargoResponsavel.trim().length < 3) errors.push('Cargo do responsável é obrigatório.');
     if (!telefoneContato || !/^\d{10,11}$/.test(telefoneContato.replace(/\D/g, ''))) errors.push('Telefone de contato é obrigatório e deve ter 10 ou 11 dígitos.');
-    
+
     if (!tipoEvento || tipoEvento.trim() === '') errors.push('Tipo de evento é obrigatório.');
 
     if (cnpj && !/^\d{14}$/.test(cnpj.replace(/\D/g, ''))) {
         errors.push('CNPJ inválido. Deve conter 14 dígitos.');
+    }
+
+    // ✅ Verificação do aceite dos termos
+    if (!aceiteTermo) {
+        errors.push('Você deve aceitar os termos de uso para enviar a solicitação.');
     }
 
     if (errors.length > 0) {
@@ -77,7 +83,6 @@ router.post('/solicitar-acesso', async (req, res) => {
         return res.render('public/solicitar-acesso', {
             titulo: 'Solicitar Acesso',
             layout: 'layouts/public',
-            // AQUI está correto usar req.body, pois é um POST com erro de validação.
             nomeEscola, cnpj, endereco, telefoneEscola,
             nomeResponsavel, emailContato, cargoResponsavel, telefoneContato,
             tipoEvento, previsaoUso, mensagem
@@ -115,55 +120,35 @@ router.post('/solicitar-acesso', async (req, res) => {
             tipoEvento: tipoEvento.trim(),
             previsaoUso: previsaoUso ? previsaoUso.trim() : undefined,
             mensagem: mensagem ? mensagem.trim() : undefined,
-            status: 'Pendente'
+            status: 'Pendente',
+            dataSolicitacao: new Date(),
+            ipSolicitante: req.ip // ✅ Armazena IP do solicitante
         });
+
         await novaSolicitacao.save();
 
         const superAdminEmail = process.env.SUPER_ADMIN_EMAIL;
         const appUrl = process.env.APP_URL || 'http://localhost:3000';
 
         if (!superAdminEmail) {
-            console.warn('Variável de ambiente SUPER_ADMIN_EMAIL não configurada. E-mail de notificação não será enviado.');
+            console.warn('Variável SUPER_ADMIN_EMAIL não configurada.');
         } else {
             const mailOptions = {
                 from: process.env.EMAIL_USER,
                 to: superAdminEmail,
                 subject: `Nova Solicitação de Acesso - ${nomeEscola}`,
                 html: `
-                    <p>Uma nova escola solicitou acesso ao sistema de avaliação de projetos.</p>
-                    <p><strong>Detalhes da Solicitação:</strong></p>
+                    <p>Uma nova escola solicitou acesso ao AvaliaFeiras.</p>
                     <ul>
-                        <li><strong>ID da Solicitação:</strong> ${novaSolicitacao._id}</li>
-                        <li><strong>Data da Solicitação:</strong> ${novaSolicitacao.dataSolicitacao.toLocaleString('pt-BR')}</li>
-                    </ul>
-                    <p><strong>Detalhes da Escola:</strong></p>
-                    <ul>
+                        <li><strong>Data:</strong> ${novaSolicitacao.dataSolicitacao.toLocaleString('pt-BR')}</li>
                         <li><strong>Nome da Escola:</strong> ${nomeEscola}</li>
-                        <li><strong>CNPJ:</strong> ${cnpj || 'Não Informado'}</li>
-                        <li><strong>Endereço:</strong> ${endereco}</li>
-                        <li><strong>Telefone da Escola:</strong> ${telefoneEscola}</li>
+                        <li><strong>Responsável:</strong> ${nomeResponsavel} (${emailContato})</li>
+                        <li><strong>IP:</strong> ${req.ip}</li>
                     </ul>
-                    <p><strong>Detalhes do Responsável:</strong></p>
-                    <ul>
-                        <li><strong>Nome:</strong> ${nomeResponsavel}</li>
-                        <li><strong>E-mail:</strong> ${emailContato}</li>
-                        <li><strong>Cargo:</strong> ${cargoResponsavel}</li>
-                        <li><strong>Telefone:</strong> ${telefoneContato}</li>
-                    </ul>
-                    <p><strong>Sobre o Uso:</strong></p>
-                    <ul>
-                        <li><strong>Tipo de Evento:</strong> ${tipoEvento}</li>
-                        <li><strong>Previsão de Uso:</strong> ${previsaoUso || 'Não Informado'}</li>
-                        <li><strong>Mensagem:</strong> ${mensagem || 'Nenhuma mensagem adicional.'}</li>
-                    </ul>
-                    <p>Acesse o painel do Super Admin para analisar e aprovar/rejeitar esta solicitação:</p>
-                    <p><a href="${appUrl}/superadmin/solicitacoes">Acessar Painel de Solicitações</a></p>
-                    <p>Por favor, não responda a este e-mail diretamente. Ele foi enviado automaticamente.</p>
+                    <p><a href="${appUrl}/superadmin/solicitacoes">Ver no painel</a></p>
                 `
             };
-
             await transporter.sendMail(mailOptions);
-            console.log('E-mail de nova solicitação enviado para o Super Admin.');
         }
 
         req.flash('success_msg', 'Sua solicitação foi enviada com sucesso! Aguarde nosso contato.');
@@ -171,11 +156,11 @@ router.post('/solicitar-acesso', async (req, res) => {
     } catch (err) {
         console.error('Erro ao processar solicitação de acesso:', err);
         if (err.code === 11000) {
-             req.flash('error_msg', 'Já existe uma solicitação ou registro com este e-mail de contato ou nome de escola.');
+            req.flash('error_msg', 'Já existe uma solicitação ou registro com este e-mail de contato ou nome de escola.');
         } else {
-             req.flash('error_msg', 'Ocorreu um erro ao enviar sua solicitação. Por favor, tente novamente.');
+            req.flash('error_msg', 'Ocorreu um erro ao enviar sua solicitação. Por favor, tente novamente.');
         }
-        res.redirect('/solicitar-acesso'); // Redireciona para o formulário
+        res.redirect('/solicitar-acesso');
     }
 });
 
