@@ -13,6 +13,7 @@ const Feira = require('../models/Feira');
 const bcrypt = require('bcryptjs');
 const SolicitacaoAcesso = require('../models/SolicitacaoAcesso');
 const nodemailer = require('nodemailer');
+const passport = require('passport'); // Importante: Adicione esta linha se você lida com passport.authenticate aqui
 require('dotenv').config();
 
 // ========================================================================
@@ -56,11 +57,14 @@ const transporter = nodemailer.createTransport({
 });
 
 // Middleware para verificar se o usuário é Super Admin
+// Esta é a linha 60
 function verificarSuperAdmin(req, res, next) {
-    if (req.isAuthenticated() && req.user.role === 'superadmin') {
+    // Certifique-se de que req.isAuthenticated() exista antes de chamá-lo
+    // Isso deve estar garantido pela configuração do Passport.js no seu app.js
+    if (req.isAuthenticated && req.isAuthenticated() && req.user.role === 'superadmin') {
         return next();
     }
-    req.flash('error_msg', 'Você não tem permissão de Super Administrador.');
+    req.flash('error_msg', 'Você não tem permissão de Super Administrador ou não está logado.');
     res.redirect('/superadmin/login');
 }
 
@@ -68,33 +72,34 @@ function verificarSuperAdmin(req, res, next) {
 // Rotas de Páginas
 // ========================================================================
 
-// Rota de Login do Super Admin
+// Rota de Login do Super Admin (GET)
+// ESTA ROTA NÃO DEVE TER O verificarSuperAdmin como middleware.
 router.get('/login', (req, res) => {
-    if (req.isAuthenticated() && req.user.role === 'superadmin') {
+    // Se o usuário JÁ ESTÁ autenticado como superadmin, redireciona para o dashboard
+    if (req.isAuthenticated && req.isAuthenticated() && req.user.role === 'superadmin') {
         return res.redirect('/superadmin/dashboard');
     }
+    // Caso contrário, renderiza a página de login
     res.render('superadmin/login', { titulo: 'Login Super Admin', layout: 'layout_login' });
 });
 
-// Rota para processar o Login do Super Admin (geralmente via POST, usando Passport.js)
-// Assume-se que você tenha uma rota POST para login configurada com o Passport.js
-// Exemplo:
-// router.post('/login', passport.authenticate('local', {
-//     successRedirect: '/superadmin/dashboard',
-//     failureRedirect: '/superadmin/login',
-//     failureFlash: true
-// }));
+// Rota para processar o Login do Super Admin (POST)
+// Use a estratégia 'superadmin-local' que você definiu no app.js
+router.post('/login', passport.authenticate('superadmin-local', {
+    successRedirect: '/superadmin/dashboard',
+    failureRedirect: '/superadmin/login',
+    failureFlash: true
+}));
 
 
 // Rota para o Dashboard do Super Admin
-// Esta rota agora renderiza a página EJS e passa dados iniciais ou vazios
-// O carregamento dos dados das abas será feito pelo JavaScript do front-end via APIs.
+// Esta sim DEVE USAR o verificarSuperAdmin, pois exige autenticação.
 router.get('/dashboard', verificarSuperAdmin, async (req, res) => {
     try {
-        const activeTab = req.query.tab || 'visao-geral'; // Define a aba ativa padrão
+        const activeTab = req.query.tab || 'visao-geral';
 
-        // AQUI: Você pode optar por pré-carregar os dados da aba inicial (visao-geral)
-        // para que ela não precise fazer uma requisição extra no carregamento da página.
+        // Remova a pré-carga de dados aqui se você quiser que tudo seja carregado via API.
+        // Se você quiser manter a visão geral pré-carregada, mantenha esta lógica.
         let dataForInitialTab = {};
         if (activeTab === 'visao-geral') {
             dataForInitialTab.totalEscolas = await Escola.countDocuments();
@@ -104,18 +109,17 @@ router.get('/dashboard', verificarSuperAdmin, async (req, res) => {
             dataForInitialTab.totalAvaliacoes = await Avaliacao.countDocuments();
             dataForInitialTab.totalSolicitacoesPendentes = await SolicitacaoAcesso.countDocuments({ status: 'Pendente' });
         }
-        // Para outras abas, os dados serão carregados sob demanda pelo front-end
 
         const success_msg = req.flash('success_msg');
         const error_msg = req.flash('error_msg');
-        const error = req.flash('error'); // Para o passport.js, se usado
+        const error = req.flash('error');
 
         res.render('superadmin/dashboard', {
             titulo: 'Dashboard Super Admin',
             userName: req.user.nome,
             userRole: 'Super Admin',
             activeTab: activeTab,
-            dataForTab: dataForInitialTab, // Passa apenas os dados da aba inicial
+            dataForTab: dataForInitialTab,
             success_msg,
             error_msg,
             error
@@ -124,12 +128,13 @@ router.get('/dashboard', verificarSuperAdmin, async (req, res) => {
     } catch (err) {
         console.error('Erro ao carregar dashboard do Super Admin:', err);
         req.flash('error_msg', 'Erro ao carregar o dashboard.');
-        res.redirect('/superadmin/login'); // Redireciona em caso de erro grave
+        res.redirect('/superadmin/login');
     }
 });
 
 // ========================================================================
 // NOVAS ROTAS DE API PARA CARREGAMENTO DINÂMICO DAS ABAS (AJAX/FETCH)
+// Todas estas devem ter verificarSuperAdmin
 // ========================================================================
 
 // API para dados da aba "Visão Geral"
@@ -183,27 +188,148 @@ router.get('/api/dashboard/solicitacoes', verificarSuperAdmin, async (req, res) 
 });
 
 // TODO: ADICIONAR ROTAS DE API PARA AS OUTRAS ABAS AQUI (PROJETOS SEM AVALIAÇÃO, RANKING, AVALIADORES)
-// Ex: router.get('/api/dashboard/projetos-sem-avaliacao', verificarSuperAdmin, async (req, res) => {
-//     try {
-//         // Lógica para buscar projetos sem avaliação
-//         const projetosSemAvaliacao = await Projeto.find({ statusAvaliacao: 'Pendente' }).lean();
-//         res.json(projetosSemAvaliacao);
-//     } catch (err) {
-//         console.error('Erro ao carregar projetos sem avaliação (API):', err);
-//         res.status(500).json({ message: 'Erro ao carregar projetos.' });
-//     }
-// });
+router.get('/api/dashboard/projetos-sem-avaliacao', verificarSuperAdmin, async (req, res) => {
+    try {
+        // Encontra projetos que não têm avaliações associadas
+        const projetosSemAvaliacao = await Projeto.aggregate([
+            {
+                $lookup: {
+                    from: 'avaliacaos', // Nome da coleção de avaliações (geralmente plural e minúsculo)
+                    localField: '_id',
+                    foreignField: 'projeto',
+                    as: 'avaliacoes'
+                }
+            },
+            {
+                $match: {
+                    'avaliacoes': { $eq: [] } // Onde o array de avaliações está vazio
+                }
+            },
+            {
+                $lookup: {
+                    from: 'escolas', // Nome da coleção de escolas
+                    localField: 'escola',
+                    foreignField: '_id',
+                    as: 'escolaInfo'
+                }
+            },
+            {
+                $unwind: { path: '$escolaInfo', preserveNullAndEmptyArrays: true } // Para desconstruir o array escolaInfo
+            },
+            {
+                $project: {
+                    titulo: 1,
+                    autores: 1,
+                    escola: '$escolaInfo.nome' // Pega apenas o nome da escola
+                }
+            }
+        ]);
+        res.json(projetosSemAvaliacao);
+    } catch (err) {
+        console.error('Erro ao carregar projetos sem avaliação (API):', err);
+        res.status(500).json({ message: 'Erro ao carregar projetos sem avaliação.' });
+    }
+});
+
+router.get('/api/dashboard/ranking-projetos', verificarSuperAdmin, async (req, res) => {
+    try {
+        const ranking = await Avaliacao.aggregate([
+            {
+                $group: {
+                    _id: '$projeto',
+                    somaNotas: { $sum: '$notaFinal' },
+                    contagemAvaliacoes: { $sum: 1 }
+                }
+            },
+            {
+                $addFields: {
+                    media: { $divide: ['$somaNotas', '$contagemAvaliacoes'] }
+                }
+            },
+            {
+                $sort: { media: -1 } // Ordena pela maior média
+            },
+            {
+                $lookup: {
+                    from: 'projetos', // Nome da coleção de projetos
+                    localField: '_id',
+                    foreignField: '_id',
+                    as: 'projetoInfo'
+                }
+            },
+            {
+                $unwind: '$projetoInfo'
+            },
+            {
+                $lookup: {
+                    from: 'escolas', // Nome da coleção de escolas
+                    localField: 'projetoInfo.escola',
+                    foreignField: '_id',
+                    as: 'escolaInfo'
+                }
+            },
+            {
+                $unwind: { path: '$escolaInfo', preserveNullAndEmptyArrays: true }
+            },
+            {
+                $project: {
+                    projeto: {
+                        titulo: '$projetoInfo.titulo',
+                        autores: '$projetoInfo.autores',
+                        categoria: '$projetoInfo.categoria'
+                    },
+                    escola: '$escolaInfo',
+                    media: 1,
+                    contagemAvaliacoes: 1
+                }
+            }
+        ]);
+
+        res.json(ranking);
+    } catch (err) {
+        console.error('Erro ao carregar ranking de projetos (API):', err);
+        res.status(500).json({ message: 'Erro ao carregar ranking de projetos.' });
+    }
+});
+
+router.get('/api/dashboard/resumo-avaliadores', verificarSuperAdmin, async (req, res) => {
+    try {
+        const avaliadores = await Avaliador.aggregate([
+            {
+                $lookup: {
+                    from: 'avaliacaos', // Nome da coleção de avaliações
+                    localField: '_id',
+                    foreignField: 'avaliador',
+                    as: 'avaliacoesRealizadas'
+                }
+            },
+            {
+                $project: {
+                    nome: 1,
+                    email: 1,
+                    avaliacoesRealizadas: { $size: '$avaliacoesRealizadas' } // Conta o número de avaliações
+                }
+            },
+            {
+                $sort: { nome: 1 }
+            }
+        ]);
+        res.json(avaliadores);
+    } catch (err) {
+        console.error('Erro ao carregar resumo de avaliadores (API):', err);
+        res.status(500).json({ message: 'Erro ao carregar resumo de avaliadores.' });
+    }
+});
+
 
 // ========================================================================
 // Rotas de CRUD para Escolas (EXISTENTES - MANTIDAS)
 // ========================================================================
 
 // Rota para listar todas as escolas (se você tiver uma página separada para isso)
-// Ou esta rota pode ser removida se o dashboard já gerencia isso via API
 router.get('/escolas', verificarSuperAdmin, async (req, res) => {
     try {
         const escolas = await Escola.find().sort({ nome: 1 }).lean();
-        // Popule o admin para cada escola se precisar dos detalhes do admin na listagem
         for (const escola of escolas) {
             escola.admin = await Admin.findOne({ escola: escola._id }).lean();
         }
@@ -257,21 +383,17 @@ router.post('/escolas/nova', verificarSuperAdmin, async (req, res) => {
             userName: req.user.nome,
             userRole: 'Super Admin',
             errors: errors,
-            escola: req.body // Para preencher os campos do formulário novamente
+            escola: req.body
         });
     } else {
         try {
-            // Verificar se já existe uma escola com o mesmo nome ou e-mail de contato
             const existingEscola = await Escola.findOne({ $or: [{ nome: nome }, { emailContato: emailContato }] });
             if (existingEscola) {
                 req.flash('error_msg', 'Já existe uma escola com este nome ou e-mail de contato.');
                 return res.redirect('/superadmin/escolas/nova');
             }
 
-            // Gerar email de admin com base no nome da escola
-            const adminEmail = `${nome.toLowerCase().replace(/\s/g, '')}@admin.com`; // Exemplo: escolax@admin.com
-
-            // Hash da senha do administrador
+            const adminEmail = `${nome.toLowerCase().replace(/\s/g, '')}@admin.com`;
             const hashedPassword = await hashPassword(senhaAdmin);
 
             const novaEscola = new Escola({
@@ -288,13 +410,13 @@ router.post('/escolas/nova', verificarSuperAdmin, async (req, res) => {
                 nome: `Admin ${nome}`,
                 email: adminEmail,
                 password: hashedPassword,
-                escola: escolaSalva._id // Vincula o admin à escola
+                escola: escolaSalva._id
             });
 
             await novoAdmin.save();
 
             req.flash('success_msg', 'Escola e administrador cadastrados com sucesso!');
-            res.redirect('/superadmin/escolas'); // Redireciona para a lista de escolas
+            res.redirect('/superadmin/escolas');
         } catch (err) {
             console.error('Erro ao cadastrar escola:', err);
             req.flash('error_msg', 'Erro ao cadastrar escola. Tente novamente.');
@@ -342,12 +464,12 @@ router.post('/escolas/:id/editar', verificarSuperAdmin, async (req, res) => {
 
     if (errors.length > 0) {
         const escola = await Escola.findById(escolaId).lean();
-        escola.admin = await Admin.findOne({ escola: escola._id }).lean(); // Popula o admin para o formulário
+        escola.admin = await Admin.findOne({ escola: escola._id }).lean();
         res.render('superadmin/detalhes_escola', {
             titulo: `Detalhes da Escola: ${escola.nome}`,
             userName: req.user.nome,
             userRole: 'Super Admin',
-            escola: { ...escola, ...req.body }, // Mescla os dados do body para preencher
+            escola: { ...escola, ...req.body },
             errors: errors
         });
     } else {
@@ -377,10 +499,9 @@ router.post('/escolas/:id/deletar', verificarSuperAdmin, async (req, res) => {
 
         if (!escola) {
             req.flash('error_msg', 'Escola não encontrada para exclusão.');
-            return res.redirect('/superadmin/dashboard?tab=gerenciar-escolas'); // Retorna para a aba de gerenciar escolas
+            return res.redirect('/superadmin/dashboard?tab=gerenciar-escolas');
         }
 
-        // Antes de deletar a escola, delete o administrador associado
         await Admin.deleteOne({ escola: escola._id });
 
         // TODO: Considerar deletar projetos e avaliações associadas à escola
@@ -389,11 +510,11 @@ router.post('/escolas/:id/deletar', verificarSuperAdmin, async (req, res) => {
 
         await Escola.deleteOne({ _id: escolaId });
         req.flash('success_msg', `Escola "${escola.nome}" e administrador associado deletados com sucesso.`);
-        res.redirect('/superadmin/dashboard?tab=gerenciar-escolas'); // Retorna para a aba de gerenciar escolas
+        res.redirect('/superadmin/dashboard?tab=gerenciar-escolas');
     } catch (err) {
         console.error('Erro ao deletar escola:', err);
         req.flash('error_msg', 'Erro ao deletar escola. Tente novamente.');
-        res.redirect('/superadmin/dashboard?tab=gerenciar-escolas'); // Retorna para a aba de gerenciar escolas
+        res.redirect('/superadmin/dashboard?tab=gerenciar-escolas');
     }
 });
 
@@ -405,7 +526,7 @@ router.post('/escolas/:id/reset-admin-password', verificarSuperAdmin, async (req
 
         if (!admin) {
             req.flash('error_msg', 'Administrador da escola não encontrado.');
-            return res.redirect('/superadmin/dashboard?tab=gerenciar-escolas'); // Retorna para a aba de gerenciar escolas
+            return res.redirect('/superadmin/dashboard?tab=gerenciar-escolas');
         }
 
         const novaSenhaTemporaria = generateTemporaryPassword();
@@ -414,7 +535,6 @@ router.post('/escolas/:id/reset-admin-password', verificarSuperAdmin, async (req
         admin.password = hashedNovaSenha;
         await admin.save();
 
-        // Envio de e-mail com a nova senha
         const mailOptions = {
             from: process.env.EMAIL_USER,
             to: admin.email,
@@ -438,11 +558,11 @@ router.post('/escolas/:id/reset-admin-password', verificarSuperAdmin, async (req
         }
 
         req.flash('success_msg', `Senha do administrador da escola "${admin.nome.replace('Admin ', '')}" resetada com sucesso e enviada para ${admin.email}.`);
-        res.redirect('/superadmin/dashboard?tab=gerenciar-escolas'); // Retorna para a aba de gerenciar escolas
+        res.redirect('/superadmin/dashboard?tab=gerenciar-escolas');
     } catch (err) {
         console.error('Erro ao resetar senha do admin:', err);
         req.flash('error_msg', 'Erro ao resetar senha do administrador. Tente novamente.');
-        res.redirect('/superadmin/dashboard?tab=gerenciar-escolas'); // Retorna para a aba de gerenciar escolas
+        res.redirect('/superadmin/dashboard?tab=gerenciar-escolas');
     }
 });
 
@@ -458,22 +578,20 @@ router.post('/solicitacoes/:id/aprovar', verificarSuperAdmin, async (req, res) =
 
         if (!solicitacao) {
             req.flash('error_msg', 'Solicitação não encontrada.');
-            return res.redirect('/superadmin/dashboard?tab=solicitacoes'); // Redireciona para a aba de solicitações
+            return res.redirect('/superadmin/dashboard?tab=solicitacoes');
         }
 
-        // 1. Verificar se já existe uma escola ou admin com o mesmo nome ou e-mail de contato
         const existingEscola = await Escola.findOne({ $or: [{ nome: solicitacao.nomeEscola }, { emailContato: solicitacao.emailContato }] });
         if (existingEscola) {
             req.flash('error_msg', `Já existe uma escola ou email de contato cadastrado com o nome/email "${solicitacao.nomeEscola}" ou "${solicitacao.emailContato}".`);
-            solicitacao.status = 'Conflito'; // Marcar como conflito
+            solicitacao.status = 'Conflito';
             await solicitacao.save();
-            return res.redirect('/superadmin/dashboard?tab=solicitacoes'); // Voltar para a aba de solicitações
+            return res.redirect('/superadmin/dashboard?tab=solicitacoes');
         }
 
         const novaSenhaTemporaria = generateTemporaryPassword();
         const hashedPassword = await hashPassword(novaSenhaTemporaria);
 
-        // 2. Criar a nova escola
         const novaEscola = new Escola({
             nome: solicitacao.nomeEscola,
             emailContato: solicitacao.emailContato,
@@ -483,8 +601,7 @@ router.post('/solicitacoes/:id/aprovar', verificarSuperAdmin, async (req, res) =
         });
         const escolaSalva = await novaEscola.save();
 
-        // 3. Criar o administrador para a escola
-        const adminEmail = `${solicitacao.nomeEscola.toLowerCase().replace(/\s/g, '')}@admin.com`; // Exemplo de email de admin
+        const adminEmail = `${solicitacao.nomeEscola.toLowerCase().replace(/\s/g, '')}@admin.com`;
         const novoAdmin = new Admin({
             nome: `Admin ${solicitacao.nomeEscola}`,
             email: adminEmail,
@@ -493,15 +610,13 @@ router.post('/solicitacoes/:id/aprovar', verificarSuperAdmin, async (req, res) =
         });
         await novoAdmin.save();
 
-        // 4. Atualizar o status da solicitação para 'Aprovada'
         solicitacao.status = 'Aprovada';
         solicitacao.dataAprovacao = new Date();
         await solicitacao.save();
 
-        // 5. Enviar e-mail de notificação com credenciais
         const mailOptionsAprovacao = {
             from: process.env.EMAIL_USER,
-            to: solicitacao.emailContato, // Enviar para o e-mail de contato da solicitação
+            to: solicitacao.emailContato,
             subject: 'Sua Solicitação de Acesso ao AvaliaFeiras Foi Aprovada!',
             html: `
                 <p>Olá ${solicitacao.nomeContato},</p>
@@ -526,11 +641,11 @@ router.post('/solicitacoes/:id/aprovar', verificarSuperAdmin, async (req, res) =
         }
 
         req.flash('success_msg', `Solicitação de "${solicitacao.nomeEscola}" aprovada e escola cadastrada com sucesso!`);
-        res.redirect('/superadmin/dashboard?tab=solicitacoes'); // Redireciona para a aba de solicitações
+        res.redirect('/superadmin/dashboard?tab=solicitacoes');
 
     } catch (err) {
         console.error('Erro ao aprovar solicitação:', err);
-        if (err.code === 11000) { // Erro de duplicidade do MongoDB
+        if (err.code === 11000) {
             req.flash('error_msg', `Erro: Já existe um registro com os dados fornecidos.`);
         } else {
             req.flash('error_msg', `Erro ao aprovar a solicitação: ${err.message}`);
@@ -546,14 +661,13 @@ router.post('/solicitacoes/:id/rejeitar', verificarSuperAdmin, async (req, res) 
 
         if (!solicitacao) {
             req.flash('error_msg', 'Solicitação não encontrada.');
-            return res.redirect('/superadmin/dashboard?tab=solicitacoes'); // Redireciona para a aba de solicitações
+            return res.redirect('/superadmin/dashboard?tab=solicitacoes');
         }
 
         solicitacao.status = 'Rejeitada';
         solicitacao.dataRejeicao = new Date();
         await solicitacao.save();
 
-        // Enviar e-mail de notificação de rejeição
         const mailOptionsRejeicao = {
             from: process.env.EMAIL_USER,
             to: solicitacao.emailContato,
