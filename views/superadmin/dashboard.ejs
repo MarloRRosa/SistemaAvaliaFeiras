@@ -1,3 +1,4 @@
+<!--views/superadmin/dashboard.ejs-->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -112,13 +113,13 @@
 
             <!-- Navegação por Abas -->
             <div class="flex flex-wrap border-b border-gray-200 mb-6 -mt-6 pb-2">
-                <button class="tab-button <%= activeTab === 'visao-geral' ? 'active' : '' %>" onclick="showTab(event, 'visao-geral')">Visão Geral</button>
-                <button class="tab-button <%= activeTab === 'gerenciar-escolas' ? 'active' : '' %>" onclick="showTab(event, 'gerenciar-escolas')">Gerenciar Escolas</button>
-                <button class="tab-button <%= activeTab === 'solicitacoes' ? 'active' : '' %>" onclick="showTab(event, 'solicitacoes')">Gerenciar Solicitações</button>
-                <button class="tab-button <%= activeTab === 'projetos-sem-avaliacao' ? 'active' : '' %>" onclick="showTab(event, 'projetos-sem-avaliacao')">Projetos Pendentes</button>
-                <button class="tab-button <%= activeTab === 'ranking-projetos' ? 'active' : '' %>" onclick="showTab(event, 'ranking-projetos')">Ranking de Projetos</button>
-                <button class="tab-button <%= activeTab === 'resumo-avaliadores' ? 'active' : '' %>" onclick="showTab(event, 'resumo-avaliadores')">Resumo de Avaliadores</button>
-            </div>
+  <button class="tab-button <%= activeTab === 'visao-geral' ? 'active' : '' %>" data-tab="visao-geral">Visão Geral</button>
+  <button class="tab-button <%= activeTab === 'gerenciar-escolas' ? 'active' : '' %>" data-tab="gerenciar-escolas">Gerenciar Escolas</button>
+  <button class="tab-button <%= activeTab === 'solicitacoes' ? 'active' : '' %>" data-tab="solicitacoes">Gerenciar Solicitações</button>
+  <button class="tab-button <%= activeTab === 'projetos-sem-avaliacao' ? 'active' : '' %>" data-tab="projetos-sem-avaliacao">Projetos Pendentes</button>
+  <button class="tab-button <%= activeTab === 'ranking-projetos' ? 'active' : '' %>" data-tab="ranking-projetos">Ranking de Projetos</button>
+  <button class="tab-button <%= activeTab === 'resumo-avaliadores' ? 'active' : '' %>" data-tab="resumo-avaliadores">Resumo de Avaliadores</button>
+</div>
 
             <!-- Conteúdo da Aba: Visão Geral -->
 <div id="visao-geral-tab" class="tab-content <%= activeTab === 'visao-geral' ? '' : 'hidden' %>">
@@ -487,52 +488,39 @@
             </div>
         </div>
     </div>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialTab = urlParams.get('tab') || 'visao-geral';
+    activateTab(initialTab);
 
-    <script>
-        function showTab(event, tabName) {
-            if (event) {
-                event.preventDefault(); 
-            }
-            
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.add('hidden');
-            });
-            document.getElementById(`${tabName}-tab`).classList.remove('hidden');
+    document.querySelectorAll('.tab-button').forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        const tabName = this.getAttribute('data-tab');
+        activateTab(tabName);
+        updateUrl(tabName);
+      });
+    });
+  });
 
-            document.querySelectorAll('.tab-button').forEach(button => {
-                button.classList.remove('active');
-            });
-            const clickedButton = event ? event.currentTarget : document.querySelector(`.tab-button[onclick*="'${tabName}'"]`);
-            if (clickedButton) {
-                clickedButton.classList.add('active');
-            }
+  function activateTab(tabName) {
+    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
 
-            const url = new URL(window.location);
-            url.searchParams.set('tab', tabName);
-            window.history.pushState({}, '', url);
-        }
+    const activeTabContent = document.getElementById(`${tabName}-tab`);
+    if (activeTabContent) activeTabContent.classList.remove('hidden');
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const initialTab = urlParams.get('tab') || 'visao-geral';
-            showTab(null, initialTab);
-        });
+    const activeButton = document.querySelector(`.tab-button[data-tab="${tabName}"]`);
+    if (activeButton) activeButton.classList.add('active');
+  }
 
-        function confirmResetAdminPassword(escolaId, escolaNome, adminEmail) {
-            const modal = document.getElementById('resetAdminPasswordModal');
-            const escolaNomeDisplay = document.getElementById('escolaNomeReset');
-            const adminEmailDisplay = document.getElementById('adminEmailReset');
-            const form = document.getElementById('resetAdminPasswordForm');
+  function updateUrl(tabName) {
+    const newUrl = new URL(window.location.href);
+    newUrl.searchParams.set('tab', tabName);
+    window.history.replaceState({}, '', newUrl);
+  }
+</script>
 
-            escolaNomeDisplay.innerText = escolaNome;
-            adminEmailDisplay.innerText = adminEmail;
-            form.action = `/superadmin/escolas/${escolaId}/reset-admin-password`;
-            modal.classList.remove('hidden');
-        }
-
-        function closeResetAdminPasswordModal() {
-            document.getElementById('resetAdminPasswordModal').classList.add('hidden');
-        }
-    </script>
 </body>
 </html>
