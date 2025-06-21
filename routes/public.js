@@ -6,7 +6,7 @@ const SolicitacaoAcesso = require('../models/SolicitacaoAcesso');
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 
-// Configuração do Nodemailer (mantenha como está)
+// Configuração do Nodemailer
 const transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
     port: parseInt(process.env.EMAIL_PORT, 10),
@@ -17,21 +17,19 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-// GET para a página inicial (mantenha como está)
+// Página inicial
 router.get('/', (req, res) => {
-    res.render('index', { titulo: 'Bem-vindo ao AvaliaFeiras', layout: 'layouts/public' });
+    res.render('index', {
+        titulo: 'Bem-vindo ao AvaliaFeiras',
+        layout: 'layouts/public'
+    });
 });
 
-// ====================================================================================
-// AJUSTE AQUI: Rota GET para exibir o formulário de solicitação de acesso
-// Não tentar ler req.body em GET.
-// ====================================================================================
+// GET - formulário de solicitação de acesso
 router.get('/solicitar-acesso', (req, res) => {
-    res.render('public/solicitar-acesso', { // Garanta que o caminho para sua EJS está correto (ex: 'public/solicitar-acesso')
+    res.render('public/solicitar-acesso', {
         titulo: 'Solicitar Acesso',
         layout: 'layouts/public',
-        // Para a primeira exibição do formulário (via GET), os campos devem começar vazios.
-        // O 'req.body' só viria preenchido em caso de um POST com erro, que renderizasse a página novamente.
         nomeEscola: '',
         cnpj: '',
         endereco: '',
@@ -46,7 +44,7 @@ router.get('/solicitar-acesso', (req, res) => {
     });
 });
 
-// POST para lidar com o envio do formulário de solicitação de acesso (mantenha como está)
+// POST - envio do formulário
 router.post('/solicitar-acesso', async (req, res) => {
     const {
         nomeEscola, cnpj, endereco, telefoneEscola,
@@ -55,28 +53,21 @@ router.post('/solicitar-acesso', async (req, res) => {
         aceiteTermo
     } = req.body;
 
-    let errors = [];
+    const errors = [];
 
     // Validações
-    if (!nomeEscola || nomeEscola.trim().length < 3) errors.push('Nome da escola é obrigatório e deve ter pelo menos 3 caracteres.');
-    if (!endereco || endereco.trim().length < 5) errors.push('Endereço é obrigatório.');
-    if (!telefoneEscola || !/^\d{10,11}$/.test(telefoneEscola.replace(/\D/g, ''))) errors.push('Telefone da escola é obrigatório e deve ter 10 ou 11 dígitos.');
+    if (!nomeEscola || nomeEscola.trim().length < 3) errors.push('Nome da escola deve ter pelo menos 3 caracteres.');
+    if (!endereco || endereco.trim().length < 5) errors.push('Endereço da escola é obrigatório.');
+    if (!telefoneEscola || !/^\d{10,11}$/.test(telefoneEscola.replace(/\D/g, ''))) errors.push('Telefone da escola deve ter 10 ou 11 dígitos.');
 
     if (!nomeResponsavel || nomeResponsavel.trim().length < 3) errors.push('Nome do responsável é obrigatório.');
     if (!emailContato || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailContato)) errors.push('E-mail de contato inválido.');
     if (!cargoResponsavel || cargoResponsavel.trim().length < 3) errors.push('Cargo do responsável é obrigatório.');
-    if (!telefoneContato || !/^\d{10,11}$/.test(telefoneContato.replace(/\D/g, ''))) errors.push('Telefone de contato é obrigatório e deve ter 10 ou 11 dígitos.');
+    if (!telefoneContato || !/^\d{10,11}$/.test(telefoneContato.replace(/\D/g, ''))) errors.push('Telefone de contato deve ter 10 ou 11 dígitos.');
 
-    if (!tipoEvento || tipoEvento.trim() === '') errors.push('Tipo de evento é obrigatório.');
-
-    if (cnpj && !/^\d{14}$/.test(cnpj.replace(/\D/g, ''))) {
-        errors.push('CNPJ inválido. Deve conter 14 dígitos.');
-    }
-
-    // ✅ Verificação do aceite dos termos
-    if (!aceiteTermo) {
-        errors.push('Você deve aceitar os termos de uso para enviar a solicitação.');
-    }
+    if (!tipoEvento || tipoEvento.trim().length === 0) errors.push('Tipo de evento é obrigatório.');
+    if (cnpj && !/^\d{14}$/.test(cnpj.replace(/\D/g, ''))) errors.push('CNPJ inválido. Deve conter 14 dígitos.');
+    if (!aceiteTermo) errors.push('Você deve aceitar os termos de uso.');
 
     if (errors.length > 0) {
         req.flash('error_msg', errors.join('<br>'));
@@ -90,15 +81,15 @@ router.post('/solicitar-acesso', async (req, res) => {
     }
 
     try {
-        const solicitacaoExistente = await SolicitacaoAcesso.findOne({
+        const existente = await SolicitacaoAcesso.findOne({
             $or: [
                 { emailContato: emailContato.trim(), status: 'Pendente' },
                 { nomeEscola: nomeEscola.trim(), status: 'Pendente' }
             ]
         });
 
-        if (solicitacaoExistente) {
-            req.flash('error_msg', 'Já existe uma solicitação de acesso pendente para esta escola ou e-mail.');
+        if (existente) {
+            req.flash('error_msg', 'Já existe uma solicitação pendente com este e-mail ou nome de escola.');
             return res.render('public/solicitar-acesso', {
                 titulo: 'Solicitar Acesso',
                 layout: 'layouts/public',
@@ -108,7 +99,7 @@ router.post('/solicitar-acesso', async (req, res) => {
             });
         }
 
-        const novaSolicitacao = new SolicitacaoAcesso({
+        const nova = new SolicitacaoAcesso({
             nomeEscola: nomeEscola.trim(),
             cnpj: cnpj ? cnpj.replace(/\D/g, '') : undefined,
             endereco: endereco.trim(),
@@ -118,48 +109,39 @@ router.post('/solicitar-acesso', async (req, res) => {
             cargoResponsavel: cargoResponsavel.trim(),
             telefoneContato: telefoneContato.replace(/\D/g, ''),
             tipoEvento: tipoEvento.trim(),
-            previsaoUso: previsaoUso ? previsaoUso.trim() : undefined,
-            mensagem: mensagem ? mensagem.trim() : undefined,
+            previsaoUso: previsaoUso?.trim() || '',
+            mensagem: mensagem?.trim() || '',
             status: 'Pendente',
             dataSolicitacao: new Date(),
-            ipSolicitante: req.ip // ✅ Armazena IP do solicitante
+            ipSolicitante: req.ip // <-- IP armazenado
         });
 
-        await novaSolicitacao.save();
+        await nova.save();
 
-        const superAdminEmail = process.env.SUPER_ADMIN_EMAIL;
-        const appUrl = process.env.APP_URL || 'http://localhost:3000';
-
-        if (!superAdminEmail) {
-            console.warn('Variável SUPER_ADMIN_EMAIL não configurada.');
-        } else {
-            const mailOptions = {
+        // E-mail para o superadmin
+        if (process.env.SUPER_ADMIN_EMAIL) {
+            await transporter.sendMail({
                 from: process.env.EMAIL_USER,
-                to: superAdminEmail,
+                to: process.env.SUPER_ADMIN_EMAIL,
                 subject: `Nova Solicitação de Acesso - ${nomeEscola}`,
                 html: `
-                    <p>Uma nova escola solicitou acesso ao AvaliaFeiras.</p>
+                    <p><strong>Nova solicitação de acesso</strong> recebida:</p>
                     <ul>
-                        <li><strong>Data:</strong> ${novaSolicitacao.dataSolicitacao.toLocaleString('pt-BR')}</li>
-                        <li><strong>Nome da Escola:</strong> ${nomeEscola}</li>
+                        <li><strong>Escola:</strong> ${nomeEscola}</li>
                         <li><strong>Responsável:</strong> ${nomeResponsavel} (${emailContato})</li>
                         <li><strong>IP:</strong> ${req.ip}</li>
+                        <li><strong>Data:</strong> ${new Date().toLocaleString('pt-BR')}</li>
                     </ul>
-                    <p><a href="${appUrl}/superadmin/solicitacoes">Ver no painel</a></p>
+                    <p><a href="${process.env.APP_URL || 'http://localhost:3000'}/superadmin/solicitacoes">Ver no painel</a></p>
                 `
-            };
-            await transporter.sendMail(mailOptions);
+            });
         }
 
         req.flash('success_msg', 'Sua solicitação foi enviada com sucesso! Aguarde nosso contato.');
         res.redirect('/');
     } catch (err) {
-        console.error('Erro ao processar solicitação de acesso:', err);
-        if (err.code === 11000) {
-            req.flash('error_msg', 'Já existe uma solicitação ou registro com este e-mail de contato ou nome de escola.');
-        } else {
-            req.flash('error_msg', 'Ocorreu um erro ao enviar sua solicitação. Por favor, tente novamente.');
-        }
+        console.error('Erro ao salvar solicitação:', err);
+        req.flash('error_msg', 'Erro ao processar sua solicitação. Tente novamente.');
         res.redirect('/solicitar-acesso');
     }
 });
