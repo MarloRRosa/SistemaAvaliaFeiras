@@ -121,35 +121,81 @@
             </div>
 
             <!-- Conteúdo da Aba: Visão Geral -->
-            <div id="visao-geral-tab" class="tab-content <%= activeTab === 'visao-geral' ? '' : 'hidden' %>">
-                <h3 class="text-2xl font-bold text-gray-800 mb-4">Visão Geral do Sistema</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div class="bg-blue-50 p-6 rounded-lg shadow-sm">
-                        <p class="text-gray-600">Total de Escolas</p>
-                        <p class="text-3xl font-bold text-blue-800"><%= typeof totalEscolas !== 'undefined' ? totalEscolas : 'N/A' %></p>
-                    </div>
-                    <div class="bg-green-50 p-6 rounded-lg shadow-sm">
-                        <p class="text-gray-600">Total de Administradores</p>
-                        <p class="text-3xl font-bold text-green-800"><%= typeof totalAdmins !== 'undefined' ? totalAdmins : 'N/A' %></p>
-                    </div>
-                    <div class="bg-yellow-50 p-6 rounded-lg shadow-sm">
-                        <p class="text-gray-600">Total de Avaliadores</p>
-                        <p class="text-3xl font-bold text-yellow-800"><%= typeof totalAvaliadores !== 'undefined' ? totalAvaliadores : 'N/A' %></p>
-                    </div>
-                    <div class="bg-purple-50 p-6 rounded-lg shadow-sm">
-                        <p class="text-gray-600">Total de Projetos</p>
-                        <p class="text-3xl font-bold text-purple-800"><%= typeof totalProjetos !== 'undefined' ? totalProjetos : 'N/A' %></p>
-                    </div>
-                    <div class="bg-indigo-50 p-6 rounded-lg shadow-sm">
-                        <p class="text-gray-600">Total de Avaliações</p>
-                        <p class="text-3xl font-bold text-indigo-800"><%= typeof totalAvaliacoes !== 'undefined' ? totalAvaliacoes : 'N/A' %></p>
-                    </div>
-                    <div class="bg-red-50 p-6 rounded-lg shadow-sm">
-                        <p class="text-gray-600">Solicitações Pendentes</p>
-                        <p class="text-3xl font-bold text-red-800"><%= typeof totalSolicitacoesPendentes !== 'undefined' ? totalSolicitacoesPendentes : 'N/A' %></p>
-                    </div>
-                </div>
-            </div>
+<div id="visao-geral-tab" class="tab-content <%= activeTab === 'visao-geral' ? '' : 'hidden' %>">
+  <h3 class="text-2xl font-bold text-gray-800 mb-6 tracking-wide flex items-center gap-2">
+    <i class="fas fa-chart-line text-blue-600 text-2xl"></i>
+    Visão Geral do Sistema
+  </h3>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <!-- Card: Total de Escolas -->
+    <div class="flex items-center p-5 bg-gradient-to-r from-blue-100 to-blue-50 rounded-xl shadow-sm border border-blue-200">
+      <div class="p-3 rounded-full bg-blue-200 text-blue-800 mr-4">
+        <i class="fas fa-school text-xl"></i>
+      </div>
+      <div>
+        <p class="text-sm text-blue-800 font-semibold uppercase tracking-wide">Escolas</p>
+        <p class="text-3xl font-bold text-blue-900"><%= totalEscolas ?? 'N/A' %></p>
+      </div>
+    </div>
+
+    <!-- Card: Total de Admins -->
+    <div class="flex items-center p-5 bg-gradient-to-r from-green-100 to-green-50 rounded-xl shadow-sm border border-green-200">
+      <div class="p-3 rounded-full bg-green-200 text-green-800 mr-4">
+        <i class="fas fa-user-shield text-xl"></i>
+      </div>
+      <div>
+        <p class="text-sm text-green-800 font-semibold uppercase tracking-wide">Administradores</p>
+        <p class="text-3xl font-bold text-green-900"><%= totalAdmins ?? 'N/A' %></p>
+      </div>
+    </div>
+
+    <!-- Card: Total de Avaliadores -->
+    <div class="flex items-center p-5 bg-gradient-to-r from-yellow-100 to-yellow-50 rounded-xl shadow-sm border border-yellow-200">
+      <div class="p-3 rounded-full bg-yellow-200 text-yellow-800 mr-4">
+        <i class="fas fa-user-tie text-xl"></i>
+      </div>
+      <div>
+        <p class="text-sm text-yellow-800 font-semibold uppercase tracking-wide">Avaliadores</p>
+        <p class="text-3xl font-bold text-yellow-900"><%= totalAvaliadores ?? 'N/A' %></p>
+      </div>
+    </div>
+
+    <!-- Card: Total de Projetos -->
+    <div class="flex items-center p-5 bg-gradient-to-r from-purple-100 to-purple-50 rounded-xl shadow-sm border border-purple-200">
+      <div class="p-3 rounded-full bg-purple-200 text-purple-800 mr-4">
+        <i class="fas fa-lightbulb text-xl"></i>
+      </div>
+      <div>
+        <p class="text-sm text-purple-800 font-semibold uppercase tracking-wide">Projetos</p>
+        <p class="text-3xl font-bold text-purple-900"><%= totalProjetos ?? 'N/A' %></p>
+      </div>
+    </div>
+
+    <!-- Card: Total de Avaliações -->
+    <div class="flex items-center p-5 bg-gradient-to-r from-indigo-100 to-indigo-50 rounded-xl shadow-sm border border-indigo-200">
+      <div class="p-3 rounded-full bg-indigo-200 text-indigo-800 mr-4">
+        <i class="fas fa-star-half-alt text-xl"></i>
+      </div>
+      <div>
+        <p class="text-sm text-indigo-800 font-semibold uppercase tracking-wide">Avaliações</p>
+        <p class="text-3xl font-bold text-indigo-900"><%= totalAvaliacoes ?? 'N/A' %></p>
+      </div>
+    </div>
+
+    <!-- Card: Solicitações Pendentes -->
+    <div class="flex items-center p-5 bg-gradient-to-r from-red-100 to-red-50 rounded-xl shadow-sm border border-red-200">
+      <div class="p-3 rounded-full bg-red-200 text-red-800 mr-4">
+        <i class="fas fa-envelope-open-text text-xl"></i>
+      </div>
+      <div>
+        <p class="text-sm text-red-800 font-semibold uppercase tracking-wide">Solicitações Pendentes</p>
+        <p class="text-3xl font-bold text-red-900"><%= totalSolicitacoesPendentes ?? 'N/A' %></p>
+      </div>
+    </div>
+  </div>
+</div>
+
 
             <!-- Conteúdo da Aba: Gerenciar Escolas -->
             <div id="gerenciar-escolas-tab" class="tab-content <%= activeTab === 'gerenciar-escolas' ? '' : 'hidden' %>">
