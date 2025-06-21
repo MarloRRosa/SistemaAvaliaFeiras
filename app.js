@@ -9,10 +9,12 @@ const flash = require('connect-flash');
 const path = require('path');
 const MongoDBStore = require('connect-mongodb-session')(session);
 const methodOverride = require('method-override');
-const isProduction = process.env.NODE_ENV === 'production';
+const helmet = require('helmet');
+const mongoSanitize = require('express-mongo-sanitize');
+const xss = require('xss-clean');
+const rateLimit = require('express-rate-limit');
 
-// Importa a função auxiliar
-const { formatarDatasParaInput } = require('./utils/helpers');
+const isProduction = process.env.NODE_ENV === 'production';
 
 const app = express();
 
@@ -37,12 +39,37 @@ store.on('error', function(error) {
 });
 
 // =====================
+// Segurança e Middlewares Globais
+// =====================
+app.use(helmet());                // Segurança de headers HTTP
+app.use(mongoSanitize());        // Previne NoSQL injection
+app.use(xss());                  // Previne XSS
+app.set('trust proxy', 1);       // Necessário para Render (HTTPS)
+
+// Redireciona HTTP para HTTPS em produção
+if (isProduction) {
+    app.use((req, res, next) => {
+        if (req.headers['x-forwarded-proto'] !== 'https') {
+            return res.redirect(`https://${req.headers.host}${req.url}`);
+        }
+        next();
+    });
+}
+
+// Limita número de requisições no formulário de acesso
+const accessLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutos
+    max: 10,
+    message: 'Muitas tentativas. Tente novamente mais tarde.'
+});
+app.use('/solicitar-acesso', accessLimiter);
+
+// =====================
 // Configuração da View Engine (EJS + Layouts)
 // =====================
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.set('layout', 'layouts/public');
-app.set('trust proxy', 1);
 
 // =====================
 // Middlewares Essenciais
@@ -50,9 +77,11 @@ app.set('trust proxy', 1);
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(methodOverride('_method'));
+app.use(expressLayouts);
 
 // =====================
-// Configuração da Sessão
+// Sessão
 // =====================
 app.use(session({
     secret: process.env.SESSION_SECRET || 'sua-chave-secreta-de-desenvolvimento',
@@ -62,12 +91,10 @@ app.use(session({
     cookie: {
         maxAge: 24 * 60 * 60 * 1000,  // 1 dia
         httpOnly: true,
-        secure: isProduction,         // true em produção
-        sameSite: isProduction ? 'none' : 'lax' // none com secure para evitar bloqueio do cookie
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'lax'
     }
 }));
-
-
 
 // =====================
 // Flash messages e variáveis globais
@@ -83,12 +110,9 @@ app.use((req, res, next) => {
 });
 
 // =====================
-// Outros Middlewares
+// Funções auxiliares globais
 // =====================
-app.use(methodOverride('_method'));
-app.use(expressLayouts);
-
-// Funções auxiliares globais para templates
+const { formatarDatasParaInput } = require('./utils/helpers');
 app.locals.formatarDatasParaInput = formatarDatasParaInput;
 
 // =====================
