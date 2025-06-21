@@ -122,7 +122,7 @@
 </div>
 
             <!-- Conteúdo da Aba: Visão Geral -->
-<div id="visao-geral-tab" class="tab-content hidden">
+<div id="visao-geral-tab" class="tab-content <%= activeTab === 'visao-geral' ? '' : 'hidden' %>">
   <h3 class="text-2xl font-bold text-gray-800 mb-6 tracking-wide flex items-center gap-2">
     <i class="fas fa-chart-line text-blue-600 text-2xl"></i>
     Visão Geral do Sistema
@@ -199,7 +199,7 @@
 
 
             <!-- Conteúdo da Aba: Gerenciar Escolas -->
-            <div id="gerenciar-escolas-tab" class="tab-content hidden">
+            <div id="gerenciar-escolas-tab" class="tab-content <%= activeTab === 'gerenciar-escolas' ? '' : 'hidden' %>">
                 <h3 class="text-2xl font-bold text-gray-800 mb-4">Gerenciar Escolas</h3>
                 
                 <% if (typeof escolasDetalhes !== 'undefined' && escolasDetalhes.length > 0) { %>
@@ -276,7 +276,7 @@
             </div>
 
             <!-- Conteúdo da Aba: Gerenciar Solicitações -->
-            <div id="solicitacoes-tab" class="tab-content hidden">
+            <div id="solicitacoes-tab" class="tab-content <%= activeTab === 'solicitacoes' ? '' : 'hidden' %>">
                 <h3 class="text-2xl font-bold text-gray-800 mb-4">Gerenciar Solicitações de Acesso</h3>
                 <% if (typeof solicitacoes !== 'undefined' && solicitacoes.length > 0) { %>
                     <div class="overflow-x-auto bg-white rounded-lg shadow-md">
@@ -332,7 +332,7 @@
             </div>
 
             <!-- Conteúdo da Aba: Projetos Sem Avaliação -->
-            <div id="projetos-sem-avaliacao-tab" class="tab-content hidden">
+            <div id="projetos-sem-avaliacao-tab" class="tab-content <%= activeTab === 'projetos-sem-avaliacao' ? '' : 'hidden' %>">
                 <h3 class="text-2xl font-bold text-gray-800 mb-4">Projetos Pendentes de Avaliação por Escola</h3>
                 
                 <div class="mb-6">
@@ -387,7 +387,7 @@
             </div>
 
             <!-- Conteúdo da Aba: Ranking de Projetos por Categoria -->
-            <div id="ranking-projetos-tab" class="tab-content hidden">
+            <div id="ranking-projetos-tab" class="tab-content <%= activeTab === 'ranking-projetos' ? '' : 'hidden' %>">
                 <h3 class="text-2xl font-bold text-gray-800 mb-4">Ranking de Projetos por Categoria</h3>
                 <% if (typeof rankingProjetosPorCategoria !== 'undefined' && Object.keys(rankingProjetosPorCategoria).length > 0) { %>
                     <% for (const categoriaNome in rankingProjetosPorCategoria) { %>
@@ -428,7 +428,7 @@
             </div>
 
             <!-- Conteúdo da Aba: Resumo de Avaliadores por Escola -->
-            <div id="resumo-avaliadores-tab" class="tab-content hidden">
+            <div id="resumo-avaliadores-tab" class="tab-content <%= activeTab === 'resumo-avaliadores' ? '' : 'hidden' %>">
                 <h3 class="text-2xl font-bold text-gray-800 mb-4">Resumo de Avaliadores por Escola</h3>
                 <% if (typeof resumoAvaliadoresPorEscola !== 'undefined' && resumoAvaliadoresPorEscola.length > 0) { %>
                     <% resumoAvaliadoresPorEscola.forEach(escolaInfo => { %>
