@@ -42,7 +42,19 @@ store.on('error', function(error) {
 // Segurança e Middlewares Globais
 // =====================
 app.use(helmet());                // Segurança de headers HTTP
-app.use(mongoSanitize());        // Previne NoSQL injection
+
+// Aplicar sanitização somente em req.body e req.params para evitar erro na req.query (somente leitura)
+app.use((req, res, next) => {
+    if (req.body) {
+        req.body = mongoSanitize.sanitize(req.body);
+    }
+    if (req.params) {
+        req.params = mongoSanitize.sanitize(req.params);
+    }
+    // NÃO modificar req.query para evitar TypeError
+    next();
+});
+
 app.use(xss());                  // Previne XSS
 app.set('trust proxy', 1);       // Necessário para Render (HTTPS)
 
