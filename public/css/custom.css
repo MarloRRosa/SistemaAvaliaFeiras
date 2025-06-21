@@ -1,21 +1,78 @@
-/* Estilo base extra além do Tailwind */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
+/* ==========================
+   Custom Animations - Sistema Avalia
+   ========================== */
+
+/* Fade In */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fadeIn 1s ease-out forwards;
+}
+
+/* Slide In Left */
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-50px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.animate-slide-in-left {
+  animation: slideInLeft 1s ease-out forwards;
+}
+
+/* Slide In Right */
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(50px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.animate-slide-in-right {
+  animation: slideInRight 1s ease-out forwards;
+}
+
+/* Blink (Piscar) */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.animate-blink {
+  animation: blink 1s steps(2, start) infinite;
+}
+
+/* Delay (Variações de atraso) */
+.delay-200 {
+  animation-delay: 0.2s;
+}
+.delay-500 {
+  animation-delay: 0.5s;
+}
+.delay-1000 {
+  animation-delay: 1s;
+}
+
+/* Exemplo de uso: fade-in com delay */
+/* <div class="animate-fade-in delay-500">...</div> */
+
+/* Mantendo seus estilos anteriores */
 .btn-green {
-    @apply bg-green-600 text-white px-8 py-4 rounded-full shadow-lg font-semibold hover:bg-green-700 hover:scale-105 transition;
+  @apply bg-green-600 text-white px-8 py-4 rounded-full shadow-lg font-semibold hover:bg-green-700 hover:scale-105 transform transition duration-300;
 }
 
 .btn-white {
-    @apply bg-white text-blue-700 px-8 py-4 rounded-full shadow-lg font-semibold hover:bg-gray-100 hover:scale-105 transition;
+  @apply bg-white text-blue-700 px-8 py-4 rounded-full shadow-lg font-semibold hover:bg-gray-100 hover:scale-105 transform transition duration-300;
 }
 
 .section-title {
-    @apply text-4xl font-extrabold text-center mb-12 text-gray-800;
+  @apply text-4xl font-extrabold text-center mb-12 text-gray-800;
 }
 
 .feature-card {
-    @apply bg-gray-50 p-8 rounded-xl shadow-md text-center hover:scale-105 transition duration-300;
+  @apply bg-gray-50 p-8 rounded-xl shadow-md text-center hover:scale-105 transform transition duration-300;
 }
 
 .step-card {
-    @apply bg-white p-8 rounded-xl shadow-md text-center hover:scale-105 transition duration-300;
+  @apply bg-white p-8 rounded-xl shadow-md text-center hover:scale-105 transform transition duration-300;
 }

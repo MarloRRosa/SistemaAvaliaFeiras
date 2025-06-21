@@ -4,7 +4,8 @@
   "description": "Sistema de avaliação de feiras escolares",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js"
+    "start": "node app.js",
+    "build:css": "npx tailwindcss -i ./public/css/custom.css -o ./public/css/output.css --minify"
   },
   "engines": {
     "node": ">=18"
@@ -30,7 +31,7 @@
   },
   "devDependencies": {
     "autoprefixer": "^10.4.21",
-    "postcss": "^8.4.39",
+    "postcss": "^8.5.6",
     "tailwindcss": "^3.4.17"
   },
   "repository": {
