@@ -2,29 +2,36 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const solicitacaoAcessoSchema = new Schema({
-    nomeEscola: { type: String, required: true },
-    cnpj: { type: String, required: false },
-    endereco: { type: String, required: false },
-    telefoneEscola: { type: String, required: false },
+  nomeEscola: { type: String, required: true },
+  cnpj: { type: String },
+  endereco: { type: String },
+  telefoneEscola: { type: String },
 
-    nomeResponsavel: { type: String, required: true },
-    cargoResponsavel: { type: String, required: false },
-    emailContato: { type: String, required: true, unique: true, lowercase: true, trim: true },
-    telefoneContato: { type: String, required: false },
+  nomeResponsavel: { type: String, required: true },
+  cargoResponsavel: { type: String },
+  emailContato: { type: String, required: true, unique: true, lowercase: true, trim: true },
+  telefoneContato: { type: String },
 
-    dataSolicitacao: { type: Date, default: Date.now },
+  tipoEvento: { type: String },
+  previsaoUso: { type: String },
+  mensagem: { type: String },
 
-    status: {
-        type: String,
-        enum: ['Pendente', 'Aprovada', 'Rejeitada'],
-        default: 'Pendente'
-    },
-    dataProcessamento: { type: Date },
-    processadoPor: { type: Schema.Types.ObjectId, ref: 'SuperAdmin' },
+  dataSolicitacao: { type: Date, default: Date.now },
 
-    // ✅ Novos campos adicionados:
-    aceiteTermo: { type: Boolean, required: true, default: false },
-    ipSolicitante: { type: String }
+  status: {
+    type: String,
+    enum: ['Pendente', 'Aprovada', 'Rejeitada'],
+    default: 'Pendente'
+  },
+  dataProcessamento: { type: Date },
+  processadoPor: { type: Schema.Types.ObjectId, ref: 'SuperAdmin' },
+
+  // ✅ Subdocumento completo de aceite
+  registroAceite: {
+    aceite: { type: Boolean, required: true, default: false },
+    ip: { type: String },
+    dataHora: { type: Date }
+  }
 });
 
 module.exports = mongoose.model('SolicitacaoAcesso', solicitacaoAcessoSchema);

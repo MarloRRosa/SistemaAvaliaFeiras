@@ -83,6 +83,9 @@
                     <span class="px-3 py-1 text-base font-semibold text-red-800 bg-red-100 rounded-full">Rejeitada em: <%= new Date(solicitacao.dataProcessamento).toLocaleDateString('pt-BR') %></span>
                 <% } %>
             </p>
+            <p class="text-gray-600 mt-2"><strong>IP:</strong> <%= solicitacao.ipSolicitante || 'Não registrado' %></p>
+            <p class="text-gray-600"><strong>Data da Solicitação:</strong> <%= new Date(solicitacao.dataSolicitacao).toLocaleString('pt-BR') %></p>
+            <p class="text-gray-600"><strong>Aceitou Termo?</strong> <%= solicitacao.aceiteTermo ? 'Sim' : 'Não' %></p>
 
             <% if (solicitacao.status === 'Pendente') { %>
                 <div class="flex gap-4">

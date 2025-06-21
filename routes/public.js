@@ -100,20 +100,21 @@ router.post('/solicitar-acesso', async (req, res) => {
         }
 
         const nova = new SolicitacaoAcesso({
-            nomeEscola: nomeEscola.trim(),
-            cnpj: cnpj ? cnpj.replace(/\D/g, '') : undefined,
-            endereco: endereco.trim(),
-            telefoneEscola: telefoneEscola.replace(/\D/g, ''),
-            nomeResponsavel: nomeResponsavel.trim(),
-            emailContato: emailContato.trim(),
-            cargoResponsavel: cargoResponsavel.trim(),
-            telefoneContato: telefoneContato.replace(/\D/g, ''),
-            tipoEvento: tipoEvento.trim(),
-            previsaoUso: previsaoUso?.trim() || '',
-            mensagem: mensagem?.trim() || '',
-            status: 'Pendente',
-            dataSolicitacao: new Date(),
-            ipSolicitante: req.ip // <-- IP armazenado
+        nomeEscola: nomeEscola.trim(),
+        cnpj: cnpj ? cnpj.replace(/\D/g, '') : undefined,
+        endereco: endereco.trim(),
+        telefoneEscola: telefoneEscola.replace(/\D/g, ''),
+        nomeResponsavel: nomeResponsavel.trim(),
+        emailContato: emailContato.trim(),
+        cargoResponsavel: cargoResponsavel.trim(),
+        telefoneContato: telefoneContato.replace(/\D/g, ''),
+        tipoEvento: tipoEvento.trim(),
+        previsaoUso: previsaoUso?.trim() || '',
+        mensagem: mensagem?.trim() || '',
+        status: 'Pendente',
+        dataSolicitacao: new Date(),
+        ipSolicitante: req.ip,
+        aceiteTermo: aceiteTermo === 'on'
         });
 
         await nova.save();
