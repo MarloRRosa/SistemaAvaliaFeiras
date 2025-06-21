@@ -6,20 +6,30 @@
   <title>Sistema de Avaliação de Projetos Escolares</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
   <link rel="stylesheet" href="/css/output.css">
+  <style>
+    /* Animações extras */
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    .blink {
+      animation: blink 1s infinite;
+    }
+  </style>
 </head>
-<body class="font-sans text-gray-800">
+<body class="font-sans text-gray-800 bg-white">
 
 <!-- HERO -->
-<section class="bg-gradient-to-r from-blue-700 to-blue-900 py-24 text-center text-white">
-  <div class="container mx-auto px-6">
-    <h1 class="text-5xl sm:text-6xl font-extrabold leading-tight mb-6 animate-fade-in delay-200">
+<section class="bg-gradient-to-r from-blue-700 to-blue-900 py-20 text-center text-white animate-fade-in">
+  <div class="container mx-auto px-4">
+    <h1 class="text-3xl sm:text-5xl md:text-6xl font-extrabold leading-tight mb-4 animate-slide-in">
       Simplifique a Avaliação de Projetos na Sua Escola
     </h1>
-    <p class="text-xl max-w-3xl mx-auto mb-10 opacity-90 animate-fade-in delay-500">
+    <p class="text-lg sm:text-xl max-w-3xl mx-auto mb-8 opacity-90">
       Sistema completo para simplificar o registro, avaliação e gestão de projetos escolares — ideal para feiras de ciências, mostras culturais e muito mais.
     </p>
 
-    <div class="flex flex-col md:flex-row justify-center gap-6 animate-slide-in-left delay-700">
+    <div class="flex flex-col md:flex-row justify-center gap-4">
       <a href="/solicitar-acesso" class="btn-green">
         <i class="fas fa-handshake mr-2"></i> Sou uma Escola (Solicitar Acesso)
       </a>
@@ -28,14 +38,13 @@
       </a>
     </div>
 
-    <!-- ACESSOS -->
-    <div class="mt-12 animate-fade-in delay-1000">
-      <p class="text-gray-300 text-base mb-4">Já possui acesso?</p>
-      <div class="flex flex-wrap justify-center gap-4">
-        <a href="/admin/login" class="text-blue-300 border border-blue-300 px-4 py-2 rounded-full hover:text-white hover:bg-blue-500 transition">
+    <div class="mt-8">
+      <p class="text-gray-300 text-sm mb-2">Já possui acesso?</p>
+      <div class="flex flex-wrap justify-center gap-3">
+        <a href="/admin/login" class="text-blue-300 border border-blue-300 px-4 py-2 rounded-full hover:text-white hover:bg-blue-500 transition text-sm">
           <i class="fas fa-user-shield mr-1"></i> Acesso Administrador
         </a>
-        <a href="/avaliador/login" class="text-purple-300 border border-purple-300 px-4 py-2 rounded-full hover:text-white hover:bg-purple-500 transition">
+        <a href="/avaliador/login" class="text-purple-300 border border-purple-300 px-4 py-2 rounded-full hover:text-white hover:bg-purple-500 transition text-sm">
           <i class="fas fa-chalkboard-teacher mr-1"></i> Acesso Avaliador
         </a>
         
@@ -45,27 +54,27 @@
 </section>
 
 <!-- FUNCIONALIDADES -->
-<section id="funcionalidades" class="py-24 bg-white">
-  <div class="container mx-auto px-6">
-    <h2 class="section-title animate-fade-in">Recursos que Fazem a Diferença</h2>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+<section id="funcionalidades" class="py-20 bg-white">
+  <div class="container mx-auto px-4">
+    <h2 class="section-title animate-fade-in delay-200">Recursos que Fazem a Diferença</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
       <% const features = [
         { icon: 'fa-school', title: 'Gestão de Escolas', color: 'blue', desc: 'Cadastre escolas, usuários e avaliadores de forma segura.' },
         { icon: 'fa-user-shield', title: 'Acesso Avaliador', color: 'purple', desc: 'Avaliadores acessam via PIN exclusivo.' },
-        { icon: 'fa-chart-line', title: 'Relatórios Detalhados', color: 'green', desc: 'Gere relatórios completos com base nos critérios definidos.' },
+        { icon: 'fa-chart-line', title: 'Relatórios', color: 'green', desc: 'Gere relatórios detalhados com base nos critérios.' },
         { icon: 'fa-medal', title: 'Ranking de Projetos', color: 'orange', desc: 'Classificação automática por categoria e turma.' },
         { icon: 'fa-calendar-alt', title: 'Organização de Eventos', color: 'red', desc: 'Gerencie feiras, categorias e cronogramas.' },
         { icon: 'fa-envelope-open-text', title: 'Comunicação Integrada', color: 'indigo', desc: 'Conecte administradores, avaliadores e escolas.' }
       ]; %>
 
       <% features.forEach(f => { %>
-        <div class="feature-card border-t-4 border-<%= f.color %>-500">
+        <div class="feature-card border-t-4 border-<%= f.color %>-500 animate-fade-in delay-300">
           <div class="text-<%= f.color %>-600 text-5xl mb-4">
             <i class="fas <%= f.icon %>"></i>
           </div>
-          <h3 class="text-2xl font-bold mb-2 text-gray-800"><%= f.title %></h3>
-          <p class="text-gray-600 text-lg"><%= f.desc %></p>
+          <h3 class="text-xl font-bold mb-2 text-gray-800"><%= f.title %></h3>
+          <p class="text-gray-600 text-sm"><%= f.desc %></p>
         </div>
       <% }); %>
 
@@ -74,10 +83,10 @@
 </section>
 
 <!-- ETAPAS -->
-<section class="py-24 bg-gray-100">
-  <div class="container mx-auto px-6">
-    <h2 class="section-title animate-fade-in">Como Funciona</h2>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-10 text-center">
+<section class="py-20 bg-gray-100">
+  <div class="container mx-auto px-4">
+    <h2 class="section-title animate-fade-in delay-500">Como Funciona</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
 
       <% const steps = [
         { icon: 'fa-registered', title: '1. Cadastre', color: 'blue', desc: 'Registre sua escola e configure os critérios.' },
@@ -86,12 +95,12 @@
       ]; %>
 
       <% steps.forEach(s => { %>
-        <div class="step-card hover:scale-105 transition duration-300">
-          <div class="text-<%= s.color %>-600 text-6xl mb-4 animate-slide-in-right">
+        <div class="step-card animate-slide-in delay-700">
+          <div class="text-<%= s.color %>-600 text-6xl mb-4">
             <i class="fas <%= s.icon %>"></i>
           </div>
           <h3 class="font-bold text-xl mb-2 text-gray-800"><%= s.title %></h3>
-          <p class="text-gray-600 text-lg"><%= s.desc %></p>
+          <p class="text-gray-600 text-sm"><%= s.desc %></p>
         </div>
       <% }); %>
 
@@ -100,23 +109,23 @@
 </section>
 
 <!-- CTA FINAL -->
-<section class="bg-gradient-to-r from-blue-600 to-blue-800 py-20 text-white text-center">
-  <div class="container mx-auto px-6">
-    <h2 class="text-4xl md:text-5xl font-extrabold mb-6 animate-fade-in">Pronto para Começar?</h2>
-    <p class="text-xl max-w-3xl mx-auto mb-8 animate-fade-in delay-300">Transforme a forma como sua escola avalia projetos.</p>
-    <a href="/solicitar-acesso" class="btn-white animate-slide-in-left delay-500">
+<section class="bg-gradient-to-r from-blue-600 to-blue-800 py-16 text-white text-center">
+  <div class="container mx-auto px-4">
+    <h2 class="text-3xl sm:text-4xl font-extrabold mb-4 blink">Pronto para Começar?</h2>
+    <p class="text-lg mb-6">Transforme a forma como sua escola avalia projetos.</p>
+    <a href="/solicitar-acesso" class="btn-white">
       <i class="fas fa-arrow-right mr-2"></i> Solicitar Acesso
     </a>
   </div>
 </section>
 
 <!-- FOOTER -->
-<footer class="bg-gray-800 text-white py-8 text-center text-sm">
+<footer class="bg-gray-800 text-white py-6 text-center text-xs">
   <p>&copy; 2025 Sistema de Avaliação de Projetos Escolares. Desenvolvido por Marlo Rosa.</p>
-  <div class="mt-4 text-xs">
-    <a href="/politica-privacidade" class="text-gray-400 hover:text-white mx-2">Política de Privacidade</a> |
-    <a href="/termos-de-uso" class="text-gray-400 hover:text-white mx-2">Termos de Uso</a> |
-    <a href="/superadmin/login" class="text-yellow-300 hover:text-white mx-2">Acesso Super Admin</a>
+  <div class="mt-2">
+    <a href="/politica-privacidade" class="text-gray-400 hover:text-white mx-1">Política de Privacidade</a> |
+    <a href="/termos-de-uso" class="text-gray-400 hover:text-white mx-1">Termos de Uso</a> |
+    <a href="/superadmin/login" class="text-yellow-300 hover:text-white mx-1">Super Admin</a>
   </div>
 </footer>
 
