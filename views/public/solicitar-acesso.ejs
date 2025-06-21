@@ -1,189 +1,110 @@
 <div class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
-    <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-2xl">
-        
-        <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">Solicitar Acesso ao AvaliaFeiras</h2>
+  <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-2xl">
+    
+    <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">Solicitar Acesso ao AvaliaFeiras</h2>
 
-        <% if (typeof success_msg !== 'undefined' && success_msg) { %>
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg relative mb-4" role="alert">
-                <span class="block sm:inline"><%- success_msg %></span>
-            </div>
-        <% } %>
-        <% if (typeof error_msg !== 'undefined' && error_msg) { %>
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative mb-4" role="alert">
-                <span class="block sm:inline"><%- error_msg %></span>
-            </div>
-        <% } %>
+    <% if (typeof success_msg !== 'undefined' && success_msg) { %>
+      <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg relative mb-4" role="alert">
+        <span class="block sm:inline"><%- success_msg %></span>
+      </div>
+    <% } %>
+    <% if (typeof error_msg !== 'undefined' && error_msg) { %>
+      <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative mb-4" role="alert">
+        <span class="block sm:inline"><%- error_msg %></span>
+      </div>
+    <% } %>
 
-        <p class="text-gray-600 text-center mb-8">Preencha os dados abaixo para solicitar o cadastro da sua escola. Nossa equipe entrará em contato.</p>
+    <p class="text-gray-600 text-center mb-8">Preencha os dados abaixo para solicitar o cadastro da sua escola. Nossa equipe entrará em contato.</p>
 
-        <form action="/solicitar-acesso" method="POST" class="space-y-6">
-            <h3 class="text-xl font-semibold text-gray-700 mb-4">Dados da Escola</h3>
-            <div>
-                <label for="nomeEscola" class="block text-sm font-medium text-gray-700 mb-1">Nome Completo da Escola <span class="text-red-500">*</span></label>
-                <input 
-                    type="text" 
-                    id="nomeEscola"
-                    name="nomeEscola" 
-                    placeholder="Ex: Escola Municipal do Campo" 
-                    value="<%= typeof nomeEscola != 'undefined' ? nomeEscola : '' %>"
-                    class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" 
-                    required>
-            </div>
-            <div>
-                <label for="cnpj" class="block text-sm font-medium text-gray-700 mb-1">CNPJ (Opcional)</label>
-                <input 
-                    type="text" 
-                    id="cnpj"
-                    name="cnpj" 
-                    placeholder="00.000.000/0000-00" 
-                    value="<%= typeof cnpj != 'undefined' ? cnpj : '' %>"
-                    class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
-            </div>
-            <div>
-                <label for="endereco" class="block text-sm font-medium text-gray-700 mb-1">Endereço Completo da Escola <span class="text-red-500">*</span></label>
-                <input 
-                    type="text" 
-                    id="endereco"
-                    name="endereco" 
-                    placeholder="Rua, Número, Bairro, Cidade, Estado, CEP" 
-                    value="<%= typeof endereco != 'undefined' ? endereco : '' %>"
-                    class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" 
-                    required>
-            </div>
-            <div>
-                <label for="telefoneEscola" class="block text-sm font-medium text-gray-700 mb-1">Telefone da Escola <span class="text-red-500">*</span></label>
-                <input 
-                    type="tel" 
-                    id="telefoneEscola"
-                    name="telefoneEscola" 
-                    placeholder="(XX) XXXX-XXXX" 
-                    value="<%= typeof telefoneEscola != 'undefined' ? telefoneEscola : '' %>"
-                    class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" 
-                    required>
-            </div>
+    <form action="/solicitar-acesso" method="POST" class="space-y-6">
+      <h3 class="text-xl font-semibold text-gray-700 mb-4">Dados da Escola</h3>
+      <div>
+        <label for="nomeEscola" class="block text-sm font-medium text-gray-700 mb-1">Nome Completo da Escola <span class="text-red-500">*</span></label>
+        <input type="text" id="nomeEscola" name="nomeEscola" placeholder="Ex: Escola Municipal do Campo" value="<%= nomeEscola || '' %>" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500" required>
+      </div>
+      <div>
+        <label for="cnpj" class="block text-sm font-medium text-gray-700 mb-1">CNPJ (Opcional)</label>
+        <input type="text" id="cnpj" name="cnpj" placeholder="00.000.000/0000-00" value="<%= cnpj || '' %>" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500">
+      </div>
+      <div>
+        <label for="endereco" class="block text-sm font-medium text-gray-700 mb-1">Endereço Completo da Escola <span class="text-red-500">*</span></label>
+        <input type="text" id="endereco" name="endereco" placeholder="Rua, Número, Bairro, Cidade, Estado, CEP" value="<%= endereco || '' %>" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500" required>
+      </div>
+      <div>
+        <label for="telefoneEscola" class="block text-sm font-medium text-gray-700 mb-1">Telefone da Escola <span class="text-red-500">*</span></label>
+        <input type="tel" id="telefoneEscola" name="telefoneEscola" placeholder="(XX) XXXX-XXXX" value="<%= telefoneEscola || '' %>" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500" required>
+      </div>
 
-            <h3 class="text-xl font-semibold text-gray-700 mb-4 mt-8">Dados do Responsável pelo Contato</h3>
-            <div>
-                <label for="nomeResponsavel" class="block text-sm font-medium text-gray-700 mb-1">Seu Nome Completo <span class="text-red-500">*</span></label>
-                <input 
-                    type="text" 
-                    id="nomeResponsavel"
-                    name="nomeResponsavel" 
-                    placeholder="Seu nome completo" 
-                    value="<%= typeof nomeResponsavel != 'undefined' ? nomeResponsavel : '' %>"
-                    class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" 
-                    required>
-            </div>
-            <div>
-                <label for="emailContato" class="block text-sm font-medium text-gray-700 mb-1">Seu E-mail de Contato <span class="text-red-500">*</span></label>
-                <input 
-                    type="email" 
-                    id="emailContato"
-                    name="emailContato" 
-                    placeholder="seu.email@exemplo.com" 
-                    value="<%= typeof emailContato != 'undefined' ? emailContato : '' %>"
-                    class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" 
-                    required>
-            </div>
-            <div>
-                <label for="cargoResponsavel" class="block text-sm font-medium text-gray-700 mb-1">Seu Cargo na Escola <span class="text-red-500">*</span></label>
-                <input 
-                    type="text" 
-                    id="cargoResponsavel"
-                    name="cargoResponsavel" 
-                    placeholder="Ex: Diretor(a), Coordenador(a), Professor(a)" 
-                    value="<%= typeof cargoResponsavel != 'undefined' ? cargoResponsavel : '' %>"
-                    class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" 
-                    required>
-            </div>
-            <div>
-                <label for="telefoneContato" class="block text-sm font-medium text-gray-700 mb-1">Seu Telefone de Contato <span class="text-red-500">*</span></label>
-                <input 
-                    type="tel" 
-                    id="telefoneContato"
-                    name="telefoneContato" 
-                    placeholder="(XX) 9XXXX-XXXX" 
-                    value="<%= typeof telefoneContato != 'undefined' ? telefoneContato : '' %>"
-                    class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" 
-                    required>
-            </div>
+      <h3 class="text-xl font-semibold text-gray-700 mb-4 mt-8">Dados do Responsável pelo Contato</h3>
+      <div>
+        <label for="nomeResponsavel" class="block text-sm font-medium text-gray-700 mb-1">Seu Nome Completo <span class="text-red-500">*</span></label>
+        <input type="text" id="nomeResponsavel" name="nomeResponsavel" placeholder="Seu nome completo" value="<%= nomeResponsavel || '' %>" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500" required>
+      </div>
+      <div>
+        <label for="emailContato" class="block text-sm font-medium text-gray-700 mb-1">Seu E-mail de Contato <span class="text-red-500">*</span></label>
+        <input type="email" id="emailContato" name="emailContato" placeholder="seu.email@exemplo.com" value="<%= emailContato || '' %>" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500" required>
+      </div>
+      <div>
+        <label for="cargoResponsavel" class="block text-sm font-medium text-gray-700 mb-1">Seu Cargo na Escola <span class="text-red-500">*</span></label>
+        <input type="text" id="cargoResponsavel" name="cargoResponsavel" placeholder="Ex: Diretor(a), Coordenador(a), Professor(a)" value="<%= cargoResponsavel || '' %>" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500" required>
+      </div>
+      <div>
+        <label for="telefoneContato" class="block text-sm font-medium text-gray-700 mb-1">Seu Telefone de Contato <span class="text-red-500">*</span></label>
+        <input type="tel" id="telefoneContato" name="telefoneContato" placeholder="(XX) 9XXXX-XXXX" value="<%= telefoneContato || '' %>" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500" required>
+      </div>
 
-            <h3 class="text-xl font-semibold text-gray-700 mb-4 mt-8">Informações sobre o Uso do Sistema</h3>
-            <div>
-                <label for="tipoEvento" class="block text-sm font-medium text-gray-700 mb-1">Tipo de Evento/Projeto a ser Avaliado <span class="text-red-500">*</span></label>
-                <input 
-                    type="text" 
-                    id="tipoEvento"
-                    name="tipoEvento" 
-                    placeholder="Ex: Feira de Ciências, Mostra Cultural, Olimpíada de Matemática" 
-                    value="<%= typeof tipoEvento != 'undefined' ? tipoEvento : '' %>"
-                    class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" 
-                    required>
-            </div>
-            <div>
-                <label for="previsaoUso" class="block text-sm font-medium text-gray-700 mb-1">Previsão de Início de Uso (Opcional)</label>
-                <input 
-                    type="text" 
-                    id="previsaoUso"
-                    name="previsaoUso" 
-                    placeholder="Ex: Próximo semestre, Agosto de 2025" 
-                    value="<%= typeof previsaoUso != 'undefined' ? previsaoUso : '' %>"
-                    class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
-            </div>
-            <div>
-                <label for="mensagem" class="block text-sm font-medium text-gray-700 mb-1">Mensagem Adicional (Opcional)</label>
-                <textarea 
-                    id="mensagem"
-                    name="mensagem" 
-                    rows="4" 
-                    placeholder="Compartilhe qualquer outra informação relevante ou dúvidas." 
-                    class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" 
-                ><%= typeof mensagem != 'undefined' ? mensagem : '' %></textarea>
-            </div>
+      <h3 class="text-xl font-semibold text-gray-700 mb-4 mt-8">Informações sobre o Uso do Sistema</h3>
+      <div>
+        <label for="tipoEvento" class="block text-sm font-medium text-gray-700 mb-1">Tipo de Evento/Projeto a ser Avaliado <span class="text-red-500">*</span></label>
+        <input type="text" id="tipoEvento" name="tipoEvento" placeholder="Ex: Feira de Ciências, Mostra Cultural" value="<%= tipoEvento || '' %>" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500" required>
+      </div>
+      <div>
+        <label for="previsaoUso" class="block text-sm font-medium text-gray-700 mb-1">Previsão de Início de Uso (Opcional)</label>
+        <input type="text" id="previsaoUso" name="previsaoUso" placeholder="Ex: Agosto de 2025" value="<%= previsaoUso || '' %>" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500">
+      </div>
+      <div>
+        <label for="mensagem" class="block text-sm font-medium text-gray-700 mb-1">Mensagem Adicional (Opcional)</label>
+        <textarea id="mensagem" name="mensagem" rows="4" placeholder="Compartilhe qualquer outra informação relevante." class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500"><%= mensagem || '' %></textarea>
+      </div>
 
-            <div class="bg-gray-50 border border-gray-300 p-4 rounded-lg text-sm text-gray-700 mt-6">
-  <h4 class="text-base font-semibold text-gray-800 mb-2">Termo de Uso do AvaliaFeiras</h4>
-  <div class="h-40 overflow-y-scroll p-3 border rounded bg-white mb-4">
-    <p class="mb-2">Ao solicitar o acesso ao sistema AvaliaFeiras, o(a) responsável declara estar ciente de que:</p>
-    <ul class="list-disc pl-5 mb-3 space-y-2">
-      <li>As informações fornecidas são verdadeiras e de responsabilidade da escola.</li>
-      <li>O sistema será utilizado apenas para fins educacionais e institucionais.</li>
-      <li>Os dados informados serão utilizados exclusivamente para contato e gestão da feira.</li>
-      <li>O uso indevido da plataforma poderá acarretar na suspensão do acesso.</li>
-      <li>Este aceite poderá ser registrado com data, horário e endereço IP para fins legais.</li>
-    </ul>
-    <p>Se não concordar com os termos, não continue com o envio desta solicitação.</p>
-  </div>
-  <label class="inline-flex items-start gap-2">
-    <input type="checkbox" id="aceiteTermo" name="aceiteTermo" class="form-checkbox h-4 w-4 text-blue-600">
-    <span>Declaro que li e aceito os termos de uso do AvaliaFeiras.</span>
-  </label>
-</div>
-            
-            <button 
-                type="submit" 
-                class="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
-                Enviar Solicitação de Acesso
-            </button>
-        </form>
-
-        <div class="text-center mt-6">
-            <a href="/" class="text-sm text-blue-600 hover:text-blue-800 hover:underline">
-                ← Voltar para a página inicial
-            </a>
+      <div class="bg-gray-50 border border-gray-300 p-4 rounded-lg text-sm text-gray-700 mt-6">
+        <h4 class="text-base font-semibold text-gray-800 mb-2">Aceite dos Termos</h4>
+        <div class="h-40 overflow-y-scroll p-3 border rounded bg-white mb-4 text-justify">
+          <p class="mb-2">Ao solicitar acesso ao sistema <strong>AvaliaFeiras</strong>, o(a) responsável declara estar ciente de que:</p>
+          <ul class="list-disc pl-5 mb-3 space-y-2">
+            <li>As informações fornecidas são verdadeiras e de responsabilidade da escola.</li>
+            <li>O sistema será utilizado apenas para fins educacionais e institucionais.</li>
+            <li>Os dados informados serão utilizados exclusivamente para contato e gestão da feira.</li>
+            <li>O uso indevido da plataforma poderá acarretar na suspensão do acesso.</li>
+            <li>Este aceite poderá ser registrado com data, horário e endereço IP para fins legais.</li>
+          </ul>
+          <p>Recomendamos a leitura completa dos <a href="/termos-de-uso" target="_blank" class="text-blue-600 underline hover:text-blue-800">Termos de Uso</a> e da <a href="/politica-privacidade" target="_blank" class="text-blue-600 underline hover:text-blue-800">Política de Privacidade</a>.</p>
         </div>
+        <label class="inline-flex items-start gap-2">
+          <input type="checkbox" id="aceiteTermo" name="aceiteTermo" class="form-checkbox h-4 w-4 text-blue-600">
+          <span>Declaro que li e aceito os termos acima.</span>
+        </label>
+      </div>
 
+      <p class="text-xs text-gray-500">O IP e data do aceite serão registrados automaticamente.</p>
+
+      <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 opacity-50 cursor-not-allowed" disabled>
+        Enviar Solicitação de Acesso
+      </button>
+    </form>
+
+    <div class="text-center mt-6">
+      <a href="/" class="text-sm text-blue-600 hover:text-blue-800 hover:underline">
+        ← Voltar para a página inicial
+      </a>
     </div>
+  </div>
 </div>
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const checkbox = document.getElementById('aceiteTermo');
     const btnSubmit = document.querySelector('form button[type="submit"]');
-
-    // Desativa o botão inicialmente
-    btnSubmit.disabled = true;
-    btnSubmit.classList.add('opacity-50', 'cursor-not-allowed');
 
     checkbox.addEventListener('change', () => {
       if (checkbox.checked) {
