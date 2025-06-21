@@ -99,51 +99,55 @@ router.post('/solicitar-acesso', async (req, res) => {
             });
         }
 
+        // Captura IP real mesmo atrás de proxy
+        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+
         const nova = new SolicitacaoAcesso({
-        nomeEscola: nomeEscola.trim(),
-        cnpj: cnpj ? cnpj.replace(/\D/g, '') : undefined,
-        endereco: endereco.trim(),
-        telefoneEscola: telefoneEscola.replace(/\D/g, ''),
-        nomeResponsavel: nomeResponsavel.trim(),
-        emailContato: emailContato.trim(),
-        cargoResponsavel: cargoResponsavel.trim(),
-        telefoneContato: telefoneContato.replace(/\D/g, ''),
-        tipoEvento: tipoEvento.trim(),
-        previsaoUso: previsaoUso?.trim() || '',
-        mensagem: mensagem?.trim() || '',
-        status: 'Pendente',
-        dataSolicitacao: new Date(),
-        ipSolicitante: req.ip,
-        aceiteTermo: aceiteTermo === 'on'
+            nomeEscola: nomeEscola.trim(),
+            cnpj: cnpj ? cnpj.replace(/\D/g, '') : undefined,
+            endereco: endereco.trim(),
+            telefoneEscola: telefoneEscola.replace(/\D/g, ''),
+            nomeResponsavel: nomeResponsavel.trim(),
+            emailContato: emailContato.trim(),
+            cargoResponsavel: cargoResponsavel.trim(),
+            telefoneContato: telefoneContato.replace(/\D/g, ''),
+            tipoEvento: tipoEvento.trim(),
+            previsaoUso: previsaoUso?.trim() || '',
+            mensagem: mensagem?.trim() || '',
+            status: 'Pendente',
+            dataSolicitacao: new Date(),
+            ipSolicitante: ip,
+            aceiteTermo: aceiteTermo === 'on'
         });
 
         await nova.save();
 
         // E-mail para o superadmin
-if (process.env.SUPER_ADMIN_EMAIL) {
-  try {
-    const envio = await transporter.sendMail({
-      from: `"AvaliaFeiras" <${process.env.EMAIL_SENDER_ADDRESS}>`,
-      to: process.env.SUPER_ADMIN_EMAIL,
-      subject: 'Nova Solicitação de Acesso ao AvaliaFeiras',
-      html: `
-        <p>Uma nova escola solicitou acesso:</p>
-        <ul>
-          <li><strong>Escola:</strong> ${nomeEscola}</li>
-          <li><strong>Responsável:</strong> ${nomeResponsavel}</li>
-          <li><strong>Email:</strong> ${emailContato}</li>
-          <li><strong>Telefone:</strong> ${telefoneContato}</li>
-        </ul>
-        <p><a href="${process.env.APP_URL}/superadmin">Acessar o painel para aprovar/rejeitar</a></p>
-      `
-    });
-    console.log('✔️ Solicitação enviada com sucesso para o superadmin:', envio.messageId);
-  } catch (erroEnvio) {
-    console.error('❌ Erro ao enviar e-mail de solicitação:', erroEnvio);
-  }
-} else {
-  console.warn('⚠️ SUPER_ADMIN_EMAIL não está definido no .env!');
-}
+        if (process.env.SUPER_ADMIN_EMAIL) {
+            try {
+                const envio = await transporter.sendMail({
+                    from: `"AvaliaFeiras" <${process.env.EMAIL_SENDER_ADDRESS}>`,
+                    to: process.env.SUPER_ADMIN_EMAIL,
+                    subject: 'Nova Solicitação de Acesso ao AvaliaFeiras',
+                    html: `
+                        <p>Uma nova escola solicitou acesso:</p>
+                        <ul>
+                            <li><strong>Escola:</strong> ${nomeEscola}</li>
+                            <li><strong>Responsável:</strong> ${nomeResponsavel}</li>
+                            <li><strong>Email:</strong> ${emailContato}</li>
+                            <li><strong>Telefone:</strong> ${telefoneContato}</li>
+                            <li><strong>IP:</strong> ${ip}</li>
+                        </ul>
+                        <p><a href="${process.env.APP_URL}/superadmin">Acessar o painel para aprovar/rejeitar</a></p>
+                    `
+                });
+                console.log('✔️ Solicitação enviada com sucesso para o superadmin:', envio.messageId);
+            } catch (erroEnvio) {
+                console.error('❌ Erro ao enviar e-mail de solicitação:', erroEnvio);
+            }
+        } else {
+            console.warn('⚠️ SUPER_ADMIN_EMAIL não está definido no .env!');
+        }
 
         req.flash('success_msg', 'Sua solicitação foi enviada com sucesso! Aguarde nosso contato.');
         res.redirect('/');

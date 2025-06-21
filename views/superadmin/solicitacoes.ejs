@@ -44,12 +44,24 @@
                   <p class="text-xs text-gray-500">Tel: <%= s.telefoneContato %></p>
                 </td>
                 <td class="px-4 py-4">
-                  <%= s.emailContato %>
-                  <p class="text-xs text-gray-500">Solicitado em: <%= new Date(s.dataSolicitacao).toLocaleString('pt-BR') %></p>
-                  <% if (s.ip) { %>
-                    <p class="text-xs text-gray-400 italic">IP: <%= s.ip %></p>
-                  <% } %>
-                </td>
+  <%= s.emailContato %>
+  <p class="text-xs text-gray-500">Solicitado em: <%= new Date(s.dataSolicitacao).toLocaleString('pt-BR') %></p>
+
+  <% if (s.registroAceite) { %>
+    <p class="text-xs text-gray-500 italic">
+      Termo aceito: <%= s.registroAceite.aceite ? 'Sim' : 'Não' %>
+    </p>
+    <p class="text-xs text-gray-400 italic">
+      IP: <%= s.registroAceite.ip || 'N/A' %>
+    </p>
+    <p class="text-xs text-gray-400 italic">
+      Aceito em: <%= s.registroAceite.dataHora ? new Date(s.registroAceite.dataHora).toLocaleString('pt-BR') : 'N/A' %>
+    </p>
+  <% } else { %>
+    <p class="text-xs text-red-400 italic">⚠️ Dados de aceite não registrados</p>
+  <% } %>
+</td>
+
                 <td class="px-4 py-4">
                   <%= s.tipoEvento %>
                   <p class="text-xs text-gray-500">Previsão: <%= s.previsaoUso || 'N/A' %></p>
