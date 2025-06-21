@@ -1,105 +1,95 @@
 <div class="p-6 md:p-8 bg-gray-50 min-h-screen">
-    <div class="max-w-7xl mx-auto bg-white rounded-xl shadow-md p-6">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-            <h2 class="text-3xl font-bold text-gray-800 mb-4 md:mb-0">Gerenciar Solicitações de Acesso</h2>
-            <!-- Você pode adicionar um link para ver solicitações processadas no futuro, se necessário -->
-            <!-- <a href="/superadmin/solicitacoes/processadas" class="flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold px-5 py-2 rounded-lg shadow-sm transition-colors duration-200">
-                Ver Solicitações Processadas
-            </a> -->
-        </div>
-
-        <!-- Mensagens Flash -->
-        <% if (typeof success_msg !== 'undefined' && success_msg) { %>
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg relative mb-4" role="alert">
-                <span class="block sm:inline"><%- success_msg %></span>
-            </div>
-        <% } %>
-        <% if (typeof error_msg !== 'undefined' && error_msg) { %>
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative mb-4" role="alert">
-                <span class="block sm:inline"><%- error_msg %></span>
-            </div>
-        <% } %>
-
-        <% if (solicitacoes.length > 0) { %>
-            <div class="overflow-x-auto bg-white rounded-lg shadow-md">
-                <table class="min-w-full text-sm text-left text-gray-700 divide-y divide-gray-200">
-                    <thead class="text-xs text-gray-700 uppercase bg-gray-100">
-                        <tr>
-                            <th scope="col" class="px-6 py-3">Escola</th>
-                            <th scope="col" class="px-6 py-3">Responsável</th>
-                            <th scope="col" class="px-6 py-3">E-mail de Contato</th>
-                            <th scope="col" class="px-6 py-3">Data da Solicitação</th>
-                            <th scope="col" class="px-6 py-3">Status</th>
-                            <th scope="col" class="px-6 py-3 text-center">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200">
-                        <% solicitacoes.forEach(solicitacao => { %>
-                            <tr class="bg-white hover:bg-gray-50 transition-colors duration-150">
-                                <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
-                                    <%= solicitacao.nomeEscola %>
-                                    <p class="text-gray-500 text-xs mt-1">CNPJ: <%= solicitacao.cnpj || 'Não Informado' %></p>
-                                    <p class="text-gray-500 text-xs">Endereço: <%= solicitacao.endereco %></p>
-                                    <p class="text-gray-500 text-xs">Tel: <%= solicitacao.telefoneEscola %></p>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    <%= solicitacao.nomeResponsavel %>
-                                    <p class="text-gray-500 text-xs mt-1">Email: <%= solicitacao.emailContato %></p>
-                                    <p class="text-gray-500 text-xs">Cargo: <%= solicitacao.cargoResponsavel %></p>
-                                    <p class="text-gray-500 text-xs">Tel: <%= solicitacao.telefoneContato %></p>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    <%= new Date(solicitacao.dataSolicitacao).toLocaleDateString('pt-BR') %>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    <%= solicitacao.tipoEvento %>
-                                    <p class="text-gray-500 text-xs mt-1">Previsão: <%= solicitacao.previsaoUso || 'N/A' %></p>
-                                    <% if (solicitacao.mensagem) { %>
-                                        <p class="text-gray-500 text-xs italic">Msg: "<%= solicitacao.mensagem %>"</p>
-                                    <% } %>
-                                </td>
-                                <td class="px-6 py-4 flex items-center justify-center gap-2">
-                                    <!-- NOVO BOTÃO/LINK: Ver/Editar detalhes da solicitação -->
-                                    <a href="/superadmin/solicitacoes/<%= solicitacao._id %>/editar" title="Ver/Editar" class="text-blue-600 hover:text-blue-800 transition-colors">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zm-3.586 3.586L6.293 10H4v2h2l4.293-4.293L13.586 5.414 10 9z" />
-                                            <path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" />
-                                        </svg>
-                                    </a>
-                                    
-                                    <!-- Os botões de Aprovar/Rejeitar só aparecem se o status for 'Pendente' -->
-                                    <% if (solicitacao.status === 'Pendente') { %>
-                                        <form action="/superadmin/solicitacoes/<%= solicitacao._id %>/aprovar" method="POST" onsubmit="return confirm('Tem certeza que deseja APROVAR esta solicitação?');">
-                                            <button type="submit" title="Aprovar" class="text-green-600 hover:text-green-800 transition-colors">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                                                </svg>
-                                            </button>
-                                        </form>
-                                        <form action="/superadmin/solicitacoes/<%= solicitacao._id %>/rejeitar" method="POST" onsubmit="return confirm('Tem certeza que deseja REJEITAR esta solicitação?');">
-                                            <button type="submit" title="Rejeitar" class="text-red-600 hover:text-red-800 transition-colors">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                                                </svg>
-                                            </button>
-                                        </form>
-                                    <% } else { %>
-                                        <span class="text-gray-400 italic">Processada</span>
-                                    <% } %>
-                                </td>
-                            </tr>
-                        <% }); %>
-                    </tbody>
-                </table>
-            </div>
-        <% } else { %>
-            <p class="text-gray-600 text-lg text-center mt-8">Nenhuma solicitação de acesso pendente no momento.</p>
-        <% } %>
-
-        <div class="text-center mt-8">
-            <a href="/superadmin/dashboard" class="text-blue-600 hover:text-blue-800 hover:underline">
-                ← Voltar para o Painel Principal
-            </a>
-        </div>
+  <div class="max-w-7xl mx-auto bg-white rounded-xl shadow-md p-6">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+      <h2 class="text-3xl font-bold text-gray-800 mb-4 md:mb-0">Gerenciar Solicitações de Acesso</h2>
     </div>
+
+    <!-- Mensagens Flash -->
+    <% if (success_msg) { %>
+      <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-4">
+        <span class="block sm:inline"><%- success_msg %></span>
+      </div>
+    <% } %>
+    <% if (error_msg) { %>
+      <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4">
+        <span class="block sm:inline"><%- error_msg %></span>
+      </div>
+    <% } %>
+
+    <% if (solicitacoes.length > 0) { %>
+      <div class="overflow-x-auto bg-white rounded-lg shadow-md">
+        <table class="min-w-full text-sm text-left text-gray-700 divide-y divide-gray-200">
+          <thead class="text-xs uppercase bg-gray-100 text-gray-600">
+            <tr>
+              <th class="px-4 py-3">Escola</th>
+              <th class="px-4 py-3">Responsável</th>
+              <th class="px-4 py-3">Contato</th>
+              <th class="px-4 py-3">Evento</th>
+              <th class="px-4 py-3">Status</th>
+              <th class="px-4 py-3 text-center">Ações</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <% solicitacoes.forEach(s => { %>
+              <tr class="hover:bg-gray-50 transition">
+                <td class="px-4 py-4 text-gray-900">
+                  <strong><%= s.nomeEscola %></strong>
+                  <p class="text-xs text-gray-500">CNPJ: <%= s.cnpj || 'Não Informado' %></p>
+                  <p class="text-xs text-gray-500">Endereço: <%= s.endereco %></p>
+                  <p class="text-xs text-gray-500">Tel. Escola: <%= s.telefoneEscola %></p>
+                </td>
+                <td class="px-4 py-4">
+                  <%= s.nomeResponsavel %>
+                  <p class="text-xs text-gray-500">Cargo: <%= s.cargoResponsavel %></p>
+                  <p class="text-xs text-gray-500">Tel: <%= s.telefoneContato %></p>
+                </td>
+                <td class="px-4 py-4">
+                  <%= s.emailContato %>
+                  <p class="text-xs text-gray-500">Solicitado em: <%= new Date(s.dataSolicitacao).toLocaleString('pt-BR') %></p>
+                  <% if (s.ip) { %>
+                    <p class="text-xs text-gray-400 italic">IP: <%= s.ip %></p>
+                  <% } %>
+                </td>
+                <td class="px-4 py-4">
+                  <%= s.tipoEvento %>
+                  <p class="text-xs text-gray-500">Previsão: <%= s.previsaoUso || 'N/A' %></p>
+                  <% if (s.mensagem) { %>
+                    <p class="text-xs text-gray-500 italic">"<%= s.mensagem %>"</p>
+                  <% } %>
+                </td>
+                <td class="px-4 py-4">
+                  <% if (s.status === 'Pendente') { %>
+                    <span class="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">Pendente</span>
+                  <% } else { %>
+                    <span class="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded-full"><%= s.status %></span>
+                  <% } %>
+                </td>
+                <td class="px-4 py-4 text-center flex items-center justify-center gap-3">
+                  <a href="/superadmin/solicitacoes/<%= s._id %>/editar" title="Ver Detalhes" class="text-blue-600 hover:text-blue-800">
+                    <i class="fas fa-eye"></i>
+                  </a>
+                  <% if (s.status === 'Pendente') { %>
+                    <form action="/superadmin/solicitacoes/<%= s._id %>/aprovar" method="POST" onsubmit="return confirm('Deseja APROVAR esta solicitação?');" class="inline">
+                      <button title="Aprovar" class="text-green-600 hover:text-green-800"><i class="fas fa-check-circle"></i></button>
+                    </form>
+                    <form action="/superadmin/solicitacoes/<%= s._id %>/rejeitar" method="POST" onsubmit="return confirm('Deseja REJEITAR esta solicitação?');" class="inline">
+                      <button title="Rejeitar" class="text-red-600 hover:text-red-800"><i class="fas fa-times-circle"></i></button>
+                    </form>
+                  <% } %>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } else { %>
+      <p class="text-center text-gray-600 mt-10 text-lg">Nenhuma solicitação pendente.</p>
+    <% } %>
+
+    <div class="text-center mt-8">
+      <a href="/superadmin/dashboard" class="text-blue-600 hover:text-blue-800 hover:underline">
+        ← Voltar para o Painel Principal
+      </a>
+    </div>
+  </div>
 </div>
