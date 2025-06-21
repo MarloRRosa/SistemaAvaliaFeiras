@@ -295,7 +295,7 @@
                                         <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"><%= solicitacao.nomeEscola %></td>
                                         <td class="px-6 py-4"><%= solicitacao.nomeResponsavel %></td>
                                         <td class="px-6 py-4"><%= solicitacao.emailContato %></td>
-                                        <td class="px-6 py-4"><%= new Date(solicitacao.dataSolicitacao).toLocaleDateString('pt-BR') %></td>
+                                        <td class="px-6 py-4"><%= new Date(solicitacao.dataSolicitacao).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }) %></td>
                                         <td class="px-6 py-4 flex items-center justify-center gap-2">
                                             <a href="/superadmin/solicitacoes/<%= solicitacao._id %>/editar" title="Ver Detalhes" class="font-medium text-blue-600 hover:text-blue-800 transition-colors">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
