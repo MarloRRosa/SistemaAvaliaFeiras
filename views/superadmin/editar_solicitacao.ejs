@@ -71,9 +71,18 @@
                     </button>
                 </form>
             </div>
-             <p class="text-gray-600 mt-2"><strong>IP:</strong> <%= solicitacao.ipSolicitante || 'Não registrado' %></p>
-            <p class="text-gray-600"><strong>Data da Solicitação:</strong> <%= new Date(solicitacao.dataSolicitacao).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }) %></p>
-            <p class="text-gray-600"><strong>Aceitou Termo?</strong> <%= solicitacao.aceiteTermo ? 'Sim' : 'Não' %></p>
+             <p class="text-gray-600 mt-2">
+  <strong>IP:</strong> <%= solicitacao.registroAceite?.ip || 'Não registrado' %>
+</p>
+
+<p class="text-gray-600">
+  <strong>Aceitou Termo?</strong> <%= solicitacao.registroAceite?.aceite ? 'Sim' : 'Não' %>
+</p>
+
+<p class="text-gray-600">
+  <strong>Data da Solicitação:</strong> <%= new Date(solicitacao.dataSolicitacao).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }) %>
+</p>
+
         </div>
 
         <div class="mt-8 pt-6 border-t border-gray-200 flex flex-col md:flex-row justify-between items-center">
