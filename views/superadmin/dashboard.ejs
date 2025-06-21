@@ -495,34 +495,24 @@
     activateTab(initialTab);
 
     document.querySelectorAll('.tab-button').forEach(button => {
-      button.addEventListener('click', function(e) {
+      button.addEventListener('click', function (e) {
         e.preventDefault();
         const tabName = this.getAttribute('data-tab');
-        activateTab(tabName);
-        updateUrl(tabName);
+        // Em vez de só atualizar a aba via JavaScript, vamos recarregar:
+        window.location.href = `/superadmin/dashboard?tab=${tabName}`;
       });
     });
   });
 
   function activateTab(tabName) {
-    // Esconde todas as abas
     document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
-    // Remove estado ativo de todos os botões
     document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
 
-    // Exibe a aba desejada
     const activeTabContent = document.getElementById(`${tabName}-tab`);
     if (activeTabContent) activeTabContent.classList.remove('hidden');
 
-    // Marca o botão da aba como ativo
     const activeButton = document.querySelector(`.tab-button[data-tab="${tabName}"]`);
     if (activeButton) activeButton.classList.add('active');
-  }
-
-  function updateUrl(tabName) {
-    const newUrl = new URL(window.location.href);
-    newUrl.searchParams.set('tab', tabName);
-    window.history.replaceState({}, '', newUrl);
   }
 </script>
 
