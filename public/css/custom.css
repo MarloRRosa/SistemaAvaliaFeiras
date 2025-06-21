@@ -1,0 +1,21 @@
+/* Estilo base extra além do Tailwind */
+
+.btn-green {
+    @apply bg-green-600 text-white px-8 py-4 rounded-full shadow-lg font-semibold hover:bg-green-700 hover:scale-105 transition;
+}
+
+.btn-white {
+    @apply bg-white text-blue-700 px-8 py-4 rounded-full shadow-lg font-semibold hover:bg-gray-100 hover:scale-105 transition;
+}
+
+.section-title {
+    @apply text-4xl font-extrabold text-center mb-12 text-gray-800;
+}
+
+.feature-card {
+    @apply bg-gray-50 p-8 rounded-xl shadow-md text-center hover:scale-105 transition duration-300;
+}
+
+.step-card {
+    @apply bg-white p-8 rounded-xl shadow-md text-center hover:scale-105 transition duration-300;
+}
