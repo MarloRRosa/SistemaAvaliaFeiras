@@ -116,8 +116,11 @@ router.post('/solicitar-acesso', async (req, res) => {
             mensagem: mensagem?.trim() || '',
             status: 'Pendente',
             dataSolicitacao: new Date(),
-            ipSolicitante: { type: String },
-            aceiteTermo: { type: Boolean, required: true }
+             registroAceite: {
+            aceite: true,
+            ip,
+            dataHora: new Date()
+        }
         });
 
         await nova.save();
