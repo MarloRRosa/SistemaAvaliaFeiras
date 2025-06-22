@@ -1,48 +1,41 @@
-<link rel="stylesheet" href="/css/super-output.css">
-
-<nav class="bg-gray-800 text-white shadow-lg fixed w-full z-50">
-  <div class="flex items-center justify-between px-4 py-3 md:py-4 md:px-6">
-    <!-- Logo -->
-    <div>
-      <a href="/superadmin/dashboard" class="text-xl font-bold">
-        AvaliaFeiras <span class="text-blue-400 text-sm">Super Admin</span>
-      </a>
-    </div>
-
-    <!-- Hamburger Button (Mobile) -->
-    <div class="md:hidden">
-      <button id="menuToggle" class="focus:outline-none">
-        <i class="fas fa-bars text-2xl"></i>
-      </button>
-    </div>
-
-    <!-- Menu Links (Desktop) -->
-    <div class="hidden md:flex space-x-4">
-      <a href="/superadmin/dashboard?tab=visao-geral" class="hover:bg-gray-700 px-3 py-2 rounded transition">Dashboard</a>
-      <a href="/superadmin/dashboard?tab=gerenciar-escolas" class="hover:bg-gray-700 px-3 py-2 rounded transition">Escolas</a>
-      <a href="/superadmin/dashboard?tab=solicitacoes" class="hover:bg-gray-700 px-3 py-2 rounded transition">Solicitações</a>
-      <a href="/superadmin/dashboard?tab=projetos-sem-avaliacao" class="hover:bg-gray-700 px-3 py-2 rounded transition">Projetos</a>
-      <a href="/superadmin/logout" class="bg-red-600 hover:bg-red-700 px-3 py-2 rounded transition">Sair</a>
-    </div>
+<!-- Sidebar SuperAdmin -->
+<div id="sidebar" class="fixed top-0 left-0 h-full w-64 bg-gray-800 text-white transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-50">
+  <div class="flex items-center justify-between px-4 py-3 md:hidden">
+    <span class="text-lg font-bold">Menu</span>
+    <button id="closeSidebar" class="text-white text-2xl">&times;</button>
   </div>
-
-  <!-- Menu Mobile -->
-  <div id="mobileMenu" class="hidden bg-gray-900 text-white flex flex-col space-y-2 px-4 py-3 md:hidden">
-    <a href="/superadmin/dashboard?tab=visao-geral" class="hover:bg-gray-700 px-3 py-2 rounded transition">Dashboard</a>
-    <a href="/superadmin/dashboard?tab=gerenciar-escolas" class="hover:bg-gray-700 px-3 py-2 rounded transition">Escolas</a>
-    <a href="/superadmin/dashboard?tab=solicitacoes" class="hover:bg-gray-700 px-3 py-2 rounded transition">Solicitações</a>
-    <a href="/superadmin/dashboard?tab=projetos-sem-avaliacao" class="hover:bg-gray-700 px-3 py-2 rounded transition">Projetos</a>
-    <a href="/superadmin/logout" class="bg-red-600 hover:bg-red-700 px-3 py-2 rounded transition">Sair</a>
+  <div class="flex flex-col space-y-2 px-4 py-4">
+    <a href="/superadmin/dashboard?tab=visao-geral" class="hover:bg-gray-700 rounded px-3 py-2">Dashboard</a>
+    <a href="/superadmin/dashboard?tab=gerenciar-escolas" class="hover:bg-gray-700 rounded px-3 py-2">Escolas</a>
+    <a href="/superadmin/dashboard?tab=solicitacoes" class="hover:bg-gray-700 rounded px-3 py-2">Solicitações</a>
+    <a href="/superadmin/dashboard?tab=projetos-sem-avaliacao" class="hover:bg-gray-700 rounded px-3 py-2">Projetos Pendentes</a>
+    <a href="/superadmin/logout" class="bg-red-600 hover:bg-red-700 rounded px-3 py-2 text-center">Sair</a>
   </div>
-</nav>
+</div>
+
+<!-- Top Navbar (só para mobile) -->
+<div class="bg-gray-800 text-white flex justify-between items-center px-4 py-3 md:hidden fixed top-0 left-0 right-0 z-40">
+  <a href="/superadmin/dashboard" class="text-xl font-bold">AvaliaFeiras <span class="text-blue-400 text-sm">Super Admin</span></a>
+  <button id="openSidebar">
+    <i class="fas fa-bars text-2xl"></i>
+  </button>
+</div>
+
+<!-- Espaçamento no desktop para o sidebar -->
+<div class="hidden md:block w-64 fixed top-0 left-0 h-full"></div>
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    const menuToggle = document.getElementById('menuToggle');
-    const mobileMenu = document.getElementById('mobileMenu');
+    const sidebar = document.getElementById('sidebar');
+    const openBtn = document.getElementById('openSidebar');
+    const closeBtn = document.getElementById('closeSidebar');
 
-    menuToggle.addEventListener('click', () => {
-      mobileMenu.classList.toggle('hidden');
+    openBtn.addEventListener('click', () => {
+      sidebar.classList.remove('-translate-x-full');
+    });
+
+    closeBtn.addEventListener('click', () => {
+      sidebar.classList.add('-translate-x-full');
     });
   });
 </script>
