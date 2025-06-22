@@ -161,4 +161,20 @@ router.post('/solicitar-acesso', async (req, res) => {
     }
 });
 
+// Página de Política de Privacidade
+router.get('/politica-privacidade', (req, res) => {
+    res.render('public/politica-privacidade', {
+        titulo: 'Política de Privacidade',
+        layout: 'layouts/public'
+    });
+});
+
+// Página de Termos de Uso
+router.get('/termos-de-uso', (req, res) => {
+    res.render('public/termos-de-uso', {
+        titulo: 'Termos de Uso',
+        layout: 'layouts/public'
+    });
+});
+
 module.exports = router;
