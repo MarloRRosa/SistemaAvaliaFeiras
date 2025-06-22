@@ -2040,7 +2040,7 @@ router.get('/relatorio/avaliacao-offline/:feiraId/:avaliadorId', verificarAdminE
         await generatePdfReport(req, res, 'relatorio_offline', dataForReport, filename);
 
     } catch (err) {
-        console.error('Erro ao gerar relatório de avaliação offline (avaliador específico):', err);
+        console.error('Erro ao gerar relatório de avaliação (avaliador específico):', err);
         if (!res.headersSent) {
             req.flash('error_msg', 'Erro ao gerar o relatório. Detalhes: ' + err.message);
             res.redirect('/admin/dashboard?tab=relatorios');
