@@ -1,21 +1,48 @@
-<nav class="bg-gray-800 p-4 shadow-lg">
-    <div class="max-w-7xl mx-auto flex justify-between items-center">
-        <!-- Logo ou Nome do Sistema -->
-        <a href="/superadmin/dashboard" class="text-white text-2xl font-bold rounded-md px-3 py-2 hover:bg-gray-700 transition-colors duration-200">
-            AvaliaFeiras <span class="text-blue-400 text-base">Super Admin</span>
-        </a>
+<link rel="stylesheet" href="/css/super-output.css">
 
-        <!-- Links de Navegação -->
-        <div class="flex items-center space-x-4">
-            <a href="/superadmin/dashboard?tab=visao-geral" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">Dashboard</a>
-            <a href="/superadmin/dashboard?tab=gerenciar-escolas" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">Escolas</a>
-            <a href="/superadmin/dashboard?tab=solicitacoes" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">Solicitações</a>
-            <a href="/superadmin/dashboard?tab=projetos-sem-avaliacao" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">Projetos Pendentes</a>
-            
-            <!-- Botão de Logout -->
-            <a href="/superadmin/logout" class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
-                Sair
-            </a>
-        </div>
+<nav class="bg-gray-800 text-white shadow-lg fixed w-full z-50">
+  <div class="flex items-center justify-between px-4 py-3 md:py-4 md:px-6">
+    <!-- Logo -->
+    <div>
+      <a href="/superadmin/dashboard" class="text-xl font-bold">
+        AvaliaFeiras <span class="text-blue-400 text-sm">Super Admin</span>
+      </a>
     </div>
+
+    <!-- Hamburger Button (Mobile) -->
+    <div class="md:hidden">
+      <button id="menuToggle" class="focus:outline-none">
+        <i class="fas fa-bars text-2xl"></i>
+      </button>
+    </div>
+
+    <!-- Menu Links (Desktop) -->
+    <div class="hidden md:flex space-x-4">
+      <a href="/superadmin/dashboard?tab=visao-geral" class="hover:bg-gray-700 px-3 py-2 rounded transition">Dashboard</a>
+      <a href="/superadmin/dashboard?tab=gerenciar-escolas" class="hover:bg-gray-700 px-3 py-2 rounded transition">Escolas</a>
+      <a href="/superadmin/dashboard?tab=solicitacoes" class="hover:bg-gray-700 px-3 py-2 rounded transition">Solicitações</a>
+      <a href="/superadmin/dashboard?tab=projetos-sem-avaliacao" class="hover:bg-gray-700 px-3 py-2 rounded transition">Projetos</a>
+      <a href="/superadmin/logout" class="bg-red-600 hover:bg-red-700 px-3 py-2 rounded transition">Sair</a>
+    </div>
+  </div>
+
+  <!-- Menu Mobile -->
+  <div id="mobileMenu" class="hidden bg-gray-900 text-white flex flex-col space-y-2 px-4 py-3 md:hidden">
+    <a href="/superadmin/dashboard?tab=visao-geral" class="hover:bg-gray-700 px-3 py-2 rounded transition">Dashboard</a>
+    <a href="/superadmin/dashboard?tab=gerenciar-escolas" class="hover:bg-gray-700 px-3 py-2 rounded transition">Escolas</a>
+    <a href="/superadmin/dashboard?tab=solicitacoes" class="hover:bg-gray-700 px-3 py-2 rounded transition">Solicitações</a>
+    <a href="/superadmin/dashboard?tab=projetos-sem-avaliacao" class="hover:bg-gray-700 px-3 py-2 rounded transition">Projetos</a>
+    <a href="/superadmin/logout" class="bg-red-600 hover:bg-red-700 px-3 py-2 rounded transition">Sair</a>
+  </div>
 </nav>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const menuToggle = document.getElementById('menuToggle');
+    const mobileMenu = document.getElementById('mobileMenu');
+
+    menuToggle.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+    });
+  });
+</script>
