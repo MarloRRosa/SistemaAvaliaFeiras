@@ -1102,46 +1102,42 @@ router.post('/avaliadores/:id/excluir', verificarAdminEscola, async (req, res) =
 
 // Criar nova feira sem excluir dados antigos
 router.post('/feiras', verificarAdminEscola, async (req, res) => {
-    const { nome, inicioFeira, fimFeira } = req.body;
-    const escolaId = req.session.adminEscola.escolaId;
+  const { nome, inicioFeira, fimFeira, status = 'ativa' } = req.body;
+  const escolaId = req.session.adminEscola.escolaId;
 
-    try {
-        // Converter de DD-MM-YYYY para Date seguro (YYYY-MM-DD)
-        const inicioParts = inicioFeira.split('-');
-        const fimParts = fimFeira.split('-');
+  try {
+    // Validação básica de datas
+    const inicio = new Date(inicioFeira);
+    const fim = new Date(fimFeira);
 
-        if (inicioParts.length !== 3 || fimParts.length !== 3) {
-            throw new Error('Formato de data inválido. Use DD-MM-YYYY.');
-        }
-
-        const inicioFormatado = new Date(`${inicioParts[2]}-${inicioParts[1]}-${inicioParts[0]}`);
-        const fimFormatado = new Date(`${fimParts[2]}-${fimParts[1]}-${fimParts[0]}`);
-
-        // Verifica se as datas são válidas
-        if (isNaN(inicioFormatado.getTime()) || isNaN(fimFormatado.getTime())) {
-            req.flash('error_msg', 'Data inválida. Use o seletor de datas e o formato correto (DD-MM-YYYY).');
-            return res.redirect('/admin/dashboard?tab=feiras');
-        }
-
-        // Arquiva outras feiras da mesma escola
-        await Feira.updateMany({ escolaId, status: 'ativa' }, { $set: { status: 'arquivada' } });
-
-        const novaFeira = new Feira({
-            nome,
-            inicioFeira: inicioFormatado,
-            fimFeira: fimFormatado,
-            status: 'ativa',
-            escolaId
-        });
-
-        await novaFeira.save();
-        req.flash('success_msg', 'Nova feira criada com sucesso!');
-        res.redirect('/admin/dashboard?tab=feiras');
-    } catch (err) {
-        console.error('Erro ao criar feira:', err);
-        req.flash('error_msg', 'Erro ao criar nova feira. Verifique os campos e tente novamente.');
-        res.redirect('/admin/dashboard?tab=feiras');
+    if (isNaN(inicio) || isNaN(fim)) {
+      req.flash('error_msg', 'Datas inválidas. Verifique os campos de início e fim da feira.');
+      return res.redirect('/admin/dashboard?tab=feiras');
     }
+
+    // Arquivar outras feiras da mesma escola antes de criar nova
+    if (status === 'ativa') {
+      await Feira.updateMany({ escolaId, status: 'ativa' }, { $set: { status: 'arquivada' } });
+    }
+
+    // Criar nova feira
+    const novaFeira = new Feira({
+      nome: nome.trim(),
+      inicioFeira: inicio,
+      fimFeira: fim,
+      status,
+      escolaId
+    });
+
+    await novaFeira.save();
+
+    req.flash('success_msg', 'Nova feira criada com sucesso!');
+    res.redirect('/admin/dashboard?tab=feiras');
+  } catch (err) {
+    console.error('Erro ao criar nova feira:', err);
+    req.flash('error_msg', 'Erro ao criar nova feira. Detalhes: ' + err.message);
+    res.redirect('/admin/dashboard?tab=feiras');
+  }
 });
 
 
