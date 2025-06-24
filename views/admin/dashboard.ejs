@@ -752,8 +752,7 @@
                         <% projetos.forEach(projeto => { %>
                             <div class="flex items-center mb-2">
                                 <input type="checkbox" id="projeto_<%= projeto._id %>" name="projetosAtribuidos" value="<%= projeto._id %>" 
-  class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-  <%= avaliador && avaliador.projetosAtribuidos && avaliador.projetosAtribuidos.includes(String(projeto._id)) ? 'checked' : '' %>>
+  class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
 
                                 <label for="projeto_<%= projeto._id %>" class="text-gray-700 text-base"><%= projeto.titulo %></label>
                             </div>
