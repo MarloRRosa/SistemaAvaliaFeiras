@@ -75,18 +75,20 @@ function formatarDataParaInput(dateString) {
 
 // Função para enviar e-mail de redefinição de PIN para avaliador
 async function sendResetPinEmail(avaliador) {
-    cport({
-        host: process.env.EMAIL_HOST,
-        port: process.env.EMAIL_PORT,
-        secure: process.env.EMAIL_SECURE === 'true',
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS
-        },
-        tls: {
-            rejectUnauthorized: false
-        }
-    });
+    const nodemailer = require('nodemailer');
+
+const transporter = nodemailer.createTransport({
+    host: process.env.EMAIL_HOST,
+    port: process.env.EMAIL_PORT,
+    secure: process.env.EMAIL_SECURE === 'true',
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+    },
+    tls: {
+        rejectUnauthorized: false
+    }
+});
 
     const mailOptions = {
         from: `"AvaliaFeiras" <${process.env.EMAIL_USER}>`,
@@ -996,6 +998,7 @@ novoAvaliador.qrcode = qrCodeBase64;
 
 router.put('/avaliadores/:id', verificarAdminEscola, async (req, res) => {
   const { id } = req.params;
+  const ativo = req.body.ativo === 'on';
   const { nome, email, projetosAtribuidos } = req.body;
   const escolaId = req.session.adminEscola.escolaId;
 
@@ -1010,7 +1013,8 @@ router.put('/avaliadores/:id', verificarAdminEscola, async (req, res) => {
       {
         nome,
         email,
-        projetosAtribuidos: Array.isArray(projetosAtribuidos) ? projetosAtribuidos : [projetosAtribuidos]
+        projetosAtribuidos: Array.isArray(projetosAtribuidos) ? projetosAtribuidos : [projetosAtribuidos],
+        ativo
       },
       { new: true }
     );
@@ -1050,6 +1054,7 @@ router.post('/avaliadores/reset-pin/:id', verificarAdminEscola, async (req, res)
 
         const newPin = generateUniquePin();
         avaliador.pin = newPin;
+        avaliador.ativo = true;
         await avaliador.save();
 
         const emailSent = await sendResetPinEmail(avaliador);

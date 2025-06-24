@@ -367,15 +367,15 @@
                                         <% } %>
                                     </td>
                                     <td class="py-3 px-4 whitespace-nowrap">
-                                        <button class="btn-editar-avaliador"
-    data-id="<%= avaliador._id %>"
-    data-nome="<%= avaliador.nome %>"
-    data-email="<%= avaliador.email %>"
-    data-pin="<%= avaliador.pin %>"
-    data-ativo="<%= avaliador.ativo %>"
-    data-projetos="<%= avaliador.projetosAtribuidos.join(',') %>"
-    data-qrcode="<%= avaliador.qrcode || '' %>">
-    <i class="fas fa-edit"></i> Editar
+                                       <button class="btn-editar-avaliador"
+  data-id="<%= avaliador._id %>"
+  data-nome="<%= avaliador.nome %>"
+  data-email="<%= avaliador.email %>"
+  data-pin="<%= avaliador.pin %>"
+  data-ativo="<%= avaliador.ativo ? 'true' : 'false' %>"
+  data-projetos="<%= avaliador.projetosAtribuidos.map(id => id.toString()).join(',') %>"
+  data-qrcode="<%= avaliador.qrcode || '' %>">
+  <i class="fas fa-edit"></i> Editar
 </button>
 
 
@@ -751,7 +751,10 @@
                     <% if (projetos && projetos.length > 0) { %>
                         <% projetos.forEach(projeto => { %>
                             <div class="flex items-center mb-2">
-                                <input type="checkbox" id="projeto_<%= projeto._id %>" name="projetosAtribuidos" value="<%= projeto._id %>" class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                <input type="checkbox" id="projeto_<%= projeto._id %>" name="projetosAtribuidos" value="<%= projeto._id %>" 
+  class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+  <%= avaliador && avaliador.projetosAtribuidos && avaliador.projetosAtribuidos.includes(String(projeto._id)) ? 'checked' : '' %>>
+
                                 <label for="projeto_<%= projeto._id %>" class="text-gray-700 text-base"><%= projeto.titulo %></label>
                             </div>
                         <% }) %>
