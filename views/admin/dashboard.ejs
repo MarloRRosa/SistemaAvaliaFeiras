@@ -772,15 +772,26 @@
     <div id="modalFeira" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
   <form method="POST" action="/admin/feiras" class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md space-y-4">
     <h2 class="text-xl font-bold text-gray-700">Adicionar Nova Feira</h2>
-    <input type="text" name="nome" placeholder="Nome da Feira" required class="w-full border border-gray-300 p-2 rounded">
-    <input type="text" name="inicioFeira" placeholder="Início (DD-MM-YYYY)" required class="w-full border border-gray-300 p-2 rounded" pattern="\d{2}-\d{2}-\d{4}">
-    <input type="text" name="fimFeira" placeholder="Fim (DD-MM-YYYY)" required class="w-full border border-gray-300 p-2 rounded" pattern="\d{2}-\d{2}-\d{4}">
-    <div class="flex justify-end space-x-2">
+    <input type="text" name="nome" id="nomeFeira" required class="w-full border border-gray-300 p-2 rounded" placeholder="Nome da Feira">
+
+    <label class="block text-sm text-gray-600">Início da Feira</label>
+    <input type="date" name="inicioFeira" id="inicioFeiraModal" required class="w-full border border-gray-300 p-2 rounded">
+
+    <label class="block text-sm text-gray-600">Fim da Feira</label>
+    <input type="date" name="fimFeira" id="fimFeiraModal" required class="w-full border border-gray-300 p-2 rounded">
+
+    <select name="status" id="statusFeiraModal" class="w-full border border-gray-300 p-2 rounded">
+  <option value="ativa">Ativa</option>
+  <option value="arquivada">Arquivada</option>
+    </select>
+
+    <div class="flex justify-end space-x-2 pt-2">
       <button type="button" onclick="fecharModalFeira()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded">Cancelar</button>
       <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Salvar</button>
     </div>
   </form>
 </div>
+
 
 <div id="modalEditarFeira" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
   <form method="POST" action="/admin/feiras/editar" class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md space-y-4">
@@ -809,31 +820,6 @@
     </div>
   </form>
 </div>
-
-    <div id="modalConfiguracoes" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden justify-center items-center z-50 p-4">
-        <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md relative">
-            <h2 class="text-3xl font-extrabold mb-6 text-center text-gray-800">Editar Datas da Feira</h2>
-            <button id="btnFecharModalConfiguracoes" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-4xl leading-none transition duration-300 ease-in-out">&times;</button>
-            <form action="/admin/configuracoes/feiradata" method="POST"> 
-                <input type="hidden" name="feiraId" value="<%= feiraAtual._id %>"> 
-                <div class="mb-4">
-                    <label for="inicioFeira" class="block text-gray-700 text-sm font-bold mb-2">Início da Feira:</label>
-                    <input type="date" id="inicioFeira" name="inicioFeira" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out" value="<%= feiraAtual.inicioFeira ? formatarDatasParaInput(feiraAtual.inicioFeira) : '' %>">
-                </div>
-                <div class="mb-4">
-                    <label for="fimFeira" class="block text-gray-700 text-sm font-bold mb-2">Fim da Feira:</label>
-                    <input type="date" id="fimFeira" name="fimFeira" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out" value="<%= feiraAtual.fimFeira ? formatarDatasParaInput(feiraAtual.fimFeira) : '' %>">
-                </div>
-                <div class="flex items-center justify-end mt-6">
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-5 rounded-lg focus:outline-none focus:shadow-outline shadow-md transition duration-300 ease-in-out">
-                        <i class="fas fa-save mr-2"></i>Salvar Datas
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-
     
     <script>
 document.addEventListener('DOMContentLoaded', () => {
