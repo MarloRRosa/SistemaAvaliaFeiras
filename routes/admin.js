@@ -1106,13 +1106,30 @@ router.post('/feiras', verificarAdminEscola, async (req, res) => {
     const escolaId = req.session.adminEscola.escolaId;
 
     try {
+        // Converter de DD-MM-YYYY para Date seguro (YYYY-MM-DD)
+        const inicioParts = inicioFeira.split('-');
+        const fimParts = fimFeira.split('-');
+
+        if (inicioParts.length !== 3 || fimParts.length !== 3) {
+            throw new Error('Formato de data inválido. Use DD-MM-YYYY.');
+        }
+
+        const inicioFormatado = new Date(`${inicioParts[2]}-${inicioParts[1]}-${inicioParts[0]}`);
+        const fimFormatado = new Date(`${fimParts[2]}-${fimParts[1]}-${fimParts[0]}`);
+
+        // Verifica se as datas são válidas
+        if (isNaN(inicioFormatado.getTime()) || isNaN(fimFormatado.getTime())) {
+            req.flash('error_msg', 'Data inválida. Use o seletor de datas e o formato correto (DD-MM-YYYY).');
+            return res.redirect('/admin/dashboard?tab=feiras');
+        }
+
         // Arquiva outras feiras da mesma escola
         await Feira.updateMany({ escolaId, status: 'ativa' }, { $set: { status: 'arquivada' } });
 
         const novaFeira = new Feira({
             nome,
-            inicioFeira: new Date(inicioFeira.split('-').reverse().join('-')), // DD-MM-YYYY → Date
-            fimFeira: new Date(fimFeira.split('-').reverse().join('-')),
+            inicioFeira: inicioFormatado,
+            fimFeira: fimFormatado,
             status: 'ativa',
             escolaId
         });
@@ -1122,103 +1139,11 @@ router.post('/feiras', verificarAdminEscola, async (req, res) => {
         res.redirect('/admin/dashboard?tab=feiras');
     } catch (err) {
         console.error('Erro ao criar feira:', err);
-        req.flash('error_msg', 'Erro ao criar nova feira. Tente novamente.');
+        req.flash('error_msg', 'Erro ao criar nova feira. Verifique os campos e tente novamente.');
         res.redirect('/admin/dashboard?tab=feiras');
     }
 });
 
-
-// Editar Feira (PUT)
-router.post('/feiras/editar', verificarAdminEscola, async (req, res) => {
-  const { feiraId, nome, inicioFeira, fimFeira, status } = req.body;
-  const escolaId = req.session.adminEscola.escolaId;
-
-  try {
-    await Feira.updateOne(
-      { _id: feiraId, escolaId },
-      {
-        nome,
-        inicioFeira: new Date(inicioFeira),
-        fimFeira: new Date(fimFeira),
-        status
-      }
-    );
-    req.flash('success_msg', 'Feira atualizada com sucesso!');
-    res.redirect('/admin/dashboard?tab=feiras');
-  } catch (err) {
-    console.error('Erro ao editar feira:', err);
-    req.flash('error_msg', 'Erro ao editar feira. Tente novamente.');
-    res.redirect('/admin/dashboard?tab=feiras');
-  }
-});
-
-// Excluir Feira (POST)
-router.post('/feiras/excluir', verificarAdminEscola, async (req, res) => {
-  const { feiraId } = req.body;
-  const escolaId = req.session.adminEscola.escolaId;
-  try {
-    await Feira.deleteOne({ _id: feiraId, escolaId });
-    req.flash('success_msg', 'Feira excluída com sucesso.');
-    res.redirect('/admin/dashboard?tab=feiras');
-  } catch (err) {
-    console.error('Erro ao excluir feira:', err);
-    req.flash('error_msg', 'Erro ao excluir feira.');
-    res.redirect('/admin/dashboard?tab=feiras');
-  }
-});
-
-// Mudar Status da Feira (POST - usando POST para simplicidade, idealmente PUT)
-router.post('/feiras/status/:id', verificarAdminEscola, async (req, res) => {
-    const { id } = req.params;
-    const { status } = req.body; // Assume que o status (ativa/arquivada) vem do formulário
-    const adminEscolaId = req.session.adminEscola.escolaId;
-
-    // Validação de ID antes de tentar a operação no banco
-    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-        req.flash('error_msg', 'ID da feira inválido para mudança de status.');
-        return res.redirect('/admin/dashboard?tab=feiras');
-    }
-
-    try {
-        // Encontra a feira e garante que ela pertence à escola do admin
-        const feira = await Feira.findOne({ _id: id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
-        if (!feira) {
-            req.flash('error_msg', 'Feira não encontrada ou não pertence a esta escola.');
-            return res.redirect('/admin/dashboard?tab=feiras');
-        }
-
-        // Se o status for 'ativa', desativa outras feiras ativas da mesma escola
-        if (status === 'ativa') {
-            // Garante que o ID usado no $ne é um ObjectId válido
-            await Feira.updateMany(
-                { _id: { $ne: new mongoose.Types.ObjectId(id) }, status: 'ativa', escolaId: adminEscolaId }, // USANDO escolaId AQUI
-                { status: 'arquivada' }
-            );
-        } else if (status === 'arquivada') {
-            // Se estiver arquivando, garante que não há mais nenhuma feira ativa automaticamente
-            // (Embora o updateMany acima já cuide de "outras ativas")
-        }
-
-
-        feira.status = status;
-        // Se a feira está sendo arquivada, registra a data de arquivamento
-        if (status === 'arquivada' && !feira.arquivadaEm) {
-            feira.arquivadaEm = Date.now();
-        } else if (status === 'ativa' && feira.arquivadaEm) {
-            // Se está sendo reativada, remove a data de arquivamento
-            feira.arquivadaEm = undefined;
-        }
-
-        await feira.save();
-
-        req.flash('success_msg', `Status da feira "${feira.nome}" alterado para "${status}" com sucesso!`);
-        res.redirect('/admin/dashboard?tab=feiras');
-    } catch (err) {
-        console.error('Erro ao mudar status da feira:', err);
-        req.flash('error_msg', 'Erro ao mudar status da feira. Detalhes: ' + err.message);
-        res.redirect('/admin/dashboard?tab=feiras');
-    }
-});
 
 // ===========================================
 // ROTAS CRUD - CATEGORIAS

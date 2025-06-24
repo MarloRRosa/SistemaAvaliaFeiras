@@ -769,20 +769,26 @@
     </div>
 </div>
 
-    <div id="modalFeira" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <!-- MODAL: Adicionar Nova Feira -->
+<div id="modalFeira" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
   <form method="POST" action="/admin/feiras" class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md space-y-4">
-    <h2 class="text-xl font-bold text-gray-700">Adicionar Nova Feira</h2>
-    <input type="text" name="nome" id="nomeFeira" required class="w-full border border-gray-300 p-2 rounded" placeholder="Nome da Feira">
+    <h2 id="tituloModalFeira" class="text-xl font-bold text-gray-700">Adicionar Nova Feira</h2>
 
-    <label class="block text-sm text-gray-600">Início da Feira</label>
-    <input type="date" name="inicioFeira" id="inicioFeiraModal" required class="w-full border border-gray-300 p-2 rounded">
+    <input type="text" name="nome" id="nomeFeira" required placeholder="Nome da Feira"
+      class="w-full border border-gray-300 p-2 rounded">
 
-    <label class="block text-sm text-gray-600">Fim da Feira</label>
-    <input type="date" name="fimFeira" id="fimFeiraModal" required class="w-full border border-gray-300 p-2 rounded">
+    <label for="inicioFeiraModal" class="block text-sm text-gray-600">Início da Feira</label>
+    <input type="date" name="inicioFeira" id="inicioFeiraModal" required
+      class="w-full border border-gray-300 p-2 rounded">
 
+    <label for="fimFeiraModal" class="block text-sm text-gray-600">Fim da Feira</label>
+    <input type="date" name="fimFeira" id="fimFeiraModal" required
+      class="w-full border border-gray-300 p-2 rounded">
+
+    <label for="statusFeiraModal" class="block text-sm text-gray-600">Status</label>
     <select name="status" id="statusFeiraModal" class="w-full border border-gray-300 p-2 rounded">
-  <option value="ativa">Ativa</option>
-  <option value="arquivada">Arquivada</option>
+      <option value="ativa">Ativa</option>
+      <option value="arquivada">Arquivada</option>
     </select>
 
     <div class="flex justify-end space-x-2 pt-2">
@@ -792,18 +798,28 @@
   </form>
 </div>
 
-
+<!-- MODAL: Editar Feira -->
 <div id="modalEditarFeira" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
   <form method="POST" action="/admin/feiras/editar" class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md space-y-4">
     <h2 class="text-xl font-bold text-gray-700">Editar Feira</h2>
+
     <input type="hidden" name="feiraId" id="editarFeiraId">
+
+    <label for="editarFeiraNome" class="block text-sm text-gray-600">Nome</label>
     <input type="text" name="nome" id="editarFeiraNome" required class="w-full border p-2 rounded" placeholder="Nome da Feira">
+
+    <label for="editarInicioFeira" class="block text-sm text-gray-600">Início</label>
     <input type="date" name="inicioFeira" id="editarInicioFeira" required class="w-full border p-2 rounded">
+
+    <label for="editarFimFeira" class="block text-sm text-gray-600">Fim</label>
     <input type="date" name="fimFeira" id="editarFimFeira" required class="w-full border p-2 rounded">
+
+    <label for="editarFeiraStatus" class="block text-sm text-gray-600">Status</label>
     <select name="status" id="editarFeiraStatus" class="w-full border p-2 rounded">
       <option value="ativa">Ativa</option>
       <option value="arquivada">Arquivada</option>
     </select>
+
     <div class="flex justify-end items-center pt-4">
       <button type="button" onclick="fecharModalEditarFeira()" class="bg-gray-500 text-white px-4 py-2 rounded">Cancelar</button>
       <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded ml-2">Salvar</button>
@@ -811,10 +827,11 @@
   </form>
 </div>
 
-        <!-- Formulário oculto para exclusão -->
+<!-- FORM OCULTO: Exclusão de Feira -->
 <form id="formExcluirFeira" action="/admin/feiras/excluir" method="POST" class="hidden">
   <input type="hidden" name="feiraId" id="excluirFeiraHidden">
 </form>
+
 
       </div>
     </div>
