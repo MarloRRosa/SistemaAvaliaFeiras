@@ -171,7 +171,7 @@ router.get('/login', (req, res) => {
     }
     res.render('superadmin/login', {
         titulo: 'Login Super Admin', 
-        layout: 'layouts/public', 
+        layout: false, 
         error_msg: req.flash('error_msg'), // Exibe as mensagens flash
         success_msg: req.flash('success_msg') // Exibe as mensagens flash
     });
