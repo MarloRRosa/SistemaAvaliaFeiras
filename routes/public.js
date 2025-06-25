@@ -21,7 +21,7 @@ const transporter = nodemailer.createTransport({
 router.get('/', (req, res) => {
     res.render('index', {
         titulo: 'Bem-vindo ao AvaliaFeiras',
-        layout: 'layouts/public'
+        layout: false
     });
 });
 

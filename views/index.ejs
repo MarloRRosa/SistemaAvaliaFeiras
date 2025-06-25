@@ -1,133 +1,688 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema de Avaliação de Projetos Escolares</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="/css/output.css">
-  <style>
-    /* Animações extras */
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0; }
-    }
-    .blink {
-      animation: blink 1s infinite;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Avaliação de Projetos Escolares</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #e5e7eb;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            padding: 1rem 0;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #1f2937;
+        }
+
+        .logo i {
+            color: #2563eb;
+            font-size: 2rem;
+        }
+
+        .login-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid;
+            border-radius: 0.375rem;
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-admin {
+            color: #2563eb;
+            border-color: #2563eb;
+        }
+
+        .btn-admin:hover {
+            background: #eff6ff;
+        }
+
+        .btn-avaliador {
+            color: #7c3aed;
+            border-color: #7c3aed;
+        }
+
+        .btn-avaliador:hover {
+            background: #f3e8ff;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8, #1e40af);
+            color: white;
+            padding: 5rem 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.05"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 10;
+        }
+
+        .hero h1 {
+            font-size: clamp(2rem, 5vw, 4rem);
+            font-weight: bold;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero p {
+            font-size: clamp(1rem, 2vw, 1.5rem);
+            margin-bottom: 2.5rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 3rem;
+        }
+
+        @media (min-width: 640px) {
+            .cta-buttons {
+                flex-direction: row;
+                justify-content: center;
+            }
+        }
+
+        .btn-green {
+            background: #16a34a;
+            color: white;
+            padding: 1rem 2rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .btn-green:hover {
+            background: #15803d;
+            transform: translateY(-2px);
+        }
+
+        .btn-white {
+            background: white;
+            color: #2563eb;
+            padding: 1rem 2rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+            border: 2px solid white;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .btn-white:hover {
+            background: #f8fafc;
+            transform: translateY(-2px);
+        }
+
+        .access-links {
+            margin-top: 2rem;
+        }
+
+        .access-links p {
+            color: #93c5fd;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        .access-badges {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid;
+            border-radius: 9999px;
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .badge-admin {
+            color: #93c5fd;
+            border-color: #93c5fd;
+        }
+
+        .badge-admin:hover {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .badge-avaliador {
+            color: #c4b5fd;
+            border-color: #c4b5fd;
+        }
+
+        .badge-avaliador:hover {
+            background: #ede9fe;
+            color: #7c3aed;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 5rem 0;
+            background: white;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            font-size: 1.25rem;
+            color: #6b7280;
+            margin-bottom: 4rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-icon {
+            width: 4rem;
+            height: 4rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 2rem;
+            color: white;
+        }
+
+        .feature-icon.blue { background: #3b82f6; }
+        .feature-icon.purple { background: #8b5cf6; }
+        .feature-icon.green { background: #10b981; }
+        .feature-icon.orange { background: #f59e0b; }
+        .feature-icon.red { background: #ef4444; }
+        .feature-icon.indigo { background: #6366f1; }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card p {
+            color: #6b7280;
+            line-height: 1.6;
+        }
+
+        /* Steps Section */
+        .steps {
+            padding: 5rem 0;
+            background: linear-gradient(135deg, #f9fafb, #f3f4f6);
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .step-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+        }
+
+        .step-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .step-icon {
+            width: 5rem;
+            height: 5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 2.5rem;
+            color: white;
+            position: relative;
+        }
+
+        .step-number {
+            position: absolute;
+            top: -0.5rem;
+            right: -0.5rem;
+            width: 2rem;
+            height: 2rem;
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            font-weight: bold;
+            color: #1f2937;
+        }
+
+        .step-card h3 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+
+        .step-card p {
+            color: #6b7280;
+            line-height: 1.6;
+        }
+
+        /* CTA Section */
+        .cta {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            padding: 5rem 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url('data:image/svg+xml,%3Csvg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.1"%3E%3Cpath d="M20 20c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10zm10 0c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');
+        }
+
+        .cta-content {
+            position: relative;
+            z-index: 10;
+        }
+
+        .cta h2 {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            animation: pulse 2s infinite;
+        }
+
+        .cta p {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        /* Footer */
+        .footer {
+            background: #111827;
+            color: white;
+            padding: 3rem 0;
+        }
+
+        .footer-content {
+            text-align: center;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-logo i {
+            color: #60a5fa;
+            font-size: 2rem;
+        }
+
+        .footer-logo span {
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+
+        .footer p {
+            color: #9ca3af;
+            margin-bottom: 1rem;
+        }
+
+        .footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1.5rem;
+            font-size: 0.875rem;
+        }
+
+        .footer-links a {
+            color: #9ca3af;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: white;
+        }
+
+        .footer-links .super-admin {
+            color: #fbbf24;
+        }
+
+        .footer-links .super-admin:hover {
+            color: #f59e0b;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .login-buttons {
+                order: -1;
+            }
+        }
+    </style>
 </head>
-<body class="font-sans text-gray-800 bg-white">
-
-<!-- HERO -->
-<section class="bg-gradient-to-r from-blue-700 to-blue-900 py-20 text-center text-white animate-fade-in">
-  <div class="container mx-auto px-4">
-    <h1 class="text-3xl sm:text-5xl md:text-6xl font-extrabold leading-tight mb-4 animate-slide-in">
-      Simplifique a Avaliação de Projetos na Sua Escola
-    </h1>
-    <p class="text-lg sm:text-xl max-w-3xl mx-auto mb-8 opacity-90">
-      Sistema completo para simplificar o registro, avaliação e gestão de projetos escolares — ideal para feiras de ciências, mostras culturais e muito mais.
-    </p>
-
-    <div class="flex flex-col md:flex-row justify-center gap-4">
-      <a href="/solicitar-acesso" class="btn-green">
-        <i class="fas fa-handshake mr-2"></i> Sou uma Escola (Solicitar Acesso)
-      </a>
-      <a href="#funcionalidades" class="btn-white">
-        <i class="fas fa-info-circle mr-2"></i> Saiba Mais
-      </a>
-    </div>
-
-    <div class="mt-8">
-      <p class="text-gray-300 text-sm mb-2">Já possui acesso?</p>
-      <div class="flex flex-wrap justify-center gap-3">
-        <a href="/admin/login" class="text-blue-300 border border-blue-300 px-4 py-2 rounded-full hover:text-white hover:bg-blue-500 transition text-sm">
-          <i class="fas fa-user-shield mr-1"></i> Acesso Administrador
-        </a>
-        <a href="/avaliador/login" class="text-purple-300 border border-purple-300 px-4 py-2 rounded-full hover:text-white hover:bg-purple-500 transition text-sm">
-          <i class="fas fa-chalkboard-teacher mr-1"></i> Acesso Avaliador
-        </a>
-        
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- FUNCIONALIDADES -->
-<section id="funcionalidades" class="py-20 bg-white">
-  <div class="container mx-auto px-4">
-    <h2 class="section-title animate-fade-in delay-200">Recursos que Fazem a Diferença</h2>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-
-      <% const features = [
-        { icon: 'fa-school', title: 'Gestão de Escolas', color: 'blue', desc: 'Cadastre escolas, usuários e avaliadores de forma segura.' },
-        { icon: 'fa-user-shield', title: 'Acesso Avaliador', color: 'purple', desc: 'Avaliadores acessam via PIN exclusivo.' },
-        { icon: 'fa-chart-line', title: 'Relatórios', color: 'green', desc: 'Gere relatórios detalhados com base nos critérios.' },
-        { icon: 'fa-medal', title: 'Ranking de Projetos', color: 'orange', desc: 'Classificação automática por categoria e turma.' },
-        { icon: 'fa-calendar-alt', title: 'Organização de Eventos', color: 'red', desc: 'Gerencie feiras, categorias e cronogramas.' },
-        { icon: 'fa-envelope-open-text', title: 'Comunicação Integrada', color: 'indigo', desc: 'Conecte administradores, avaliadores e escolas.' }
-      ]; %>
-
-      <% features.forEach(f => { %>
-        <div class="feature-card border-t-4 border-<%= f.color %>-500 animate-fade-in delay-300">
-          <div class="text-<%= f.color %>-600 text-5xl mb-4">
-            <i class="fas <%= f.icon %>"></i>
-          </div>
-          <h3 class="text-xl font-bold mb-2 text-gray-800"><%= f.title %></h3>
-          <p class="text-gray-600 text-sm"><%= f.desc %></p>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-school"></i>
+                    <span>Sistema de Avaliação</span>
+                </div>
+                <div class="login-buttons">
+                    <a href="/admin/login" class="btn btn-admin">
+                        <i class="fas fa-shield-alt"></i>
+                        Admin
+                    </a>
+                    <a href="/avaliador/login" class="btn btn-avaliador">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                        Avaliador
+                    </a>
+                </div>
+            </div>
         </div>
-      <% }); %>
+    </header>
 
-    </div>
-  </div>
-</section>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content animate-fade-in">
+                <h1>Simplifique a Avaliação de Projetos na Sua Escola</h1>
+                <p>Sistema completo para simplificar o registro, avaliação e gestão de projetos escolares — ideal para feiras de ciências, mostras culturais e muito mais.</p>
 
-<!-- ETAPAS -->
-<section class="py-20 bg-gray-100">
-  <div class="container mx-auto px-4">
-    <h2 class="section-title animate-fade-in delay-500">Como Funciona</h2>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                <div class="cta-buttons">
+                    <a href="/solicitar-acesso" class="btn-green">
+                        <i class="fas fa-user-check"></i>
+                        Sou uma Escola (Solicitar Acesso)
+                    </a>
+                    <a href="#funcionalidades" class="btn-white">
+                        <i class="fas fa-chart-line"></i>
+                        Saiba Mais
+                    </a>
+                </div>
 
-      <% const steps = [
-        { icon: 'fa-registered', title: '1. Cadastre', color: 'blue', desc: 'Registre sua escola e configure os critérios, categorias, projetos e avaliadores.' },
-        { icon: 'fa-clipboard-check', title: '2. Avalie', color: 'green', desc: 'Avaliadores acessam via PIN e avaliam os projetos à ele designados.' },
-        { icon: 'fa-chart-pie', title: '3. Resultados', color: 'purple', desc: 'Acompanhe relatórios e rankings em tempo real.' }
-      ]; %>
-
-      <% steps.forEach(s => { %>
-        <div class="step-card animate-slide-in delay-700">
-          <div class="text-<%= s.color %>-600 text-6xl mb-4">
-            <i class="fas <%= s.icon %>"></i>
-          </div>
-          <h3 class="font-bold text-xl mb-2 text-gray-800"><%= s.title %></h3>
-          <p class="text-gray-600 text-sm"><%= s.desc %></p>
+                <div class="access-links">
+                    <p>Já possui acesso?</p>
+                    <div class="access-badges">
+                        <a href="/admin/login" class="badge badge-admin">
+                            <i class="fas fa-shield-alt"></i>
+                            Acesso Administrador
+                        </a>
+                        <a href="/avaliador/login" class="badge badge-avaliador">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                            Acesso Avaliador
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
-      <% }); %>
+    </section>
 
-    </div>
-  </div>
-</section>
+    <!-- Features Section -->
+    <section id="funcionalidades" class="features">
+        <div class="container">
+            <h2 class="section-title">Recursos que Fazem a Diferença</h2>
+            <p class="section-subtitle">Descubra como nossa plataforma revoluciona a gestão de projetos escolares</p>
+            
+            <div class="features-grid">
+                <div class="feature-card animate-fade-in">
+                    <div class="feature-icon blue">
+                        <i class="fas fa-school"></i>
+                    </div>
+                    <h3>Gestão de Escolas</h3>
+                    <p>Cadastre escolas, usuários e avaliadores de forma segura.</p>
+                </div>
 
-<!-- CTA FINAL -->
-<section class="bg-gradient-to-r from-blue-600 to-blue-800 py-16 text-white text-center">
-  <div class="container mx-auto px-4">
-    <h2 class="text-3xl sm:text-4xl font-extrabold mb-4 blink">Pronto para Começar?</h2>
-    <p class="text-lg mb-6">Transforme a forma como sua escola avalia projetos.</p>
-    <a href="/solicitar-acesso" class="btn-white">
-      <i class="fas fa-arrow-right mr-2"></i> Solicitar Acesso
-    </a>
-  </div>
-</section>
+                <div class="feature-card animate-fade-in">
+                    <div class="feature-icon purple">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Acesso Avaliador</h3>
+                    <p>Avaliadores acessam via PIN exclusivo.</p>
+                </div>
 
-<!-- FOOTER -->
-<footer class="bg-gray-800 text-white py-6 text-center text-xs">
-  <p>&copy; 2025 Sistema de Avaliação de Projetos Escolares. Desenvolvido por Marlo Rosa.</p>
-  <div class="mt-2">
-    <a href="/politica-privacidade" class="text-gray-400 hover:text-white mx-1">Política de Privacidade</a> |
-    <a href="/termos-de-uso" class="text-gray-400 hover:text-white mx-1">Termos de Uso</a> |
-    <a href="/superadmin/login" class="text-yellow-300 hover:text-white mx-1">Super Admin</a>
-  </div>
-</footer>
+                <div class="feature-card animate-fade-in">
+                    <div class="feature-icon green">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Relatórios</h3>
+                    <p>Gere relatórios detalhados com base nos critérios.</p>
+                </div>
 
+                <div class="feature-card animate-fade-in">
+                    <div class="feature-icon orange">
+                        <i class="fas fa-medal"></i>
+                    </div>
+                    <h3>Ranking de Projetos</h3>
+                    <p>Classificação automática por categoria e turma.</p>
+                </div>
+
+                <div class="feature-card animate-fade-in">
+                    <div class="feature-icon red">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <h3>Organização de Eventos</h3>
+                    <p>Gerencie feiras, categorias e cronogramas.</p>
+                </div>
+
+                <div class="feature-card animate-fade-in">
+                    <div class="feature-icon indigo">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <h3>Comunicação Integrada</h3>
+                    <p>Conecte administradores, avaliadores e escolas.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Steps Section -->
+    <section class="steps">
+        <div class="container">
+            <h2 class="section-title">Como Funciona</h2>
+            <p class="section-subtitle">Três passos simples para transformar a avaliação de projetos na sua escola</p>
+            
+            <div class="steps-grid">
+                <div class="step-card animate-fade-in">
+                    <div class="step-icon blue">
+                        <i class="fas fa-school"></i>
+                        <div class="step-number">1</div>
+                    </div>
+                    <h3>Cadastre</h3>
+                    <p>Registre sua escola e configure os critérios, categorias, projetos e avaliadores.</p>
+                </div>
+
+                <div class="step-card animate-fade-in">
+                    <div class="step-icon green">
+                        <i class="fas fa-check-circle"></i>
+                        <div class="step-number">2</div>
+                    </div>
+                    <h3>Avalie</h3>
+                    <p>Avaliadores acessam via PIN e avaliam os projetos à ele designados.</p>
+                </div>
+
+                <div class="step-card animate-fade-in">
+                    <div class="step-icon purple">
+                        <i class="fas fa-chart-pie"></i>
+                        <div class="step-number">3</div>
+                    </div>
+                    <h3>Resultados</h3>
+                    <p>Acompanhe relatórios e rankings em tempo real.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Pronto para Começar?</h2>
+                <p>Transforme a forma como sua escola avalia projetos.</p>
+                <a href="/solicitar-acesso" class="btn-white">
+                    <i class="fas fa-arrow-right"></i>
+                    Solicitar Acesso
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <i class="fas fa-school"></i>
+                    <span>Sistema de Avaliação de Projetos Escolares</span>
+                </div>
+                <p>&copy; 2025 Sistema de Avaliação de Projetos Escolares. Desenvolvido por Marlo Rosa.</p>
+                <div class="footer-links">
+                    <a href="/politica-privacidade">Política de Privacidade</a>
+                    <a href="/termos-de-uso">Termos de Uso</a>
+                    <a href="/superadmin/login" class="super-admin">Super Admin</a>
+                </div>
+            </div>
+        </div>
+    </footer>
 </body>
 </html>
