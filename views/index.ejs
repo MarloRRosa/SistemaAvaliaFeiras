@@ -1,688 +1,714 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Avaliação de Projetos Escolares</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            line-height: 1.6;
-            color: #1f2937;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 1rem;
-        }
-
-        /* Header */
-        .header {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid #e5e7eb;
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            padding: 1rem 0;
-        }
-
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 1.25rem;
-            font-weight: bold;
-            color: #1f2937;
-        }
-
-        .logo i {
-            color: #2563eb;
-            font-size: 2rem;
-        }
-
-        .login-buttons {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
-            padding: 0.5rem 1rem;
-            border: 1px solid;
-            border-radius: 0.375rem;
-            text-decoration: none;
-            font-size: 0.875rem;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-
-        .btn-admin {
-            color: #2563eb;
-            border-color: #2563eb;
-        }
-
-        .btn-admin:hover {
-            background: #eff6ff;
-        }
-
-        .btn-avaliador {
-            color: #7c3aed;
-            border-color: #7c3aed;
-        }
-
-        .btn-avaliador:hover {
-            background: #f3e8ff;
-        }
-
-        /* Hero Section */
-        .hero {
-            background: linear-gradient(135deg, #2563eb, #1d4ed8, #1e40af);
-            color: white;
-            padding: 5rem 0;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .hero::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.05"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');
-        }
-
-        .hero-content {
-            position: relative;
-            z-index: 10;
-        }
-
-        .hero h1 {
-            font-size: clamp(2rem, 5vw, 4rem);
-            font-weight: bold;
-            line-height: 1.1;
-            margin-bottom: 1.5rem;
-        }
-
-        .hero p {
-            font-size: clamp(1rem, 2vw, 1.5rem);
-            margin-bottom: 2.5rem;
-            opacity: 0.9;
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .cta-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            align-items: center;
-            margin-bottom: 3rem;
-        }
-
-        @media (min-width: 640px) {
-            .cta-buttons {
-                flex-direction: row;
-                justify-content: center;
-            }
-        }
-
-        .btn-green {
-            background: #16a34a;
-            color: white;
-            padding: 1rem 2rem;
-            font-size: 1.125rem;
-            font-weight: 600;
-            border: none;
-            border-radius: 0.5rem;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: all 0.2s;
-        }
-
-        .btn-green:hover {
-            background: #15803d;
-            transform: translateY(-2px);
-        }
-
-        .btn-white {
-            background: white;
-            color: #2563eb;
-            padding: 1rem 2rem;
-            font-size: 1.125rem;
-            font-weight: 600;
-            border: 2px solid white;
-            border-radius: 0.5rem;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: all 0.2s;
-        }
-
-        .btn-white:hover {
-            background: #f8fafc;
-            transform: translateY(-2px);
-        }
-
-        .access-links {
-            margin-top: 2rem;
-        }
-
-        .access-links p {
-            color: #93c5fd;
-            font-size: 0.875rem;
-            margin-bottom: 1rem;
-        }
-
-        .access-badges {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 0.75rem;
-        }
-
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
-            padding: 0.5rem 1rem;
-            border: 1px solid;
-            border-radius: 9999px;
-            text-decoration: none;
-            font-size: 0.875rem;
-            transition: all 0.2s;
-        }
-
-        .badge-admin {
-            color: #93c5fd;
-            border-color: #93c5fd;
-        }
-
-        .badge-admin:hover {
-            background: #dbeafe;
-            color: #1d4ed8;
-        }
-
-        .badge-avaliador {
-            color: #c4b5fd;
-            border-color: #c4b5fd;
-        }
-
-        .badge-avaliador:hover {
-            background: #ede9fe;
-            color: #7c3aed;
-        }
-
-        /* Features Section */
-        .features {
-            padding: 5rem 0;
-            background: white;
-        }
-
-        .section-title {
-            text-align: center;
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #1f2937;
-            margin-bottom: 1rem;
-        }
-
-        .section-subtitle {
-            text-align: center;
-            font-size: 1.25rem;
-            color: #6b7280;
-            margin-bottom: 4rem;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-        }
-
-        .feature-card {
-            background: white;
-            padding: 2rem;
-            border-radius: 1rem;
-            text-align: center;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-        }
-
-        .feature-icon {
-            width: 4rem;
-            height: 4rem;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 1rem;
-            font-size: 2rem;
-            color: white;
-        }
-
-        .feature-icon.blue { background: #3b82f6; }
-        .feature-icon.purple { background: #8b5cf6; }
-        .feature-icon.green { background: #10b981; }
-        .feature-icon.orange { background: #f59e0b; }
-        .feature-icon.red { background: #ef4444; }
-        .feature-icon.indigo { background: #6366f1; }
-
-        .feature-card h3 {
-            font-size: 1.25rem;
-            font-weight: bold;
-            color: #1f2937;
-            margin-bottom: 1rem;
-        }
-
-        .feature-card p {
-            color: #6b7280;
-            line-height: 1.6;
-        }
-
-        /* Steps Section */
-        .steps {
-            padding: 5rem 0;
-            background: linear-gradient(135deg, #f9fafb, #f3f4f6);
-        }
-
-        .steps-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-        }
-
-        .step-card {
-            background: white;
-            padding: 2rem;
-            border-radius: 1rem;
-            text-align: center;
-            position: relative;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s;
-        }
-
-        .step-card:hover {
-            transform: scale(1.05);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-        }
-
-        .step-icon {
-            width: 5rem;
-            height: 5rem;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 1rem;
-            font-size: 2.5rem;
-            color: white;
-            position: relative;
-        }
-
-        .step-number {
-            position: absolute;
-            top: -0.5rem;
-            right: -0.5rem;
-            width: 2rem;
-            height: 2rem;
-            background: white;
-            border: 2px solid #e5e7eb;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.875rem;
-            font-weight: bold;
-            color: #1f2937;
-        }
-
-        .step-card h3 {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #1f2937;
-            margin-bottom: 1rem;
-        }
-
-        .step-card p {
-            color: #6b7280;
-            line-height: 1.6;
-        }
-
-        /* CTA Section */
-        .cta {
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            color: white;
-            padding: 5rem 0;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .cta::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: url('data:image/svg+xml,%3Csvg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.1"%3E%3Cpath d="M20 20c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10zm10 0c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');
-        }
-
-        .cta-content {
-            position: relative;
-            z-index: 10;
-        }
-
-        .cta h2 {
-            font-size: clamp(2rem, 4vw, 3rem);
-            font-weight: bold;
-            margin-bottom: 1.5rem;
-            animation: pulse 2s infinite;
-        }
-
-        .cta p {
-            font-size: 1.25rem;
-            margin-bottom: 2rem;
-            opacity: 0.9;
-        }
-
-        /* Footer */
-        .footer {
-            background: #111827;
-            color: white;
-            padding: 3rem 0;
-        }
-
-        .footer-content {
-            text-align: center;
-        }
-
-        .footer-logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .footer-logo i {
-            color: #60a5fa;
-            font-size: 2rem;
-        }
-
-        .footer-logo span {
-            font-size: 1.25rem;
-            font-weight: bold;
-        }
-
-        .footer p {
-            color: #9ca3af;
-            margin-bottom: 1rem;
-        }
-
-        .footer-links {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 1.5rem;
-            font-size: 0.875rem;
-        }
-
-        .footer-links a {
-            color: #9ca3af;
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-
-        .footer-links a:hover {
-            color: white;
-        }
-
-        .footer-links .super-admin {
-            color: #fbbf24;
-        }
-
-        .footer-links .super-admin:hover {
-            color: #f59e0b;
-        }
-
-        /* Animations */
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .animate-fade-in {
-            animation: fadeIn 0.6s ease-out;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .header-content {
-                flex-direction: column;
-                gap: 1rem;
-            }
-
-            .login-buttons {
-                order: -1;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Avaliação de Projetos Escolares</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background: #f8fafc;
+    }
+
+    /* Navigation */
+    .navbar {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 1rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+
+    .nav-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 2rem;
+    }
+
+    .logo {
+      color: white;
+      font-size: 1.5rem;
+      font-weight: bold;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .nav-btn {
+      padding: 0.6rem 1.2rem;
+      border-radius: 25px;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .nav-btn.primary {
+      background: #48bb78;
+      color: white;
+      border-color: #48bb78;
+    }
+
+    .nav-btn.primary:hover {
+      background: #38a169;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(72, 187, 120, 0.3);
+    }
+
+    .nav-btn.secondary {
+      background: rgba(255,255,255,0.1);
+      color: white;
+      border-color: rgba(255,255,255,0.3);
+    }
+
+    .nav-btn.secondary:hover {
+      background: rgba(255,255,255,0.2);
+      border-color: white;
+      transform: translateY(-2px);
+    }
+
+    .nav-btn.outline {
+      background: transparent;
+      color: rgba(255,255,255,0.9);
+      border-color: rgba(255,255,255,0.3);
+      font-size: 0.8rem;
+    }
+
+    .nav-btn.outline:hover {
+      background: rgba(255,255,255,0.1);
+      color: white;
+      border-color: white;
+    }
+
+    /* Mobile menu */
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .nav-links {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        flex-direction: column;
+        padding: 1rem;
+        gap: 0.5rem;
+      }
+
+      .nav-links.active {
+        display: flex;
+      }
+
+      .mobile-menu-btn {
+        display: block;
+      }
+
+      .nav-container {
+        position: relative;
+      }
+    }
+
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+      color: white;
+      padding: 4rem 0;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="rgba(255,255,255,0.05)"><polygon points="0,0 1000,0 1000,100 0,80"/></svg>');
+      background-size: cover;
+    }
+
+    .hero-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      margin-bottom: 1.5rem;
+      line-height: 1.2;
+      text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+
+    .hero p {
+      font-size: 1.2rem;
+      margin-bottom: 2rem;
+      opacity: 0.9;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .cta-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+    }
+
+    .btn {
+      padding: 1rem 2rem;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.1rem;
+    }
+
+    .btn-primary {
+      background: #48bb78;
+      color: white;
+      box-shadow: 0 4px 15px rgba(72, 187, 120, 0.4);
+    }
+
+    .btn-primary:hover {
+      background: #38a169;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(72, 187, 120, 0.6);
+    }
+
+    .btn-secondary {
+      background: rgba(255,255,255,0.1);
+      color: white;
+      border: 2px solid rgba(255,255,255,0.3);
+      backdrop-filter: blur(10px);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.2);
+      border-color: white;
+      transform: translateY(-3px);
+    }
+
+    /* Features Section */
+    .features {
+      padding: 5rem 0;
+      background: white;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    .section-title {
+      text-align: center;
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 3rem;
+      color: #1a365d;
+      position: relative;
+    }
+
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 4px;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      border-radius: 2px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 2rem;
+    }
+
+    .feature-card {
+      background: white;
+      padding: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      text-align: center;
+      transition: all 0.3s ease;
+      border-top: 4px solid transparent;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--card-color), var(--card-color-light));
+    }
+
+    .feature-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+
+    .feature-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, var(--card-color), var(--card-color-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .feature-card h3 {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #2d3748;
+    }
+
+    .feature-card p {
+      color: #718096;
+      line-height: 1.6;
+    }
+
+    /* Color variations for cards */
+    .feature-card:nth-child(1) { --card-color: #3182ce; --card-color-light: #63b3ed; }
+    .feature-card:nth-child(2) { --card-color: #805ad5; --card-color-light: #b794f6; }
+    .feature-card:nth-child(3) { --card-color: #38a169; --card-color-light: #68d391; }
+    .feature-card:nth-child(4) { --card-color: #dd6b20; --card-color-light: #f6ad55; }
+    .feature-card:nth-child(5) { --card-color: #e53e3e; --card-color-light: #fc8181; }
+    .feature-card:nth-child(6) { --card-color: #5a67d8; --card-color-light: #7c3aed; }
+
+    /* How it works */
+    .how-it-works {
+      padding: 5rem 0;
+      background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+    }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 3rem;
+      margin-top: 3rem;
+    }
+
+    .step-card {
+      text-align: center;
+      padding: 2rem;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .step-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 25px 50px rgba(0,0,0,0.12);
+    }
+
+    .step-number {
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--step-color), var(--step-color-light));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+
+    .step-icon {
+      font-size: 3.5rem;
+      margin: 1rem 0;
+      background: linear-gradient(135deg, var(--step-color), var(--step-color-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .step-card h3 {
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #2d3748;
+    }
+
+    .step-card p {
+      color: #718096;
+      line-height: 1.6;
+    }
+
+    .step-card:nth-child(1) { --step-color: #3182ce; --step-color-light: #63b3ed; }
+    .step-card:nth-child(2) { --step-color: #38a169; --step-color-light: #68d391; }
+    .step-card:nth-child(3) { --step-color: #805ad5; --step-color-light: #b794f6; }
+
+    /* Final CTA */
+    .final-cta {
+      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+      color: white;
+      padding: 4rem 0;
+      text-align: center;
+    }
+
+    .final-cta h2 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .final-cta p {
+      font-size: 1.2rem;
+      margin-bottom: 2rem;
+      opacity: 0.9;
+    }
+
+    /* Footer */
+    .footer {
+      background: #1a202c;
+      color: #a0aec0;
+      padding: 2rem 0;
+      text-align: center;
+    }
+
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    .footer-links {
+      margin-top: 1rem;
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .footer-links a {
+      color: #a0aec0;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .footer-links a:hover {
+      color: white;
+    }
+
+    .footer-links a.super-admin {
+      color: #ffd700;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    .animate-fade-in { animation: fadeIn 0.8s ease-out forwards; }
+    .animate-pulse { animation: pulse 2s infinite; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .cta-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .btn {
+        width: 100%;
+        max-width: 300px;
+        justify-content: center;
+      }
+
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .steps-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+
+      .section-title {
+        font-size: 2rem;
+      }
+
+      .hero h1 {
+        font-size: 2rem;
+      }
+
+      .hero p {
+        font-size: 1rem;
+      }
+    }
+  </style>
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="container">
-            <div class="header-content">
-                <div class="logo">
-                    <i class="fas fa-school"></i>
-                    <span>Sistema de Avaliação</span>
-                </div>
-                <div class="login-buttons">
-                    <a href="/admin/login" class="btn btn-admin">
-                        <i class="fas fa-shield-alt"></i>
-                        Admin
-                    </a>
-                    <a href="/avaliador/login" class="btn btn-avaliador">
-                        <i class="fas fa-chalkboard-teacher"></i>
-                        Avaliador
-                    </a>
-                </div>
-            </div>
+
+<!-- Navigation -->
+<nav class="navbar">
+  <div class="nav-container">
+    <a href="/" class="logo">
+      <i class="fas fa-graduation-cap"></i>
+      Sistema de Avaliação
+    </a>
+    
+    <div class="nav-links" id="navLinks">
+      <a href="/solicitar-acesso" class="nav-btn primary">
+        <i class="fas fa-handshake"></i> Solicitar Acesso
+      </a>
+      <a href="/admin/login" class="nav-btn outline">
+        <i class="fas fa-user-shield"></i> Admin
+      </a>
+      <a href="/avaliador/login" class="nav-btn outline">
+        <i class="fas fa-chalkboard-teacher"></i> Avaliador
+      </a>
+    </div>
+    
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+      <i class="fas fa-bars"></i>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero">
+  <div class="hero-content animate-fade-in">
+    <h1>Simplifique a Avaliação de Projetos na Sua Escola</h1>
+    <p>Sistema completo para simplificar o registro, avaliação e gestão de projetos escolares — ideal para feiras de ciências, mostras culturais e muito mais.</p>
+    
+    <div class="cta-buttons">
+      <a href="/solicitar-acesso" class="btn btn-primary">
+        <i class="fas fa-handshake"></i> Sou uma Escola
+      </a>
+      <a href="#funcionalidades" class="btn btn-secondary">
+        <i class="fas fa-info-circle"></i> Saiba Mais
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section id="funcionalidades" class="features">
+  <div class="container">
+    <h2 class="section-title animate-fade-in">Recursos que Fazem a Diferença</h2>
+    <div class="features-grid">
+      
+      <div class="feature-card animate-fade-in">
+        <div class="feature-icon">
+          <i class="fas fa-school"></i>
         </div>
-    </header>
+        <h3>Gestão de Escolas</h3>
+        <p>Cadastre escolas, usuários e avaliadores de forma segura.</p>
+      </div>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="container">
-            <div class="hero-content animate-fade-in">
-                <h1>Simplifique a Avaliação de Projetos na Sua Escola</h1>
-                <p>Sistema completo para simplificar o registro, avaliação e gestão de projetos escolares — ideal para feiras de ciências, mostras culturais e muito mais.</p>
-
-                <div class="cta-buttons">
-                    <a href="/solicitar-acesso" class="btn-green">
-                        <i class="fas fa-user-check"></i>
-                        Sou uma Escola (Solicitar Acesso)
-                    </a>
-                    <a href="#funcionalidades" class="btn-white">
-                        <i class="fas fa-chart-line"></i>
-                        Saiba Mais
-                    </a>
-                </div>
-
-                <div class="access-links">
-                    <p>Já possui acesso?</p>
-                    <div class="access-badges">
-                        <a href="/admin/login" class="badge badge-admin">
-                            <i class="fas fa-shield-alt"></i>
-                            Acesso Administrador
-                        </a>
-                        <a href="/avaliador/login" class="badge badge-avaliador">
-                            <i class="fas fa-chalkboard-teacher"></i>
-                            Acesso Avaliador
-                        </a>
-                    </div>
-                </div>
-            </div>
+      <div class="feature-card animate-fade-in">
+        <div class="feature-icon">
+          <i class="fas fa-user-shield"></i>
         </div>
-    </section>
+        <h3>Acesso Avaliador</h3>
+        <p>Avaliadores acessam via PIN exclusivo.</p>
+      </div>
 
-    <!-- Features Section -->
-    <section id="funcionalidades" class="features">
-        <div class="container">
-            <h2 class="section-title">Recursos que Fazem a Diferença</h2>
-            <p class="section-subtitle">Descubra como nossa plataforma revoluciona a gestão de projetos escolares</p>
-            
-            <div class="features-grid">
-                <div class="feature-card animate-fade-in">
-                    <div class="feature-icon blue">
-                        <i class="fas fa-school"></i>
-                    </div>
-                    <h3>Gestão de Escolas</h3>
-                    <p>Cadastre escolas, usuários e avaliadores de forma segura.</p>
-                </div>
-
-                <div class="feature-card animate-fade-in">
-                    <div class="feature-icon purple">
-                        <i class="fas fa-shield-alt"></i>
-                    </div>
-                    <h3>Acesso Avaliador</h3>
-                    <p>Avaliadores acessam via PIN exclusivo.</p>
-                </div>
-
-                <div class="feature-card animate-fade-in">
-                    <div class="feature-icon green">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
-                    <h3>Relatórios</h3>
-                    <p>Gere relatórios detalhados com base nos critérios.</p>
-                </div>
-
-                <div class="feature-card animate-fade-in">
-                    <div class="feature-icon orange">
-                        <i class="fas fa-medal"></i>
-                    </div>
-                    <h3>Ranking de Projetos</h3>
-                    <p>Classificação automática por categoria e turma.</p>
-                </div>
-
-                <div class="feature-card animate-fade-in">
-                    <div class="feature-icon red">
-                        <i class="fas fa-calendar-alt"></i>
-                    </div>
-                    <h3>Organização de Eventos</h3>
-                    <p>Gerencie feiras, categorias e cronogramas.</p>
-                </div>
-
-                <div class="feature-card animate-fade-in">
-                    <div class="feature-icon indigo">
-                        <i class="fas fa-envelope"></i>
-                    </div>
-                    <h3>Comunicação Integrada</h3>
-                    <p>Conecte administradores, avaliadores e escolas.</p>
-                </div>
-            </div>
+      <div class="feature-card animate-fade-in">
+        <div class="feature-icon">
+          <i class="fas fa-chart-line"></i>
         </div>
-    </section>
+        <h3>Relatórios</h3>
+        <p>Gere relatórios detalhados com base nos critérios.</p>
+      </div>
 
-    <!-- Steps Section -->
-    <section class="steps">
-        <div class="container">
-            <h2 class="section-title">Como Funciona</h2>
-            <p class="section-subtitle">Três passos simples para transformar a avaliação de projetos na sua escola</p>
-            
-            <div class="steps-grid">
-                <div class="step-card animate-fade-in">
-                    <div class="step-icon blue">
-                        <i class="fas fa-school"></i>
-                        <div class="step-number">1</div>
-                    </div>
-                    <h3>Cadastre</h3>
-                    <p>Registre sua escola e configure os critérios, categorias, projetos e avaliadores.</p>
-                </div>
-
-                <div class="step-card animate-fade-in">
-                    <div class="step-icon green">
-                        <i class="fas fa-check-circle"></i>
-                        <div class="step-number">2</div>
-                    </div>
-                    <h3>Avalie</h3>
-                    <p>Avaliadores acessam via PIN e avaliam os projetos à ele designados.</p>
-                </div>
-
-                <div class="step-card animate-fade-in">
-                    <div class="step-icon purple">
-                        <i class="fas fa-chart-pie"></i>
-                        <div class="step-number">3</div>
-                    </div>
-                    <h3>Resultados</h3>
-                    <p>Acompanhe relatórios e rankings em tempo real.</p>
-                </div>
-            </div>
+      <div class="feature-card animate-fade-in">
+        <div class="feature-icon">
+          <i class="fas fa-medal"></i>
         </div>
-    </section>
+        <h3>Ranking de Projetos</h3>
+        <p>Classificação automática por categoria e turma.</p>
+      </div>
 
-    <!-- CTA Section -->
-    <section class="cta">
-        <div class="container">
-            <div class="cta-content">
-                <h2>Pronto para Começar?</h2>
-                <p>Transforme a forma como sua escola avalia projetos.</p>
-                <a href="/solicitar-acesso" class="btn-white">
-                    <i class="fas fa-arrow-right"></i>
-                    Solicitar Acesso
-                </a>
-            </div>
+      <div class="feature-card animate-fade-in">
+        <div class="feature-icon">
+          <i class="fas fa-calendar-alt"></i>
         </div>
-    </section>
+        <h3>Organização de Eventos</h3>
+        <p>Gerencie feiras, categorias e cronogramas.</p>
+      </div>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-logo">
-                    <i class="fas fa-school"></i>
-                    <span>Sistema de Avaliação de Projetos Escolares</span>
-                </div>
-                <p>&copy; 2025 Sistema de Avaliação de Projetos Escolares. Desenvolvido por Marlo Rosa.</p>
-                <div class="footer-links">
-                    <a href="/politica-privacidade">Política de Privacidade</a>
-                    <a href="/termos-de-uso">Termos de Uso</a>
-                    <a href="/superadmin/login" class="super-admin">Super Admin</a>
-                </div>
-            </div>
+      <div class="feature-card animate-fade-in">
+        <div class="feature-icon">
+          <i class="fas fa-envelope-open-text"></i>
         </div>
-    </footer>
+        <h3>Comunicação Integrada</h3>
+        <p>Conecte administradores, avaliadores e escolas.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- How it Works -->
+<section class="how-it-works">
+  <div class="container">
+    <h2 class="section-title animate-fade-in">Como Funciona</h2>
+    <div class="steps-grid">
+      
+      <div class="step-card animate-fade-in">
+        <div class="step-number">1</div>
+        <div class="step-icon">
+          <i class="fas fa-registered"></i>
+        </div>
+        <h3>Cadastre</h3>
+        <p>Registre sua escola e configure os critérios, categorias, projetos e avaliadores.</p>
+      </div>
+
+      <div class="step-card animate-fade-in">
+        <div class="step-number">2</div>
+        <div class="step-icon">
+          <i class="fas fa-clipboard-check"></i>
+        </div>
+        <h3>Avalie</h3>
+        <p>Avaliadores acessam via PIN e avaliam os projetos à ele designados.</p>
+      </div>
+
+      <div class="step-card animate-fade-in">
+        <div class="step-number">3</div>
+        <div class="step-icon">
+          <i class="fas fa-chart-pie"></i>
+        </div>
+        <h3>Resultados</h3>
+        <p>Acompanhe relatórios e rankings em tempo real.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- Final CTA -->
+<section class="final-cta">
+  <div class="container">
+    <h2 class="animate-pulse">Pronto para Começar?</h2>
+    <p>Transforme a forma como sua escola avalia projetos.</p>
+    <a href="/solicitar-acesso" class="btn btn-primary">
+      <i class="fas fa-arrow-right"></i> Solicitar Acesso
+    </a>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-content">
+    <p>&copy; 2025 Sistema de Avaliação de Projetos Escolares. Desenvolvido por Marlo Rosa.</p>
+    <div class="footer-links">
+      <a href="/politica-privacidade">Política de Privacidade</a>
+      <span>|</span>
+      <a href="/termos-de-uso">Termos de Uso</a>
+      <span>|</span>
+      <a href="/superadmin/login" class="super-admin">Super Admin</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  function toggleMobileMenu() {
+    const navLinks = document.getElementById('navLinks');
+    navLinks.classList.toggle('active');
+  }
+
+  // Smooth scrolling for anchor links
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    });
+  });
+
+  // Animation on scroll
+  const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, observerOptions);
+
+  document.querySelectorAll('.animate-fade-in').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(30px)';
+    el.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+    observer.observe(el);
+  });
+</script>
+
 </body>
 </html>
