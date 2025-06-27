@@ -764,7 +764,11 @@ if (feiraIdSelecionada && mongoose.Types.ObjectId.isValid(feiraIdSelecionada)) {
         // --- FIM: PREPARAÇÃO DE DADOS PARA O DASHBOARD GERAL ---
 
         const activeTab = req.query.tab || 'dashboard-geral';
-        const preCadastros = await Avaliador.find({ status: 'pendente' }).lean();
+        const preCadastros = await PreCadastroAvaliador.find({
+  feiraId: feiraAtual._id,
+  status: 'pendente'
+}).lean();
+
 
 
         // Renderiza o dashboard principal e passa TODOS os dados necessários para as abas
