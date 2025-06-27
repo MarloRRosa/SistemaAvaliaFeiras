@@ -930,59 +930,55 @@ router.delete('/projetos/:id', verificarAdminEscola, async (req, res) => {
 // Adicionar Avaliador (POST)
 
 // Aprovar pré-cadastro de avaliador
-router.post('/admin/pre-cadastro/:id/aprovar', async (req, res) => {
+router.get('/admin/dashboard', async (req, res) => {
   try {
-    const preCadastro = await PreCadastroAvaliador.findById(req.params.id);
-    if (!preCadastro) {
-      req.flash('error', 'Pré-cadastro não encontrado.');
-      return res.redirect('/admin/dashboard');
+    const adminEscolaId = req.session.adminEscola.escolaId;
+
+    // Busca todas as feiras dessa escola
+    const feiras = await Feira.find({ escolaId: adminEscolaId }).lean();
+
+    // Define a feira atual (pode usar req.query.feiraId se tiver seleção dinâmica)
+    let feiraAtual = await Feira.findOne({ escolaId: adminEscolaId, status: 'ativa' }).lean();
+    if (!feiraAtual) {
+      feiraAtual = feiras[0]; // fallback: pega a primeira feira se não tiver ativa
     }
 
-    // Cria um novo avaliador com base no pré-cadastro
-    const novoAvaliador = new Avaliador({
-      nome: preCadastro.nome,
-      email: preCadastro.email,
-      pin: Math.floor(1000 + Math.random() * 9000).toString(), // PIN aleatório de 4 dígitos
-      escolaId: req.session.escolaId,
-      feira: preCadastro.feiraId,
-      ativo: true
+    // Exemplo de outros dados
+    const projetos = await Projeto.find({ feiraId: feiraAtual._id }).lean();
+    const avaliadores = await Avaliador.find({ feira: feiraAtual._id }).lean();
+    const avaliacoes = await Avaliacao.find({ feiraId: feiraAtual._id }).lean();
+
+    // 🔑 Consulta dos PRÉ-CADASTROS PENDENTES só da feira atual
+    const preCadastros = await PreCadastroAvaliador.find({
+      feiraId: feiraAtual._id,
+      status: 'pendente'
+    }).lean();
+
+    // Exemplo de contagem se usar em cards
+    const totalProjetos = projetos.length;
+    const totalAvaliadores = avaliadores.length;
+
+    res.render('admin/dashboard', {
+      titulo: 'Dashboard Admin',
+      layout: false,
+      usuarioLogado: req.session.adminEscola,
+      feiras,
+      feiraAtual,
+      projetos,
+      avaliadores,
+      avaliacoes,
+      preCadastros,  // ✅ passa pro partial
+      totalProjetos,
+      totalAvaliadores
+      // outros dados que precisar...
     });
 
-    await novoAvaliador.save();
-
-    // Atualiza o status do pré-cadastro para "aprovado"
-    preCadastro.status = 'aprovado';
-    await preCadastro.save();
-
-    req.flash('success', 'Avaliador aprovado com sucesso.');
-    res.redirect('/admin/dashboard');
   } catch (err) {
     console.error(err);
-    req.flash('error', 'Erro ao aprovar o pré-cadastro.');
-    res.redirect('/admin/dashboard');
+    res.send('Erro ao carregar dashboard.');
   }
 });
 
-// Recusar pré-cadastro de avaliador
-router.post('/admin/pre-cadastro/:id/recusar', async (req, res) => {
-  try {
-    const preCadastro = await PreCadastroAvaliador.findById(req.params.id);
-    if (!preCadastro) {
-      req.flash('error', 'Pré-cadastro não encontrado.');
-      return res.redirect('/admin/dashboard');
-    }
-
-    preCadastro.status = 'recusado';
-    await preCadastro.save();
-
-    req.flash('info', 'Pré-cadastro recusado.');
-    res.redirect('/admin/dashboard');
-  } catch (err) {
-    console.error(err);
-    req.flash('error', 'Erro ao recusar o pré-cadastro.');
-    res.redirect('/admin/dashboard');
-  }
-});
 
 router.post('/avaliadores', verificarAdminEscola, async (req, res) => {
   const { nome, email, projetosAtribuidos } = req.body;
