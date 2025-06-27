@@ -13,7 +13,6 @@ const Avaliacao = require('../models/Avaliacao');
 const Admin = require('../models/Admin');
 const generatePIN = () => Math.floor(1000 + Math.random() * 9000).toString();
 const PreCadastroAvaliador = require('../models/PreCadastroAvaliador');
-const Avaliador = require('../models/Avaliador');
 
 const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
