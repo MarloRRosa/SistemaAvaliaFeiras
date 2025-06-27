@@ -16,6 +16,8 @@ router.get('/pre-cadastro/:feiraId', async (req, res) => {
     const camposExtras = ['Área de Atuação', 'Instituição'];
 
     res.render('public/pre-cadastro', {
+      layout: 'layouts/public',                // ✅ Garante que usa o layout certo
+      titulo: `Pré-Cadastro - ${feira.nome}`,  // ✅ Passa titulo para o <title>
       feiraId: feira._id,
       mensagem: req.flash('success'),
       camposExtras
