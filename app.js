@@ -62,12 +62,10 @@ app.use(session({
     cookie: {
         maxAge: 24 * 60 * 60 * 1000,  // 1 dia
         httpOnly: true,
-        secure: isProduction,         // true em produção
-        sameSite: isProduction ? 'none' : 'lax' // none com secure para evitar bloqueio do cookie
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'lax'
     }
 }));
-
-
 
 // =====================
 // Flash messages e variáveis globais
@@ -98,8 +96,10 @@ const publicRoutes = require('./routes/public');
 const superadminRoutes = require('./routes/superadmin');
 const adminRoutes = require('./routes/admin');
 const avaliadorRoutes = require('./routes/avaliador');
+const preCadastroRoutes = require('./routes/preCadastro'); // ✅ NOVO
 
 app.use('/', publicRoutes);
+app.use(preCadastroRoutes); // ✅ NOVO
 app.use('/superadmin', superadminRoutes);
 app.use('/admin', adminRoutes);
 app.use('/avaliador', avaliadorRoutes);

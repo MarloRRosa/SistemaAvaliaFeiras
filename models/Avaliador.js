@@ -1,4 +1,3 @@
-// models/Avaliador.js
 const mongoose = require('mongoose');
 
 const AvaliadorSchema = new mongoose.Schema({
@@ -41,7 +40,17 @@ const AvaliadorSchema = new mongoose.Schema({
     default: Date.now
   },
   qrcode: {
-    type: String // <- adicionado
+    type: String
+  },
+
+  // NOVOS CAMPOS:
+  criadoVia: {
+    type: String,
+    enum: ['manual', 'pre-cadastro'],
+    default: 'manual'
+  },
+  extras: {
+    type: mongoose.Schema.Types.Mixed 
   }
 });
 

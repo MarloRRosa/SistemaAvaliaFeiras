@@ -12,6 +12,8 @@ const Avaliador = require('../models/Avaliador');
 const Avaliacao = require('../models/Avaliacao');
 const Admin = require('../models/Admin');
 const generatePIN = () => Math.floor(1000 + Math.random() * 9000).toString();
+const PreCadastroAvaliador = require('../models/PreCadastroAvaliador');
+const Avaliador = require('../models/Avaliador');
 
 const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
@@ -756,14 +758,11 @@ if (feiraIdSelecionada && mongoose.Types.ObjectId.isValid(feiraIdSelecionada)) {
             return notaCriterioB - notaCriterioA;
         }
     }
-
-    // 3. Se continuar empate, mantém a ordem
     return 0;
 });
 
         }
         // --- FIM: PREPARAÇÃO DE DADOS PARA O DASHBOARD GERAL ---
-
 
         const activeTab = req.query.tab || 'dashboard-geral';
 
@@ -926,6 +925,62 @@ router.delete('/projetos/:id', verificarAdminEscola, async (req, res) => {
 // ===========================================
 
 // Adicionar Avaliador (POST)
+
+// Aprovar pré-cadastro de avaliador
+router.post('/admin/pre-cadastro/:id/aprovar', async (req, res) => {
+  try {
+    const preCadastro = await PreCadastroAvaliador.findById(req.params.id);
+    if (!preCadastro) {
+      req.flash('error', 'Pré-cadastro não encontrado.');
+      return res.redirect('/admin/dashboard');
+    }
+
+    // Cria um novo avaliador com base no pré-cadastro
+    const novoAvaliador = new Avaliador({
+      nome: preCadastro.nome,
+      email: preCadastro.email,
+      pin: Math.floor(1000 + Math.random() * 9000).toString(), // PIN aleatório de 4 dígitos
+      escolaId: req.session.escolaId,
+      feira: preCadastro.feiraId,
+      ativo: true
+    });
+
+    await novoAvaliador.save();
+
+    // Atualiza o status do pré-cadastro para "aprovado"
+    preCadastro.status = 'aprovado';
+    await preCadastro.save();
+
+    req.flash('success', 'Avaliador aprovado com sucesso.');
+    res.redirect('/admin/dashboard');
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Erro ao aprovar o pré-cadastro.');
+    res.redirect('/admin/dashboard');
+  }
+});
+
+// Recusar pré-cadastro de avaliador
+router.post('/admin/pre-cadastro/:id/recusar', async (req, res) => {
+  try {
+    const preCadastro = await PreCadastroAvaliador.findById(req.params.id);
+    if (!preCadastro) {
+      req.flash('error', 'Pré-cadastro não encontrado.');
+      return res.redirect('/admin/dashboard');
+    }
+
+    preCadastro.status = 'recusado';
+    await preCadastro.save();
+
+    req.flash('info', 'Pré-cadastro recusado.');
+    res.redirect('/admin/dashboard');
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Erro ao recusar o pré-cadastro.');
+    res.redirect('/admin/dashboard');
+  }
+});
+
 router.post('/avaliadores', verificarAdminEscola, async (req, res) => {
   const { nome, email, projetosAtribuidos } = req.body;
   const escolaId = req.session.adminEscola.escolaId;
