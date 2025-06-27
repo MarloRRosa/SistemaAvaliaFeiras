@@ -764,34 +764,38 @@ if (feiraIdSelecionada && mongoose.Types.ObjectId.isValid(feiraIdSelecionada)) {
         // --- FIM: PREPARAÇÃO DE DADOS PARA O DASHBOARD GERAL ---
 
         const activeTab = req.query.tab || 'dashboard-geral';
+        const preCadastros = await Avaliador.find({ status: 'pendente' }).lean();
+
 
         // Renderiza o dashboard principal e passa TODOS os dados necessários para as abas
         res.render('admin/dashboard', {
-    titulo: 'Dashboard Admin',
-    layout: false,
-    usuarioLogado: req.session.adminEscola,
-    activeTab: activeTab,
-    feiras,
-    escolas,
-    feiraAtual: feiraAtual ? feiraAtual.toObject() : null,
-    projetos: projetosFetched,
-    categorias: categoriasFetched,
-    criterios: criteriosOficiais,
-    avaliadores: avaliadoresFetched,
-    avaliacoes: avaliacoesFetched,
-    projetosPorCategoria,
-    avaliacoesPorAvaliadorCount,
-    mediaAvaliacaoPorCriterio,
-    statusProjetosCount,
-    escola,
-    totalProjetos,
-    totalAvaliadores,
-    projetosAvaliadosCompletosCount,
-    projetosPendentesAvaliacaoCount,
-    mediaGeralAvaliacoes,
-    relatorioFinalPorProjeto,
-    formatarDatasParaInput: formatarDataParaInput // ✅ ESSA LINHA corrige o erro
+  titulo: 'Dashboard Admin',
+  layout: false,
+  usuarioLogado: req.session.adminEscola,
+  activeTab: activeTab,
+  feiras,
+  escolas,
+  feiraAtual: feiraAtual ? feiraAtual.toObject() : null,
+  projetos: projetosFetched,
+  categorias: categoriasFetched,
+  criterios: criteriosOficiais,
+  avaliadores: avaliadoresFetched,
+  avaliacoes: avaliacoesFetched,
+  projetosPorCategoria,
+  avaliacoesPorAvaliadorCount,
+  mediaAvaliacaoPorCriterio,
+  statusProjetosCount,
+  escola,
+  totalProjetos,
+  totalAvaliadores,
+  projetosAvaliadosCompletosCount,
+  projetosPendentesAvaliacaoCount,
+  mediaGeralAvaliacoes,
+  relatorioFinalPorProjeto,
+  formatarDatasParaInput: formatarDataParaInput,
+  preCadastros // ✅ Adicionado aqui!
 });
+
 
     } catch (error) {
         console.error('Erro ao carregar dashboard do admin:', error);
