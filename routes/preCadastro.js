@@ -13,7 +13,11 @@ router.get('/pre-cadastro/:feiraId', async (req, res) => {
     }
 
     // Campos extras configuráveis futuramente pela feira (placeholder por enquanto)
-    const camposExtras = ['Área de Atuação', 'Instituição'];
+    const ConfiguracaoFormularioPreCadastro = require('../models/ConfiguracaoFormularioPreCadastro');
+
+const configuracao = await ConfiguracaoFormularioPreCadastro.findOne({ escolaId: feira.escolaId });
+const camposExtras = configuracao ? configuracao.camposExtras : [];
+
 
     res.render('public/pre-cadastro', {
       layout: 'layouts/public',                // ✅ Garante que usa o layout certo

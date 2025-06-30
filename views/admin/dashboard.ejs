@@ -341,6 +341,7 @@
   <div class="flex gap-2 mb-4 border-b">
     <button class="subtab-btn active text-sm font-semibold text-gray-600 hover:text-blue-600 transition" data-subtab="sub-avaliadores-cadastrados">Cadastrados</button>
     <button class="subtab-btn text-sm font-semibold text-gray-600 hover:text-blue-600 transition" data-subtab="sub-pre-cadastros">Pré-Cadastros Pendentes</button>
+      <button class="subtab-btn text-sm font-semibold text-gray-600 hover:text-blue-600 transition" data-subtab="sub-configurar-pre-cadastro"> Configurar Formulário</button>
   </div>
 
   <!-- Conteúdo: Avaliadores Cadastrados -->
@@ -416,6 +417,11 @@
   <div id="sub-pre-cadastros" class="subtab-content hidden">
     <%- include('partials/avaliadores-pre-cadastro', { preCadastros }) %>
   </div>
+  <!-- Conteúdo: Configurar Formulário de Pré-Cadastro -->
+<div id="sub-configurar-pre-cadastro" class="subtab-content hidden">
+  <%- include('partials/configurar-formulario-pre-cadastro', { camposExtras }) %>
+</div>
+
 
 <!-- FIM ABA: AVALIADORES -->
 

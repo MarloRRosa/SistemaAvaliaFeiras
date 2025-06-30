@@ -13,6 +13,7 @@ const Avaliacao = require('../models/Avaliacao');
 const Admin = require('../models/Admin');
 const generatePIN = () => Math.floor(1000 + Math.random() * 9000).toString();
 const PreCadastroAvaliador = require('../models/PreCadastroAvaliador');
+const ConfiguracaoFormularioPreCadastro = require('../models/ConfiguracaoFormularioPreCadastro');
 
 const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
@@ -1156,12 +1157,48 @@ router.post('/avaliadores/:id/excluir', verificarAdminEscola, async (req, res) =
   res.redirect('/admin/dashboard?tab=avaliadores');
 });
 
+// GET: Configurar formulário de pré-cadastro
+router.get('/admin/formulario-pre-cadastro/configurar', verificarAdminEscola, async (req, res) => {
+  const escolaId = req.session.adminEscola.escolaId;
+  let configuracao = await ConfiguracaoFormularioPreCadastro.findOne({ escolaId });
+  if (!configuracao) {
+    configuracao = { camposExtras: [] };
+  }
+  res.render('admin/configurar-formulario-pre-cadastro', {
+    titulo: 'Configurar Formulário de Pré-Cadastro',
+    camposExtras: configuracao.camposExtras
+  });
+});
+
+
+// GET
+router.get('/admin/formulario-pre-cadastro/configurar', verificarAdminEscola, async (req, res) => {
+  const escolaId = req.session.adminEscola.escolaId;
+  let configuracao = await ConfiguracaoFormularioPreCadastro.findOne({ escolaId });
+  if (!configuracao) configuracao = { camposExtras: [] };
+  res.render('partials/configurar-formulario-pre-cadastro', {
+    layout: false, // se usar include no dashboard não precisa layout
+    camposExtras: configuracao.camposExtras,
+    success_msg: req.flash('success_msg')
+  });
+});
+
+// POST
+router.post('/admin/formulario-pre-cadastro/configurar', verificarAdminEscola, async (req, res) => {
+  const escolaId = req.session.adminEscola.escolaId;
+  const camposExtras = req.body.camposExtras || [];
+  await ConfiguracaoFormularioPreCadastro.findOneAndUpdate(
+    { escolaId },
+    { camposExtras },
+    { upsert: true, new: true }
+  );
+  req.flash('success_msg', 'Configuração salva com sucesso!');
+  res.redirect('/admin/dashboard'); // ou onde quiser
+});
 
 // ===========================================
 // ROTAS CRUD - FEIRAS
 // ===========================================
-
-
 
 // Criar nova feira sem excluir dados antigos
 router.post('/feiras', verificarAdminEscola, async (req, res) => {

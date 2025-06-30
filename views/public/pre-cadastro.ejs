@@ -17,35 +17,45 @@
 
     <form action="/pre-cadastro/<%= feiraId %>" method="POST" class="space-y-5">
 
+      <!-- Campo Nome -->
       <div>
         <label for="nome" class="block text-sm font-medium text-gray-700">Nome completo</label>
         <input type="text" id="nome" name="nome" required
                class="mt-1 block w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 border-gray-300">
       </div>
 
+      <!-- Campo Email -->
       <div>
         <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
         <input type="email" id="email" name="email" required
                class="mt-1 block w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 border-gray-300">
       </div>
 
+      <!-- Campo Telefone -->
       <div>
         <label for="telefone" class="block text-sm font-medium text-gray-700">Telefone (opcional)</label>
         <input type="text" id="telefone" name="telefone"
                class="mt-1 block w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 border-gray-300">
       </div>
 
-      <!-- Campos extras opcionais -->
+      <!-- Campos extras configuráveis -->
       <% if (camposExtras && camposExtras.length > 0) { %>
         <% camposExtras.forEach(campo => { %>
           <div>
-            <label for="extra_<%= campo %>" class="block text-sm font-medium text-gray-700"><%= campo %></label>
-            <input type="text" id="extra_<%= campo %>" name="extras[<%= campo %>]"
+            <label for="extra_<%= campo.label %>" class="block text-sm font-medium text-gray-700">
+              <%= campo.label %>
+              <% if (campo.obrigatorio) { %><span class="text-red-500">*</span><% } %>
+            </label>
+            <input type="text"
+                   id="extra_<%= campo.label %>"
+                   name="extras[<%= campo.label %>]"
+                   <%= campo.obrigatorio ? 'required' : '' %>
                    class="mt-1 block w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 border-gray-300">
           </div>
         <% }) %>
       <% } %>
 
+      <!-- Botão de Enviar -->
       <div class="text-center mt-6">
         <button type="submit"
                 class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md shadow-md transition">
