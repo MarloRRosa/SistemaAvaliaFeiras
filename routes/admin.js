@@ -1053,7 +1053,7 @@ novoAvaliador.qrcode = qrCodeBase64;
     req.flash('error_msg', 'Erro ao cadastrar avaliador. Detalhes: ' + err.message);
   }
 
-  res.redirect('/admin/dashboard?tab=avaliadores');
+  res.redirect('/dashboard?tab=avaliadores');
 });
 
 router.put('/avaliadores/:id', verificarAdminEscola, async (req, res) => {
@@ -1089,7 +1089,7 @@ router.put('/avaliadores/:id', verificarAdminEscola, async (req, res) => {
     req.flash('error_msg', 'Erro ao atualizar avaliador. Detalhes: ' + err.message);
   }
 
-  res.redirect('/admin/dashboard?tab=avaliadores');
+  res.redirect('/dashboard?tab=avaliadores');
 });
 
 
@@ -1128,7 +1128,7 @@ router.post('/avaliadores/reset-pin/:id', verificarAdminEscola, async (req, res)
     } catch (err) {
         console.error('Erro ao redefinir PIN do avaliador:', err);
         req.flash('error_msg', 'Erro ao redefinir PIN do avaliador. Detalhes: ' + err.message);
-        res.redirect('/admin/dashboard?tab=avaliadores');
+        res.redirect('/dashboard?tab=avaliadores');
     }
 });
 
@@ -1155,11 +1155,11 @@ router.post('/avaliadores/:id/excluir', verificarAdminEscola, async (req, res) =
     req.flash('error_msg', 'Erro ao excluir avaliador. Detalhes: ' + err.message);
   }
 
-  res.redirect('/admin/dashboard?tab=avaliadores');
+  res.redirect('/dashboard?tab=avaliadores');
 });
 
 // GET
-router.get('/admin/formulario-pre-cadastro/configurar', verificarAdminEscola, async (req, res) => {
+router.get('/formulario-pre-cadastro/configurar', verificarAdminEscola, async (req, res) => {
   const escolaId = req.session.adminEscola.escolaId;
   let configuracao = await ConfiguracaoFormularioPreCadastro.findOne({ escolaId });
   if (!configuracao) configuracao = { camposExtras: [] };
@@ -1171,7 +1171,7 @@ router.get('/admin/formulario-pre-cadastro/configurar', verificarAdminEscola, as
 });
 
 // POST
-router.post('/admin/formulario-pre-cadastro/configurar', verificarAdminEscola, async (req, res) => {
+router.post('/formulario-pre-cadastro/configurar', verificarAdminEscola, async (req, res) => {
   const escolaId = req.session.adminEscola.escolaId;
   const camposExtras = req.body.camposExtras || [];
   await ConfiguracaoFormularioPreCadastro.findOneAndUpdate(
@@ -1180,7 +1180,7 @@ router.post('/admin/formulario-pre-cadastro/configurar', verificarAdminEscola, a
     { upsert: true, new: true }
   );
   req.flash('success_msg', 'Configuração salva com sucesso!');
-  res.redirect('/admin/dashboard'); // ou onde quiser
+  res.redirect('/dashboard');
 });
 
 // ===========================================
