@@ -325,23 +325,27 @@
             </div>
             <!-- FIM ABA: CRITÉRIOS -->
 
-           <!-- ABA: AVALIADORES -->
+         <!-- ABA: AVALIADORES -->
 <div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200 hidden" id="avaliadores" role="tabpanel" aria-labelledby="avaliadores-tab">
 
-  <!-- Botão de novo avaliador -->
-  <button id="btnAbrirModalAvaliador" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg mb-6 shadow-md transition duration-300 ease-in-out">
-    <i class="fas fa-plus-circle mr-2"></i>Adicionar Novo Avaliador
-  </button>
-  <button onclick="copiarLinkPreCadastro()" class="ml-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-5 rounded-lg shadow-md transition duration-300 ease-in-out">
-  <i class="fas fa-link mr-2"></i>Copiar Link de Pré-Cadastro
-</button>
-
+  <!-- Botões principais -->
+  <div class="flex flex-wrap items-center gap-3 mb-6">
+    <button id="btnAbrirModalAvaliador" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg shadow-md transition duration-300 ease-in-out">
+      <i class="fas fa-plus-circle mr-2"></i>Adicionar Novo Avaliador
+    </button>
+    <button onclick="copiarLinkPreCadastro()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-5 rounded-lg shadow-md transition duration-300 ease-in-out">
+      <i class="fas fa-link mr-2"></i>Copiar Link de Pré-Cadastro
+    </button>
+    <a href="/admin/formulario-pre-cadastro/configurar" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-5 rounded-lg shadow-md transition duration-300 ease-in-out">
+      <i class="fas fa-edit mr-2"></i>Ver e Editar Formulário
+    </a>
+  </div>
 
   <!-- Subabas -->
   <div class="flex gap-2 mb-4 border-b">
     <button class="subtab-btn active text-sm font-semibold text-gray-600 hover:text-blue-600 transition" data-subtab="sub-avaliadores-cadastrados">Cadastrados</button>
     <button class="subtab-btn text-sm font-semibold text-gray-600 hover:text-blue-600 transition" data-subtab="sub-pre-cadastros">Pré-Cadastros Pendentes</button>
-      <button class="subtab-btn text-sm font-semibold text-gray-600 hover:text-blue-600 transition" data-subtab="sub-configurar-pre-cadastro"> Configurar Formulário</button>
+    <button class="subtab-btn text-sm font-semibold text-gray-600 hover:text-blue-600 transition" data-subtab="sub-configurar-pre-cadastro">Configurar Formulário</button>
   </div>
 
   <!-- Conteúdo: Avaliadores Cadastrados -->
@@ -413,13 +417,16 @@
     </div>
   </div>
 
-  <!-- Conteúdo: Pré-Cadastros Pendentes -->
+   <!-- Conteúdo: Pré-Cadastros Pendentes -->
   <div id="sub-pre-cadastros" class="subtab-content hidden">
     <%- include('partials/avaliadores-pre-cadastro', { preCadastros }) %>
   </div>
+
   <!-- Conteúdo: Configurar Formulário de Pré-Cadastro -->
-<div id="sub-configurar-pre-cadastro" class="subtab-content hidden">
-  <%- include('partials/configurar-formulario-pre-cadastro', { camposExtras }) %>
+  <div id="sub-configurar-pre-cadastro" class="subtab-content hidden">
+    <%- include('partials/configurar-formulario-pre-cadastro', { camposExtras }) %>
+  </div>
+
 </div>
 
 
