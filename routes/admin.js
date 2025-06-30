@@ -1174,7 +1174,16 @@ router.get('/formulario-pre-cadastro/configurar', verificarAdminEscola, async (r
 // POST: Salvar configuração dos campos extras
 router.post('/formulario-pre-cadastro/configurar', verificarAdminEscola, async (req, res) => {
   const escolaId = req.session.adminEscola.escolaId;
-  const camposExtras = req.body.camposExtras || [];
+
+  // Tratamento dos campos vindos do formulário
+  const brutos = req.body.camposExtras || [];
+
+  const camposExtras = brutos.map(campo => ({
+    label: campo.label,
+    tipo: campo.tipo,
+    obrigatorio: campo.obrigatorio === 'true' || campo.obrigatorio === true,
+    opcoes: campo.tipo === 'seleção' ? (campo.opcoes || '').trim() : ''
+  }));
 
   await ConfiguracaoFormularioPreCadastro.findOneAndUpdate(
     { escolaId },
