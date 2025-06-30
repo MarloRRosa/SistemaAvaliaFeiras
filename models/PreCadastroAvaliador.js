@@ -6,14 +6,13 @@ const PreCadastroAvaliadorSchema = new mongoose.Schema({
     ref: 'Feira',
     required: true
   },
+  // ❌ Removido o required para nome e email
   nome: {
     type: String,
-    required: true,
     trim: true
   },
   email: {
     type: String,
-    required: true,
     lowercase: true,
     trim: true
   },
@@ -21,7 +20,7 @@ const PreCadastroAvaliadorSchema = new mongoose.Schema({
     type: String
   },
   extras: {
-    type: mongoose.Schema.Types.Mixed, // Campos adicionais dinâmicos
+    type: mongoose.Schema.Types.Mixed,
     default: {}
   },
   status: {
@@ -35,7 +34,7 @@ const PreCadastroAvaliadorSchema = new mongoose.Schema({
   }
 });
 
-// Permite que o mesmo avaliador pré-cadastre-se em diferentes feiras
+// ❗️Chave composta: email + feiraId continua útil para evitar duplicidade
 PreCadastroAvaliadorSchema.index({ email: 1, feiraId: 1 }, { unique: true });
 
 const PreCadastroAvaliador = mongoose.model('PreCadastroAvaliador', PreCadastroAvaliadorSchema);

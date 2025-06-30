@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const PreCadastroAvaliador = require('../models/PreCadastroAvaliador');
 const Feira = require('../models/Feira');
+const ConfiguracaoFormularioPreCadastro = require('../models/ConfiguracaoFormularioPreCadastro');
 
 // GET: Exibir formulário de pré-cadastro
 router.get('/pre-cadastro/:feiraId', async (req, res) => {
@@ -12,16 +13,12 @@ router.get('/pre-cadastro/:feiraId', async (req, res) => {
       return res.send('Feira inválida ou inativa.');
     }
 
-    // Campos extras configuráveis futuramente pela feira (placeholder por enquanto)
-    const ConfiguracaoFormularioPreCadastro = require('../models/ConfiguracaoFormularioPreCadastro');
-
-const configuracao = await ConfiguracaoFormularioPreCadastro.findOne({ escolaId: feira.escolaId });
-const camposExtras = configuracao ? configuracao.camposExtras : [];
-
+    const configuracao = await ConfiguracaoFormularioPreCadastro.findOne({ escolaId: feira.escolaId });
+    const camposExtras = configuracao ? configuracao.camposExtras : [];
 
     res.render('public/pre-cadastro', {
-      layout: 'layouts/public',                // ✅ Garante que usa o layout certo
-      titulo: `Pré-Cadastro - ${feira.nome}`,  // ✅ Passa titulo para o <title>
+      layout: 'layouts/public',
+      titulo: `Pré-Cadastro - ${feira.nome}`,
       feiraId: feira._id,
       mensagem: req.flash('success'),
       camposExtras
@@ -35,22 +32,30 @@ const camposExtras = configuracao ? configuracao.camposExtras : [];
 // POST: Enviar dados de pré-cadastro
 router.post('/pre-cadastro/:feiraId', async (req, res) => {
   try {
-    const { nome, email, telefone } = req.body;
+    const { feiraId } = req.params;
     const extras = req.body.extras || {};
 
-    const feira = await Feira.findById(req.params.feiraId);
+    // Extrai os campos essenciais de dentro dos extras
+    const nome = extras['Nome']?.trim();
+    const email = extras['Email']?.trim();
+    const telefone = extras['Telefone']?.trim() || '';
+
+    if (!nome || !email) {
+      return res.send('Nome e Email são obrigatórios.');
+    }
+
+    const feira = await Feira.findById(feiraId);
     if (!feira) {
       return res.send('Feira não encontrada.');
     }
 
-    // Verifica duplicidade de email já enviado para essa feira
-    const existe = await PreCadastroAvaliador.findOne({ email, feiraId: feira._id });
-    if (existe) {
+    const existente = await PreCadastroAvaliador.findOne({ email, feiraId });
+    if (existente) {
       return res.send('Você já enviou um pré-cadastro para esta feira.');
     }
 
     const novoPreCadastro = new PreCadastroAvaliador({
-      feiraId: feira._id,
+      feiraId,
       nome,
       email,
       telefone,
@@ -60,9 +65,9 @@ router.post('/pre-cadastro/:feiraId', async (req, res) => {
     await novoPreCadastro.save();
 
     req.flash('success', 'Pré-cadastro enviado com sucesso!');
-    res.redirect(`/pre-cadastro/${feira._id}`);
+    res.redirect(`/pre-cadastro/${feiraId}`);
   } catch (err) {
-    console.error(err);
+    console.error('Erro ao enviar pré-cadastro:', err);
     res.send('Erro ao enviar o pré-cadastro.');
   }
 });
