@@ -1053,7 +1053,7 @@ novoAvaliador.qrcode = qrCodeBase64;
     req.flash('error_msg', 'Erro ao cadastrar avaliador. Detalhes: ' + err.message);
   }
 
-  res.redirect('/dashboard?tab=avaliadores');
+  res.redirect('/admin/dashboard?tab=avaliadores');
 });
 
 router.put('/avaliadores/:id', verificarAdminEscola, async (req, res) => {
@@ -1089,7 +1089,7 @@ router.put('/avaliadores/:id', verificarAdminEscola, async (req, res) => {
     req.flash('error_msg', 'Erro ao atualizar avaliador. Detalhes: ' + err.message);
   }
 
-  res.redirect('/dashboard?tab=avaliadores');
+  res.redirect('/admin/dashboard?tab=avaliadores');
 });
 
 
@@ -1128,7 +1128,7 @@ router.post('/avaliadores/reset-pin/:id', verificarAdminEscola, async (req, res)
     } catch (err) {
         console.error('Erro ao redefinir PIN do avaliador:', err);
         req.flash('error_msg', 'Erro ao redefinir PIN do avaliador. Detalhes: ' + err.message);
-        res.redirect('/dashboard?tab=avaliadores');
+        res.redirect('/admin/dashboard?tab=avaliadores');
     }
 });
 
@@ -1155,33 +1155,37 @@ router.post('/avaliadores/:id/excluir', verificarAdminEscola, async (req, res) =
     req.flash('error_msg', 'Erro ao excluir avaliador. Detalhes: ' + err.message);
   }
 
-  res.redirect('/dashboard?tab=avaliadores');
+  res.redirect('/admin/dashboard?tab=avaliadores');
 });
 
-// GET
+// GET: Página de configuração dos campos extras do formulário de pré-cadastro
 router.get('/formulario-pre-cadastro/configurar', verificarAdminEscola, async (req, res) => {
   const escolaId = req.session.adminEscola.escolaId;
   let configuracao = await ConfiguracaoFormularioPreCadastro.findOne({ escolaId });
   if (!configuracao) configuracao = { camposExtras: [] };
-  res.render('partials/configurar-formulario-pre-cadastro', {
-    layout: false, // se usar include no dashboard não precisa layout
+
+  res.render('admin/partials/configurar-formulario-pre-cadastro', {
+    layout: false,
     camposExtras: configuracao.camposExtras,
     success_msg: req.flash('success_msg')
   });
 });
 
-// POST
+// POST: Salvar configuração dos campos extras
 router.post('/formulario-pre-cadastro/configurar', verificarAdminEscola, async (req, res) => {
   const escolaId = req.session.adminEscola.escolaId;
   const camposExtras = req.body.camposExtras || [];
+
   await ConfiguracaoFormularioPreCadastro.findOneAndUpdate(
     { escolaId },
     { camposExtras },
     { upsert: true, new: true }
   );
+
   req.flash('success_msg', 'Configuração salva com sucesso!');
-  res.redirect('/dashboard');
+  res.redirect('/admin/dashboard');
 });
+
 
 // ===========================================
 // ROTAS CRUD - FEIRAS
