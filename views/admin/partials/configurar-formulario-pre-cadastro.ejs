@@ -2,89 +2,89 @@
   <h2 class="text-xl font-semibold mb-4">Configurar Formulário de Pré-Cadastro</h2>
 
   <% if (success_msg) { %>
-    <div class="bg-green-100 text-green-700 px-4 py-2 mb-4 rounded">
-      <%= success_msg %>
-    </div>
+    <div class="bg-green-100 text-green-700 px-4 py-2 mb-4 rounded"><%= success_msg %></div>
   <% } %>
 
   <form action="/admin/formulario-pre-cadastro/configurar" method="POST" id="formCamposExtras">
     <div id="campos-container" class="space-y-4">
       <% if (camposExtras && camposExtras.length > 0) { %>
-        <!-- por campo -->
-<% camposExtras.forEach((campo, idx) => { %>
-  <div class="flex flex-wrap items-center gap-2">
-    <input type="text" name="camposExtras[<%= idx %>][label]" value="<%= campo.label %>" placeholder="Nome do Campo" required class="border px-2 py-1 rounded w-1/4">
-    
-    <select name="camposExtras[<%= idx %>][tipo]" class="border px-2 py-1 rounded w-1/4">
-      <option value="texto" <%= campo.tipo === 'texto' ? 'selected' : '' %>>Texto</option>
-      <option value="número" <%= campo.tipo === 'número' ? 'selected' : '' %>>Número</option>
-      <option value="seleção" <%= campo.tipo === 'seleção' ? 'selected' : '' %>>Seleção (Lista)</option>
-    </select>
+        <% camposExtras.forEach((campo, idx) => { %>
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+            <!-- Label -->
+            <input type="text" name="camposExtras[<%= idx %>][label]" value="<%= campo.label %>"
+                   placeholder="Nome do Campo" required class="border px-2 py-1 rounded">
 
-    <!-- CAMPO DE OPÇÕES APARECE SEMPRE (você pode fazer JS para ocultar se quiser) -->
-    <input type="text" name="camposExtras[<%= idx %>][opcoes]" value="<%= campo.opcoes || '' %>" placeholder="Opções separadas por vírgula" class="border px-2 py-1 rounded w-1/3">
+            <!-- Tipo -->
+           <select name="camposExtras[<%= idx %>][tipo]" onchange="toggleOpcoes(this, '<%= idx %>')"
+                    class="border px-2 py-1 rounded">
+              <option value="texto"   <%= campo.tipo === 'texto'   ? 'selected' : '' %>>Texto</option>
+              <option value="número"  <%= campo.tipo === 'número'  ? 'selected' : '' %>>Número</option>
+              <option value="seleção" <%= campo.tipo === 'seleção' ? 'selected' : '' %>>Seleção (Lista)</option>
+            </select>
 
-    <label class="flex items-center gap-1">
-      <input type="checkbox" name="camposExtras[<%= idx %>][obrigatorio]" value="true" <%= campo.obrigatorio ? 'checked' : '' %> />
-      Obrigatório
-    </label>
-  </div>
-<% }) %>
+            <!-- Opções (só para seleção) -->
+           <input type="text"
+       name="camposExtras[<%= idx %>][opcoes]"
+       value="<%= campo.opcoes || '' %>"
+       placeholder="Opções separadas por vírgula"
+       class="border px-2 py-1 rounded w-1/3 <%= campo.tipo === 'seleção' ? '' : 'hidden' %>">
 
+
+
+            <!-- Obrigatório -->
+            <label class="flex items-center gap-1">
+              <input type="checkbox" name="camposExtras[<%= idx %>][obrigatorio]" value="true"
+                     <%= campo.obrigatorio ? 'checked' : '' %>>
+              Obrigatório
+            </label>
+          </div>
+        <% }) %>
+      <% } %> <!-- FECHA o if corretamente -->
     </div>
 
     <button type="button" onclick="adicionarCampo()"
-      class="bg-green-600 text-white px-3 py-1 rounded mt-4">+ Adicionar Campo</button>
+            class="bg-green-600 text-white px-3 py-1 rounded mt-4">+ Adicionar Campo</button>
 
-    <button type="submit" class="ml-4 bg-blue-600 text-white px-4 py-2 rounded">Salvar Configuração</button>
+    <button type="submit" class="ml-4 bg-blue-600 text-white px-4 py-2 rounded">
+      Salvar Configuração
+    </button>
   </form>
 </div>
 
 <script>
+  /* Adiciona novo campo */
   function adicionarCampo() {
     const container = document.getElementById('campos-container');
     const idx = container.children.length;
-
-    const div = document.createElement('div');
-    div.className = 'flex items-center gap-4 mt-2';
-    div.innerHTML = `
-      <input type="text" name="camposExtras[${idx}][label]" placeholder="Nome do Campo" required
-        class="border px-2 py-1 rounded w-1/4">
-
-      <select name="camposExtras[${idx}][tipo]"
-              class="border px-2 py-1 rounded w-1/4 tipo-select"
-              data-idx="${idx}">
-        <option value="texto">Texto</option>
-        <option value="número">Número</option>
-        <option value="seleção">Seleção (Lista)</option>
-      </select>
-
-      <input type="text"
-             name="camposExtras[${idx}][opcoes]"
-             placeholder="Opções separadas por vírgula"
-             id="opcoes-${idx}"
-             class="border px-2 py-1 rounded w-1/4 hidden">
-
-      <label class="flex items-center gap-1">
-        <input type="checkbox" name="camposExtras[${idx}][obrigatorio]" value="true">
-        Obrigatório
-      </label>
-    `;
-
-    container.appendChild(div);
+    container.insertAdjacentHTML('beforeend', `
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-center mt-2">
+        <input type="text" name="camposExtras[${idx}][label]" placeholder="Nome do Campo" required
+               class="border px-2 py-1 rounded">
+        <select name="camposExtras[${idx}][tipo]" onchange="toggleOpcoes(this, ${idx})"
+                class="border px-2 py-1 rounded tipo-select" data-idx="${idx}">
+          <option value="texto">Texto</option>
+          <option value="número">Número</option>
+          <option value="seleção">Seleção (Lista)</option>
+        </select>
+        <input type="text" name="camposExtras[${idx}][opcoes]" id="opcoes_${idx}"
+               placeholder="Opções separadas por vírgula"
+               class="border px-2 py-1 rounded" style="display:none;">
+        <label class="flex items-center gap-1">
+          <input type="checkbox" name="camposExtras[${idx}][obrigatorio]" value="true">
+          Obrigatório
+        </label>
+      </div>
+    `);
   }
 
-  // Mostra ou esconde o campo de opções conforme o tipo selecionado
-  document.addEventListener('change', function (e) {
-    if (e.target.classList.contains('tipo-select')) {
-      const idx = e.target.dataset.idx;
-      const opcoesInput = document.getElementById(`opcoes-${idx}`);
-      if (e.target.value === 'seleção') {
-        opcoesInput.classList.remove('hidden');
-      } else {
-        opcoesInput.classList.add('hidden');
-        opcoesInput.value = '';
-      }
+  /* Mostra/oculta input de opções */
+  function toggleOpcoes(select, idx) {
+    const input = document.getElementById('opcoes_' + idx);
+    if (select.value === 'seleção') {
+      input.style.display = '';
+    } else {
+      input.style.display = 'none';
+      input.value = '';
     }
-  });
+  }
 </script>
