@@ -1174,25 +1174,29 @@ router.get('/formulario-pre-cadastro/configurar', verificarAdminEscola, async (r
 // POST: Salvar configuração dos campos extras
 router.post('/formulario-pre-cadastro/configurar', verificarAdminEscola, async (req, res) => {
   const escolaId = req.session.adminEscola.escolaId;
+  let camposExtras = req.body.camposExtras || [];
 
-  // Tratamento dos campos vindos do formulário
-  const brutos = req.body.camposExtras || [];
+  // Se for um único campo, transforma em array
+  if (!Array.isArray(camposExtras)) {
+    camposExtras = Object.values(camposExtras);
+  }
 
-  const camposExtras = brutos.map(campo => ({
-    label: campo.label,
-    tipo: campo.tipo,
-    obrigatorio: campo.obrigatorio === 'true' || campo.obrigatorio === true,
-    opcoes: campo.tipo === 'seleção' ? (campo.opcoes || '').trim() : ''
+  // Garante estrutura correta de cada campo
+  const camposFormatados = camposExtras.map(campo => ({
+    label: campo.label?.trim() || '',
+    tipo: campo.tipo || 'texto',
+    obrigatorio: campo.obrigatorio === 'true' || campo.obrigatorio === true || campo.obrigatorio === 'on',
+    opcoes: campo.opcoes || ''
   }));
 
   await ConfiguracaoFormularioPreCadastro.findOneAndUpdate(
     { escolaId },
-    { camposExtras },
+    { camposExtras: camposFormatados },
     { upsert: true, new: true }
   );
 
   req.flash('success_msg', 'Configuração salva com sucesso!');
-  res.redirect('/admin/dashboard');
+  res.redirect('/admin/dashboard?tab=avaliadores');
 });
 
 

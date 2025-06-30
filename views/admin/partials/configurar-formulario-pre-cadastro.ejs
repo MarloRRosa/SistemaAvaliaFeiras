@@ -10,34 +10,27 @@
   <form action="/admin/formulario-pre-cadastro/configurar" method="POST" id="formCamposExtras">
     <div id="campos-container" class="space-y-4">
       <% if (camposExtras && camposExtras.length > 0) { %>
-        <% camposExtras.forEach((campo, idx) => { %>
-          <div class="flex items-center gap-4">
-            <input type="text" name="camposExtras[<%= idx %>][label]" value="<%= campo.label %>"
-              placeholder="Nome do Campo" required class="border px-2 py-1 rounded w-1/4">
+        <!-- por campo -->
+<% camposExtras.forEach((campo, idx) => { %>
+  <div class="flex flex-wrap items-center gap-2">
+    <input type="text" name="camposExtras[<%= idx %>][label]" value="<%= campo.label %>" placeholder="Nome do Campo" required class="border px-2 py-1 rounded w-1/4">
+    
+    <select name="camposExtras[<%= idx %>][tipo]" class="border px-2 py-1 rounded w-1/4">
+      <option value="texto" <%= campo.tipo === 'texto' ? 'selected' : '' %>>Texto</option>
+      <option value="número" <%= campo.tipo === 'número' ? 'selected' : '' %>>Número</option>
+      <option value="seleção" <%= campo.tipo === 'seleção' ? 'selected' : '' %>>Seleção (Lista)</option>
+    </select>
 
-            <select name="camposExtras[<%= idx %>][tipo]"
-                    class="border px-2 py-1 rounded w-1/4 tipo-select"
-                    data-idx="<%= idx %>">
-              <option value="texto" <%= campo.tipo === 'texto' ? 'selected' : '' %>>Texto</option>
-              <option value="número" <%= campo.tipo === 'número' ? 'selected' : '' %>>Número</option>
-              <option value="seleção" <%= campo.tipo === 'seleção' ? 'selected' : '' %>>Seleção (Lista)</option>
-            </select>
+    <!-- CAMPO DE OPÇÕES APARECE SEMPRE (você pode fazer JS para ocultar se quiser) -->
+    <input type="text" name="camposExtras[<%= idx %>][opcoes]" value="<%= campo.opcoes || '' %>" placeholder="Opções separadas por vírgula" class="border px-2 py-1 rounded w-1/3">
 
-            <input type="text"
-                   name="camposExtras[<%= idx %>][opcoes]"
-                   placeholder="Opções separadas por vírgula"
-                   value="<%= campo.opcoes || '' %>"
-                   id="opcoes-<%= idx %>"
-                   class="border px-2 py-1 rounded w-1/4 <%= campo.tipo === 'seleção' ? '' : 'hidden' %>">
+    <label class="flex items-center gap-1">
+      <input type="checkbox" name="camposExtras[<%= idx %>][obrigatorio]" value="true" <%= campo.obrigatorio ? 'checked' : '' %> />
+      Obrigatório
+    </label>
+  </div>
+<% }) %>
 
-            <label class="flex items-center gap-1">
-              <input type="checkbox" name="camposExtras[<%= idx %>][obrigatorio]" value="true"
-                <%= campo.obrigatorio ? 'checked' : '' %> />
-              Obrigatório
-            </label>
-          </div>
-        <% }) %>
-      <% } %>
     </div>
 
     <button type="button" onclick="adicionarCampo()"
