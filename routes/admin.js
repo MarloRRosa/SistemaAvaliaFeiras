@@ -1158,20 +1158,6 @@ router.post('/avaliadores/:id/excluir', verificarAdminEscola, async (req, res) =
   res.redirect('/admin/dashboard?tab=avaliadores');
 });
 
-// GET: Configurar formulário de pré-cadastro
-router.get('/admin/formulario-pre-cadastro/configurar', verificarAdminEscola, async (req, res) => {
-  const escolaId = req.session.adminEscola.escolaId;
-  let configuracao = await ConfiguracaoFormularioPreCadastro.findOne({ escolaId });
-  if (!configuracao) {
-    configuracao = { camposExtras: [] };
-  }
-  res.render('admin/configurar-formulario-pre-cadastro', {
-    titulo: 'Configurar Formulário de Pré-Cadastro',
-    camposExtras: configuracao.camposExtras
-  });
-});
-
-
 // GET
 router.get('/admin/formulario-pre-cadastro/configurar', verificarAdminEscola, async (req, res) => {
   const escolaId = req.session.adminEscola.escolaId;
