@@ -798,7 +798,8 @@ if (feiraIdSelecionada && mongoose.Types.ObjectId.isValid(feiraIdSelecionada)) {
   mediaGeralAvaliacoes,
   relatorioFinalPorProjeto,
   formatarDatasParaInput: formatarDataParaInput,
-  preCadastros // ✅ Adicionado aqui!
+  preCadastros,
+  camposExtras: []
 });
 
 
@@ -972,10 +973,10 @@ router.get('/admin/dashboard', async (req, res) => {
       projetos,
       avaliadores,
       avaliacoes,
-      preCadastros,  // ✅ passa pro partial
+      preCadastros,
       totalProjetos,
-      totalAvaliadores
-      // outros dados que precisar...
+      totalAvaliadores,
+      camposExtras: []
     });
 
   } catch (err) {
