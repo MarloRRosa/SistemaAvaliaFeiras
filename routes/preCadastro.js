@@ -35,30 +35,32 @@ router.post('/pre-cadastro/:feiraId', async (req, res) => {
     const { feiraId } = req.params;
     const extras = req.body.extras || {};
 
-    // Extrai os campos essenciais de dentro dos extras
-    const nome = extras['Nome']?.trim();
-    const email = extras['Email']?.trim();
-    const telefone = extras['Telefone']?.trim() || '';
-
-    if (!nome || !email) {
-      return res.send('Nome e Email são obrigatórios.');
-    }
-
     const feira = await Feira.findById(feiraId);
     if (!feira) {
       return res.send('Feira não encontrada.');
     }
 
-    const existente = await PreCadastroAvaliador.findOne({ email, feiraId });
-    if (existente) {
-      return res.send('Você já enviou um pré-cadastro para esta feira.');
+    const configuracao = await ConfiguracaoFormularioPreCadastro.findOne({ escolaId: feira.escolaId });
+    const camposObrigatorios = (configuracao?.camposExtras || []).filter(c => c.obrigatorio);
+
+    for (const campo of camposObrigatorios) {
+      const valor = extras[campo.label]?.trim?.() || '';
+      if (!valor) {
+        return res.send(`O campo "${campo.label}" é obrigatório.`);
+      }
+    }
+
+    // Verifica duplicidade pelo campo "Email", se presente
+    const email = extras['Email']?.trim();
+    if (email) {
+      const existente = await PreCadastroAvaliador.findOne({ feiraId, 'extras.Email': email });
+      if (existente) {
+        return res.send('Você já enviou um pré-cadastro para esta feira.');
+      }
     }
 
     const novoPreCadastro = new PreCadastroAvaliador({
       feiraId,
-      nome,
-      email,
-      telefone,
       extras
     });
 
