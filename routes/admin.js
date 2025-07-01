@@ -1176,17 +1176,15 @@ router.post('/formulario-pre-cadastro/configurar', verificarAdminEscola, async (
   const escolaId = req.session.adminEscola.escolaId;
   let camposExtras = req.body.camposExtras || [];
 
-  // Se for um único campo, transforma em array
   if (!Array.isArray(camposExtras)) {
     camposExtras = Object.values(camposExtras);
   }
 
-  // Garante estrutura correta de cada campo
   const camposFormatados = camposExtras.map(campo => ({
     label: campo.label?.trim() || '',
     tipo: campo.tipo || 'texto',
     obrigatorio: campo.obrigatorio === 'true' || campo.obrigatorio === true || campo.obrigatorio === 'on',
-    opcoes: campo.opcoes || ''
+    opcoes: campo.opcoes?.trim() || ''
   }));
 
   await ConfiguracaoFormularioPreCadastro.findOneAndUpdate(
@@ -1198,7 +1196,6 @@ router.post('/formulario-pre-cadastro/configurar', verificarAdminEscola, async (
   req.flash('success_msg', 'Configuração salva com sucesso!');
   res.redirect('/admin/dashboard?tab=avaliadores');
 });
-
 
 // ===========================================
 // ROTAS CRUD - FEIRAS

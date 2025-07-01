@@ -17,44 +17,44 @@
 
     <form action="/pre-cadastro/<%= feiraId %>" method="POST" class="space-y-5">
 
-      <!-- Campos extras configuráveis -->
-<% if (camposExtras && camposExtras.length > 0) { %>
-  <% camposExtras.forEach(campo => { %>
-    <div>
-      <label for="extra_<%= campo.label %>" class="block text-sm font-medium text-gray-700">
-        <%= campo.label %>
-        <% if (campo.obrigatorio) { %><span class="text-red-500">*</span><% } %>
-      </label>
+      <% if (camposExtras && camposExtras.length > 0) { %>
+        <% camposExtras.forEach(campo => { %>
+          <div>
+            <label for="extra_<%= campo.label %>" class="block text-sm font-medium text-gray-700">
+              <%= campo.label %>
+              <% if (campo.obrigatorio) { %><span class="text-red-500">*</span><% } %>
+            </label>
 
-      <% if (campo.tipo === 'seleção' && campo.opcoes) { 
-           const opcoes = campo.opcoes.split(',').map(op => op.trim());
-      %>
-        <select id="extra_<%= campo.label %>" name="extras[<%= campo.label %>]"
-          class="mt-1 block w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 border-gray-300"
-          <%= campo.obrigatorio ? 'required' : '' %>>
-          <option value="">Selecione...</option>
-          <% opcoes.forEach(op => { %>
-            <option value="<%= op %>"><%= op %></option>
-          <% }) %>
-        </select>
-      <% } else if (campo.tipo === 'número') { %>
-        <input type="number"
-               id="extra_<%= campo.label %>"
-               name="extras[<%= campo.label %>]"
-               <%= campo.obrigatorio ? 'required' : '' %>
-               class="mt-1 block w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 border-gray-300">
+            <% if (campo.tipo === 'seleção' && campo.opcoes) {
+                 const opcoes = campo.opcoes.split(',').map(op => op.trim());
+            %>
+              <select id="extra_<%= campo.label %>" name="extras[<%= campo.label %>]"
+                class="mt-1 block w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 border-gray-300"
+                <%= campo.obrigatorio ? 'required' : '' %>>
+                <option value="">Selecione...</option>
+                <% opcoes.forEach(op => { %>
+                  <option value="<%= op %>"><%= op %></option>
+                <% }) %>
+              </select>
+            <% } else if (campo.tipo === 'número') { %>
+              <input type="number"
+                     id="extra_<%= campo.label %>"
+                     name="extras[<%= campo.label %>]"
+                     <%= campo.obrigatorio ? 'required' : '' %>
+                     class="mt-1 block w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 border-gray-300">
+            <% } else { %>
+              <input type="text"
+                     id="extra_<%= campo.label %>"
+                     name="extras[<%= campo.label %>]"
+                     <%= campo.obrigatorio ? 'required' : '' %>
+                     class="mt-1 block w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 border-gray-300">
+            <% } %>
+          </div>
+        <% }) %>
       <% } else { %>
-        <input type="text"
-               id="extra_<%= campo.label %>"
-               name="extras[<%= campo.label %>]"
-               <%= campo.obrigatorio ? 'required' : '' %>
-               class="mt-1 block w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 border-gray-300">
+        <p class="text-gray-500 italic">Nenhum campo configurado.</p>
       <% } %>
-    </div>
-  <% }) %>
-<% } %>
 
-      <!-- Botão de Enviar -->
       <div class="text-center mt-6">
         <button type="submit"
                 class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md shadow-md transition">
