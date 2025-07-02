@@ -26,7 +26,7 @@ const path = require('path');
 const ejs = require('ejs');
 const QRCode = require('qrcode');
 const upload = multer({ storage: multer.memoryStorage() });
-const rotasPreCadastros = require('./preCadastrosAdmin');
+const rotasPreCadastros = require('./preCadastros');
 
 
 // Carrega variáveis de ambiente (garante que estão disponíveis para este arquivo)
