@@ -26,6 +26,8 @@ const path = require('path');
 const ejs = require('ejs');
 const QRCode = require('qrcode');
 const upload = multer({ storage: multer.memoryStorage() });
+const rotasPreCadastros = require('./preCadastrosAdmin');
+
 
 // Carrega variáveis de ambiente (garante que estão disponíveis para este arquivo)
 require('dotenv').config();
@@ -1209,6 +1211,101 @@ router.post('/formulario-pre-cadastro/configurar', verificarAdminEscola, async (
   req.flash('success_msg', 'Configuração salva com sucesso!');
   res.redirect('/admin/dashboard?tab=avaliadores');
 });
+
+//Listar pré-cadastro
+router.get('/pre-cadastros', verificarAdminEscola, async (req, res) => {
+  try {
+    const escolaId = req.session.adminEscola.escolaId;
+
+    const feiras = await Feira.find({ escolaId });
+    const feiraIds = feiras.map(f => f._id);
+
+    const preCadastros = await PreCadastroAvaliador.find({ feiraId: { $in: feiraIds } });
+
+    res.render('admin/pre-cadastros/lista', {
+      layout: 'layouts/painel',
+      titulo: 'Pré-Cadastros de Avaliadores',
+      preCadastros
+    });
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'Erro ao carregar pré-cadastros.');
+    res.redirect('/admin/dashboard');
+  }
+});
+
+//Visualizar e editar um pré-cadastro
+router.get('/pre-cadastros/:id', verificarAdminEscola, async (req, res) => {
+  try {
+    const pre = await PreCadastroAvaliador.findById(req.params.id);
+    const feira = await Feira.findById(pre.feiraId);
+    const projetos = await Projeto.find({ feiraId: feira._id });
+
+    if (!pre) {
+      req.flash('error_msg', 'Pré-cadastro não encontrado.');
+      return res.redirect('/admin/pre-cadastros');
+    }
+
+    res.render('admin/pre-cadastros/editar', {
+      layout: 'layouts/painel',
+      titulo: 'Aprovar Pré-Cadastro',
+      pre,
+      projetos,
+      feira
+    });
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'Erro ao carregar pré-cadastro.');
+    res.redirect('/admin/pre-cadastros');
+  }
+});
+
+//Aprovar e criar Avaliador
+router.post('/pre-cadastros/:id/aprovar', verificarAdminEscola, async (req, res) => {
+  try {
+    const { nome, email, telefone, projetosAtribuidos = [] } = req.body;
+    const pre = await PreCadastroAvaliador.findById(req.params.id);
+
+    if (!pre) {
+      req.flash('error_msg', 'Pré-cadastro não encontrado.');
+      return res.redirect('/admin/pre-cadastros');
+    }
+
+    // Verifica duplicidade
+    const jaExiste = await Avaliador.findOne({ email, escolaId: req.session.adminEscola.escolaId });
+    if (jaExiste) {
+      req.flash('error_msg', 'Já existe um avaliador com esse email.');
+      return res.redirect('/admin/pre-cadastros');
+    }
+
+    const pin = generatePIN();
+    const url = `${process.env.APP_URL || 'http://localhost:3000'}/avaliador/acesso-direto/${pin}`;
+    const qrcode = await QRCode.toDataURL(url);
+
+    const novo = new Avaliador({
+      nome,
+      email,
+      telefone,
+      escolaId: req.session.adminEscola.escolaId,
+      feira: pre.feiraId,
+      pin,
+      projetosAtribuidos: Array.isArray(projetosAtribuidos) ? projetosAtribuidos : [projetosAtribuidos],
+      qrcode,
+      ativo: true
+    });
+
+    await novo.save();
+    await PreCadastroAvaliador.findByIdAndDelete(pre._id);
+
+    req.flash('success_msg', 'Avaliador aprovado com sucesso.');
+    res.redirect('/admin/dashboard?tab=avaliadores');
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'Erro ao aprovar pré-cadastro.');
+    res.redirect('/admin/pre-cadastros');
+  }
+});
+
 
 // ===========================================
 // ROTAS CRUD - FEIRAS

@@ -1,0 +1,19 @@
+<form action="/admin/pre-cadastros/<%= pre._id %>/aprovar" method="POST" class="space-y-4">
+  <h2 class="text-2xl font-bold">Aprovar Avaliador</h2>
+
+  <input type="text" name="nome" value="<%= pre.nome %>" required class="w-full border p-2 rounded">
+  <input type="email" name="email" value="<%= pre.email %>" required class="w-full border p-2 rounded">
+  <input type="text" name="telefone" value="<%= pre.telefone %>" class="w-full border p-2 rounded">
+
+  <label class="block font-semibold">Projetos Atribuídos:</label>
+  <div class="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto border p-2 rounded bg-gray-50">
+    <% projetos.forEach(p => { %>
+      <label class="flex items-center space-x-2">
+        <input type="checkbox" name="projetosAtribuidos" value="<%= p._id %>">
+        <span><%= p.titulo %></span>
+      </label>
+    <% }) %>
+  </div>
+
+  <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Aprovar e Cadastrar</button>
+</form>
