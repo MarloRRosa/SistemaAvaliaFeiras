@@ -1,3 +1,4 @@
+<!--pre-cadastro-->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -16,7 +17,26 @@
     <% } %>
 
     <form action="/pre-cadastro/<%= feiraId %>" method="POST" class="space-y-5">
+      <!-- Campos fixos obrigatórios -->
+      <div>
+        <label for="nome" class="block text-sm font-medium text-gray-700">Nome <span class="text-red-500">*</span></label>
+        <input type="text" id="nome" name="nome" required
+               class="mt-1 block w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 border-gray-300">
+      </div>
 
+      <div>
+        <label for="email" class="block text-sm font-medium text-gray-700">Email <span class="text-red-500">*</span></label>
+        <input type="email" id="email" name="email" required
+               class="mt-1 block w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 border-gray-300">
+      </div>
+
+      <div>
+        <label for="telefone" class="block text-sm font-medium text-gray-700">Telefone</label>
+        <input type="tel" id="telefone" name="telefone"
+               class="mt-1 block w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 border-gray-300">
+      </div>
+
+      <!-- Campos extras configuráveis -->
       <% if (camposExtras && camposExtras.length > 0) { %>
         <% camposExtras.forEach(campo => { %>
           <div>
@@ -52,9 +72,10 @@
           </div>
         <% }) %>
       <% } else { %>
-        <p class="text-gray-500 italic">Nenhum campo configurado.</p>
+        <p class="text-gray-500 italic">Nenhum campo extra configurado.</p>
       <% } %>
 
+      <!-- Botão de Enviar -->
       <div class="text-center mt-6">
         <button type="submit"
                 class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md shadow-md transition">

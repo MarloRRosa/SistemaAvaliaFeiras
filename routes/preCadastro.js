@@ -1,3 +1,4 @@
+//preCadastro
 const express = require('express');
 const router = express.Router();
 const PreCadastroAvaliador = require('../models/PreCadastroAvaliador');
@@ -14,7 +15,10 @@ router.get('/pre-cadastro/:feiraId', async (req, res) => {
     }
 
     const configuracao = await ConfiguracaoFormularioPreCadastro.findOne({ escolaId: feira.escolaId });
-    const camposExtras = configuracao ? configuracao.camposExtras : [];
+    const camposExtras = (configuracao?.camposExtras || []).filter(campo => {
+      const label = campo.label.trim().toLowerCase();
+      return label !== 'nome' && label !== 'email';
+    });
 
     res.render('public/pre-cadastro', {
       layout: 'layouts/public',
@@ -35,32 +39,42 @@ router.post('/pre-cadastro/:feiraId', async (req, res) => {
     const { feiraId } = req.params;
     const extras = req.body.extras || {};
 
+    const nome = req.body.nome?.trim();
+    const email = req.body.email?.trim();
+    const telefone = req.body.telefone?.trim() || '';
+
+    if (!nome || !email) {
+      return res.send('Nome e Email são obrigatórios.');
+    }
+
     const feira = await Feira.findById(feiraId);
     if (!feira) {
       return res.send('Feira não encontrada.');
+    }
+
+    // Verifica duplicidade pelo email
+    const existente = await PreCadastroAvaliador.findOne({ feiraId, email });
+    if (existente) {
+      return res.send('Você já enviou um pré-cadastro para esta feira.');
     }
 
     const configuracao = await ConfiguracaoFormularioPreCadastro.findOne({ escolaId: feira.escolaId });
     const camposObrigatorios = (configuracao?.camposExtras || []).filter(c => c.obrigatorio);
 
     for (const campo of camposObrigatorios) {
+      const label = campo.label.trim().toLowerCase();
+      if (label === 'nome' || label === 'email') continue; // já são tratados
       const valor = extras[campo.label]?.trim?.() || '';
       if (!valor) {
         return res.send(`O campo "${campo.label}" é obrigatório.`);
       }
     }
 
-    // Verifica duplicidade pelo campo "Email", se presente
-    const email = extras['Email']?.trim();
-    if (email) {
-      const existente = await PreCadastroAvaliador.findOne({ feiraId, 'extras.Email': email });
-      if (existente) {
-        return res.send('Você já enviou um pré-cadastro para esta feira.');
-      }
-    }
-
     const novoPreCadastro = new PreCadastroAvaliador({
       feiraId,
+      nome,
+      email,
+      telefone,
       extras
     });
 

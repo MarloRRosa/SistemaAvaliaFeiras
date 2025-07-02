@@ -1,3 +1,4 @@
+<!--avaliadores-pre-cadastro-->
 <div class="overflow-x-auto bg-white rounded-lg shadow-md border border-gray-200">
   <% if (preCadastros && preCadastros.length > 0) { %>
     <table class="min-w-full divide-y divide-gray-200 text-sm">
@@ -17,11 +18,15 @@
             <td class="py-3 px-4"><%= cadastro.email %></td>
             <td class="py-3 px-4"><%= cadastro.telefone || '-' %></td>
             <td class="py-3 px-4">
-              <% if (cadastro.extras) { %>
-                <% for (let campo in cadastro.extras) { %>
+              <% if (cadastro.extras) { 
+                   const camposOcultos = ['nome', 'email', 'telefone'];
+                   Object.keys(cadastro.extras).forEach(campo => {
+                     if (!camposOcultos.includes(campo.trim().toLowerCase())) {
+              %>
                   <div><strong><%= campo %>:</strong> <%= cadastro.extras[campo] %></div>
-                <% } %>
-              <% } else { %>
+              <%   }
+                   });
+                 } else { %>
                 <span class="text-gray-400 italic">Nenhum</span>
               <% } %>
             </td>

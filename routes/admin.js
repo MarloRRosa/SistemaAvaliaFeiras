@@ -1162,11 +1162,18 @@ router.post('/avaliadores/:id/excluir', verificarAdminEscola, async (req, res) =
 router.get('/formulario-pre-cadastro/configurar', verificarAdminEscola, async (req, res) => {
   const escolaId = req.session.adminEscola.escolaId;
   let configuracao = await ConfiguracaoFormularioPreCadastro.findOne({ escolaId });
+
   if (!configuracao) configuracao = { camposExtras: [] };
+
+  // Remove quaisquer entradas que tentem usar "Nome" ou "Email" como campo extra
+  const camposExtrasFiltrados = configuracao.camposExtras.filter(campo => {
+    const label = campo.label?.trim().toLowerCase();
+    return label !== 'nome' && label !== 'email';
+  });
 
   res.render('admin/partials/configurar-formulario-pre-cadastro', {
     layout: false,
-    camposExtras: configuracao.camposExtras,
+    camposExtras: camposExtrasFiltrados,
     success_msg: req.flash('success_msg')
   });
 });
@@ -1180,12 +1187,18 @@ router.post('/formulario-pre-cadastro/configurar', verificarAdminEscola, async (
     camposExtras = Object.values(camposExtras);
   }
 
-  const camposFormatados = camposExtras.map(campo => ({
-    label: campo.label?.trim() || '',
-    tipo: campo.tipo || 'texto',
-    obrigatorio: campo.obrigatorio === 'true' || campo.obrigatorio === true || campo.obrigatorio === 'on',
-    opcoes: campo.opcoes?.trim() || ''
-  }));
+  // Filtra para remover manualmente entradas com label "Nome" ou "Email"
+  const camposFormatados = camposExtras
+    .map(campo => ({
+      label: campo.label?.trim() || '',
+      tipo: campo.tipo || 'texto',
+      obrigatorio: campo.obrigatorio === 'true' || campo.obrigatorio === true || campo.obrigatorio === 'on',
+      opcoes: campo.opcoes?.trim() || ''
+    }))
+    .filter(campo => {
+      const label = campo.label.toLowerCase();
+      return label !== 'nome' && label !== 'email';
+    });
 
   await ConfiguracaoFormularioPreCadastro.findOneAndUpdate(
     { escolaId },
