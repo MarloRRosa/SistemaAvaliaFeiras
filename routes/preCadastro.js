@@ -21,7 +21,7 @@ router.get('/pre-cadastro/:feiraId', async (req, res) => {
     });
 
     res.render('public/pre-cadastro', {
-      layout: 'layouts/public',
+      layout: false,
       titulo: `Pré-Cadastro - ${feira.nome}`,
       feiraId: feira._id,
       mensagem: req.flash('success'),
