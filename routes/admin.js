@@ -2272,7 +2272,7 @@ router.get('/relatorio/avaliacao-offline/:feiraId/:avaliadorId', verificarAdminE
 
 // Gera PDF de Avaliadores com dados extras
 
-router.get('/relatorio-avaliadores/pdf/:feiraId', verificarAdminEscola, async (req, res) => {
+router.get('/pdf-avaliadores/pdf/:feiraId', verificarAdminEscola, async (req, res) => {
   const { feiraId } = req.params;
   const adminEscolaId = req.session.adminEscola.escolaId;
 
