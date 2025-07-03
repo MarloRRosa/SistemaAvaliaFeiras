@@ -2271,8 +2271,45 @@ router.get('/relatorio/avaliacao-offline/:feiraId/:avaliadorId', verificarAdminE
 });
 
 // Gera PDF de Avaliadores com dados extras
+// 🔒 Rota para pré-visualizar o HTML do relatório de avaliadores (opcional)
+router.get('/admin/pdf-avaliadores/:feiraId', verificarAdminEscola, async (req, res) => {
+  const { feiraId } = req.params;
+  const adminEscolaId = req.session.adminEscola.escolaId;
 
-router.get('/pdf-avaliadores/pdf/:feiraId', verificarAdminEscola, async (req, res) => {
+  try {
+    if (!feiraId || !mongoose.Types.ObjectId.isValid(feiraId)) {
+      req.flash('error_msg', 'ID da feira inválido para o relatório.');
+      return res.redirect('/admin/dashboard?tab=relatorios');
+    }
+
+    const feira = await Feira.findOne({ _id: feiraId, escolaId: adminEscolaId }).lean();
+    if (!feira) {
+      req.flash('error_msg', 'Feira não encontrada.');
+      return res.redirect('/admin/dashboard?tab=relatorios');
+    }
+
+    const avaliadores = await Avaliador.find({ escolaId: adminEscolaId, feira: feira._id }).lean();
+    if (!avaliadores || avaliadores.length === 0) {
+      req.flash('error_msg', 'Nenhum avaliador encontrado.');
+      return res.redirect('/admin/dashboard?tab=relatorios');
+    }
+
+    res.render('admin/pdf-avaliadores', {
+      layout: false,
+      titulo: `Relatório de Avaliadores - ${feira.nome}`,
+      feira,
+      avaliadores
+    });
+
+  } catch (err) {
+    console.error('Erro ao gerar visualização do relatório de avaliadores:', err);
+    req.flash('error_msg', 'Erro ao gerar visualização do relatório.');
+    res.redirect('/admin/dashboard?tab=relatorios');
+  }
+});
+
+// ✅ Rota para gerar o PDF de avaliadores usando generatePdfReport padronizado
+router.get('/relatorio/avaliadores/pdf/:feiraId', verificarAdminEscola, async (req, res) => {
   const { feiraId } = req.params;
   const adminEscolaId = req.session.adminEscola.escolaId;
 
@@ -2305,7 +2342,7 @@ router.get('/pdf-avaliadores/pdf/:feiraId', verificarAdminEscola, async (req, re
 
     const dataForReport = {
       titulo: `Relatório de Avaliadores - ${feira.nome}`,
-      feira: feira,
+      feira,
       avaliadores,
       formatarData
     };
@@ -2322,7 +2359,6 @@ router.get('/pdf-avaliadores/pdf/:feiraId', verificarAdminEscola, async (req, re
     }
   }
 });
-
 
 // ===========================================
 // ROTAS DE CONFIGURAÇÃO (ADMIN)
