@@ -2297,6 +2297,51 @@ router.get('/admin/pdf-avaliadores', verificarAdminEscola, async (req, res) => {
   }
 });
 
+router.get('/admin/relatorio-avaliadores/pdf', async (req, res) => {
+  try {
+    const escolaId = req.session.adminEscola.escolaId;
+
+    const feira = await Feira.findOne({ escolaId, status: 'ativa' }).lean();
+    if (!feira) {
+      req.flash('error_msg', 'Nenhuma feira ativa encontrada.');
+      return res.redirect('/admin/dashboard');
+    }
+
+    const avaliadores = await Avaliador.find({ escolaId, feira: feira._id }).lean();
+
+    const html = await ejs.renderFile(
+      path.join(__dirname, '../views/admin/pdf-avaliadores.ejs'),
+      { avaliadores, feira }
+    );
+
+    const browser = await puppeteer.launch({
+      headless: 'new',
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
+    const page = await browser.newPage();
+    await page.setContent(html, { waitUntil: 'networkidle0' });
+
+    const pdfBuffer = await page.pdf({
+      format: 'A4',
+      printBackground: true
+    });
+
+    await browser.close();
+
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `inline; filename=Relatorio_Avaliadores.pdf`
+    });
+
+    res.send(pdfBuffer);
+
+  } catch (err) {
+    console.error('Erro ao gerar relatório de avaliadores:', err);
+    req.flash('error_msg', 'Erro ao gerar relatório de avaliadores.');
+    res.redirect('/admin/dashboard');
+  }
+});
+
 
 // ===========================================
 // ROTAS DE CONFIGURAÇÃO (ADMIN)
