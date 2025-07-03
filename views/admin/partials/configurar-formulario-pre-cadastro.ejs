@@ -1,290 +1,408 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Configurar Formulário</title>
-  <style>
-    * {
-      margin: 0; padding: 0; box-sizing: border-box;
-    }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #fafafa;
-      color: #333;
-      line-height: 1.6;
-    }
-    .container {
-      max-width: 800px;
-      margin: 2rem auto;
-      padding: 0 1rem;
-    }
-    .card {
-      background: white;
-      border-radius: 12px;
-      padding: 2rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      border: 1px solid #e5e7eb;
-    }
-    h2 {
-      font-size: 1.5rem;
-      font-weight: 600;
-      margin-bottom: 2rem;
-      color: #1f2937;
-    }
-    .success-message {
-      background: #f0f9ff;
-      color: #0369a1;
-      padding: 0.75rem 1rem;
-      border-radius: 8px;
-      margin-bottom: 1.5rem;
-      border-left: 4px solid #0ea5e9;
-      font-size: 0.9rem;
-    }
-    .field-row {
-      display: grid;
-      grid-template-columns: 2fr 1fr 2fr auto auto;
-      gap: 1rem;
-      align-items: center;
-      padding: 1rem 0;
-      border-bottom: 1px solid #f3f4f6;
-    }
-    .field-row:last-child {
-      border-bottom: none;
-    }
-    .fixed-field {
-      background: #f9fafb;
-      border-radius: 8px;
-      padding: 0.75rem;
-      margin-bottom: 0.5rem;
-    }
-    .fixed-field .field-row {
-      border-bottom: none;
-      padding: 0.5rem 0;
-    }
-    .fixed-label {
-      font-weight: 500;
-      color: #6b7280;
-    }
-    .fixed-note {
-      font-size: 0.8rem;
-      color: #9ca3af;
-      font-style: italic;
-    }
-    input[type="text"], input[type="number"], select {
-      width: 100%;
-      padding: 0.75rem;
-      border: 1px solid #d1d5db;
-      border-radius: 6px;
-      font-size: 0.9rem;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-    input[type="text"]:focus, input[type="number"]:focus, select:focus {
-      outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-    input[readonly] {
-      background: #f3f4f6;
-      color: #6b7280;
-      cursor: not-allowed;
-    }
-    .checkbox-container {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.9rem;
-    }
-    input[type="checkbox"] {
-      width: 18px;
-      height: 18px;
-      accent-color: #3b82f6;
-    }
-    .hidden {
-      display: none !important;
-    }
-    .buttons {
-      margin-top: 2rem;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      align-items: center;
-    }
-    .btn {
-      padding: 0.75rem 1.5rem;
-      border: none;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-      text-decoration: none;
-      display: inline-block;
-    }
-    .btn-add {
-      background: #10b981;
-      color: white;
-    }
-    .btn-add:hover {
-      background: #059669;
-      transform: translateY(-1px);
-    }
-    .btn-save {
-      background: #3b82f6;
-      color: white;
-    }
-    .btn-save:hover {
-      background: #2563eb;
-      transform: translateY(-1px);
-    }
-    .btn-back {
-      background: #6b7280;
-      color: white;
-    }
-    .btn-back:hover {
-      background: #4b5563;
-      transform: translateY(-1px);
-    }
-    .btn-cancel {
-      background: #ef4444;
-      color: white;
-    }
-    .btn-cancel:hover {
-      background: #dc2626;
-      transform: translateY(-1px);
-    }
-    .section-title {
-      font-size: 1rem;
-      font-weight: 500;
-      color: #374151;
-      margin: 1.5rem 0 1rem 0;
-      padding-bottom: 0.5rem;
-      border-bottom: 2px solid #e5e7eb;
-    }
-    .section-title:first-of-type {
-      margin-top: 0;
-    }
-    .field-headers {
-      display: grid;
-      grid-template-columns: 2fr 1fr 2fr auto auto;
-      gap: 1rem;
-      padding: 0.5rem 0;
-      font-size: 0.8rem;
-      font-weight: 500;
-      color: #6b7280;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    @media (max-width: 768px) {
-      .container { margin: 1rem auto; }
-      .card { padding: 1.5rem; }
-      .field-row {
-        grid-template-columns: 1fr;
-        gap: 0.75rem;
-      }
-      .field-headers { display: none; }
-      .buttons {
-        flex-direction: column;
-        align-items: stretch;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurar Formulário</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #fafafa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            color: #1f2937;
+        }
+
+        .success-message {
+            background: #f0f9ff;
+            color: #0369a1;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid #0ea5e9;
+            font-size: 0.9rem;
+        }
+
+        .field-row {
+            display: grid;
+            grid-template-columns: 2.5fr 1.2fr 2fr auto auto;
+            gap: 1rem;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #f3f4f6;
+            background: white;
+        }
+
+        .field-row:last-child {
+            border-bottom: none;
+        }
+
+        .field-row:nth-child(even) {
+            background: #fafafa;
+        }
+
+        .fixed-field {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .fixed-field .field-row {
+            border-bottom: none;
+            padding: 0.75rem;
+            background: transparent;
+            grid-template-columns: 2.5fr 1.2fr 2fr auto auto;
+        }
+
+        .fixed-field .field-row:nth-child(even) {
+            background: rgba(0,0,0,0.02);
+        }
+
+        .fixed-label {
+            font-weight: 500;
+            color: #6b7280;
+        }
+
+        .fixed-note {
+            font-size: 0.8rem;
+            color: #9ca3af;
+            font-style: italic;
+        }
+
+        input[type="text"], 
+        input[type="number"], 
+        select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input[type="text"]:focus, 
+        input[type="number"]:focus, 
+        select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        input[readonly] {
+            background: #f3f4f6;
+            color: #6b7280;
+            cursor: not-allowed;
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #3b82f6;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .buttons {
+            margin-top: 2rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-add {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-add:hover {
+            background: #059669;
+            transform: translateY(-1px);
+        }
+
+        .btn-save {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-remove {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-remove:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
+        }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #374151;
+            margin: 1.5rem 0 1rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .section-title:first-of-type {
+            margin-top: 0;
+        }
+
+        .field-headers {
+            display: grid;
+            grid-template-columns: 2.5fr 1.2fr 2fr auto auto;
+            gap: 1rem;
+            padding: 1rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background: #f8fafc;
+            border-radius: 8px 8px 0 0;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 1rem auto;
+            }
+            
+            .card {
+                padding: 1.5rem;
+            }
+            
+            .field-row {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+            
+            .field-headers {
+                display: none;
+            }
+            
+            .buttons {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <div class="card">
-      <h2>Configurar Formulário de Pré-Cadastro</h2>
+    <div class="container">
+        <div class="card">
+            <h2>Configurar Formulário de Pré-Cadastro</h2>
 
-      <% if (success_msg) { %>
-        <div class="success-message"><%= success_msg %></div>
-      <% } %>
+            <!-- Mensagem de sucesso (mantendo a lógica do backend) -->
+            <% if (success_msg) { %>
+                <div class="success-message"><%= success_msg %></div>
+            <% } %>
 
-      <form action="/admin/formulario-pre-cadastro/configurar" method="POST" id="formCamposExtras">
-
-        <div class="section-title">Campos Obrigatórios</div>
-        <div class="fixed-field">
-          <div class="field-row">
-            <div class="fixed-label">Nome</div><div></div>
-            <div class="fixed-note">Campo fixo obrigatório</div><div></div>
-          </div>
-          <div class="field-row">
-            <div class="fixed-label">Email</div><div></div>
-            <div class="fixed-note">Campo fixo obrigatório</div><div></div>
-          </div>
-        </div>
-
-        <div class="section-title">Campos Personalizados</div>
-        <div class="field-headers">
-          <div>Nome do Campo</div>
-          <div>Tipo</div>
-          <div>Opções</div>
-          <div>Obrigatório</div>
-          <div>Ações</div>
-        </div>
-
-        <div id="campos-container">
-          <% if (camposExtras && camposExtras.length > 0) { %>
-            <% camposExtras.forEach((campo, idx) => { %>
-              <div class="field-row">
-                <input type="text" name="camposExtras[<%= idx %>][label]" value="<%= campo.label %>" placeholder="Nome do Campo" required>
-                <select name="camposExtras[<%= idx %>][tipo]" onchange="toggleOpcoes(this, '<%= idx %>')" class="tipo-select" data-idx="<%= idx %>">
-                  <option value="texto"   <%= campo.tipo === 'texto' ? 'selected' : '' %>>Texto</option>
-                  <option value="número"  <%= campo.tipo === 'número' ? 'selected' : '' %>>Número</option>
-                  <option value="seleção" <%= campo.tipo === 'seleção' ? 'selected' : '' %>>Seleção</option>
-                </select>
-                <input type="text" name="camposExtras[<%= idx %>][opcoes]" id="opcoes_<%= idx %>" value="<%= campo.opcoes || '' %>" placeholder="Opções separadas por vírgula" class="<%= campo.tipo === 'seleção' ? '' : 'hidden' %>">
-                <div class="checkbox-container">
-                  <input type="checkbox" name="camposExtras[<%= idx %>][obrigatorio]" value="true" <%= campo.obrigatorio ? 'checked' : '' %>>
-                  <label>Obrigatório</label>
+            <form action="/admin/formulario-pre-cadastro/configurar" method="POST" id="formCamposExtras">
+                
+                <!-- Campos Fixos -->
+                <div class="section-title">Campos Obrigatórios</div>
+                <div class="fixed-field">
+                    <div class="field-row">
+                        <div class="fixed-label">Nome</div>
+                        <div class="fixed-label">Texto</div>
+                        <div class="fixed-note">Campo fixo obrigatório</div>
+                        <div class="fixed-note">Sim</div>
+                        <div></div>
+                    </div>
+                    <div class="field-row">
+                        <div class="fixed-label">Email</div>
+                        <div class="fixed-label">Texto</div>
+                        <div class="fixed-note">Campo fixo obrigatório</div>
+                        <div class="fixed-note">Sim</div>
+                        <div></div>
+                    </div>
                 </div>
-                <button type="button" class="btn btn-cancel" onclick="this.parentElement.remove()">Excluir</button>
-              </div>
-            <% }) %>
-          <% } %>
-        </div>
 
-        <div class="buttons">
-          <button type="button" onclick="adicionarCampo()" class="btn btn-add">+ Adicionar Campo</button>
-          <button type="submit" class="btn btn-save">Salvar Configuração</button>
-          <a href="/admin/dashboard" class="btn btn-back">Voltar para Dashboard</a>
+                <!-- Campos Extras -->
+                <div class="section-title">Campos Personalizados</div>
+                <div class="field-headers">
+                    <div>NOME DO CAMPO</div>
+                    <div>TIPO</div>
+                    <div>OPÇÕES</div>
+                    <div>OBRIGATÓRIO</div>
+                    <div>AÇÕES</div>
+                </div>
+
+                <div id="campos-container">
+                    <!-- Campos extras editáveis (mantendo a lógica do backend) -->
+                    <% if (camposExtras && camposExtras.length > 0) { %>
+                        <% camposExtras.forEach((campo, idx) => { %>
+                            <div class="field-row">
+                                <input type="text" name="camposExtras[<%= idx %>][label]" value="<%= campo.label %>"
+                                       placeholder="Nome do Campo" required>
+
+                                <select name="camposExtras[<%= idx %>][tipo]" onchange="toggleOpcoes(this, '<%= idx %>')"
+                                        class="tipo-select" data-idx="<%= idx %>">
+                                    <option value="texto"   <%= campo.tipo === 'texto' ? 'selected' : '' %>>Texto</option>
+                                    <option value="número"  <%= campo.tipo === 'número' ? 'selected' : '' %>>Número</option>
+                                    <option value="seleção" <%= campo.tipo === 'seleção' ? 'selected' : '' %>>Seleção</option>
+                                </select>
+
+                                <input type="text"
+                                       name="camposExtras[<%= idx %>][opcoes]"
+                                       id="opcoes_<%= idx %>"
+                                       value="<%= campo.opcoes || '' %>"
+                                       placeholder="Opções separadas por vírgula"
+                                       class="<%= campo.tipo === 'seleção' ? '' : 'hidden' %>">
+
+                                <div class="checkbox-container">
+                                    <input type="checkbox" name="camposExtras[<%= idx %>][obrigatorio]" value="true"
+                                           <%= campo.obrigatorio ? 'checked' : '' %>>
+                                    <label>Obrigatório</label>
+                                </div>
+
+                                <button type="button" onclick="removerCampo(this)" class="btn-remove">
+                                    Excluir
+                                </button>
+                            </div>
+                        <% }) %>
+                    <% } %>
+                </div>
+
+                <div class="buttons">
+                    <button type="button" onclick="adicionarCampo()" class="btn btn-add">
+                        + Adicionar Campo
+                    </button>
+                    <button type="submit" class="btn btn-save">
+                        Salvar Configuração
+                    </button>
+                </div>
+            </form>
         </div>
-      </form>
     </div>
-  </div>
 
-  <script>
-    function adicionarCampo() {
-      const container = document.getElementById('campos-container');
-      const existingFields = container.querySelectorAll('.field-row').length;
-      const idx = existingFields;
+    <script>
+        function adicionarCampo() {
+            const container = document.getElementById('campos-container');
+            const existingFields = container.querySelectorAll('.field-row').length;
+            const idx = existingFields;
+            
+            container.insertAdjacentHTML('beforeend', `
+                <div class="field-row">
+                    <input type="text" name="camposExtras[${idx}][label]" placeholder="Nome do Campo" required>
+                    <select name="camposExtras[${idx}][tipo]" onchange="toggleOpcoes(this, ${idx})"
+                            class="tipo-select" data-idx="${idx}">
+                        <option value="texto">Texto</option>
+                        <option value="número">Número</option>
+                        <option value="seleção">Seleção</option>
+                    </select>
+                    <input type="text" name="camposExtras[${idx}][opcoes]" id="opcoes_${idx}"
+                           placeholder="Opções separadas por vírgula"
+                           class="hidden">
+                    <div class="checkbox-container">
+                        <input type="checkbox" name="camposExtras[${idx}][obrigatorio]" value="true">
+                        <label>Obrigatório</label>
+                    </div>
+                    <button type="button" onclick="removerCampo(this)" class="btn-remove">
+                        Excluir
+                    </button>
+                </div>
+            `);
+        }
 
-      container.insertAdjacentHTML('beforeend', `
-        <div class="field-row">
-          <input type="text" name="camposExtras[${idx}][label]" placeholder="Nome do Campo" required>
-          <select name="camposExtras[${idx}][tipo]" onchange="toggleOpcoes(this, ${idx})" class="tipo-select" data-idx="${idx}">
-            <option value="texto">Texto</option>
-            <option value="número">Número</option>
-            <option value="seleção">Seleção</option>
-          </select>
-          <input type="text" name="camposExtras[${idx}][opcoes]" id="opcoes_${idx}" placeholder="Opções separadas por vírgula" class="hidden">
-          <div class="checkbox-container">
-            <input type="checkbox" name="camposExtras[${idx}][obrigatorio]" value="true">
-            <label>Obrigatório</label>
-          </div>
-          <button type="button" class="btn btn-cancel" onclick="this.parentElement.remove()">Excluir</button>
-        </div>
-      `);
-    }
+        function toggleOpcoes(select, idx) {
+            const input = document.getElementById('opcoes_' + idx);
+            if (select.value === 'seleção') {
+                input.classList.remove('hidden');
+            } else {
+                input.classList.add('hidden');
+                input.value = '';
+            }
+        }
 
-    function toggleOpcoes(select, idx) {
-      const input = document.getElementById('opcoes_' + idx);
-      if (select.value === 'seleção') {
-        input.classList.remove('hidden');
-      } else {
-        input.classList.add('hidden');
-        input.value = '';
-      }
-    }
-  </script>
+        function removerCampo(button) {
+            const row = button.closest('.field-row');
+            row.remove();
+            // Reindexar os campos
+            reindexarCampos();
+        }
+
+        function reindexarCampos() {
+            const container = document.getElementById('campos-container');
+            const rows = container.querySelectorAll('.field-row');
+            
+            rows.forEach((row, index) => {
+                const inputs = row.querySelectorAll('input, select');
+                inputs.forEach(input => {
+                    if (input.name) {
+                        input.name = input.name.replace(/\[\d+\]/, `[${index}]`);
+                    }
+                    if (input.id && input.id.startsWith('opcoes_')) {
+                        input.id = `opcoes_${index}`;
+                    }
+                });
+                
+                const select = row.querySelector('.tipo-select');
+                if (select) {
+                    select.setAttribute('data-idx', index);
+                    select.setAttribute('onchange', `toggleOpcoes(this, ${index})`);
+                }
+                
+                const removeBtn = row.querySelector('.btn-remove');
+                if (removeBtn) {
+                    removeBtn.setAttribute('onclick', 'removerCampo(this)');
+                }
+            });
+        }
+    </script>
 </body>
 </html>
