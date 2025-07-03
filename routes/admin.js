@@ -2271,8 +2271,7 @@ router.get('/relatorio/avaliacao-offline/:feiraId/:avaliadorId', verificarAdminE
 });
 
 // Gera PDF de Avaliadores com dados extras
-// 🔒 Rota para pré-visualizar o HTML do relatório de avaliadores (opcional)
-router.get('/admin/pdf-avaliadores/:feiraId', verificarAdminEscola, async (req, res) => {
+router.get('/pdf-avaliadores/:feiraId', verificarAdminEscola, async (req, res) => {
   const { feiraId } = req.params;
   const adminEscolaId = req.session.adminEscola.escolaId;
 
