@@ -1284,16 +1284,18 @@ router.post('/pre-cadastros/:id/aprovar', verificarAdminEscola, async (req, res)
     const qrcode = await QRCode.toDataURL(url);
 
     const novo = new Avaliador({
-      nome: nome.trim(),
-      email: email.trim(),
-      telefone: telefone?.trim() || '',
-      escolaId,
-      feira: pre.feiraId,
-      pin,
-      projetosAtribuidos: Array.isArray(projetosAtribuidos) ? projetosAtribuidos : [projetosAtribuidos],
-      qrcode,
-      ativo: true
-    });
+  nome: nome.trim(),
+  email: email.trim(),
+  telefone: telefone?.trim() || '',
+  escolaId,
+  feira: pre.feiraId,
+  pin,
+  projetosAtribuidos: Array.isArray(projetosAtribuidos) ? projetosAtribuidos : [projetosAtribuidos],
+  qrcode,
+  ativo: true,
+  criadoVia: 'pre-cadastro',
+  extras: pre.extras || {}
+});
 
     await novo.save();
     await PreCadastroAvaliador.findByIdAndDelete(pre._id);
@@ -2267,6 +2269,34 @@ router.get('/relatorio/avaliacao-offline/:feiraId/:avaliadorId', verificarAdminE
         }
     }
 });
+
+// Gera PDF de Avaliadores com dados extras
+router.get('/admin/pdf-avaliadores', verificarAdminEscola, async (req, res) => {
+  try {
+    const escolaId = req.session.adminEscola.escolaId;
+    const feira = await Feira.findOne({ escolaId, status: 'ativa' });
+
+    if (!feira) {
+      req.flash('error_msg', 'Nenhuma feira ativa encontrada.');
+      return res.redirect('/admin/dashboard?tab=relatorios');
+    }
+
+    const avaliadores = await Avaliador.find({ escolaId, feira: feira._id }).lean();
+
+    res.render('admin/pdf-avaliadores', {
+      layout: false,
+      titulo: 'Relatório de Avaliadores',
+      avaliadores,
+      feira
+    });
+
+  } catch (err) {
+    console.error('Erro ao gerar relatório de avaliadores:', err);
+    req.flash('error_msg', 'Erro ao gerar relatório de avaliadores.');
+    res.redirect('/admin/dashboard?tab=relatorios');
+  }
+});
+
 
 // ===========================================
 // ROTAS DE CONFIGURAÇÃO (ADMIN)

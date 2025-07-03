@@ -1,3 +1,4 @@
+//models/Avaliador.js
 const mongoose = require('mongoose');
 
 const AvaliadorSchema = new mongoose.Schema({
