@@ -1,52 +1,352 @@
 <!--avaliadores-pre-cadastro-->
-<div class="overflow-x-auto bg-white rounded-lg shadow-md border border-gray-200">
-  <% if (preCadastros && preCadastros.length > 0) { %>
-    <table class="min-w-full divide-y divide-gray-200 text-sm">
-      <thead class="bg-gray-100 text-gray-600 uppercase text-xs">
-        <tr>
-          <th class="py-3 px-4 text-left">Nome</th>
-          <th class="py-3 px-4 text-left">Email</th>
-          <th class="py-3 px-4 text-left">Telefone</th>
-          <th class="py-3 px-4 text-left">Extras</th>
-          <th class="py-3 px-4 text-left">Ações</th>
-        </tr>
-      </thead>
-      <tbody class="bg-white divide-y divide-gray-200">
-        <% preCadastros.forEach(cadastro => { %>
-          <tr class="hover:bg-gray-50">
-            <td class="py-3 px-4"><%= cadastro.nome %></td>
-            <td class="py-3 px-4"><%= cadastro.email %></td>
-            <td class="py-3 px-4"><%= cadastro.telefone || '-' %></td>
-            <td class="py-3 px-4">
-              <% if (cadastro.extras) { 
-                   const camposOcultos = ['nome', 'email', 'telefone'];
-                   Object.keys(cadastro.extras).forEach(campo => {
-                     if (!camposOcultos.includes(campo.trim().toLowerCase())) {
-              %>
-                  <div><strong><%= campo %>:</strong> <%= cadastro.extras[campo] %></div>
-              <%   }
-                   });
-                 } else { %>
-                <span class="text-gray-400 italic">Nenhum</span>
-              <% } %>
-            </td>
-            <td class="py-3 px-4 space-x-2">
-                <form action="/admin/pre-cadastros/<%= cadastro._id %>/aprovar" method="POST" class="inline">
-                <button type="submit" class="bg-green-600 text-white px-3 py-1.5 rounded hover:bg-green-700 transition">
-                  <i class="fas fa-check-circle mr-1"></i>Aprovar
-                </button>
-              </form>
-              <form action="/admin/pre-cadastros/<%= cadastro._id %>/recusar" method="POST" class="inline" onsubmit="return confirm('Deseja recusar este pré-cadastro?');">
-                <button type="submit" class="bg-red-600 text-white px-3 py-1.5 rounded hover:bg-red-700 transition">
-                  <i class="fas fa-times-circle mr-1"></i>Recusar
-                </button>
-              </form>
-            </td>
-          </tr>
-        <% }) %>
-      </tbody>
-    </table>
-  <% } else { %>
-    <p class="text-gray-500 italic p-4">Nenhum pré-cadastro pendente.</p>
-  <% } %>
-</div>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pré-Cadastros</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f9fafb;
+            min-height: 100vh;
+            padding: 1rem;
+            color: #374151;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            margin-bottom: 2rem;
+        }
+
+        .header h2 {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #111827;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: #6b7280;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+            overflow: hidden;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table thead {
+            background-color: #f9fafb;
+        }
+
+        .table th {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .table th .header-content {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .table th i {
+            color: #9ca3af;
+        }
+
+        .table td {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            white-space: nowrap;
+        }
+
+        .table tr:hover {
+            background-color: #f9fafb;
+        }
+
+        .user-cell {
+            display: flex;
+            align-items: center;
+        }
+
+        .avatar {
+            height: 2.5rem;
+            width: 2.5rem;
+            border-radius: 50%;
+            background-color: #dbeafe;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+        }
+
+        .avatar span {
+            color: #2563eb;
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+
+        .user-name {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #111827;
+        }
+
+        .text-content {
+            font-size: 0.875rem;
+            color: #111827;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background-color: #2563eb;
+            color: white;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+
+        .btn:hover {
+            background-color: #1d4ed8;
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn i {
+            margin-right: 0.5rem;
+        }
+
+        /* Mobile Cards */
+        .mobile-cards {
+            display: none;
+        }
+
+        .card {
+            border-bottom: 1px solid #e5e7eb;
+            padding: 1rem;
+            transition: background-color 0.2s;
+        }
+
+        .card:hover {
+            background-color: #f9fafb;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .card-avatar {
+            height: 3rem;
+            width: 3rem;
+            border-radius: 50%;
+            background-color: #dbeafe;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.75rem;
+        }
+
+        .card-name {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #111827;
+        }
+
+        .card-info {
+            margin-bottom: 1rem;
+        }
+
+        .card-info-item {
+            display: flex;
+            align-items: center;
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-info-item i {
+            width: 1rem;
+            margin-right: 0.5rem;
+            color: #9ca3af;
+        }
+
+        .card-actions {
+            display: flex;
+        }
+
+        .card-btn {
+            width: 100%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem 1rem;
+            background-color: #2563eb;
+            color: white;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+
+        .card-btn:hover {
+            background-color: #1d4ed8;
+            color: white;
+            text-decoration: none;
+        }
+
+        .card-btn i {
+            margin-right: 0.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .desktop-table {
+                display: none;
+            }
+            .mobile-cards {
+                display: block;
+            }
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 0.5rem;
+            }
+            .header h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h2>Pré-Cadastros Recebidos</h2>
+            <p>Gerencie os pré-cadastros recebidos</p>
+        </div>
+
+        <!-- Tabela -->
+        <div class="table-container">
+            <!-- Versão desktop -->
+            <div class="desktop-table">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>
+                                <div class="header-content">
+                                    <i class="fas fa-user"></i>
+                                    Nome
+                                </div>
+                            </th>
+                            <th>
+                                <div class="header-content">
+                                    <i class="fas fa-envelope"></i>
+                                    Email
+                                </div>
+                            </th>
+                            <th>
+                                <div class="header-content">
+                                    <i class="fas fa-phone"></i>
+                                    Telefone
+                                </div>
+                            </th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% preCadastros.forEach(pre => { %>
+                        <tr>
+                            <td>
+                                <div class="user-cell">
+                                    <div class="avatar">
+                                        <span><%= pre.nome.charAt(0).toUpperCase() %></span>
+                                    </div>
+                                    <div class="user-name"><%= pre.nome %></div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="text-content"><%= pre.email %></div>
+                            </td>
+                            <td>
+                                <div class="text-content"><%= pre.telefone || '-' %></div>
+                            </td>
+                            <td>
+                                <a href="/admin/pre-cadastros/<%= pre._id %>" class="btn">
+                                    <i class="fas fa-eye"></i>
+                                    Ver / Aprovar
+                                </a>
+                            </td>
+                        </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Versão mobile -->
+            <div class="mobile-cards">
+                <% preCadastros.forEach(pre => { %>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-avatar">
+                            <span><%= pre.nome.charAt(0).toUpperCase() %></span>
+                        </div>
+                        <div class="card-name"><%= pre.nome %></div>
+                    </div>
+                    
+                    <div class="card-info">
+                        <div class="card-info-item">
+                            <i class="fas fa-envelope"></i>
+                            <%= pre.email %>
+                        </div>
+                        <div class="card-info-item">
+                            <i class="fas fa-phone"></i>
+                            <%= pre.telefone || '-' %>
+                        </div>
+                    </div>
+                    
+                    <div class="card-actions">
+                        <a href="/admin/pre-cadastros/<%= pre._id %>" class="card-btn">
+                            <i class="fas fa-eye"></i>
+                            Ver / Aprovar
+                        </a>
+                    </div>
+                </div>
+                <% }) %>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

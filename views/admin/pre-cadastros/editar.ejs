@@ -1,19 +1,198 @@
-<form action="/admin/pre-cadastros/<%= pre._id %>/aprovar" method="POST" class="space-y-4">
-  <h2 class="text-2xl font-bold">Aprovar Avaliador</h2>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aprovar Avaliador</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
 
-  <input type="text" name="nome" value="<%= pre.nome %>" required class="w-full border p-2 rounded">
-  <input type="email" name="email" value="<%= pre.email %>" required class="w-full border p-2 rounded">
-  <input type="text" name="telefone" value="<%= pre.telefone %>" class="w-full border p-2 rounded">
+        /* Form animations */
+        .form-input {
+            transition: all 0.3s ease;
+        }
+        .form-input:focus {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+        }
 
-  <label class="block font-semibold">Projetos Atribuídos:</label>
-  <div class="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto border p-2 rounded bg-gray-50">
-    <% projetos.forEach(p => { %>
-      <label class="flex items-center space-x-2">
-        <input type="checkbox" name="projetosAtribuidos" value="<%= p._id %>">
-        <span><%= p.titulo %></span>
-      </label>
-    <% }) %>
-  </div>
+        /* Custom checkbox */
+        .custom-checkbox {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #d1d5db;
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+        .custom-checkbox:checked {
+            background: #3b82f6;
+            border-color: #3b82f6;
+        }
+        .custom-checkbox:checked::after {
+            content: '✓';
+            position: absolute;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .custom-checkbox:hover {
+            border-color: #3b82f6;
+        }
 
-  <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Aprovar e Cadastrar</button>
-</form>
+        /* Button styling */
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Card styling */
+        .form-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+        }
+
+        /* Input labels */
+        .input-group {
+            position: relative;
+        }
+        .input-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+
+        /* Project card hover */
+        .project-item {
+            transition: all 0.2s ease;
+        }
+        .project-item:hover {
+            background-color: #f8fafc;
+            border-color: #3b82f6;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-white to-indigo-50 min-h-screen p-4">
+    <div class="max-w-2xl mx-auto py-8">
+        <div class="form-card p-8">
+            <!-- Mantendo exatamente sua estrutura EJS original -->
+            <form action="/admin/pre-cadastros/<%= pre._id %>/aprovar" method="POST" class="space-y-6">
+                
+                <!-- Header melhorado -->
+                <div class="text-center mb-8">
+                    <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                    </div>
+                    <h2 class="text-3xl font-bold text-gray-800 mb-2">Aprovar Avaliador</h2>
+                    <p class="text-gray-600">Complete as informações para cadastrar o novo avaliador</p>
+                </div>
+
+                <!-- Seção de dados pessoais -->
+                <div class="bg-gray-50 rounded-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Informações Pessoais
+                    </h3>
+                    
+                    <div class="space-y-4">
+                        <div class="input-group">
+                            <label class="input-label">Nome Completo *</label>
+                            <input type="text" name="nome" value="<%= pre.nome %>" required 
+                                   class="form-input w-full border-2 border-gray-200 p-3 rounded-lg focus:border-blue-500 focus:outline-none">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label class="input-label">E-mail *</label>
+                            <input type="email" name="email" value="<%= pre.email %>" required 
+                                   class="form-input w-full border-2 border-gray-200 p-3 rounded-lg focus:border-blue-500 focus:outline-none">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label class="input-label">Telefone</label>
+                            <input type="text" name="telefone" value="<%= pre.telefone %>" 
+                                   class="form-input w-full border-2 border-gray-200 p-3 rounded-lg focus:border-blue-500 focus:outline-none">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seção de projetos mantendo sua estrutura original -->
+                <div class="bg-gray-50 rounded-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        Projetos Atribuídos
+                    </label>
+                    
+                    <div class="bg-white rounded-lg border-2 border-gray-200 p-4">
+                        <!-- Mantendo exatamente sua estrutura de grid e loop -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-48 overflow-y-auto custom-scrollbar">
+                            <% projetos.forEach(p => { %>
+                                <label class="project-item flex items-center space-x-3 p-3 rounded-lg border border-transparent cursor-pointer">
+                                    <input type="checkbox" name="projetosAtribuidos" value="<%= p._id %>" class="custom-checkbox">
+                                    <span class="text-gray-700 select-none text-sm"><%= p.titulo %></span>
+                                </label>
+                            <% }) %>
+                        </div>
+                        
+                        <div class="mt-3 pt-3 border-t border-gray-200">
+                            <p class="text-sm text-gray-500 flex items-center">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                Selecione os projetos que este avaliador poderá acessar
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botão de submit melhorado mantendo a funcionalidade original -->
+                <div class="pt-6">
+                    <button type="submit" 
+                            class="btn-primary w-full text-white font-semibold py-4 px-6 rounded-lg flex items-center justify-center text-lg">
+                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Aprovar e Cadastrar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
