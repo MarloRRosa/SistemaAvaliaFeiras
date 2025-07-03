@@ -2271,78 +2271,57 @@ router.get('/relatorio/avaliacao-offline/:feiraId/:avaliadorId', verificarAdminE
 });
 
 // Gera PDF de Avaliadores com dados extras
-router.get('/admin/pdf-avaliadores', verificarAdminEscola, async (req, res) => {
-  try {
-    const escolaId = req.session.adminEscola.escolaId;
-    const feira = await Feira.findOne({ escolaId, status: 'ativa' });
 
-    if (!feira) {
-      req.flash('error_msg', 'Nenhuma feira ativa encontrada.');
+router.get('/relatorio-avaliadores/pdf/:feiraId', verificarAdminEscola, async (req, res) => {
+  const { feiraId } = req.params;
+  const adminEscolaId = req.session.adminEscola.escolaId;
+
+  try {
+    if (!feiraId || !mongoose.Types.ObjectId.isValid(feiraId)) {
+      req.flash('error_msg', 'ID da feira inválido para o relatório.');
       return res.redirect('/admin/dashboard?tab=relatorios');
     }
 
-    const avaliadores = await Avaliador.find({ escolaId, feira: feira._id }).lean();
+    const feira = await Feira.findOne({ _id: feiraId, escolaId: adminEscolaId }).lean();
+    if (!feira) {
+      req.flash('error_msg', 'Feira não encontrada.');
+      return res.redirect('/admin/dashboard?tab=relatorios');
+    }
 
-    res.render('admin/pdf-avaliadores', {
-      layout: false,
-      titulo: 'Relatório de Avaliadores',
+    const avaliadores = await Avaliador.find({ escolaId: adminEscolaId, feira: feira._id }).lean();
+    if (!avaliadores || avaliadores.length === 0) {
+      req.flash('error_msg', 'Nenhum avaliador encontrado.');
+      return res.redirect('/admin/dashboard?tab=relatorios');
+    }
+
+    const formatarData = (dateString) => {
+      if (!dateString) return 'N/A';
+      const date = new Date(dateString);
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+      return `${day}/${month}/${year}`;
+    };
+
+    const dataForReport = {
+      titulo: `Relatório de Avaliadores - ${feira.nome}`,
+      feira: feira,
       avaliadores,
-      feira
-    });
+      formatarData
+    };
+
+    const filename = `relatorio_avaliadores_${feira.nome.replace(/\s/g, '_')}`;
+
+    await generatePdfReport(req, res, 'pdf-avaliadores', dataForReport, filename);
 
   } catch (err) {
     console.error('Erro ao gerar relatório de avaliadores:', err);
-    req.flash('error_msg', 'Erro ao gerar relatório de avaliadores.');
-    res.redirect('/admin/dashboard?tab=relatorios');
-  }
-});
-
-router.get('/relatorio-avaliadores/pdf', verificarAdminEscola, async (req, res) => {
-  let browser = null;
-  try {
-    const escolaId = req.session.adminEscola.escolaId;
-
-    const feira = await Feira.findOne({ escolaId, status: 'ativa' }).lean();
-    if (!feira) {
-      req.flash('error_msg', 'Nenhuma feira ativa encontrada.');
-      return res.redirect('/admin/dashboard?tab=relatorios');
+    if (!res.headersSent) {
+      req.flash('error_msg', 'Erro ao gerar relatório: ' + err.message);
+      res.redirect('/admin/dashboard?tab=relatorios');
     }
-
-    const avaliadores = await Avaliador.find({ escolaId, feira: feira._id }).lean();
-
-    const html = await ejs.renderFile(
-      path.join(__dirname, '../views/admin/pdf-avaliadores.ejs'),
-      { avaliadores, feira }
-    );
-
-    browser = await puppeteer.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    });
-
-    const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: 'networkidle0' });
-
-    const pdfBuffer = await page.pdf({
-      format: 'A4',
-      printBackground: true,
-    });
-
-    res.set({
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': 'inline; filename="Relatorio_Avaliadores.pdf"',
-    });
-
-    res.send(pdfBuffer);
-  } catch (err) {
-    console.error('Erro ao gerar relatório de avaliadores:', err);
-    req.flash('error_msg', 'Erro ao gerar relatório de avaliadores.');
-    res.redirect('/admin/dashboard?tab=relatorios');
-  } finally {
-    if (browser) await browser.close();
   }
 });
-
 
 
 // ===========================================
