@@ -6,390 +6,187 @@
   <title>Configurar Formulário</title>
   <style>
     * {
-      margin: 0; 
-      padding: 0; 
-      box-sizing: border-box;
+      margin: 0; padding: 0; box-sizing: border-box;
     }
-    
     body {
-     
-      color: #1a202c;
-     
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #fafafa;
+      color: #333;
+      line-height: 1.6;
     }
-    
     .container {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 2rem 1rem;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 0 1rem;
     }
-    
     .card {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(20px);
-      border-radius: 20px;
-      padding: 3rem;
-      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      width: 100%;
-      animation: slideUp 0.6s ease-out;
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      border: 1px solid #e5e7eb;
     }
-    
-    @keyframes slideUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    
     h2 {
-      font-size: 2rem;
-      font-weight: 700;
-      margin-bottom: 2.5rem;
-      color: #2d3748;
-      text-align: center;
-      position: relative;
-    }
-    
-    h2::after {
-      content: '';
-      position: absolute;
-      bottom: -10px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 60px;
-      height: 4px;
-      background: linear-gradient(90deg, #667eea, #764ba2);
-      border-radius: 2px;
-    }
-    
-    .success-message {
-      background: linear-gradient(135deg, #48bb78, #38a169);
-      color: white;
-      padding: 1rem 1.5rem;
-      border-radius: 12px;
+      font-size: 1.5rem;
+      font-weight: 600;
       margin-bottom: 2rem;
-      border-left: 4px solid #2f855a;
-      font-size: 0.95rem;
-      box-shadow: 0 4px 12px rgba(72, 187, 120, 0.3);
-      animation: pulse 0.5s ease-out;
+      color: #1f2937;
     }
-    
-    @keyframes pulse {
-      0% { transform: scale(0.95); opacity: 0; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-    
-    .section-title {
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: #2d3748;
-      margin: 2rem 0 1.5rem 0;
+    .success-message {
+      background: #f0f9ff;
+      color: #0369a1;
       padding: 0.75rem 1rem;
-      background: linear-gradient(135deg, #f7fafc, #edf2f7);
-      border-radius: 10px;
-      border-left: 4px solid #667eea;
-      position: relative;
-    }
-    
-    .section-title:first-of-type {
-      margin-top: 0;
-    }
-    
-    .fixed-field {
-      background: linear-gradient(135deg, #f8fafc, #e2e8f0);
-      border-radius: 12px;
-      padding: 1.5rem;
-      margin-bottom: 1rem;
-      border: 1px solid rgba(226, 232, 240, 0.8);
-    }
-    
-    .fixed-field .field-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.75rem 0;
-      border-bottom: 1px solid rgba(203, 213, 224, 0.5);
-    }
-    
-    .fixed-field .field-row:last-child {
-      border-bottom: none;
-    }
-    
-    .fixed-label {
-      font-weight: 600;
-      color: #4a5568;
-      font-size: 1rem;
-    }
-    
-    .fixed-note {
-      font-size: 0.85rem;
-      color: #718096;
-      font-style: italic;
-      background: rgba(160, 174, 192, 0.1);
-      padding: 0.25rem 0.5rem;
-      border-radius: 6px;
-    }
-    
-    .field-headers {
-      display: grid;
-      grid-template-columns: 2.5fr 1.2fr 2fr auto auto;
-      gap: 1.5rem;
-      padding: 1rem 0;
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: #4a5568;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      background: linear-gradient(135deg, #edf2f7, #e2e8f0);
       border-radius: 8px;
-      margin-bottom: 1rem;
-      padding: 1rem 1.5rem;
+      margin-bottom: 1.5rem;
+      border-left: 4px solid #0ea5e9;
+      font-size: 0.9rem;
     }
-    
     .field-row {
       display: grid;
-      grid-template-columns: 2.5fr 1.2fr 2fr auto auto;
-      gap: 1.5rem;
+      grid-template-columns: 2fr 1fr 2fr auto auto;
+      gap: 1rem;
       align-items: center;
-      padding: 1.5rem;
-      margin-bottom: 1rem;
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-      border: 1px solid #e2e8f0;
-      transition: all 0.3s ease;
+      padding: 1rem 0;
+      border-bottom: 1px solid #f3f4f6;
     }
-    
-    .field-row:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-      border-color: #667eea;
+    .field-row:last-child {
+      border-bottom: none;
     }
-    
-    input[type="text"], 
-    input[type="number"], 
-    select {
-      width: 100%;
-      padding: 0.875rem 1rem;
-      border: 2px solid #e2e8f0;
+    .fixed-field {
+      background: #f9fafb;
       border-radius: 8px;
-      font-size: 0.95rem;
-      transition: all 0.3s ease;
-      background: white;
-      font-family: inherit;
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
     }
-    
-    input[type="text"]:focus, 
-    input[type="number"]:focus, 
-    select:focus {
+    .fixed-field .field-row {
+      border-bottom: none;
+      padding: 0.5rem 0;
+    }
+    .fixed-label {
+      font-weight: 500;
+      color: #6b7280;
+    }
+    .fixed-note {
+      font-size: 0.8rem;
+      color: #9ca3af;
+      font-style: italic;
+    }
+    input[type="text"], input[type="number"], select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input[type="text"]:focus, input[type="number"]:focus, select:focus {
       outline: none;
-      border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-      transform: translateY(-1px);
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
-    
     input[readonly] {
-      background: #f7fafc;
-      color: #718096;
+      background: #f3f4f6;
+      color: #6b7280;
       cursor: not-allowed;
-      border-color: #cbd5e0;
     }
-    
     .checkbox-container {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      gap: 0.5rem;
       font-size: 0.9rem;
-      font-weight: 500;
-      color: #4a5568;
     }
-    
     input[type="checkbox"] {
-      width: 20px;
-      height: 20px;
-      accent-color: #667eea;
-      border-radius: 4px;
+      width: 18px;
+      height: 18px;
+      accent-color: #3b82f6;
     }
-    
     .hidden {
       display: none !important;
     }
-    
     .buttons {
-      margin-top: 3rem;
+      margin-top: 2rem;
       display: flex;
       flex-wrap: wrap;
       gap: 1rem;
       align-items: center;
-      justify-content: center;
     }
-    
     .btn {
-      padding: 1rem 2rem;
-      border: none;
-      border-radius: 10px;
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-family: inherit;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .btn::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-      transition: left 0.5s;
-    }
-    
-    .btn:hover::before {
-      left: 100%;
-    }
-    
-    .btn-add {
-      background: linear-gradient(135deg, #48bb78, #38a169);
-      color: white;
-      box-shadow: 0 4px 15px rgba(72, 187, 120, 0.4);
-    }
-    
-    .btn-add:hover {
-      background: linear-gradient(135deg, #38a169, #2f855a);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(72, 187, 120, 0.5);
-    }
-    
-    .btn-save {
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: white;
-      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-    }
-    
-    .btn-save:hover {
-      background: linear-gradient(135deg, #5a67d8, #6b46c1);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
-    }
-    
-    .btn-back {
-      background: linear-gradient(135deg, #718096, #4a5568);
-      color: white;
-      box-shadow: 0 4px 15px rgba(113, 128, 150, 0.4);
-    }
-    
-    .btn-back:hover {
-      background: linear-gradient(135deg, #4a5568, #2d3748);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(113, 128, 150, 0.5);
-    }
-    
-    .btn-cancel {
-      background: linear-gradient(135deg, #f56565, #e53e3e);
-      color: white;
-      box-shadow: 0 4px 15px rgba(245, 101, 101, 0.4);
       padding: 0.75rem 1.5rem;
-      font-size: 0.85rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-block;
     }
-    
+    .btn-add {
+      background: #10b981;
+      color: white;
+    }
+    .btn-add:hover {
+      background: #059669;
+      transform: translateY(-1px);
+    }
+    .btn-save {
+      background: #3b82f6;
+      color: white;
+    }
+    .btn-save:hover {
+      background: #2563eb;
+      transform: translateY(-1px);
+    }
+    .btn-back {
+      background: #6b7280;
+      color: white;
+    }
+    .btn-back:hover {
+      background: #4b5563;
+      transform: translateY(-1px);
+    }
+    .btn-cancel {
+      background: #ef4444;
+      color: white;
+    }
     .btn-cancel:hover {
-      background: linear-gradient(135deg, #e53e3e, #c53030);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(245, 101, 101, 0.5);
+      background: #dc2626;
+      transform: translateY(-1px);
     }
-    
-    /* Responsive Design */
+    .section-title {
+      font-size: 1rem;
+      font-weight: 500;
+      color: #374151;
+      margin: 1.5rem 0 1rem 0;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    .section-title:first-of-type {
+      margin-top: 0;
+    }
+    .field-headers {
+      display: grid;
+      grid-template-columns: 2fr 1fr 2fr auto auto;
+      gap: 1rem;
+      padding: 0.5rem 0;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
     @media (max-width: 768px) {
-      .container { 
-        padding: 1rem; 
-      }
-      
-      .card { 
-        padding: 2rem 1.5rem; 
-        border-radius: 16px;
-      }
-      
-      h2 {
-        font-size: 1.75rem;
-        margin-bottom: 2rem;
-      }
-      
+      .container { margin: 1rem auto; }
+      .card { padding: 1.5rem; }
       .field-row {
         grid-template-columns: 1fr;
-        gap: 1rem;
-        padding: 1.5rem 1rem;
+        gap: 0.75rem;
       }
-      
-      .field-headers { 
-        display: none; 
-      }
-      
+      .field-headers { display: none; }
       .buttons {
         flex-direction: column;
         align-items: stretch;
       }
-      
-      .btn {
-        justify-content: center;
-        padding: 1rem;
-      }
-      
-      .section-title {
-        font-size: 1.1rem;
-        margin: 1.5rem 0 1rem 0;
-        padding: 0.75rem;
-      }
-    }
-    
-    @media (max-width: 480px) {
-      .card {
-        padding: 1.5rem 1rem;
-      }
-      
-      h2 {
-        font-size: 1.5rem;
-      }
-      
-      .field-row {
-        padding: 1rem 0.75rem;
-      }
-    }
-    
-    /* Loading States */
-    .btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none !important;
-    }
-    
-    /* Form validation styles */
-    input:invalid {
-      border-color: #f56565;
-    }
-    
-    input:valid {
-      border-color: #48bb78;
-    }
-    
-    /* Smooth scrolling */
-    html {
-      scroll-behavior: smooth;
     }
   </style>
 </head>
@@ -404,19 +201,19 @@
 
       <form action="/admin/formulario-pre-cadastro/configurar" method="POST" id="formCamposExtras">
 
-        <div class="section-title">📋 Campos Obrigatórios</div>
+        <div class="section-title">Campos Obrigatórios</div>
         <div class="fixed-field">
           <div class="field-row">
-            <div class="fixed-label">Nome</div>
-            <div class="fixed-note">Campo fixo obrigatório</div>
+            <div class="fixed-label">Nome</div><div></div>
+            <div class="fixed-note">Campo fixo obrigatório</div><div></div>
           </div>
           <div class="field-row">
-            <div class="fixed-label">Email</div>
-            <div class="fixed-note">Campo fixo obrigatório</div>
+            <div class="fixed-label">Email</div><div></div>
+            <div class="fixed-note">Campo fixo obrigatório</div><div></div>
           </div>
         </div>
 
-        <div class="section-title">⚙️ Campos Personalizados</div>
+        <div class="section-title">Campos Personalizados</div>
         <div class="field-headers">
           <div>Nome do Campo</div>
           <div>Tipo</div>
@@ -440,16 +237,16 @@
                   <input type="checkbox" name="camposExtras[<%= idx %>][obrigatorio]" value="true" <%= campo.obrigatorio ? 'checked' : '' %>>
                   <label>Obrigatório</label>
                 </div>
-                <button type="button" class="btn btn-cancel" onclick="this.parentElement.remove()">🗑️ Excluir</button>
+                <button type="button" class="btn btn-cancel" onclick="this.parentElement.remove()">Excluir</button>
               </div>
             <% }) %>
           <% } %>
         </div>
 
         <div class="buttons">
-          <button type="button" onclick="adicionarCampo()" class="btn btn-add">➕ Adicionar Campo</button>
-          <button type="submit" class="btn btn-save">💾 Salvar Configuração</button>
-          <a href="/admin/dashboard" class="btn btn-back">🏠 Voltar para Dashboard</a>
+          <button type="button" onclick="adicionarCampo()" class="btn btn-add">+ Adicionar Campo</button>
+          <button type="submit" class="btn btn-save">Salvar Configuração</button>
+          <a href="/admin/dashboard" class="btn btn-back">Voltar para Dashboard</a>
         </div>
       </form>
     </div>
@@ -461,8 +258,8 @@
       const existingFields = container.querySelectorAll('.field-row').length;
       const idx = existingFields;
 
-      const newFieldHTML = `
-        <div class="field-row" style="animation: slideUp 0.5s ease-out;">
+      container.insertAdjacentHTML('beforeend', `
+        <div class="field-row">
           <input type="text" name="camposExtras[${idx}][label]" placeholder="Nome do Campo" required>
           <select name="camposExtras[${idx}][tipo]" onchange="toggleOpcoes(this, ${idx})" class="tipo-select" data-idx="${idx}">
             <option value="texto">Texto</option>
@@ -474,50 +271,20 @@
             <input type="checkbox" name="camposExtras[${idx}][obrigatorio]" value="true">
             <label>Obrigatório</label>
           </div>
-          <button type="button" class="btn btn-cancel" onclick="this.parentElement.remove()">🗑️ Excluir</button>
+          <button type="button" class="btn btn-cancel" onclick="this.parentElement.remove()">Excluir</button>
         </div>
-      `;
-
-      container.insertAdjacentHTML('beforeend', newFieldHTML);
+      `);
     }
 
     function toggleOpcoes(select, idx) {
       const input = document.getElementById('opcoes_' + idx);
       if (select.value === 'seleção') {
         input.classList.remove('hidden');
-        input.focus();
       } else {
         input.classList.add('hidden');
         input.value = '';
       }
     }
-
-    // Adicionar feedback visual no submit
-    document.getElementById('formCamposExtras').addEventListener('submit', function(e) {
-      const submitBtn = this.querySelector('.btn-save');
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = '⏳ Salvando...';
-      
-      // Re-habilitar o botão após 3 segundos (caso haja erro)
-      setTimeout(() => {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '💾 Salvar Configuração';
-      }, 3000);
-    });
-
-    // Adicionar efeito de focus nos inputs
-    document.addEventListener('DOMContentLoaded', function() {
-      const inputs = document.querySelectorAll('input[type="text"], input[type="number"], select');
-      inputs.forEach(input => {
-        input.addEventListener('focus', function() {
-          this.parentElement.style.transform = 'scale(1.02)';
-        });
-        
-        input.addEventListener('blur', function() {
-          this.parentElement.style.transform = 'scale(1)';
-        });
-      });
-    });
   </script>
 </body>
 </html>
