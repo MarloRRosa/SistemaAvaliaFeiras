@@ -2298,6 +2298,7 @@ router.get('/admin/pdf-avaliadores', verificarAdminEscola, async (req, res) => {
 });
 
 router.get('/relatorio-avaliadores/pdf', verificarAdminEscola, async (req, res) => {
+  let browser = null;
   try {
     const escolaId = req.session.adminEscola.escolaId;
 
@@ -2314,9 +2315,9 @@ router.get('/relatorio-avaliadores/pdf', verificarAdminEscola, async (req, res) 
       { avaliadores, feira }
     );
 
-    const browser = await puppeteer.launch({
-      headless: 'new',
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    browser = await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });
 
     const page = await browser.newPage();
@@ -2324,14 +2325,12 @@ router.get('/relatorio-avaliadores/pdf', verificarAdminEscola, async (req, res) 
 
     const pdfBuffer = await page.pdf({
       format: 'A4',
-      printBackground: true
+      printBackground: true,
     });
-
-    await browser.close();
 
     res.set({
       'Content-Type': 'application/pdf',
-      'Content-Disposition': 'inline; filename="Relatorio_Avaliadores.pdf"'
+      'Content-Disposition': 'inline; filename="Relatorio_Avaliadores.pdf"',
     });
 
     res.send(pdfBuffer);
@@ -2339,8 +2338,11 @@ router.get('/relatorio-avaliadores/pdf', verificarAdminEscola, async (req, res) 
     console.error('Erro ao gerar relatório de avaliadores:', err);
     req.flash('error_msg', 'Erro ao gerar relatório de avaliadores.');
     res.redirect('/admin/dashboard?tab=relatorios');
+  } finally {
+    if (browser) await browser.close();
   }
 });
+
 
 
 // ===========================================
