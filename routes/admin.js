@@ -451,7 +451,7 @@ router.post('/resetar-senha/:token', async (req, res) => {
 // ROTAS DE RELATÓRIOS (PDF) - COM PUPPETEER
 // ==========================================
 async function generatePdfReport(req, res, templateName, data, filename) {
-    let browser;
+    let browser = null;
     try {
         const escolaId = req.session.adminEscola.escolaId;
         const escola = await Escola.findById(escolaId).lean();
@@ -2313,6 +2313,11 @@ router.get('/relatorio-avaliadores/pdf', verificarAdminEscola, async (req, res) 
       path.join(__dirname, '../views/admin/pdf-avaliadores.ejs'),
       { avaliadores, feira }
     );
+
+    const browser = await puppeteer.launch({
+      headless: 'new',
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
 
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: 'networkidle0' });
