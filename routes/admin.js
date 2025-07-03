@@ -2297,7 +2297,7 @@ router.get('/admin/pdf-avaliadores', verificarAdminEscola, async (req, res) => {
   }
 });
 
-router.get('/admin/relatorio-avaliadores/pdf', verificarAdminEscola, async (req, res) => {
+router.get('/relatorio-avaliadores/pdf', verificarAdminEscola, async (req, res) => {
   try {
     const escolaId = req.session.adminEscola.escolaId;
 

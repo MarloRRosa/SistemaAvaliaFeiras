@@ -96,10 +96,10 @@ const publicRoutes = require('./routes/public');
 const superadminRoutes = require('./routes/superadmin');
 const adminRoutes = require('./routes/admin');
 const avaliadorRoutes = require('./routes/avaliador');
-const preCadastroRoutes = require('./routes/preCadastro'); // ✅ NOVO
+const preCadastroRoutes = require('./routes/preCadastro');
 
 app.use('/', publicRoutes);
-app.use(preCadastroRoutes); // ✅ NOVO
+app.use(preCadastroRoutes); 
 app.use('/superadmin', superadminRoutes);
 app.use('/admin', adminRoutes);
 app.use('/avaliador', avaliadorRoutes);
