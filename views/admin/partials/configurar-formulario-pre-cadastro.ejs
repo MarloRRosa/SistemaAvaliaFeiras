@@ -6,187 +6,390 @@
   <title>Configurar Formulário</title>
   <style>
     * {
-      margin: 0; padding: 0; box-sizing: border-box;
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box;
     }
+    
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #fafafa;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
       color: #333;
       line-height: 1.6;
+      padding: 2rem 0;
     }
+    
     .container {
-      max-width: 800px;
-      margin: 2rem auto;
+      max-width: 900px;
+      margin: 0 auto;
       padding: 0 1rem;
     }
+    
     .card {
-      background: white;
-      border-radius: 12px;
-      padding: 2rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      border: 1px solid #e5e7eb;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 3rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      animation: slideIn 0.6s ease-out;
     }
+    
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
     h2 {
-      font-size: 1.5rem;
-      font-weight: 600;
-      margin-bottom: 2rem;
-      color: #1f2937;
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 2.5rem;
+      color: #2d3748;
+      text-align: center;
+      position: relative;
     }
+    
+    h2::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 4px;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      border-radius: 2px;
+    }
+    
     .success-message {
-      background: #f0f9ff;
-      color: #0369a1;
-      padding: 0.75rem 1rem;
-      border-radius: 8px;
-      margin-bottom: 1.5rem;
-      border-left: 4px solid #0ea5e9;
-      font-size: 0.9rem;
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      margin-bottom: 2rem;
+      border-left: 4px solid #047857;
+      font-size: 0.95rem;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+      animation: fadeIn 0.5s ease-out;
     }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    
+    .section-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #2d3748;
+      margin: 2rem 0 1.5rem 0;
+      padding: 0.75rem 1rem;
+      background: linear-gradient(135deg, #f7fafc, #edf2f7);
+      border-radius: 12px;
+      border-left: 4px solid #667eea;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .section-title::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, transparent, rgba(102, 126, 234, 0.05));
+      pointer-events: none;
+    }
+    
+    .section-title:first-of-type {
+      margin-top: 0;
+    }
+    
+    .fixed-field {
+      background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      border: 1px solid rgba(102, 126, 234, 0.1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+    
+    .fixed-field .field-row {
+      border-bottom: none;
+      padding: 0.75rem 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .fixed-label {
+      font-weight: 600;
+      color: #4a5568;
+      font-size: 1rem;
+    }
+    
+    .fixed-note {
+      font-size: 0.85rem;
+      color: #718096;
+      font-style: italic;
+      background: rgba(102, 126, 234, 0.1);
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      border: 1px solid rgba(102, 126, 234, 0.2);
+    }
+    
+    .field-headers {
+      display: grid;
+      grid-template-columns: 2fr 1fr 2fr auto auto;
+      gap: 1rem;
+      padding: 1rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #4a5568;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: linear-gradient(135deg, #edf2f7, #e2e8f0);
+      border-radius: 12px;
+      margin-bottom: 1rem;
+      border: 1px solid rgba(102, 126, 234, 0.1);
+    }
+    
     .field-row {
       display: grid;
       grid-template-columns: 2fr 1fr 2fr auto auto;
       gap: 1rem;
       align-items: center;
-      padding: 1rem 0;
-      border-bottom: 1px solid #f3f4f6;
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      border-radius: 12px;
+      margin-bottom: 0.75rem;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(5px);
+      transition: all 0.3s ease;
+      border: 1px solid rgba(102, 126, 234, 0.1);
     }
+    
+    .field-row:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      background: rgba(255, 255, 255, 0.9);
+    }
+    
     .field-row:last-child {
       border-bottom: none;
     }
-    .fixed-field {
-      background: #f9fafb;
-      border-radius: 8px;
-      padding: 0.75rem;
-      margin-bottom: 0.5rem;
-    }
-    .fixed-field .field-row {
-      border-bottom: none;
-      padding: 0.5rem 0;
-    }
-    .fixed-label {
-      font-weight: 500;
-      color: #6b7280;
-    }
-    .fixed-note {
-      font-size: 0.8rem;
-      color: #9ca3af;
-      font-style: italic;
-    }
-    input[type="text"], input[type="number"], select {
+    
+    input[type="text"], 
+    input[type="number"], 
+    select {
       width: 100%;
-      padding: 0.75rem;
-      border: 1px solid #d1d5db;
-      border-radius: 6px;
-      font-size: 0.9rem;
-      transition: border-color 0.2s, box-shadow 0.2s;
+      padding: 0.875rem 1rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(5px);
     }
-    input[type="text"]:focus, input[type="number"]:focus, select:focus {
+    
+    input[type="text"]:focus, 
+    input[type="number"]:focus, 
+    select:focus {
       outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      border-color: #667eea;
+      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+      transform: translateY(-1px);
     }
+    
     input[readonly] {
-      background: #f3f4f6;
+      background: rgba(243, 244, 246, 0.8);
       color: #6b7280;
       cursor: not-allowed;
     }
+    
     .checkbox-container {
       display: flex;
       align-items: center;
       gap: 0.5rem;
       font-size: 0.9rem;
+      font-weight: 500;
+      color: #4a5568;
     }
+    
     input[type="checkbox"] {
-      width: 18px;
-      height: 18px;
-      accent-color: #3b82f6;
+      width: 20px;
+      height: 20px;
+      accent-color: #667eea;
+      cursor: pointer;
     }
+    
     .hidden {
       display: none !important;
     }
+    
     .buttons {
-      margin-top: 2rem;
+      margin-top: 3rem;
       display: flex;
       flex-wrap: wrap;
       gap: 1rem;
       align-items: center;
+      justify-content: center;
     }
+    
     .btn {
-      padding: 0.75rem 1.5rem;
+      padding: 1rem 2rem;
       border: none;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      font-weight: 500;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.3s ease;
       text-decoration: none;
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      position: relative;
+      overflow: hidden;
     }
+    
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+    
+    .btn:hover::before {
+      left: 100%;
+    }
+    
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+    
+    .btn:active {
+      transform: translateY(-1px);
+    }
+    
     .btn-add {
-      background: #10b981;
+      background: linear-gradient(135deg, #10b981, #059669);
       color: white;
     }
-    .btn-add:hover {
-      background: #059669;
-      transform: translateY(-1px);
+    
+    .btn-add::after {
+      content: '✨';
+      opacity: 0;
+      transition: opacity 0.3s;
     }
+    
+    .btn-add:hover::after {
+      opacity: 1;
+    }
+    
     .btn-save {
-      background: #3b82f6;
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
       color: white;
     }
-    .btn-save:hover {
-      background: #2563eb;
-      transform: translateY(-1px);
-    }
+    
     .btn-back {
-      background: #6b7280;
+      background: linear-gradient(135deg, #6b7280, #4b5563);
       color: white;
     }
-    .btn-back:hover {
-      background: #4b5563;
-      transform: translateY(-1px);
-    }
+    
     .btn-cancel {
-      background: #ef4444;
+      background: linear-gradient(135deg, #ef4444, #dc2626);
       color: white;
+      padding: 0.75rem 1.5rem;
+      font-size: 0.85rem;
     }
+    
     .btn-cancel:hover {
-      background: #dc2626;
-      transform: translateY(-1px);
+      transform: translateY(-2px) scale(1.05);
     }
-    .section-title {
-      font-size: 1rem;
-      font-weight: 500;
-      color: #374151;
-      margin: 1.5rem 0 1rem 0;
-      padding-bottom: 0.5rem;
-      border-bottom: 2px solid #e5e7eb;
-    }
-    .section-title:first-of-type {
-      margin-top: 0;
-    }
-    .field-headers {
-      display: grid;
-      grid-template-columns: 2fr 1fr 2fr auto auto;
-      gap: 1rem;
-      padding: 0.5rem 0;
-      font-size: 0.8rem;
-      font-weight: 500;
-      color: #6b7280;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
+    
+    /* Responsividade melhorada */
     @media (max-width: 768px) {
-      .container { margin: 1rem auto; }
-      .card { padding: 1.5rem; }
+      body {
+        padding: 1rem 0;
+      }
+      
+      .container { 
+        margin: 0 auto; 
+        padding: 0 0.5rem;
+      }
+      
+      .card { 
+        padding: 2rem 1.5rem; 
+        border-radius: 16px;
+        margin: 0 0.5rem;
+      }
+      
+      h2 {
+        font-size: 1.5rem;
+      }
+      
       .field-row {
         grid-template-columns: 1fr;
-        gap: 0.75rem;
+        gap: 1rem;
+        padding: 1.25rem;
       }
-      .field-headers { display: none; }
+      
+      .field-headers { 
+        display: none; 
+      }
+      
       .buttons {
         flex-direction: column;
         align-items: stretch;
+        gap: 0.75rem;
       }
+      
+      .btn {
+        justify-content: center;
+        padding: 1rem;
+      }
+      
+      .fixed-field .field-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+      }
+    }
+    
+    /* Animações adicionais */
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    
+    .btn-add:hover {
+      animation: pulse 0.6s ease-in-out;
+    }
+    
+    /* Melhorias de acessibilidade */
+    .btn:focus {
+      outline: 3px solid rgba(102, 126, 234, 0.5);
+      outline-offset: 2px;
+    }
+    
+    input:focus, select:focus {
+      outline: 2px solid rgba(102, 126, 234, 0.5);
+      outline-offset: 2px;
     }
   </style>
 </head>
@@ -201,19 +404,19 @@
 
       <form action="/admin/formulario-pre-cadastro/configurar" method="POST" id="formCamposExtras">
 
-        <div class="section-title">Campos Obrigatórios</div>
+        <div class="section-title">📋 Campos Obrigatórios</div>
         <div class="fixed-field">
           <div class="field-row">
-            <div class="fixed-label">Nome</div><div></div>
-            <div class="fixed-note">Campo fixo obrigatório</div><div></div>
+            <div class="fixed-label">Nome</div>
+            <div class="fixed-note">Campo fixo obrigatório</div>
           </div>
           <div class="field-row">
-            <div class="fixed-label">Email</div><div></div>
-            <div class="fixed-note">Campo fixo obrigatório</div><div></div>
+            <div class="fixed-label">Email</div>
+            <div class="fixed-note">Campo fixo obrigatório</div>
           </div>
         </div>
 
-        <div class="section-title">Campos Personalizados</div>
+        <div class="section-title">⚙️ Campos Personalizados</div>
         <div class="field-headers">
           <div>Nome do Campo</div>
           <div>Tipo</div>
@@ -237,16 +440,16 @@
                   <input type="checkbox" name="camposExtras[<%= idx %>][obrigatorio]" value="true" <%= campo.obrigatorio ? 'checked' : '' %>>
                   <label>Obrigatório</label>
                 </div>
-                <button type="button" class="btn btn-cancel" onclick="this.parentElement.remove()">Excluir</button>
+                <button type="button" class="btn btn-cancel" onclick="this.parentElement.remove()">🗑️ Excluir</button>
               </div>
             <% }) %>
           <% } %>
         </div>
 
         <div class="buttons">
-          <button type="button" onclick="adicionarCampo()" class="btn btn-add">+ Adicionar Campo</button>
-          <button type="submit" class="btn btn-save">Salvar Configuração</button>
-          <a href="/admin/dashboard" class="btn btn-back">Voltar para Dashboard</a>
+          <button type="button" onclick="adicionarCampo()" class="btn btn-add">➕ Adicionar Campo</button>
+          <button type="submit" class="btn btn-save">💾 Salvar Configuração</button>
+          <a href="/admin/dashboard" class="btn btn-back">🏠 Voltar para Dashboard</a>
         </div>
       </form>
     </div>
@@ -258,33 +461,53 @@
       const existingFields = container.querySelectorAll('.field-row').length;
       const idx = existingFields;
 
-      container.insertAdjacentHTML('beforeend', `
-        <div class="field-row">
-          <input type="text" name="camposExtras[${idx}][label]" placeholder="Nome do Campo" required>
-          <select name="camposExtras[${idx}][tipo]" onchange="toggleOpcoes(this, ${idx})" class="tipo-select" data-idx="${idx}">
-            <option value="texto">Texto</option>
-            <option value="número">Número</option>
-            <option value="seleção">Seleção</option>
-          </select>
-          <input type="text" name="camposExtras[${idx}][opcoes]" id="opcoes_${idx}" placeholder="Opções separadas por vírgula" class="hidden">
-          <div class="checkbox-container">
-            <input type="checkbox" name="camposExtras[${idx}][obrigatorio]" value="true">
-            <label>Obrigatório</label>
-          </div>
-          <button type="button" class="btn btn-cancel" onclick="this.parentElement.remove()">Excluir</button>
+      const newField = document.createElement('div');
+      newField.className = 'field-row';
+      newField.style.opacity = '0';
+      newField.style.transform = 'translateY(20px)';
+      
+      newField.innerHTML = `
+        <input type="text" name="camposExtras[${idx}][label]" placeholder="Nome do Campo" required>
+        <select name="camposExtras[${idx}][tipo]" onchange="toggleOpcoes(this, ${idx})" class="tipo-select" data-idx="${idx}">
+          <option value="texto">Texto</option>
+          <option value="número">Número</option>
+          <option value="seleção">Seleção</option>
+        </select>
+        <input type="text" name="camposExtras[${idx}][opcoes]" id="opcoes_${idx}" placeholder="Opções separadas por vírgula" class="hidden">
+        <div class="checkbox-container">
+          <input type="checkbox" name="camposExtras[${idx}][obrigatorio]" value="true">
+          <label>Obrigatório</label>
         </div>
-      `);
+        <button type="button" class="btn btn-cancel" onclick="this.parentElement.remove()">🗑️ Excluir</button>
+      `;
+      
+      container.appendChild(newField);
+      
+      // Animação de entrada
+      setTimeout(() => {
+        newField.style.transition = 'all 0.3s ease';
+        newField.style.opacity = '1';
+        newField.style.transform = 'translateY(0)';
+      }, 10);
     }
 
     function toggleOpcoes(select, idx) {
       const input = document.getElementById('opcoes_' + idx);
       if (select.value === 'seleção') {
         input.classList.remove('hidden');
+        input.focus();
       } else {
         input.classList.add('hidden');
         input.value = '';
       }
     }
+
+    // Adicionar animação de loading no submit
+    document.getElementById('formCamposExtras').addEventListener('submit', function(e) {
+      const submitBtn = this.querySelector('.btn-save');
+      submitBtn.innerHTML = '⏳ Salvando...';
+      submitBtn.disabled = true;
+    });
   </script>
 </body>
 </html>
