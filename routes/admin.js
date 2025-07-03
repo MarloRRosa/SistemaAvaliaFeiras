@@ -2297,14 +2297,14 @@ router.get('/admin/pdf-avaliadores', verificarAdminEscola, async (req, res) => {
   }
 });
 
-router.get('/admin/relatorio-avaliadores/pdf', async (req, res) => {
+router.get('/admin/relatorio-avaliadores/pdf', verificarAdminEscola, async (req, res) => {
   try {
     const escolaId = req.session.adminEscola.escolaId;
 
     const feira = await Feira.findOne({ escolaId, status: 'ativa' }).lean();
     if (!feira) {
       req.flash('error_msg', 'Nenhuma feira ativa encontrada.');
-      return res.redirect('/admin/dashboard');
+      return res.redirect('/admin/dashboard?tab=relatorios');
     }
 
     const avaliadores = await Avaliador.find({ escolaId, feira: feira._id }).lean();
@@ -2318,6 +2318,7 @@ router.get('/admin/relatorio-avaliadores/pdf', async (req, res) => {
       headless: 'new',
       args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
+
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: 'networkidle0' });
 
@@ -2330,15 +2331,14 @@ router.get('/admin/relatorio-avaliadores/pdf', async (req, res) => {
 
     res.set({
       'Content-Type': 'application/pdf',
-      'Content-Disposition': `inline; filename=Relatorio_Avaliadores.pdf`
+      'Content-Disposition': 'inline; filename="Relatorio_Avaliadores.pdf"'
     });
 
     res.send(pdfBuffer);
-
   } catch (err) {
     console.error('Erro ao gerar relatório de avaliadores:', err);
     req.flash('error_msg', 'Erro ao gerar relatório de avaliadores.');
-    res.redirect('/admin/dashboard');
+    res.redirect('/admin/dashboard?tab=relatorios');
   }
 });
 
