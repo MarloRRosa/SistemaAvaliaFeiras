@@ -1223,7 +1223,7 @@ router.get('/pre-cadastros', verificarAdminEscola, async (req, res) => {
     const preCadastros = await PreCadastroAvaliador.find({ feiraId: { $in: feiraIds } });
 
     res.render('admin/pre-cadastros/lista', {
-      layout: 'layouts/painel',
+      layout: false,
       titulo: 'Pré-Cadastros de Avaliadores',
       preCadastros
     });
@@ -1247,7 +1247,7 @@ router.get('/pre-cadastros/:id', verificarAdminEscola, async (req, res) => {
     }
 
     res.render('admin/pre-cadastros/editar', {
-      layout: 'layouts/painel',
+      layout: false,
       titulo: 'Aprovar Pré-Cadastro',
       pre,
       projetos,
