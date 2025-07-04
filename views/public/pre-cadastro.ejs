@@ -280,7 +280,8 @@
       <h1>Pré-Cadastro de Avaliador</h1>
       <p>Preencha os dados abaixo para se cadastrar como avaliador</p>
       <h2 style="font-size: 40px;"> <%= feira.nome %></h2>
-  <p style="font-size: 34px;"><%= formatarData(feira.inicioFeira) %> à <%= formatarData(feira.fimFeira) %></p>
+      <p><%= projeto.escolaNome || 'N/A' %></p>
+  <p style="font-size: 14px;"><%= formatarData(feira.inicioFeira) %> à <%= formatarData(feira.fimFeira) %></p>
     </div>
 
     <div class="form-container">

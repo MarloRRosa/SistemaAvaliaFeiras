@@ -91,7 +91,8 @@ router.post('/pre-cadastro/:feiraId', async (req, res) => {
       nome,
       email,
       telefone,
-      extras
+      extras,
+       escolaId
     });
 
     await novoPreCadastro.save();
