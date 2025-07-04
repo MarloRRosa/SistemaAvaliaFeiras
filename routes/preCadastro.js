@@ -3,6 +3,8 @@ const router = express.Router();
 const PreCadastroAvaliador = require('../models/PreCadastroAvaliador');
 const Feira = require('../models/Feira');
 const ConfiguracaoFormularioPreCadastro = require('../models/ConfiguracaoFormularioPreCadastro');
+const Escola = require('../models/Escola');
+
 
 // ✅ Função local para formatar data dd/mm/aaaa (sem alterar helpers.js)
 function formatarData(data) {
@@ -37,6 +39,7 @@ router.get('/pre-cadastro/:feiraId', async (req, res) => {
       titulo: `Pré-Cadastro - ${feira.nome}`,
       feira,
       feiraId: feira._id,
+      escola,
       mensagem: req.flash('success'),
       camposExtras,
       formatarData // 👈 passa função local para o EJS

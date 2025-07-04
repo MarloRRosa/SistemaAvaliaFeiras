@@ -277,12 +277,13 @@
 <body>
   <div class="container">
     <div class="header">
-      <h1>Pré-Cadastro de Avaliador</h1>
-      <p>Preencha os dados abaixo para se cadastrar como avaliador</p>
-      <h2 style="font-size: 40px;"> <%= feira.nome %></h2>
-      <p><%= projeto.escolaNome || 'N/A' %></p>
+  <h1>Pré-Cadastro de Avaliador</h1>
+  <p>Preencha os dados abaixo para se cadastrar como avaliador</p>
+  <h2 style="font-size: 40px;"><%= feira.nome %></h2>
+  <p style="font-size: 16px;" class="text-gray-700 font-semibold">Escola: <%= escola?.nome || 'Não informada' %></p>
   <p style="font-size: 14px;"><%= formatarData(feira.inicioFeira) %> à <%= formatarData(feira.fimFeira) %></p>
-    </div>
+</div>
+
 
     <div class="form-container">
       <% if (mensagem) { %>
