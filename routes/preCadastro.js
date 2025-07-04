@@ -4,6 +4,7 @@ const router = express.Router();
 const PreCadastroAvaliador = require('../models/PreCadastroAvaliador');
 const Feira = require('../models/Feira');
 const ConfiguracaoFormularioPreCadastro = require('../models/ConfiguracaoFormularioPreCadastro');
+const { formatarData } = require('../utils/helpers');
 
 // GET: Exibir formulário de pré-cadastro
 router.get('/pre-cadastro/:feiraId', async (req, res) => {
@@ -21,12 +22,14 @@ router.get('/pre-cadastro/:feiraId', async (req, res) => {
     });
 
     res.render('public/pre-cadastro', {
-      layout: false,
-      titulo: `Pré-Cadastro - ${feira.nome}`,
-      feiraId: feira._id,
-      mensagem: req.flash('success'),
-      camposExtras
-    });
+  layout: false,
+  titulo: `Pré-Cadastro - ${feira.nome}`,
+  feira,
+  feiraId: feira._id,
+  mensagem: req.flash('success'),
+  camposExtras,
+  formatarData
+});
   } catch (err) {
     console.error(err);
     res.send('Erro ao carregar o formulário.');
