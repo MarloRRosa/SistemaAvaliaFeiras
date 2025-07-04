@@ -1,7 +1,6 @@
 // app.js
 require('dotenv').config();
 
-app.use(express.static('public'));
 const express = require('express');
 const session = require('express-session');
 const expressLayouts = require('express-ejs-layouts');
