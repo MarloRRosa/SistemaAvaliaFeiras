@@ -76,6 +76,32 @@
       z-index: 1;
     }
 
+    .header h2 {
+      color: white;
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin: 15px 0 10px 0;
+      position: relative;
+      z-index: 1;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .header .escola-info {
+      color: rgba(255, 255, 255, 0.95);
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .header .data-info {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 0.95rem;
+      position: relative;
+      z-index: 1;
+    }
+
     .form-container {
       padding: 40px 30px;
     }
@@ -91,6 +117,10 @@
       animation: fadeIn 0.5s ease-out;
     }
 
+    .message.error {
+      background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    }
+
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(-10px); }
       to { opacity: 1; transform: translateY(0); }
@@ -100,6 +130,7 @@
       margin-bottom: 25px;
       animation: fadeInUp 0.6s ease-out forwards;
       opacity: 0;
+      position: relative;
     }
 
     .form-group:nth-child(1) { animation-delay: 0.1s; }
@@ -173,7 +204,6 @@
     }
 
     .submit-container {
-      
       margin-top: 30px;
     }
 
@@ -216,6 +246,83 @@
       transform: translateY(-1px);
     }
 
+    .submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Loader do botão */
+    .btn-loader {
+      display: none;
+      width: 20px;
+      height: 20px;
+      border: 2px solid transparent;
+      border-top: 2px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 10px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Indicadores de validação */
+    .form-control:invalid:not(:placeholder-shown) {
+      border-color: #e74c3c;
+      background-color: #fdf2f2;
+    }
+
+    .form-control:valid:not(:placeholder-shown) {
+      border-color: #27ae60;
+      background-color: #f2fdf5;
+    }
+
+    /* Ícones de validação */
+    .form-group::after {
+      content: '';
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .form-group.valid::after {
+      content: '✓';
+      color: #27ae60;
+      opacity: 1;
+      font-weight: bold;
+    }
+
+    .form-group.invalid::after {
+      content: '✗';
+      color: #e74c3c;
+      opacity: 1;
+      font-weight: bold;
+    }
+
+    /* Mensagens de erro */
+    .error-message {
+      color: #e74c3c;
+      font-size: 0.85rem;
+      margin-top: 5px;
+      display: none;
+    }
+
+    /* Contador de caracteres */
+    .char-counter {
+      font-size: 0.8rem;
+      color: #8b9dc3;
+      text-align: right;
+      margin-top: 5px;
+    }
+
     /* Responsividade */
     @media (max-width: 768px) {
       body {
@@ -232,6 +339,10 @@
 
       .header h1 {
         font-size: 1.7rem;
+      }
+
+      .header h2 {
+        font-size: 2rem;
       }
 
       .form-container {
@@ -253,6 +364,10 @@
         font-size: 1.5rem;
       }
 
+      .header h2 {
+        font-size: 1.8rem;
+      }
+
       .header p {
         font-size: 0.9rem;
       }
@@ -262,28 +377,55 @@
       }
     }
 
-    /* Estados de validação */
-    .form-control:invalid:not(:placeholder-shown) {
-      border-color: #e74c3c;
-      background-color: #fdf2f2;
+    /* Animação de sucesso */
+    .success-animation {
+      display: none;
+      text-align: center;
+      padding: 40px;
     }
 
-    .form-control:valid:not(:placeholder-shown) {
-      border-color: #27ae60;
-      background-color: #f2fdf5;
+    .success-icon {
+      font-size: 4rem;
+      color: #27ae60;
+      margin-bottom: 20px;
+      animation: bounce 0.6s ease-out;
+    }
+
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+      }
+      40% {
+        transform: translateY(-10px);
+      }
+      60% {
+        transform: translateY(-5px);
+      }
+    }
+
+    /* Melhorias de acessibilidade */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
-  <h1>Pré-Cadastro de Avaliador</h1>
-  <p>Preencha os dados abaixo para se cadastrar como avaliador</p>
-  <h2 style="font-size: 40px;"><%= feira.nome %></h2>
-  <p style="font-size: 16px;" class="text-gray-700 font-semibold">Escola: <%= escola?.nome || 'Não informada' %></p>
-  <p style="font-size: 14px;"><%= formatarData(feira.inicioFeira) %> à <%= formatarData(feira.fimFeira) %></p>
-</div>
-
+      <h1>Pré-Cadastro de Avaliador</h1>
+      <p>Preencha os dados abaixo para se cadastrar como avaliador</p>
+      <h2><%= feira.nome %></h2>
+      <p class="escola-info">Escola: <%= escola?.nome || 'Não informada' %></p>
+      <p class="data-info"><%= formatarData(feira.inicioFeira) %> à <%= formatarData(feira.fimFeira) %></p>
+    </div>
 
     <div class="form-container">
       <% if (mensagem) { %>
@@ -292,21 +434,26 @@
         </div>
       <% } %>
 
-      <form action="/pre-cadastro/<%= feiraId %>" method="POST">
+      <form id="preCadastroForm" action="/pre-cadastro/<%= feiraId %>" method="POST">
         <!-- Campos fixos obrigatórios -->
         <div class="form-group">
           <label for="nome">Nome <span class="text-red-500">*</span></label>
-          <input type="text" id="nome" name="nome" required class="form-control">
+          <input type="text" id="nome" name="nome" required class="form-control" maxlength="100">
+          <div class="error-message">Nome é obrigatório</div>
+          <div class="char-counter"><span id="nomeCounter">0</span>/100</div>
         </div>
 
         <div class="form-group">
           <label for="email">Email <span class="text-red-500">*</span></label>
-          <input type="email" id="email" name="email" required class="form-control">
+          <input type="email" id="email" name="email" required class="form-control" maxlength="100">
+          <div class="error-message">Email válido é obrigatório</div>
+          <div class="char-counter"><span id="emailCounter">0</span>/100</div>
         </div>
 
         <div class="form-group">
           <label for="telefone">Telefone</label>
-          <input type="tel" id="telefone" name="telefone" class="form-control">
+          <input type="tel" id="telefone" name="telefone" class="form-control" maxlength="15" placeholder="(00) 00000-0000">
+          <div class="char-counter"><span id="telefoneCounter">0</span>/15</div>
         </div>
 
         <!-- Campos extras configuráveis -->
@@ -342,6 +489,7 @@
                        <%= campo.obrigatorio ? 'required' : '' %>
                        class="form-control">
               <% } %>
+              <div class="error-message"><%= campo.label %> é obrigatório</div>
             </div>
           <% }) %>
         <% } else { %>
@@ -350,25 +498,144 @@
 
         <!-- Botão de Enviar -->
         <div class="submit-container">
-          <button type="submit" class="submit-btn">
-            Enviar Pré-Cadastro
+          <button type="submit" class="submit-btn" id="submitBtn">
+            <span class="btn-loader"></span>
+            <span class="btn-text">Enviar Pré-Cadastro</span>
           </button>
         </div>
       </form>
+
+      <!-- Animação de sucesso -->
+      <div class="success-animation" id="successAnimation">
+        <div class="success-icon">✓</div>
+        <h3>Pré-cadastro enviado com sucesso!</h3>
+        <p>Você receberá um email de confirmação em breve.</p>
+      </div>
     </div>
   </div>
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+      const form = document.getElementById('preCadastroForm');
+      const submitBtn = document.getElementById('submitBtn');
+      const btnLoader = document.querySelector('.btn-loader');
+      const btnText = document.querySelector('.btn-text');
+      const successAnimation = document.getElementById('successAnimation');
+
       // Formatação automática para telefone
       const telefoneInput = document.getElementById('telefone');
       if (telefoneInput) {
         telefoneInput.addEventListener('input', function(e) {
           let value = e.target.value.replace(/\D/g, '');
-          value = value.replace(/(\d{2})(\d)/, '($1) $2');
-          value = value.replace(/(\d{5})(\d)/, '$1-$2');
-          e.target.value = value;
+          if (value.length <= 11) {
+            value = value.replace(/(\d{2})(\d)/, '($1) $2');
+            value = value.replace(/(\d{5})(\d)/, '$1-$2');
+            e.target.value = value;
+          }
         });
+      }
+
+      // Contadores de caracteres
+      const inputs = ['nome', 'email', 'telefone'];
+      inputs.forEach(inputId => {
+        const input = document.getElementById(inputId);
+        const counter = document.getElementById(inputId + 'Counter');
+        if (input && counter) {
+          input.addEventListener('input', function() {
+            counter.textContent = this.value.length;
+          });
+        }
+      });
+
+      // Validação em tempo real
+      const formInputs = form.querySelectorAll('input, select');
+      formInputs.forEach(input => {
+        input.addEventListener('blur', validateField);
+        input.addEventListener('input', function() {
+          if (this.classList.contains('invalid')) {
+            validateField.call(this);
+          }
+        });
+      });
+
+      function validateField() {
+        const formGroup = this.closest('.form-group');
+        const errorMessage = formGroup.querySelector('.error-message');
+        
+        if (this.validity.valid && this.value.trim() !== '') {
+          formGroup.classList.remove('invalid');
+          formGroup.classList.add('valid');
+          if (errorMessage) errorMessage.style.display = 'none';
+        } else if (this.required && this.value.trim() === '') {
+          formGroup.classList.remove('valid');
+          formGroup.classList.add('invalid');
+          if (errorMessage) errorMessage.style.display = 'block';
+        } else if (!this.validity.valid) {
+          formGroup.classList.remove('valid');
+          formGroup.classList.add('invalid');
+          if (errorMessage) errorMessage.style.display = 'block';
+        }
+      }
+
+      // Submissão do formulário
+      form.addEventListener('submit', function(e) {
+        // Validar todos os campos
+        let isValid = true;
+        formInputs.forEach(input => {
+          validateField.call(input);
+          if (!input.validity.valid || (input.required && input.value.trim() === '')) {
+            isValid = false;
+          }
+        });
+
+        if (!isValid) {
+          e.preventDefault();
+          showMessage('Por favor, corrija os erros antes de enviar.', 'error');
+          return;
+        }
+
+        // Mostrar loading
+        submitBtn.disabled = true;
+        btnLoader.style.display = 'inline-block';
+        btnText.textContent = 'Enviando...';
+
+        // Permitir envio normal do formulário
+      });
+
+      function showMessage(message, type = 'error') {
+        // Criar mensagem temporária se não existir mensagem do servidor
+        if (!messageContainer || messageContainer.style.display === 'none') {
+          const tempMessage = document.createElement('div');
+          tempMessage.className = `message ${type}`;
+          tempMessage.textContent = message;
+          tempMessage.style.marginBottom = '20px';
+          form.parentNode.insertBefore(tempMessage, form);
+          
+          setTimeout(() => {
+            tempMessage.remove();
+          }, 5000);
+        }
+      }
+
+      // Melhorias de acessibilidade
+      formInputs.forEach(input => {
+        input.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter' && this.tagName !== 'TEXTAREA') {
+            e.preventDefault();
+            const nextInput = getNextInput(this);
+            if (nextInput) {
+              nextInput.focus();
+            } else {
+              form.querySelector('button[type="submit"]').focus();
+            }
+          }
+        });
+      });
+
+      function getNextInput(currentInput) {
+        const inputs = Array.from(form.querySelectorAll('input, select, textarea'));
+        const currentIndex = inputs.indexOf(currentInput);
+        return inputs[currentIndex + 1];
       }
     });
   </script>
