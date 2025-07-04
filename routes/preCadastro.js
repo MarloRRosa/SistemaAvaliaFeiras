@@ -5,7 +5,6 @@ const Feira = require('../models/Feira');
 const ConfiguracaoFormularioPreCadastro = require('../models/ConfiguracaoFormularioPreCadastro');
 const Escola = require('../models/Escola');
 
-
 // ✅ Função local para formatar data dd/mm/aaaa (sem alterar helpers.js)
 function formatarData(data) {
   if (!data) return '';
@@ -22,10 +21,11 @@ function formatarData(data) {
 router.get('/pre-cadastro/:feiraId', async (req, res) => {
   try {
     const feira = await Feira.findById(req.params.feiraId);
-
     if (!feira || feira.status !== 'ativa') {
       return res.send('Feira inválida ou inativa.');
     }
+
+    const escola = await Escola.findById(feira.escolaId).lean(); // ✅ buscar a escola
 
     const configuracao = await ConfiguracaoFormularioPreCadastro.findOne({ escolaId: feira.escolaId });
 
@@ -42,7 +42,7 @@ router.get('/pre-cadastro/:feiraId', async (req, res) => {
       escola,
       mensagem: req.flash('success'),
       camposExtras,
-      formatarData // 👈 passa função local para o EJS
+      formatarData
     });
   } catch (err) {
     console.error(err);
@@ -82,7 +82,7 @@ router.post('/pre-cadastro/:feiraId', async (req, res) => {
 
     for (const campo of camposObrigatorios) {
       const label = campo.label.trim().toLowerCase();
-      if (label === 'nome' || label === 'email') continue; // já tratados
+      if (label === 'nome' || label === 'email') continue;
       const valor = extras[campo.label]?.trim?.() || '';
       if (!valor) {
         return res.send(`O campo "${campo.label}" é obrigatório.`);
@@ -91,11 +91,11 @@ router.post('/pre-cadastro/:feiraId', async (req, res) => {
 
     const novoPreCadastro = new PreCadastroAvaliador({
       feiraId,
+      escolaId: feira.escolaId, // ✅ Corrigido aqui
       nome,
       email,
       telefone,
-      extras,
-       escolaId
+      extras
     });
 
     await novoPreCadastro.save();

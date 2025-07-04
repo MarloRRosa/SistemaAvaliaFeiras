@@ -1,3 +1,4 @@
+//models/Escola.js
 const mongoose = require('mongoose');
 
 const escolaSchema = new mongoose.Schema({
