@@ -1,12 +1,22 @@
-//preCadastro
 const express = require('express');
 const router = express.Router();
 const PreCadastroAvaliador = require('../models/PreCadastroAvaliador');
 const Feira = require('../models/Feira');
 const ConfiguracaoFormularioPreCadastro = require('../models/ConfiguracaoFormularioPreCadastro');
-const { formatarData } = require('../utils/helpers');
 
+// ✅ Função local para formatar data dd/mm/aaaa (sem alterar helpers.js)
+function formatarData(data) {
+  if (!data) return '';
+  const d = new Date(data);
+  const dia = String(d.getDate()).padStart(2, '0');
+  const mes = String(d.getMonth() + 1).padStart(2, '0');
+  const ano = d.getFullYear();
+  return `${dia}/${mes}/${ano}`;
+}
+
+// ===============================
 // GET: Exibir formulário de pré-cadastro
+// ===============================
 router.get('/pre-cadastro/:feiraId', async (req, res) => {
   try {
     const feira = await Feira.findById(req.params.feiraId);
@@ -16,27 +26,30 @@ router.get('/pre-cadastro/:feiraId', async (req, res) => {
     }
 
     const configuracao = await ConfiguracaoFormularioPreCadastro.findOne({ escolaId: feira.escolaId });
+
     const camposExtras = (configuracao?.camposExtras || []).filter(campo => {
       const label = campo.label.trim().toLowerCase();
       return label !== 'nome' && label !== 'email';
     });
 
     res.render('public/pre-cadastro', {
-  layout: false,
-  titulo: `Pré-Cadastro - ${feira.nome}`,
-  feira,
-  feiraId: feira._id,
-  mensagem: req.flash('success'),
-  camposExtras,
-  formatarData
-});
+      layout: false,
+      titulo: `Pré-Cadastro - ${feira.nome}`,
+      feira,
+      feiraId: feira._id,
+      mensagem: req.flash('success'),
+      camposExtras,
+      formatarData // 👈 passa função local para o EJS
+    });
   } catch (err) {
     console.error(err);
     res.send('Erro ao carregar o formulário.');
   }
 });
 
+// ===============================
 // POST: Enviar dados de pré-cadastro
+// ===============================
 router.post('/pre-cadastro/:feiraId', async (req, res) => {
   try {
     const { feiraId } = req.params;
@@ -66,7 +79,7 @@ router.post('/pre-cadastro/:feiraId', async (req, res) => {
 
     for (const campo of camposObrigatorios) {
       const label = campo.label.trim().toLowerCase();
-      if (label === 'nome' || label === 'email') continue; // já são tratados
+      if (label === 'nome' || label === 'email') continue; // já tratados
       const valor = extras[campo.label]?.trim?.() || '';
       if (!valor) {
         return res.send(`O campo "${campo.label}" é obrigatório.`);
