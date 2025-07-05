@@ -444,6 +444,9 @@
                 <button class="tab-button <%= activeTab === 'projetos-sem-avaliacao' ? 'active' : '' %>" data-tab="projetos-sem-avaliacao">
                     <i class="fas fa-clock mr-2"></i>Projetos Pendentes
                 </button>
+                <button class="tab-button <%= activeTab === 'relatorio-projetos' ? 'active' : '' %>" data-tab="relatorio-projetos">
+                    <i class="fas fa-list-alt mr-2"></i>Relatório Projetos
+                </button>
                 <button class="tab-button <%= activeTab === 'ranking-projetos' ? 'active' : '' %>" data-tab="ranking-projetos">
                     <i class="fas fa-trophy mr-2"></i>Ranking
                 </button>
@@ -716,6 +719,61 @@
                     </div>
                 <% } %>
             </div>
+
+            <!-- Conteúdo da Aba: relatórios-->
+
+            <div id="relatorio-projetos-tab" class="tab-content <%= activeTab === 'relatorio-projetos' ? '' : 'hidden' %> animate-fade-in-up">
+    <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center">
+        <i class="fas fa-list-alt text-purple-600 mr-3"></i>
+        Relatório de Projetos por Escola e Categoria
+    </h2>
+
+    <% if (projetosPorEscola && projetosPorEscola.length > 0) { %>
+        <% projetosPorEscola.forEach(escola => { %>
+            <div class="mb-10 p-6 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl border border-indigo-200">
+                <h3 class="text-2xl font-bold text-gray-700 mb-4 flex items-center">
+                    <i class="fas fa-school text-indigo-600 mr-2"></i>
+                    Escola: <%= escola.escolaNome %>
+                </h3>
+
+                <% Object.keys(escola.categorias).forEach(categoria => { %>
+                    <div class="mb-6">
+                        <h4 class="text-xl font-semibold text-gray-600 mb-2">
+                            <i class="fas fa-folder-open text-purple-500 mr-2"></i>
+                            Categoria: <%= categoria %>
+                        </h4>
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>Título do Projeto</th>
+                                    <th>Turma</th>
+                                    <th>Média Final</th>
+                                    <th>Premiado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% escola.categorias[categoria].forEach(proj => { %>
+                                    <tr>
+                                        <td class="font-semibold text-gray-900"><%= proj.titulo %></td>
+                                        <td><%= proj.turma %></td>
+                                        <td><%= proj.media %></td>
+                                        <td><%= proj.premiado %></td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                <% }) %>
+            </div>
+        <% }) %>
+    <% } else { %>
+        <div class="text-center py-12">
+            <i class="fas fa-info-circle text-6xl text-gray-300 mb-4"></i>
+            <p class="text-gray-600 text-xl">Nenhum projeto encontrado.</p>
+        </div>
+    <% } %>
+</div>
+
 
             <!-- Conteúdo da Aba: Ranking de Projetos por Categoria -->
             <div id="ranking-projetos-tab" class="tab-content <%= activeTab === 'ranking-projetos' ? '' : 'hidden' %>">

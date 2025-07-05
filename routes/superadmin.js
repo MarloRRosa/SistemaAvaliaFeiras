@@ -486,6 +486,32 @@ router.get('/dashboard', verificarSuperAdmin, async (req, res) => {
             }
             dataForTab.resumoAvaliadoresPorEscola = resumoAvaliadores;
         }
+        else if (activeTab === 'relatorio-projetos') {
+    let projetosPorEscola = [];
+
+    for (const escola of escolasCadastradas) {
+        const projetos = await Projeto.find({ escolaId: escola._id }).populate('categoria').lean();
+
+        const categoriasMap = {};
+        projetos.forEach(proj => {
+            const categoriaNome = proj.categoria?.nome || 'Sem Categoria';
+            if (!categoriasMap[categoriaNome]) categoriasMap[categoriaNome] = [];
+            categoriasMap[categoriaNome].push({
+                titulo: proj.titulo,
+                turma: proj.turma,
+                premiado: proj.premiado ? 'Sim' : 'Não',
+                media: proj.mediaFinal || 'N/A'
+            });
+        });
+
+        projetosPorEscola.push({
+            escolaNome: escola.nome,
+            categorias: categoriasMap
+        });
+    }
+
+    dataForTab.projetosPorEscola = projetosPorEscola;
+}
 
         res.render('superadmin/dashboard', {
             titulo: 'Painel Super Admin', 
