@@ -742,12 +742,25 @@
                             <i class="fas fa-folder-open text-purple-500 mr-2"></i>
                             Categoria: <%= categoria %>
                         </h4>
+
                         <table class="modern-table">
                             <thead>
                                 <tr>
                                     <th>Título do Projeto</th>
                                     <th>Turma</th>
-                                    <th>Média Final</th>
+                                    <th>Nº Avaliações</th>
+
+                                    <% 
+                                    // Pega o primeiro projeto para descobrir os critérios dinamicamente
+                                    const primeiroProjeto = escola.categorias[categoria][0];
+                                    const criteriosProjeto = primeiroProjeto && primeiroProjeto.mediasCriterios ? Object.keys(primeiroProjeto.mediasCriterios) : [];
+                                    %>
+
+                                    <% criteriosProjeto.forEach(critId => { %>
+                                        <th>Média Critério <%= critId %></th>
+                                    <% }) %>
+
+                                    <th>Média Geral</th>
                                     <th>Premiado</th>
                                 </tr>
                             </thead>
@@ -756,8 +769,14 @@
                                     <tr>
                                         <td class="font-semibold text-gray-900"><%= proj.titulo %></td>
                                         <td><%= proj.turma %></td>
-                                        <td><%= proj.media %></td>
-                                        <td><%= proj.premiado %></td>
+                                        <td class="text-center"><%= proj.numAvaliacoes %></td>
+
+                                        <% criteriosProjeto.forEach(critId => { %>
+                                            <td class="text-center"><%= proj.mediasCriterios[critId] %></td>
+                                        <% }) %>
+
+                                        <td class="text-center font-semibold"><%= proj.mediaGeral %></td>
+                                        <td class="text-center"><%= proj.premiado %></td>
                                     </tr>
                                 <% }) %>
                             </tbody>
@@ -773,7 +792,6 @@
         </div>
     <% } %>
 </div>
-
 
             <!-- Conteúdo da Aba: Ranking de Projetos por Categoria -->
             <div id="ranking-projetos-tab" class="tab-content <%= activeTab === 'ranking-projetos' ? '' : 'hidden' %>">

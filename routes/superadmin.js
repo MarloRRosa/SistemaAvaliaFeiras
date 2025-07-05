@@ -493,16 +493,56 @@ router.get('/dashboard', verificarSuperAdmin, async (req, res) => {
         const projetos = await Projeto.find({ escolaId: escola._id }).populate('categoria').lean();
 
         const categoriasMap = {};
-        projetos.forEach(proj => {
+
+        for (const proj of projetos) {
             const categoriaNome = proj.categoria?.nome || 'Sem Categoria';
             if (!categoriasMap[categoriaNome]) categoriasMap[categoriaNome] = [];
+
+            // Buscar avaliações do projeto
+            const avaliacoesDoProjeto = await Avaliacao.find({ projeto: proj._id }).lean();
+
+            // Buscar critérios do projeto (se existirem)
+            const criteriosOficiaisProjeto = await Criterio.find({ _id: { $in: proj.criterios } }).lean();
+
+            let mediasCriterios = {};
+            let totalPontuacao = 0;
+            let totalPesos = 0;
+
+            // Inicializar médias como 'N/A'
+            criteriosOficiaisProjeto.forEach(crit => {
+                mediasCriterios[crit._id.toString()] = 'N/A';
+            });
+
+            // Calcular médias por critério
+            criteriosOficiaisProjeto.forEach(crit => {
+                const notas = [];
+                avaliacoesDoProjeto.forEach(aval => {
+                    aval.itens.forEach(item => {
+                        if (String(item.criterio) === String(crit._id) && item.nota != null) {
+                            notas.push(item.nota);
+                        }
+                    });
+                });
+
+                if (notas.length > 0) {
+                    const mediaCriterio = notas.reduce((a, b) => a + b, 0) / notas.length;
+                    mediasCriterios[crit._id.toString()] = mediaCriterio.toFixed(2);
+                    totalPontuacao += mediaCriterio * crit.peso;
+                    totalPesos += crit.peso;
+                }
+            });
+
+            const mediaGeral = totalPesos > 0 ? (totalPontuacao / totalPesos).toFixed(2) : 'N/A';
+
             categoriasMap[categoriaNome].push({
                 titulo: proj.titulo,
                 turma: proj.turma,
                 premiado: proj.premiado ? 'Sim' : 'Não',
-                media: proj.mediaFinal || 'N/A'
+                numAvaliacoes: avaliacoesDoProjeto.length,
+                mediasCriterios,
+                mediaGeral
             });
-        });
+        }
 
         projetosPorEscola.push({
             escolaNome: escola.nome,
