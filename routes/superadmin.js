@@ -564,6 +564,7 @@ criteriosOficiaisProjeto.forEach(crit => {
             activeTab: activeTab,
             error_msg: req.flash('error_msg'),
             success_msg: req.flash('success_msg'),
+            escolasCadastradas,
             ...dataForTab,
             projetosPorEscola: dataForTab.projetosPorEscola
         });
