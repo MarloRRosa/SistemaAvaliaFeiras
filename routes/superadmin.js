@@ -519,7 +519,8 @@ router.get('/dashboard', verificarSuperAdmin, async (req, res) => {
             activeTab: activeTab,
             error_msg: req.flash('error_msg'),
             success_msg: req.flash('success_msg'),
-            ...dataForTab
+            ...dataForTab,
+            projetosPorEscola: dataForTab.projetosPorEscola
         });
 
     } catch (err) {
