@@ -758,8 +758,9 @@
                                         %>
 
                                         <% criteriosProjeto.forEach(critId => { %>
-                                            <th class="px-2 py-1">Crit. <%= critId %></th>
-                                        <% }) %>
+    <th class="px-2 py-1"><%= primeiroProjeto.nomesCriterios[critId] || ('Crit. ' + critId) %></th>
+<% }) %>
+
 
                                         <th class="px-2 py-1">Média</th>
                                         <th class="px-2 py-1">Premiado</th>

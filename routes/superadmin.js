@@ -505,13 +505,17 @@ router.get('/dashboard', verificarSuperAdmin, async (req, res) => {
             const criteriosOficiaisProjeto = await Criterio.find({ _id: { $in: proj.criterios } }).lean();
 
             let mediasCriterios = {};
-            let totalPontuacao = 0;
-            let totalPesos = 0;
+let nomesCriterios = {};
+let totalPontuacao = 0;
+let totalPesos = 0;
 
-            // Inicializar médias como 'N/A'
-            criteriosOficiaisProjeto.forEach(crit => {
-                mediasCriterios[crit._id.toString()] = 'N/A';
-            });
+// Inicializar médias e mapear nomes
+criteriosOficiaisProjeto.forEach(crit => {
+    const critIdStr = crit._id.toString();
+    mediasCriterios[critIdStr] = 'N/A';
+    nomesCriterios[critIdStr] = crit.nome;  // adiciona o nome
+});
+
 
             // Calcular médias por critério
             criteriosOficiaisProjeto.forEach(crit => {
@@ -540,6 +544,7 @@ router.get('/dashboard', verificarSuperAdmin, async (req, res) => {
                 premiado: proj.premiado ? 'Sim' : 'Não',
                 numAvaliacoes: avaliacoesDoProjeto.length,
                 mediasCriterios,
+                nomesCriterios,
                 mediaGeral
             });
         }
