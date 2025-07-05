@@ -728,9 +728,21 @@
         Relatório de Projetos por Escola e Categoria
     </h2>
 
+    <% if (escolasCadastradas && escolasCadastradas.length > 0) { %>
+        <div class="mb-4 flex items-center space-x-2 bg-blue-50 p-4 rounded-md border border-blue-100">
+            <label for="escolaFiltro" class="font-semibold text-gray-700">Filtrar por Escola:</label>
+            <select id="escolaFiltro" class="border rounded px-2 py-1">
+                <option value="">-- Selecione uma Escola --</option>
+                <% escolasCadastradas.forEach(esc => { %>
+                    <option value="<%= esc.nome %>"><%= esc.nome %></option>
+                <% }) %>
+            </select>
+        </div>
+    <% } %>
+
     <% if (projetosPorEscola && projetosPorEscola.length > 0) { %>
         <% projetosPorEscola.forEach(escola => { %>
-            <div class="mb-6 p-3 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border border-indigo-200">
+            <div class="mb-6 p-3 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border border-indigo-200 bloco-escola" data-escola="<%= escola.escolaNome %>">
                 <h3 class="text-lg font-bold text-gray-700 mb-3 flex items-center">
                     <i class="fas fa-school text-indigo-600 mr-2"></i>
                     Escola: <%= escola.escolaNome %>
@@ -752,15 +764,13 @@
                                         <th class="px-2 py-1">Nº Aval.</th>
 
                                         <% 
-                                        // Pega o primeiro projeto para descobrir os critérios dinamicamente
                                         const primeiroProjeto = escola.categorias[categoria][0];
                                         const criteriosProjeto = primeiroProjeto && primeiroProjeto.mediasCriterios ? Object.keys(primeiroProjeto.mediasCriterios) : [];
                                         %>
 
                                         <% criteriosProjeto.forEach(critId => { %>
-    <th class="px-2 py-1"><%= primeiroProjeto.nomesCriterios[critId] || ('Crit. ' + critId) %></th>
-<% }) %>
-
+                                            <th class="px-2 py-1"><%= primeiroProjeto.nomesCriterios[critId] || ('Crit. ' + critId) %></th>
+                                        <% }) %>
 
                                         <th class="px-2 py-1">Média</th>
                                         <th class="px-2 py-1">Premiado</th>
@@ -795,6 +805,7 @@
         </div>
     <% } %>
 </div>
+
 
             <!-- Conteúdo da Aba: Ranking de Projetos por Categoria -->
             <div id="ranking-projetos-tab" class="tab-content <%= activeTab === 'ranking-projetos' ? '' : 'hidden' %>">
@@ -953,6 +964,26 @@
     </div>
 
     <script>
+     
+document.addEventListener("DOMContentLoaded", () => {
+    const filtroSelect = document.getElementById('escolaFiltro');
+    const blocosEscolas = document.querySelectorAll('#relatorio-projetos-tab > div.mb-6');
+
+    filtroSelect.addEventListener('change', () => {
+        const valorSelecionado = filtroSelect.value;
+
+        blocosEscolas.forEach(bloco => {
+            const titulo = bloco.querySelector('h3')?.textContent || '';
+            if (!valorSelecionado || titulo.includes(valorSelecionado)) {
+                bloco.style.display = '';
+            } else {
+                bloco.style.display = 'none';
+            }
+        });
+    });
+});
+
+
         document.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
             const initialTab = urlParams.get('tab') || '<%= activeTab %>' || 'visao-geral';
