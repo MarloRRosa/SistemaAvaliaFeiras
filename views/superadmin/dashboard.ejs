@@ -8,553 +8,401 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* Variáveis CSS para cores e transições */
         :root {
-            --primary-color: #3B82F6;
-            --primary-dark: #1E40AF;
+            --primary-color: #4f46e5;
+            --primary-dark: #3730a3;
             --sidebar-width: 280px;
-            --sidebar-collapsed-width: 80px;
-            --header-height: 70px;
-            --transition-speed: 0.3s;
+            --sidebar-collapsed-width: 72px;
         }
 
-        /* Estilos gerais */
         * {
-            box-sizing: border-box;
+            scrollbar-width: thin;
+            scrollbar-color: #d1d5db #f3f4f6;
         }
 
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            margin: 0;
-            padding: 0;
+        *::-webkit-scrollbar {
+            width: 6px;
         }
 
-        /* Header fixo */
-        .header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: var(--header-height);
+        *::-webkit-scrollbar-track {
+            background: #f3f4f6;
+        }
+
+        *::-webkit-scrollbar-thumb {
+            background-color: #d1d5db;
+            border-radius: 20px;
+        }
+
+        .sidebar {
+            width: var(--sidebar-width);
+            transition: all 0.3s ease;
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed-width);
+        }
+
+        .sidebar-item {
+            @apply flex items-center gap-3 px-6 py-3 text-slate-300 hover:text-white hover:bg-slate-700/50 transition-all duration-200 cursor-pointer border-l-4 border-transparent;
+        }
+
+        .sidebar-item.active {
+            @apply text-white bg-slate-700/70 border-l-indigo-500;
+        }
+
+        .sidebar-item:hover {
+            transform: translateX(4px);
+        }
+
+        .sidebar.collapsed .sidebar-item {
+            @apply px-6 justify-center;
+        }
+
+        .sidebar.collapsed .sidebar-item span {
+            display: none;
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            transition: all 0.3s ease;
+        }
+
+        .main-content.expanded {
+            margin-left: var(--sidebar-collapsed-width);
+        }
+
+        .glass-card {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 1.5rem;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Sidebar */
-        .sidebar {
-            position: fixed;
-            top: var(--header-height);
-            left: 0;
-            width: var(--sidebar-width);
-            height: calc(100vh - var(--header-height));
-            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
-            color: white;
-            transform: translateX(-100%);
-            transition: transform var(--transition-speed) ease;
-            z-index: 999;
-            overflow-y: auto;
-            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .sidebar.open {
-            transform: translateX(0);
-        }
-
-        .sidebar-nav {
-            padding: 1.5rem 0;
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            padding: 1rem 1.5rem;
-            color: rgba(255, 255, 255, 0.8);
-            text-decoration: none;
-            transition: all var(--transition-speed) ease;
-            border-left: 3px solid transparent;
-            cursor: pointer;
-        }
-
-        .nav-item:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border-left-color: var(--primary-color);
-        }
-
-        .nav-item.active {
-            background: rgba(59, 130, 246, 0.2);
-            color: white;
-            border-left-color: var(--primary-color);
-        }
-
-        .nav-item i {
-            width: 24px;
-            margin-right: 12px;
-            font-size: 1.1rem;
-        }
-
-        /* Conteúdo principal */
-        .main-content {
-            margin-top: var(--header-height);
-            padding: 2rem;
-            min-height: calc(100vh - var(--header-height));
-            transition: margin-left var(--transition-speed) ease;
-        }
-
-        .content-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-
-        /* Cards estatísticos */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
 
         .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 2rem;
-            border-radius: 16px;
-            color: white;
-            position: relative;
-            overflow: hidden;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            transition: transform 0.5s ease;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
         }
 
         .stat-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
         }
 
-        .stat-card:hover::before {
-            transform: scale(1.2);
+        .mobile-nav {
+            display: none;
         }
 
-        .stat-card.blue { background: linear-gradient(135deg, #3B82F6 0%, #1E40AF 100%); }
-        .stat-card.green { background: linear-gradient(135deg, #10B981 0%, #059669 100%); }
-        .stat-card.yellow { background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); }
-        .stat-card.purple { background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%); }
-        .stat-card.indigo { background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%); }
-        .stat-card.red { background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%); }
-
-        .stat-icon {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-            opacity: 0.9;
-        }
-
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-label {
-            font-size: 0.9rem;
-            opacity: 0.9;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        /* Tabelas */
-        .table-container {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            margin-bottom: 2rem;
-        }
-
-        .table-header {
-            background: linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 100%);
-            padding: 1.5rem;
-            border-bottom: 1px solid #E2E8F0;
-        }
-
-        .table-header h3 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #1E293B;
-            margin: 0;
-        }
-
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .data-table th,
-        .data-table td {
-            padding: 1rem 1.5rem;
-            text-align: left;
-            border-bottom: 1px solid #F1F5F9;
-        }
-
-        .data-table th {
-            background: #F8FAFC;
-            font-weight: 600;
-            color: #475569;
-            font-size: 0.875rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .data-table tbody tr:hover {
-            background: #F8FAFC;
-        }
-
-        /* Botões */
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 500;
-            text-decoration: none;
-            transition: all 0.2s ease;
-            border: none;
-            cursor: pointer;
-            font-size: 0.875rem;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #3B82F6 0%, #1E40AF 100%);
-            color: white;
-            box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(59, 130, 246, 0.4);
-        }
-
-        .btn-danger {
-            background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
-            color: white;
-            box-shadow: 0 4px 6px rgba(239, 68, 68, 0.3);
-        }
-
-        .btn-danger:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(239, 68, 68, 0.4);
-        }
-
-        /* Overlay para mobile */
-        .sidebar-overlay {
+        .mobile-overlay {
+            display: none;
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
             background: rgba(0, 0, 0, 0.5);
-            opacity: 0;
-            visibility: hidden;
-            transition: all var(--transition-speed) ease;
-            z-index: 998;
+            z-index: 40;
         }
 
-        .sidebar-overlay.active {
-            opacity: 1;
-            visibility: visible;
+        .mobile-overlay.active {
+            display: block;
         }
 
-        /* Filtros */
-        .filter-container {
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modern-table {
             background: white;
-            padding: 1.5rem;
             border-radius: 12px;
-            margin-bottom: 2rem;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
-        .filter-select {
-            padding: 0.75rem 1rem;
-            border: 2px solid #E2E8F0;
-            border-radius: 8px;
-            font-size: 0.875rem;
-            transition: border-color 0.2s ease;
-        }
-
-        .filter-select:focus {
-            outline: none;
-            border-color: var(--primary-color);
-        }
-
-        /* Badges */
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 500;
-        }
-
-        .badge.success {
-            background: #DCFCE7;
-            color: #166534;
-        }
-
-        .badge.danger {
-            background: #FEE2E2;
-            color: #991B1B;
-        }
-
-        /* Mensagens flash */
-        .flash-message {
-            margin-bottom: 1.5rem;
+        .modern-table th {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            font-weight: 600;
+            color: #374151;
             padding: 1rem 1.5rem;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
         }
 
-        .flash-success {
-            background: #ECFDF5;
-            color: #065F46;
-            border: 1px solid #A7F3D0;
+        .modern-table td {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #f1f5f9;
         }
 
-        .flash-error {
-            background: #FEF2F2;
-            color: #991B1B;
-            border: 1px solid #FECACA;
+        .modern-table tbody tr:hover {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
         }
 
-        /* Responsividade */
+        .action-btn {
+            @apply inline-flex items-center justify-center w-8 h-8 rounded-full transition-all duration-200 hover:scale-110;
+        }
+
+        .action-btn.edit {
+            @apply bg-blue-100 text-blue-600 hover:bg-blue-200;
+        }
+
+        .action-btn.toggle {
+            @apply bg-yellow-100 text-yellow-600 hover:bg-yellow-200;
+        }
+
+        .action-btn.activate {
+            @apply bg-green-100 text-green-600 hover:bg-green-200;
+        }
+
+        .action-btn.reset {
+            @apply bg-red-100 text-red-600 hover:bg-red-200;
+        }
+
+        .floating-btn {
+            @apply fixed bottom-6 right-6 w-14 h-14 bg-indigo-600 text-white rounded-full shadow-lg hover:bg-indigo-700 transition-all duration-200 hover:scale-110 flex items-center justify-center z-30;
+        }
+
         @media (max-width: 768px) {
-            .header {
-                padding: 0 1rem;
+            .sidebar {
+                position: fixed;
+                left: -100%;
+                top: 0;
+                height: 100vh;
+                z-index: 50;
+                width: 280px;
+            }
+
+            .sidebar.mobile-open {
+                left: 0;
             }
 
             .main-content {
-                padding: 1rem;
+                margin-left: 0;
             }
 
-            .stats-grid {
-                grid-template-columns: 1fr;
-                gap: 1rem;
+            .mobile-nav {
+                display: flex;
             }
 
             .stat-card {
-                padding: 1.5rem;
+                margin-bottom: 1rem;
             }
-
-            .stat-number {
-                font-size: 2rem;
-            }
-
-            .data-table th,
-            .data-table td {
-                padding: 0.75rem;
-                font-size: 0.875rem;
-            }
-
-            .content-container {
-                border-radius: 12px;
-                margin: 0;
-            }
-        }
-
-        @media (max-width: 640px) {
-            .data-table {
-                font-size: 0.8rem;
-            }
-
-            .data-table th,
-            .data-table td {
-                padding: 0.5rem;
-            }
-        }
-
-        /* Animações */
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .content-section {
-            animation: fadeIn 0.5s ease-out;
-        }
-
-        /* Esconder conteúdo */
-        .hidden {
-            display: none !important;
         }
     </style>
 </head>
-<body>
-    <!-- Header -->
-    <header class="header">
-        <div class="flex items-center">
-            <button id="sidebarToggle" class="p-2 rounded-lg hover:bg-gray-100 transition-colors mr-4">
-                <i class="fas fa-bars text-xl text-gray-600"></i>
-            </button>
-            <h1 class="text-xl font-bold text-gray-800">Painel Super Admin</h1>
-        </div>
-        <div class="flex items-center gap-4">
-            <a href="/superadmin/escolas/nova" class="btn btn-primary">
-                <i class="fas fa-plus"></i>
-                <span class="hidden sm:inline">Nova Escola</span>
-            </a>
-            <a href="/superadmin/logout" class="btn btn-danger">
-                <i class="fas fa-sign-out-alt"></i>
-                <span class="hidden sm:inline">Sair</span>
-            </a>
-        </div>
-    </header>
+<body class="bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen">
+    <!-- Mobile Navigation -->
+    <div class="mobile-nav fixed top-0 left-0 right-0 h-16 bg-white shadow-lg z-40 flex items-center justify-between px-4">
+        <button id="mobile-menu-btn" class="p-2 rounded-lg hover:bg-gray-100">
+            <i class="fas fa-bars text-xl text-gray-600"></i>
+        </button>
+        <h1 class="text-lg font-bold text-gray-800">Super Admin</h1>
+        <a href="/superadmin/logout" class="p-2 rounded-lg hover:bg-red-50 text-red-600">
+            <i class="fas fa-sign-out-alt"></i>
+        </a>
+    </div>
+
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" id="mobile-overlay"></div>
 
     <!-- Sidebar -->
-    <nav class="sidebar" id="sidebar">
-        <div class="sidebar-nav">
-            <a href="#" class="nav-item active" data-section="visao-geral">
-                <i class="fas fa-chart-line"></i>
-                <span>Visão Geral</span>
-            </a>
-            <a href="#" class="nav-item" data-section="gerenciar-escolas">
-                <i class="fas fa-school"></i>
-                <span>Gerenciar Escolas</span>
-            </a>
-            <a href="#" class="nav-item" data-section="solicitacoes">
-                <i class="fas fa-envelope-open-text"></i>
-                <span>Solicitações</span>
-            </a>
-            <a href="#" class="nav-item" data-section="projetos-sem-avaliacao">
-                <i class="fas fa-clock"></i>
-                <span>Projetos Pendentes</span>
-            </a>
-            <a href="#" class="nav-item" data-section="ranking-projetos">
-                <i class="fas fa-trophy"></i>
-                <span>Ranking</span>
-            </a>
-            <a href="#" class="nav-item" data-section="resumo-avaliadores">
-                <i class="fas fa-user-tie"></i>
-                <span>Avaliadores</span>
-            </a>
+    <div class="sidebar fixed top-0 left-0 h-full z-50" id="sidebar">
+        <div class="p-6 border-b border-slate-700">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-crown text-white"></i>
+                </div>
+                <div class="sidebar-text">
+                    <h2 class="text-white font-bold text-lg">Super Admin</h2>
+                    <p class="text-slate-400 text-sm">Painel de Controle</p>
+                </div>
+            </div>
         </div>
-    </nav>
 
-    <!-- Overlay para mobile -->
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+        <nav class="mt-6">
+            <div class="sidebar-item active" data-tab="visao-geral">
+                <i class="fas fa-chart-line text-xl"></i>
+                <span>Visão Geral</span>
+            </div>
+            <div class="sidebar-item" data-tab="gerenciar-escolas">
+                <i class="fas fa-school text-xl"></i>
+                <span>Gerenciar Escolas</span>
+            </div>
+            <div class="sidebar-item" data-tab="solicitacoes">
+                <i class="fas fa-envelope-open-text text-xl"></i>
+                <span>Solicitações</span>
+            </div>
+            <div class="sidebar-item" data-tab="projetos-sem-avaliacao">
+                <i class="fas fa-clock text-xl"></i>
+                <span>Projetos Pendentes</span>
+            </div>
+            <div class="sidebar-item" data-tab="ranking-projetos">
+                <i class="fas fa-trophy text-xl"></i>
+                <span>Ranking</span>
+            </div>
+            <div class="sidebar-item" data-tab="resumo-avaliadores">
+                <i class="fas fa-user-tie text-xl"></i>
+                <span>Avaliadores</span>
+            </div>
+        </nav>
 
-    <!-- Conteúdo Principal -->
-    <main class="main-content">
-        <div class="content-container">
-            <!-- Mensagens Flash -->
-            <div class="p-6 pb-0">
-                <% if (success_msg && success_msg.length > 0) { %>
-                    <div class="flash-message flash-success">
-                        <i class="fas fa-check-circle"></i>
-                        <span><%= success_msg %></span>
+        <div class="absolute bottom-6 left-6 right-6">
+            <button id="collapse-btn" class="w-full p-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors">
+                <i class="fas fa-chevron-left"></i>
+                <span class="ml-2 sidebar-text">Recolher</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content pt-4 md:pt-6" id="main-content">
+        <div class="px-4 md:px-6 lg:px-8 pb-20">
+            <!-- Header -->
+            <div class="mb-8 mt-16 md:mt-0">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Dashboard</h1>
+                        <p class="text-gray-600">Gerencie o sistema e monitore as atividades</p>
                     </div>
-                <% } %>
-                <% if (error_msg && error_msg.length > 0) { %>
-                    <div class="flash-message flash-error">
-                        <i class="fas fa-exclamation-circle"></i>
-                        <span><%= error_msg %></span>
-                    </div>
-                <% } %>
+                    <a href="/superadmin/escolas/nova" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-200 hover:scale-105 shadow-lg flex items-center gap-2">
+                        <i class="fas fa-plus"></i>
+                        <span>Nova Escola</span>
+                    </a>
+                </div>
             </div>
 
-            <!-- Seção: Visão Geral -->
-            <div id="visao-geral" class="content-section p-6">
-                <div class="stats-grid">
-                    <div class="stat-card blue">
-                        <div class="stat-icon">
-                            <i class="fas fa-school"></i>
-                        </div>
-                        <div class="stat-number"><%= totalEscolas ?? 'N/A' %></div>
-                        <div class="stat-label">Escolas</div>
+            <!-- Flash Messages -->
+            <% if (success_msg && success_msg.length > 0) { %>
+                <div class="mb-6 p-4 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                    <div class="flex items-center">
+                        <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                        <span class="text-green-700 font-medium"><%= success_msg %></span>
                     </div>
-                    <div class="stat-card green">
-                        <div class="stat-icon">
-                            <i class="fas fa-user-shield"></i>
-                        </div>
-                        <div class="stat-number"><%= totalAdmins ?? 'N/A' %></div>
-                        <div class="stat-label">Administradores</div>
+                </div>
+            <% } %>
+            <% if (error_msg && error_msg.length > 0) { %>
+                <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg">
+                    <div class="flex items-center">
+                        <i class="fas fa-exclamation-circle text-red-500 mr-3"></i>
+                        <span class="text-red-700 font-medium"><%= error_msg %></span>
                     </div>
-                    <div class="stat-card yellow">
-                        <div class="stat-icon">
-                            <i class="fas fa-user-tie"></i>
+                </div>
+            <% } %>
+
+            <!-- Tab Content: Visão Geral -->
+            <div id="visao-geral-tab" class="tab-content active">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                    <!-- Escolas Card -->
+                    <div class="stat-card rounded-2xl p-6 bg-gradient-to-br from-blue-500 to-blue-600 text-white">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-blue-100 text-sm font-medium">Total de Escolas</p>
+                                <p class="text-3xl font-bold mt-2"><%= totalEscolas ?? 'N/A' %></p>
+                            </div>
+                            <div class="p-3 bg-blue-400 rounded-full">
+                                <i class="fas fa-school text-2xl"></i>
+                            </div>
                         </div>
-                        <div class="stat-number"><%= totalAvaliadores ?? 'N/A' %></div>
-                        <div class="stat-label">Avaliadores</div>
                     </div>
-                    <div class="stat-card purple">
-                        <div class="stat-icon">
-                            <i class="fas fa-lightbulb"></i>
+
+                    <!-- Admins Card -->
+                    <div class="stat-card rounded-2xl p-6 bg-gradient-to-br from-green-500 to-green-600 text-white">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-green-100 text-sm font-medium">Administradores</p>
+                                <p class="text-3xl font-bold mt-2"><%= totalAdmins ?? 'N/A' %></p>
+                            </div>
+                            <div class="p-3 bg-green-400 rounded-full">
+                                <i class="fas fa-user-shield text-2xl"></i>
+                            </div>
                         </div>
-                        <div class="stat-number"><%= totalProjetos ?? 'N/A' %></div>
-                        <div class="stat-label">Projetos</div>
                     </div>
-                    <div class="stat-card indigo">
-                        <div class="stat-icon">
-                            <i class="fas fa-star-half-alt"></i>
+
+                    <!-- Avaliadores Card -->
+                    <div class="stat-card rounded-2xl p-6 bg-gradient-to-br from-yellow-500 to-yellow-600 text-white">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-yellow-100 text-sm font-medium">Avaliadores</p>
+                                <p class="text-3xl font-bold mt-2"><%= totalAvaliadores ?? 'N/A' %></p>
+                            </div>
+                            <div class="p-3 bg-yellow-400 rounded-full">
+                                <i class="fas fa-user-tie text-2xl"></i>
+                            </div>
                         </div>
-                        <div class="stat-number"><%= totalAvaliacoes ?? 'N/A' %></div>
-                        <div class="stat-label">Avaliações</div>
                     </div>
-                    <div class="stat-card red">
-                        <div class="stat-icon">
-                            <i class="fas fa-envelope-open-text"></i>
+
+                    <!-- Projetos Card -->
+                    <div class="stat-card rounded-2xl p-6 bg-gradient-to-br from-purple-500 to-purple-600 text-white">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-purple-100 text-sm font-medium">Projetos</p>
+                                <p class="text-3xl font-bold mt-2"><%= totalProjetos ?? 'N/A' %></p>
+                            </div>
+                            <div class="p-3 bg-purple-400 rounded-full">
+                                <i class="fas fa-lightbulb text-2xl"></i>
+                            </div>
                         </div>
-                        <div class="stat-number"><%= totalSolicitacoesPendentes ?? 'N/A' %></div>
-                        <div class="stat-label">Solicitações Pendentes</div>
+                    </div>
+
+                    <!-- Avaliações Card -->
+                    <div class="stat-card rounded-2xl p-6 bg-gradient-to-br from-indigo-500 to-indigo-600 text-white">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-indigo-100 text-sm font-medium">Avaliações</p>
+                                <p class="text-3xl font-bold mt-2"><%= totalAvaliacoes ?? 'N/A' %></p>
+                            </div>
+                            <div class="p-3 bg-indigo-400 rounded-full">
+                                <i class="fas fa-star-half-alt text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Solicitações Card -->
+                    <div class="stat-card rounded-2xl p-6 bg-gradient-to-br from-red-500 to-red-600 text-white">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-red-100 text-sm font-medium">Solicitações</p>
+                                <p class="text-3xl font-bold mt-2"><%= totalSolicitacoesPendentes ?? 'N/A' %></p>
+                            </div>
+                            <div class="p-3 bg-red-400 rounded-full">
+                                <i class="fas fa-envelope-open-text text-2xl"></i>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Seção: Gerenciar Escolas -->
-            <div id="gerenciar-escolas" class="content-section hidden">
-                <div class="table-container">
-                    <div class="table-header">
-                        <h3>Gerenciar Escolas</h3>
-                    </div>
+            <!-- Tab Content: Gerenciar Escolas -->
+            <div id="gerenciar-escolas-tab" class="tab-content">
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                        <i class="fas fa-school text-indigo-600"></i>
+                        Gerenciar Escolas
+                    </h3>
+                    
                     <% if (typeof escolasDetalhes !== 'undefined' && escolasDetalhes.length > 0) { %>
                         <div class="overflow-x-auto">
-                            <table class="data-table">
+                            <table class="modern-table w-full">
                                 <thead>
                                     <tr>
-                                        <th>Nome da Escola</th>
+                                        <th>Escola</th>
                                         <th>Admin Principal</th>
                                         <th class="text-center">Projetos</th>
                                         <th class="text-center">Avaliadores</th>
+                                        <th class="text-center">Avaliações</th>
                                         <th class="text-center">Status</th>
                                         <th class="text-center">Ações</th>
                                     </tr>
@@ -562,37 +410,39 @@
                                 <tbody>
                                     <% escolasDetalhes.forEach(escola => { %>
                                         <tr>
-                                            <td class="font-medium"><%= escola.nome %></td>
-                                            <td><%= escola.adminEmail %></td>
-                                            <td class="text-center"><%= escola.numProjetos %></td>
-                                            <td class="text-center"><%= escola.numAvaliadores %></td>
+                                            <td class="font-semibold text-gray-900"><%= escola.nome %></td>
+                                            <td class="text-gray-600"><%= escola.adminEmail %></td>
+                                            <td class="text-center font-medium"><%= escola.numProjetos %></td>
+                                            <td class="text-center font-medium"><%= escola.numAvaliadores %></td>
+                                            <td class="text-center font-medium"><%= escola.numAvaliacoes %></td>
                                             <td class="text-center">
                                                 <% if (escola.ativa) { %>
-                                                    <span class="badge success">Ativa</span>
+                                                    <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">Ativa</span>
                                                 <% } else { %>
-                                                    <span class="badge danger">Inativa</span>
+                                                    <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-medium">Inativa</span>
                                                 <% } %>
                                             </td>
                                             <td class="text-center">
                                                 <div class="flex items-center justify-center gap-2">
-                                                    <a href="/superadmin/escolas/<%= escola._id %>/editar" title="Editar" class="text-blue-600 hover:text-blue-800">
+                                                    <a href="/superadmin/escolas/<%= escola._id %>/editar" class="action-btn edit" title="Editar">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
+                                                    
                                                     <% if (escola.ativa) { %>
-                                                        <a href="/superadmin/escolas/<%= escola._id %>/inativar" title="Inativar" class="text-yellow-600 hover:text-yellow-800"
+                                                        <a href="/superadmin/escolas/<%= escola._id %>/inativar" class="action-btn toggle" title="Inativar"
                                                             onclick="return confirm('Tem certeza que deseja INATIVAR esta escola?');">
                                                             <i class="fas fa-pause"></i>
                                                         </a>
                                                     <% } else { %>
-                                                        <a href="/superadmin/escolas/<%= escola._id %>/ativar" title="Ativar" class="text-green-600 hover:text-green-800"
+                                                        <a href="/superadmin/escolas/<%= escola._id %>/ativar" class="action-btn activate" title="Ativar"
                                                             onclick="return confirm('Tem certeza que deseja ATIVAR esta escola?');">
                                                             <i class="fas fa-play"></i>
                                                         </a>
                                                     <% } %>
+
                                                     <button type="button" 
                                                             onclick="confirmResetAdminPassword('<%= escola._id %>', '<%= escola.nome %>', '<%= escola.adminEmail %>');" 
-                                                            title="Redefinir Senha do Admin" 
-                                                            class="text-red-600 hover:text-red-800">
+                                                            class="action-btn reset" title="Redefinir Senha">
                                                         <i class="fas fa-key"></i>
                                                     </button>
                                                 </div>
@@ -603,52 +453,54 @@
                             </table>
                         </div>
                     <% } else { %>
-                        <div class="p-8 text-center text-gray-500">
-                            <i class="fas fa-school text-4xl mb-4"></i>
-                            <p>Nenhuma escola cadastrada ainda.</p>
+                        <div class="text-center py-12">
+                            <i class="fas fa-school text-6xl text-gray-300 mb-4"></i>
+                            <p class="text-gray-500 text-lg">Nenhuma escola cadastrada ainda.</p>
                         </div>
                     <% } %>
                 </div>
             </div>
 
-            <!-- Seção: Solicitações -->
-            <div id="solicitacoes" class="content-section hidden">
-                <div class="table-container">
-                    <div class="table-header">
-                        <h3>Gerenciar Solicitações de Acesso</h3>
-                    </div>
+            <!-- Tab Content: Solicitações -->
+            <div id="solicitacoes-tab" class="tab-content">
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                        <i class="fas fa-envelope-open-text text-indigo-600"></i>
+                        Gerenciar Solicitações
+                    </h3>
+                    
                     <% if (typeof solicitacoes !== 'undefined' && solicitacoes.length > 0) { %>
                         <div class="overflow-x-auto">
-                            <table class="data-table">
+                            <table class="modern-table w-full">
                                 <thead>
                                     <tr>
-                                        <th>Nome da Escola</th>
-                                        <th>Admin Solicitante</th>
+                                        <th>Escola</th>
+                                        <th>Solicitante</th>
                                         <th>E-mail</th>
-                                        <th>Data da Solicitação</th>
+                                        <th>Data</th>
                                         <th class="text-center">Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <% solicitacoes.forEach(solicitacao => { %>
                                         <tr>
-                                            <td class="font-medium"><%= solicitacao.nomeEscola %></td>
-                                            <td><%= solicitacao.nomeResponsavel %></td>
-                                            <td><%= solicitacao.emailContato %></td>
-                                            <td><%= new Date(solicitacao.dataSolicitacao).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }) %></td>
+                                            <td class="font-semibold text-gray-900"><%= solicitacao.nomeEscola %></td>
+                                            <td class="text-gray-600"><%= solicitacao.nomeResponsavel %></td>
+                                            <td class="text-gray-600"><%= solicitacao.emailContato %></td>
+                                            <td class="text-gray-600"><%= new Date(solicitacao.dataSolicitacao).toLocaleDateString('pt-BR') %></td>
                                             <td class="text-center">
                                                 <div class="flex items-center justify-center gap-2">
-                                                    <a href="/superadmin/solicitacoes/<%= solicitacao._id %>/editar" title="Ver Detalhes" class="text-blue-600 hover:text-blue-800">
+                                                    <a href="/superadmin/solicitacoes/<%= solicitacao._id %>/editar" class="action-btn edit" title="Ver Detalhes">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                                     <form action="/superadmin/solicitacoes/<%= solicitacao._id %>/aprovar" method="POST" class="inline">
-                                                        <button type="submit" title="Aprovar" class="text-green-600 hover:text-green-800"
+                                                        <button type="submit" class="action-btn activate" title="Aprovar"
                                                             onclick="return confirm('Tem certeza que deseja APROVAR esta solicitação?');">
                                                             <i class="fas fa-check"></i>
                                                         </button>
                                                     </form>
                                                     <form action="/superadmin/solicitacoes/<%= solicitacao._id %>/rejeitar" method="POST" class="inline">
-                                                        <button type="submit" title="Rejeitar" class="text-red-600 hover:text-red-800"
+                                                        <button type="submit" class="action-btn reset" title="Rejeitar"
                                                             onclick="return confirm('Tem certeza que deseja REJEITAR esta solicitação?');">
                                                             <i class="fas fa-times"></i>
                                                         </button>
@@ -661,204 +513,179 @@
                             </table>
                         </div>
                     <% } else { %>
-                        <div class="p-8 text-center text-gray-500">
-                            <i class="fas fa-envelope-open-text text-4xl mb-4"></i>
-                            <p>Nenhuma solicitação de acesso pendente.</p>
+                        <div class="text-center py-12">
+                            <i class="fas fa-envelope-open-text text-6xl text-gray-300 mb-4"></i>
+                            <p class="text-gray-500 text-lg">Nenhuma solicitação pendente.</p>
                         </div>
                     <% } %>
                 </div>
             </div>
 
-            <!-- Seção: Projetos Pendentes -->
-            <div id="projetos-sem-avaliacao" class="content-section hidden">
-                <div class="filter-container">
-                    <form action="/superadmin/dashboard" method="GET" class="flex items-center gap-4">
-                        <input type="hidden" name="tab" value="projetos-sem-avaliacao">
-                        <label for="filterEscola" class="text-gray-700 font-medium">Filtrar por Escola:</label>
-                        <select id="filterEscola" name="escolaId" onchange="this.form.submit()" class="filter-select">
-                            <option value="">-- Selecione uma Escola --</option>
-                            <% if (typeof todasEscolas !== 'undefined' && todasEscolas.length > 0) { %>
-                                <% todasEscolas.forEach(escola => { %>
-                                    <option value="<%= escola._id %>" <%= selectedEscolaId === String(escola._id) ? 'selected' : '' %>>
-                                        <%= escola.nome %>
-                                    </option>
-                                <% }) %>
-                            <% } %>
-                        </select>
-                    </form>
-                </div>
-
-                <div class="table-container">
-                    <div class="table-header">
-                        <h3>Projetos Pendentes de Avaliação</h3>
+            <!-- Tab Content: Projetos Pendentes -->
+            <div id="projetos-sem-avaliacao-tab" class="tab-content">
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                        <i class="fas fa-clock text-indigo-600"></i>
+                        Projetos Pendentes
+                    </h3>
+                    
+                    <div class="mb-6">
+                        <form action="/superadmin/dashboard" method="GET" class="flex items-center gap-4">
+                            <input type="hidden" name="tab" value="projetos-sem-avaliacao">
+                            <label class="text-gray-700 font-medium">Filtrar por Escola:</label>
+                            <select name="escolaId" onchange="this.form.submit()" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="">-- Todas as Escolas --</option>
+                                <% if (typeof todasEscolas !== 'undefined' && todasEscolas.length > 0) { %>
+                                    <% todasEscolas.forEach(escola => { %>
+                                        <option value="<%= escola._id %>" <%= selectedEscolaId === String(escola._id) ? 'selected' : '' %>>
+                                            <%= escola.nome %>
+                                        </option>
+                                    <% }) %>
+                                <% } %>
+                            </select>
+                        </form>
                     </div>
+
                     <% if (typeof selectedEscolaId !== 'undefined' && selectedEscolaId) { %>
                         <% if (typeof projetosNaoAvaliados !== 'undefined' && projetosNaoAvaliados.length > 0) { %>
                             <div class="overflow-x-auto">
-                                <table class="data-table">
+                                <table class="modern-table w-full">
                                     <thead>
                                         <tr>
-                                            <th>Título do Projeto</th>
+                                            <th>Projeto</th>
                                             <th>Turma</th>
-                                            <th>Avaliadores Designados</th>
-                                            <th class="text-center">Avaliações Recebidas</th>
-                                            <th class="text-center">Critérios Necessários</th>
+                                            <th>Avaliadores</th>
+                                            <th class="text-center">Recebidas</th>
+                                            <th class="text-center">Necessárias</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <% projetosNaoAvaliados.forEach(projeto => { %>
                                             <tr>
-                                                <td class="font-medium"><%= projeto.titulo %></td>
-                                                <td><%= projeto.turma %></td>
-                                                <td><%= projeto.avaliadoresDesignados %></td>
-                                                <td class="text-center"><%= projeto.numAvaliacoesRecebidas %></td>
-                                                <td class="text-center"><%= projeto.totalCriteriosNecessarios %></td>
+                                                <td class="font-semibold text-gray-900"><%= projeto.titulo %></td>
+                                                <td class="text-gray-600"><%= projeto.turma %></td>
+                                                <td class="text-gray-600"><%= projeto.avaliadoresDesignados %></td>
+                                                <td class="text-center font-medium"><%= projeto.numAvaliacoesRecebidas %></td>
+                                                <td class="text-center font-medium"><%= projeto.totalCriteriosNecessarios %></td>
                                             </tr>
                                         <% }) %>
                                     </tbody>
                                 </table>
                             </div>
                         <% } else { %>
-                            <div class="p-8 text-center text-gray-500">
-                                <i class="fas fa-check-circle text-4xl mb-4"></i>
-                                <p>Todos os projetos desta escola foram avaliados ou não há projetos.</p>
+                            <div class="text-center py-12">
+                                <i class="fas fa-check-circle text-6xl text-green-300 mb-4"></i>
+                                <p class="text-gray-500 text-lg">Todos os projetos foram avaliados!</p>
                             </div>
                         <% } %>
                     <% } else { %>
-                        <div class="p-8 text-center text-gray-500">
-                            <i class="fas fa-filter text-4xl mb-4"></i>
-                            <p>Selecione uma escola para visualizar os projetos pendentes.</p>
+                        <div class="text-center py-12">
+                            <i class="fas fa-arrow-up text-6xl text-gray-300 mb-4"></i>
+                            <p class="text-gray-500 text-lg">Selecione uma escola para ver os projetos pendentes.</p>
                         </div>
                     <% } %>
                 </div>
             </div>
 
-            <!-- Seção: Ranking de Projetos -->
-            <div id="ranking-projetos" class="content-section hidden">
-                <div class="filter-container">
-                    <form action="/superadmin/dashboard" method="GET" class="flex items-center gap-4">
-                        <input type="hidden" name="tab" value="ranking-projetos">
-                        <label for="filterEscolaRanking" class="text-gray-700 font-medium">Filtrar por Escola:</label>
-                        <select id="filterEscolaRanking" name="escolaId" onchange="this.form.submit()" class="filter-select">
-                            <option value="">-- Todas as Escolas --</option>
-                            <% if (typeof todasEscolas !== 'undefined' && todasEscolas.length > 0) { %>
-                                <% todasEscolas.forEach(escola => { %>
-                                    <option value="<%= escola._id %>" <%= selectedEscolaRankingId === String(escola._id) ? 'selected' : '' %>>
-                                        <%= escola.nome %>
-                                    </option>
-                                <% }) %>
+            <!-- Tab Content: Ranking -->
+            <div id="ranking-projetos-tab" class="tab-content">
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                        <i class="fas fa-trophy text-indigo-600"></i>
+                        Ranking de Projetos
+                    </h3>
+                    
+                    <% if (typeof rankingProjetosPorCategoria !== 'undefined' && Object.keys(rankingProjetosPorCategoria).length > 0) { %>
+                        <div class="space-y-8">
+                            <% for (const categoriaNome in rankingProjetosPorCategoria) { %>
+                                <% const projetosNaCategoria = rankingProjetosPorCategoria[categoriaNome]; %>
+                                <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                                    <h4 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                                        <i class="fas fa-medal text-yellow-500"></i>
+                                        <%= categoriaNome %>
+                                    </h4>
+                                    
+                                    <% if (projetosNaCategoria && projetosNaCategoria.length > 0) { %>
+                                        <div class="space-y-3">
+                                            <% projetosNaCategoria.slice(0, 10).forEach((projeto, index) => { %>
+                                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                                    <div class="flex items-center gap-4">
+                                                        <div class="flex items-center justify-center w-8 h-8 rounded-full font-bold text-white
+                                                            <%= index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-400' : index === 2 ? 'bg-orange-500' : 'bg-gray-300' %>">
+                                                            <%= index + 1 %>
+                                                        </div>
+                                                        <div>
+                                                            <h5 class="font-semibold text-gray-900"><%= projeto.titulo %></h5>
+                                                            <p class="text-sm text-gray-600"><%= projeto.escola %> - <%= projeto.turma %></p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="text-right">
+                                                        <p class="text-lg font-bold text-indigo-600"><%= projeto.notaFinal.toFixed(1) %></p>
+                                                        <p class="text-sm text-gray-500"><%= projeto.numAvaliacoes %> avaliações</p>
+                                                    </div>
+                                                </div>
+                                            <% }) %>
+                                        </div>
+                                    <% } else { %>
+                                        <div class="text-center py-8">
+                                            <i class="fas fa-trophy text-4xl text-gray-300 mb-2"></i>
+                                            <p class="text-gray-500">Nenhum projeto avaliado nesta categoria ainda.</p>
+                                        </div>
+                                    <% } %>
+                                </div>
                             <% } %>
-                        </select>
-                    </form>
-                </div>
-
-                <div class="table-container">
-                    <div class="table-header">
-                        <h3>Ranking dos Projetos</h3>
-                    </div>
-                    <% if (typeof rankingProjetos !== 'undefined' && rankingProjetos.length > 0) { %>
-                        <div class="overflow-x-auto">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th class="text-center">Posição</th>
-                                        <th>Título do Projeto</th>
-                                        <th>Escola</th>
-                                        <th>Turma</th>
-                                        <th class="text-center">Nota Final</th>
-                                        <th class="text-center">Avaliações</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <% rankingProjetos.forEach((projeto, index) => { %>
-                                        <tr>
-                                            <td class="text-center font-bold">
-                                                <% if (index === 0) { %>
-                                                    <span class="inline-flex items-center">
-                                                        <i class="fas fa-trophy text-yellow-500 mr-1"></i>
-                                                        1°
-                                                    </span>
-                                                <% } else if (index === 1) { %>
-                                                    <span class="inline-flex items-center">
-                                                        <i class="fas fa-medal text-gray-400 mr-1"></i>
-                                                        2°
-                                                    </span>
-                                                <% } else if (index === 2) { %>
-                                                    <span class="inline-flex items-center">
-                                                        <i class="fas fa-medal text-amber-600 mr-1"></i>
-                                                        3°
-                                                    </span>
-                                                <% } else { %>
-                                                    <%= index + 1 %>°
-                                                <% } %>
-                                            </td>
-                                            <td class="font-medium"><%= projeto.titulo %></td>
-                                            <td><%= projeto.nomeEscola %></td>
-                                            <td><%= projeto.turma %></td>
-                                            <td class="text-center">
-                                                <span class="font-bold text-lg <%= projeto.notaFinal >= 8 ? 'text-green-600' : projeto.notaFinal >= 6 ? 'text-yellow-600' : 'text-red-600' %>">
-                                                    <%= projeto.notaFinal.toFixed(1) %>
-                                                </span>
-                                            </td>
-                                            <td class="text-center"><%= projeto.totalAvaliacoes %></td>
-                                        </tr>
-                                    <% }) %>
-                                </tbody>
-                            </table>
                         </div>
                     <% } else { %>
-                        <div class="p-8 text-center text-gray-500">
-                            <i class="fas fa-trophy text-4xl mb-4"></i>
-                            <p>Nenhum projeto avaliado ainda para exibir no ranking.</p>
+                        <div class="text-center py-12">
+                            <i class="fas fa-trophy text-6xl text-gray-300 mb-4"></i>
+                            <p class="text-gray-500 text-lg">Nenhum projeto avaliado ainda.</p>
                         </div>
                     <% } %>
                 </div>
             </div>
 
-            <!-- Seção: Resumo dos Avaliadores -->
-            <div id="resumo-avaliadores" class="content-section hidden">
-                <div class="table-container">
-                    <div class="table-header">
-                        <h3>Resumo dos Avaliadores</h3>
-                    </div>
+            <!-- Tab Content: Resumo Avaliadores -->
+            <div id="resumo-avaliadores-tab" class="tab-content">
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                        <i class="fas fa-user-tie text-indigo-600"></i>
+                        Resumo dos Avaliadores
+                    </h3>
+                    
                     <% if (typeof resumoAvaliadores !== 'undefined' && resumoAvaliadores.length > 0) { %>
                         <div class="overflow-x-auto">
-                            <table class="data-table">
+                            <table class="modern-table w-full">
                                 <thead>
                                     <tr>
-                                        <th>Nome do Avaliador</th>
+                                        <th>Avaliador</th>
                                         <th>E-mail</th>
                                         <th>Escola</th>
-                                        <th class="text-center">Projetos Designados</th>
-                                        <th class="text-center">Avaliações Realizadas</th>
-                                        <th class="text-center">Progresso</th>
+                                        <th class="text-center">Avaliações</th>
+                                        <th class="text-center">Projetos</th>
+                                        <th class="text-center">Última Atividade</th>
                                         <th class="text-center">Status</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <% resumoAvaliadores.forEach(avaliador => { %>
                                         <tr>
-                                            <td class="font-medium"><%= avaliador.nome %></td>
-                                            <td><%= avaliador.email %></td>
-                                            <td><%= avaliador.nomeEscola %></td>
-                                            <td class="text-center"><%= avaliador.projetosDesignados %></td>
-                                            <td class="text-center"><%= avaliador.avaliacoesRealizadas %></td>
-                                            <td class="text-center">
-                                                <% const porcentagem = avaliador.projetosDesignados > 0 ? Math.round((avaliador.avaliacoesRealizadas / avaliador.projetosDesignados) * 100) : 0 %>
-                                                <div class="w-full bg-gray-200 rounded-full h-2">
-                                                    <div class="bg-blue-600 h-2 rounded-full" style="width: <%= porcentagem %>%"></div>
-                                                </div>
-                                                <span class="text-sm text-gray-600"><%= porcentagem %>%</span>
+                                            <td class="font-semibold text-gray-900"><%= avaliador.nome %></td>
+                                            <td class="text-gray-600"><%= avaliador.email %></td>
+                                            <td class="text-gray-600"><%= avaliador.nomeEscola %></td>
+                                            <td class="text-center font-medium"><%= avaliador.totalAvaliacoes %></td>
+                                            <td class="text-center font-medium"><%= avaliador.projetosAvaliados %></td>
+                                            <td class="text-center text-gray-600">
+                                                <% if (avaliador.ultimaAtividade) { %>
+                                                    <%= new Date(avaliador.ultimaAtividade).toLocaleDateString('pt-BR') %>
+                                                <% } else { %>
+                                                    <span class="text-gray-400">Nunca</span>
+                                                <% } %>
                                             </td>
                                             <td class="text-center">
-                                                <% if (avaliador.projetosDesignados === 0) { %>
-                                                    <span class="badge" style="background: #E5E7EB; color: #6B7280;">Sem projetos</span>
-                                                <% } else if (avaliador.avaliacoesRealizadas === avaliador.projetosDesignados) { %>
-                                                    <span class="badge success">Completo</span>
-                                                <% } else if (avaliador.avaliacoesRealizadas > 0) { %>
-                                                    <span class="badge" style="background: #FEF3C7; color: #D97706;">Em andamento</span>
+                                                <% if (avaliador.ativo) { %>
+                                                    <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">Ativo</span>
                                                 <% } else { %>
-                                                    <span class="badge danger">Pendente</span>
+                                                    <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-medium">Inativo</span>
                                                 <% } %>
                                             </td>
                                         </tr>
@@ -867,250 +694,281 @@
                             </table>
                         </div>
                     <% } else { %>
-                        <div class="p-8 text-center text-gray-500">
-                            <i class="fas fa-user-tie text-4xl mb-4"></i>
-                            <p>Nenhum avaliador encontrado.</p>
+                        <div class="text-center py-12">
+                            <i class="fas fa-user-tie text-6xl text-gray-300 mb-4"></i>
+                            <p class="text-gray-500 text-lg">Nenhum avaliador cadastrado ainda.</p>
                         </div>
                     <% } %>
                 </div>
             </div>
         </div>
-    </main>
+    </div>
 
-    <!-- Scripts -->
+    <!-- Floating Action Button -->
+    <button class="floating-btn" onclick="window.location.href='/superadmin/escolas/nova'">
+        <i class="fas fa-plus text-xl"></i>
+    </button>
+
+    <!-- JavaScript -->
     <script>
-        // Controle do sidebar
+        // Mobile menu toggle
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileOverlay = document.getElementById('mobile-overlay');
         const sidebar = document.getElementById('sidebar');
-        const sidebarToggle = document.getElementById('sidebarToggle');
-        const sidebarOverlay = document.getElementById('sidebarOverlay');
-        const navItems = document.querySelectorAll('.nav-item');
 
-        // Toggle sidebar
-        sidebarToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('open');
-            sidebarOverlay.classList.toggle('active');
+        mobileMenuBtn.addEventListener('click', function() {
+            sidebar.classList.toggle('mobile-open');
+            mobileOverlay.classList.toggle('active');
         });
 
-        // Fechar sidebar ao clicar no overlay
-        sidebarOverlay.addEventListener('click', () => {
-            sidebar.classList.remove('open');
-            sidebarOverlay.classList.remove('active');
+        mobileOverlay.addEventListener('click', function() {
+            sidebar.classList.remove('mobile-open');
+            mobileOverlay.classList.remove('active');
         });
 
-        // Navegação entre seções
-        navItems.forEach(item => {
-            item.addEventListener('click', (e) => {
-                e.preventDefault();
+        // Sidebar collapse
+        const collapseBtn = document.getElementById('collapse-btn');
+        const mainContent = document.getElementById('main-content');
+
+        collapseBtn.addEventListener('click', function() {
+            sidebar.classList.toggle('collapsed');
+            mainContent.classList.toggle('expanded');
+            
+            const icon = collapseBtn.querySelector('i');
+            if (sidebar.classList.contains('collapsed')) {
+                icon.classList.remove('fa-chevron-left');
+                icon.classList.add('fa-chevron-right');
+            } else {
+                icon.classList.remove('fa-chevron-right');
+                icon.classList.add('fa-chevron-left');
+            }
+        });
+
+        // Tab switching
+        const sidebarItems = document.querySelectorAll('.sidebar-item');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        sidebarItems.forEach(item => {
+            item.addEventListener('click', function() {
+                const targetTab = this.getAttribute('data-tab');
                 
-                // Remove classe active de todos os itens
-                navItems.forEach(nav => nav.classList.remove('active'));
-                
-                // Adiciona classe active ao item clicado
-                item.classList.add('active');
-                
-                // Esconde todas as seções
-                document.querySelectorAll('.content-section').forEach(section => {
-                    section.classList.add('hidden');
+                // Remove active class from all sidebar items
+                sidebarItems.forEach(sidebarItem => {
+                    sidebarItem.classList.remove('active');
                 });
                 
-                // Mostra a seção correspondente
-                const targetSection = item.getAttribute('data-section');
-                const section = document.getElementById(targetSection);
-                if (section) {
-                    section.classList.remove('hidden');
-                }
+                // Add active class to clicked item
+                this.classList.add('active');
                 
-                // Fecha o sidebar no mobile
+                // Hide all tab contents
+                tabContents.forEach(content => {
+                    content.classList.remove('active');
+                });
+                
+                // Show target tab content
+                const targetContent = document.getElementById(targetTab + '-tab');
+                if (targetContent) {
+                    targetContent.classList.add('active');
+                }
+
+                // Close mobile menu if open
                 if (window.innerWidth <= 768) {
-                    sidebar.classList.remove('open');
-                    sidebarOverlay.classList.remove('active');
+                    sidebar.classList.remove('mobile-open');
+                    mobileOverlay.classList.remove('active');
                 }
             });
         });
 
-        // Função para confirmar reset de senha do admin
+        // Check for tab parameter in URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const tabParam = urlParams.get('tab');
+        
+        if (tabParam) {
+            // Find the sidebar item with the matching data-tab
+            const targetSidebarItem = document.querySelector(`[data-tab="${tabParam}"]`);
+            if (targetSidebarItem) {
+                // Remove active from all
+                sidebarItems.forEach(item => item.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+                
+                // Activate the target
+                targetSidebarItem.classList.add('active');
+                const targetContent = document.getElementById(tabParam + '-tab');
+                if (targetContent) {
+                    targetContent.classList.add('active');
+                }
+            }
+        }
+
+        // Confirm reset admin password
         function confirmResetAdminPassword(escolaId, nomeEscola, emailAdmin) {
-            if (confirm(`Tem certeza que deseja redefinir a senha do administrador?\n\nEscola: ${nomeEscola}\nAdmin: ${emailAdmin}\n\nUma nova senha será enviada por e-mail.`)) {
-                // Criar form dinamicamente para enviar POST
+            if (confirm(`Tem certeza que deseja redefinir a senha do administrador da escola "${nomeEscola}" (${emailAdmin})?\n\nUma nova senha será gerada e enviada por e-mail.`)) {
+                // Create a form and submit it
                 const form = document.createElement('form');
                 form.method = 'POST';
-                form.action = `/superadmin/escolas/${escolaId}/reset-password`;
+                form.action = `/superadmin/escolas/${escolaId}/resetar-senha-admin`;
                 
-                // Adicionar CSRF token se necessário
-                const csrfInput = document.createElement('input');
-                csrfInput.type = 'hidden';
-                csrfInput.name = '_csrf';
-                csrfInput.value = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-                form.appendChild(csrfInput);
+                // Add CSRF token if available
+                const csrfToken = document.querySelector('meta[name="csrf-token"]');
+                if (csrfToken) {
+                    const csrfInput = document.createElement('input');
+                    csrfInput.type = 'hidden';
+                    csrfInput.name = '_token';
+                    csrfInput.value = csrfToken.getAttribute('content');
+                    form.appendChild(csrfInput);
+                }
                 
                 document.body.appendChild(form);
                 form.submit();
             }
         }
 
-        // Inicialização da página
-        document.addEventListener('DOMContentLoaded', () => {
-            // Verificar se há uma aba específica na URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const tabParam = urlParams.get('tab');
-            
-            if (tabParam) {
-                // Encontrar o item de navegação correspondente
-                const targetNavItem = document.querySelector(`[data-section="${tabParam}"]`);
-                if (targetNavItem) {
-                    // Remover active de todos os itens
-                    navItems.forEach(nav => nav.classList.remove('active'));
-                    
-                    // Ativar o item correspondente
-                    targetNavItem.classList.add('active');
-                    
-                    // Esconder todas as seções
-                    document.querySelectorAll('.content-section').forEach(section => {
-                        section.classList.add('hidden');
-                    });
-                    
-                    // Mostrar a seção correspondente
-                    const section = document.getElementById(tabParam);
-                    if (section) {
-                        section.classList.remove('hidden');
-                    }
-                }
+        // Auto-refresh data every 30 seconds for real-time updates
+        setInterval(function() {
+            // Only refresh if we're on the overview tab
+            const overviewTab = document.getElementById('visao-geral-tab');
+            if (overviewTab && overviewTab.classList.contains('active')) {
+                // Subtle indication that data is being refreshed
+                const cards = document.querySelectorAll('.stat-card');
+                cards.forEach(card => {
+                    card.style.opacity = '0.8';
+                    setTimeout(() => {
+                        card.style.opacity = '1';
+                    }, 500);
+                });
             }
-        });
+        }, 30000);
 
-        // Adicionar animação aos cards estatísticos
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.animationDelay = `${Math.random() * 0.5}s`;
-                    entry.target.classList.add('animate-fade-in');
+        // Smooth scrolling for internal links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
                 }
             });
-        }, observerOptions);
-
-        // Observar os cards estatísticos
-        document.querySelectorAll('.stat-card').forEach(card => {
-            observer.observe(card);
         });
 
-        // Função para atualizar estatísticas em tempo real (opcional)
-        function updateStats() {
-            // Esta função pode ser implementada para atualizar as estatísticas via AJAX
-            // fetch('/superadmin/api/stats')
-            //     .then(response => response.json())
-            //     .then(data => {
-            //         // Atualizar os valores dos cards
-            //     });
+        // Add loading state to action buttons
+        document.querySelectorAll('.action-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const icon = this.querySelector('i');
+                const originalClass = icon.className;
+                
+                // Add loading spinner
+                icon.className = 'fas fa-spinner fa-spin';
+                this.style.pointerEvents = 'none';
+                
+                // Reset after 3 seconds (fallback)
+                setTimeout(() => {
+                    icon.className = originalClass;
+                    this.style.pointerEvents = 'auto';
+                }, 3000);
+            });
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Alt + 1-6 for quick tab switching
+            if (e.altKey && e.key >= '1' && e.key <= '6') {
+                e.preventDefault();
+                const tabIndex = parseInt(e.key) - 1;
+                const sidebarItem = sidebarItems[tabIndex];
+                if (sidebarItem) {
+                    sidebarItem.click();
+                }
+            }
+            
+            // Escape to close mobile menu
+            if (e.key === 'Escape') {
+                sidebar.classList.remove('mobile-open');
+                mobileOverlay.classList.remove('active');
+            }
+        });
+
+        // Initialize tooltips (if using a tooltip library)
+        document.querySelectorAll('[title]').forEach(element => {
+            element.addEventListener('mouseenter', function() {
+                // Simple tooltip implementation
+                const tooltip = document.createElement('div');
+                tooltip.className = 'absolute z-50 px-2 py-1 bg-gray-800 text-white text-sm rounded shadow-lg';
+                tooltip.textContent = this.getAttribute('title');
+                tooltip.style.top = this.offsetTop - 30 + 'px';
+                tooltip.style.left = this.offsetLeft + 'px';
+                this.appendChild(tooltip);
+            });
+            
+            element.addEventListener('mouseleave', function() {
+                const tooltip = this.querySelector('.absolute.z-50');
+                if (tooltip) {
+                    tooltip.remove();
+                }
+            });
+        });
+
+        // Check for flash messages and auto-hide them
+        const flashMessages = document.querySelectorAll('.bg-green-50, .bg-red-50');
+        flashMessages.forEach(message => {
+            setTimeout(() => {
+                message.style.opacity = '0';
+                message.style.transform = 'translateY(-10px)';
+                setTimeout(() => {
+                    message.remove();
+                }, 300);
+            }, 5000);
+        });
+
+        // Add ripple effect to buttons
+        function addRippleEffect(button) {
+            button.addEventListener('click', function(e) {
+                const ripple = document.createElement('span');
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+                
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+                ripple.classList.add('ripple');
+                
+                this.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            });
         }
 
-        // Atualizar estatísticas a cada 5 minutos (opcional)
-        // setInterval(updateStats, 5 * 60 * 1000);
+        // Apply ripple effect to buttons
+        document.querySelectorAll('.action-btn, .floating-btn').forEach(addRippleEffect);
+
+        // Add CSS for ripple effect
+        const style = document.createElement('style');
+        style.textContent = `
+            .ripple {
+                position: absolute;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.6);
+                transform: scale(0);
+                animation: ripple-animation 0.6s linear;
+                pointer-events: none;
+            }
+            
+            @keyframes ripple-animation {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        console.log('Dashboard Super Admin carregado com sucesso!');
     </script>
-
-    <!-- Estilos adicionais para animações -->
-    <style>
-        .animate-fade-in {
-            animation: fadeInUp 0.6s ease-out forwards;
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Melhorias no hover dos cards */
-        .stat-card {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .stat-card:hover {
-            transform: translateY(-8px) scale(1.02);
-        }
-
-        /* Melhorias na responsividade da tabela */
-        @media (max-width: 640px) {
-            .data-table {
-                display: block;
-                overflow-x: auto;
-                white-space: nowrap;
-            }
-            
-            .data-table thead,
-            .data-table tbody,
-            .data-table th,
-            .data-table td,
-            .data-table tr {
-                display: block;
-            }
-            
-            .data-table thead tr {
-                position: absolute;
-                top: -9999px;
-                left: -9999px;
-            }
-            
-            .data-table tr {
-                border: 1px solid #E5E7EB;
-                margin-bottom: 10px;
-                padding: 10px;
-                border-radius: 8px;
-                background: white;
-            }
-            
-            .data-table td {
-                border: none;
-                position: relative;
-                padding: 8px 8px 8px 50% !important;
-                text-align: left !important;
-            }
-            
-            .data-table td:before {
-                content: attr(data-label) ": ";
-                position: absolute;
-                left: 6px;
-                width: 45%;
-                padding-right: 10px;
-                white-space: nowrap;
-                font-weight: bold;
-                color: #374151;
-            }
-        }
-
-        /* Melhorias no loading state */
-        .loading {
-            opacity: 0.6;
-            pointer-events: none;
-        }
-
-        .loading::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 20px;
-            height: 20px;
-            margin: -10px 0 0 -10px;
-            border: 2px solid #E5E7EB;
-            border-top: 2px solid #3B82F6;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    </style>
 </body>
 </html>
