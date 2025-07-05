@@ -208,7 +208,7 @@ router.post('/login', async (req, res) => {
             req.flash('error_msg', 'Credenciais inválidas.');
             res.render('superadmin/login', { 
                 titulo: 'Login Super Admin', 
-                layout: 'layouts/public', 
+                layout: false, 
                 error_msg: req.flash('error_msg'),
                 success_msg: req.flash('success_msg') 
             });
@@ -489,7 +489,7 @@ router.get('/dashboard', verificarSuperAdmin, async (req, res) => {
 
         res.render('superadmin/dashboard', {
             titulo: 'Painel Super Admin', 
-            layout: 'layouts/public', 
+            layout: false, 
             activeTab: activeTab,
             error_msg: req.flash('error_msg'),
             success_msg: req.flash('success_msg'),
