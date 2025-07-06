@@ -1823,6 +1823,35 @@ function copiarLinkPreCadastro() {
 
   let avaliadorIdSelecionado = '';
 
+    // Abre o modal de Reenvio e configura a action do formulário
+  document.querySelectorAll('.btn-reenviar-avaliador').forEach(button => {
+    button.addEventListener('click', () => {
+      const id = button.dataset.id;
+      const modal = document.getElementById('modalReenviarAvaliador');
+      const form = document.getElementById('formReenviarAvaliador');
+      
+      // Define a action correta do form
+      form.action = `/admin/avaliadores/${id}/reenviar-email`;
+
+      // Limpa o campo da mensagem
+      document.getElementById('campoMensagemAvaliador').value = '';
+
+      // Exibe o modal
+      modal.classList.remove('hidden');
+    });
+  });
+
+  // Fecha o modal
+  function fecharModalReenviarAvaliador() {
+    document.getElementById('modalReenviarAvaliador').classList.add('hidden');
+  }
+
+  // Ao enviar o formulário, passa a mensagem personalizada para o campo hidden
+  document.getElementById('formReenviarAvaliador').addEventListener('submit', function(e) {
+    const mensagem = document.getElementById('campoMensagemAvaliador').value.trim();
+    document.getElementById('mensagemPersonalizada').value = mensagem;
+  });
+
 </script>
 
 </body>
