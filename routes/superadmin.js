@@ -1121,7 +1121,7 @@ router.post('/solicitacoes/:id/rejeitar', verificarSuperAdmin, async (req, res) 
     }
 });
 
-const Mensagem = require('../models/Mensagem');
+const Mensagem = require('../models/mensagensSuporte');
 
 router.get('/dashboard', async (req, res) => {
   try {
