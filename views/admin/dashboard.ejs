@@ -533,24 +533,6 @@
             </a>
         </div>
 
-        <!-- Filtros e busca -->
-        <div class="mb-6 bg-gray-50 p-4 rounded-lg">
-            <div class="flex flex-wrap gap-4 items-center">
-                <div class="flex-1 min-w-64">
-                    <input type="text" id="searchInput" placeholder="Buscar por nome, email ou PIN..." 
-                           class="search-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
-                </div>
-                <select id="statusFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    <option value="">Todos os Status</option>
-                    <option value="true">Apenas Ativos</option>
-                    <option value="false">Apenas Inativos</option>
-                </select>
-                <button onclick="limparFiltros()" class="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors">
-                    <i class="fas fa-times mr-1"></i>Limpar
-                </button>
-            </div>
-        </div>
-
         <!-- Subabas melhoradas -->
         <div class="flex gap-2 mb-6 bg-gray-100 p-1 rounded-lg">
             <button class="subtab-btn active flex-1 text-sm transition-all duration-200" data-subtab="sub-avaliadores-cadastrados">
@@ -630,7 +612,7 @@
                                             <i class="fas fa-edit"></i>
                                         </button>
 
-                                        <button type="button" class="tooltip btn-reenviar-avaliador btn-hover-effect bg-teal-600 hover:bg-teal-700 text-white font-semibold py-1.5 px-3 rounded-md text-sm shadow-sm" 
+                                        <button type="button" class="tooltip btn-reenviar-avaliador btn-hover-effect bg-orange-600 hover:bg-orange-700 text-white font-semibold py-1.5 px-3 rounded-md text-sm shadow-sm"
                                                 data-tooltip="Reenviar acesso"
                                                 data-id="<%= avaliador._id %>"
                                                 data-nome="<%= avaliador.nome %>"
