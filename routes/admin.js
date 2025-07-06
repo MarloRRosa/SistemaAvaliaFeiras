@@ -2553,5 +2553,31 @@ router.post('/suporte', async (req, res) => {
   res.redirect('/suporte');
 });
 
+router.post('/dashboard/suporte', verificarAdminEscola, async (req, res) => {
+  const { mensagem } = req.body;
+  const autorId = req.session.adminEscola.id;
+
+  if (!mensagem) {
+    req.flash('error_msg', 'Por favor, escreva uma mensagem.');
+    return res.redirect('/admin/dashboard?tab=suporte');
+  }
+
+  try {
+    const novaMensagem = new Mensagem({
+      autorId,
+      autorTipo: 'ADM',
+      mensagem
+    });
+
+    await novaMensagem.save();
+
+    res.redirect('/admin/dashboard?tab=suporte');
+  } catch (err) {
+    console.error('Erro ao enviar mensagem:', err);
+    req.flash('error_msg', 'Erro ao enviar mensagem.');
+    res.redirect('/admin/dashboard?tab=suporte');
+  }
+});
+
 
 module.exports = router;
