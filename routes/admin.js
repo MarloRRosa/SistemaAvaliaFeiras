@@ -27,7 +27,8 @@ const ejs = require('ejs');
 const QRCode = require('qrcode');
 const upload = multer({ storage: multer.memoryStorage() });
 const rotasPreCadastros = require('./preCadastro');
-
+const Mensagem = require('../models/mensagensSuporte');
+const enviarMensagemTelegram = require('../utils/telegram');
 
 // Carrega variáveis de ambiente (garante que estão disponíveis para este arquivo)
 require('dotenv').config();
@@ -772,7 +773,9 @@ if (feiraIdSelecionada && mongoose.Types.ObjectId.isValid(feiraIdSelecionada)) {
   status: 'pendente'
 }).lean();
 
-
+const mensagens = await Mensagem.find({ autorId: req.session.adminEscola.id })
+  .sort({ dataEnvio: -1 })
+  .lean();
 
         // Renderiza o dashboard principal e passa TODOS os dados necessários para as abas
         res.render('admin/dashboard', {
@@ -2509,6 +2512,42 @@ router.post('/escola/atualizar', verificarAdminEscola, upload.single('logo'), as
     res.redirect('/admin/dashboard?tab=tab-configuracoes');
   }
 });
+
+router.post('/suporte', verificarSuperAdmin, async (req, res) => {
+    const { mensagem } = req.body;
+    const usuario = req.session.superadmin; // ajuste conforme seu sistema
+
+    if (!mensagem) {
+        req.flash('error_msg', 'Mensagem não pode estar vazia.');
+        return res.redirect('/suporte');
+    }
+
+    await Mensagem.create({
+        autorNome: usuario.nome,
+        autorEmail: usuario.email,
+        autorTipo: 'SUPERADM',
+        mensagem: mensagem,
+        dataEnvio: new Date()
+    });
+
+    req.flash('success_msg', 'Mensagem enviada com sucesso.');
+    res.redirect('/suporte');
+});
+
+router.post('/suporte', async (req, res) => {
+  const novaMensagem = new Mensagem({
+    autorId: req.session.adminEscola.id,
+    autorTipo: 'ADM',
+    mensagem: req.body.mensagem,
+    dataEnvio: new Date()
+  });
+
+  await novaMensagem.save();
+
+  res.redirect('/admin/dashboard?tab=suporte');
+});
+
+
 
 
 module.exports = router;
