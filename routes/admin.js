@@ -29,8 +29,6 @@ const upload = multer({ storage: multer.memoryStorage() });
 const rotasPreCadastros = require('./preCadastro');
 const Mensagem = require('../models/mensagensSuporte');
 const enviarMensagemTelegram = require('../utils/telegram');
-const { verificarAdminEscola, verificarSuperAdmin } = require('../middlewares/auth');
-
 
 
 
