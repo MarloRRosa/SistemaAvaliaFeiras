@@ -801,7 +801,8 @@ if (feiraIdSelecionada && mongoose.Types.ObjectId.isValid(feiraIdSelecionada)) {
   relatorioFinalPorProjeto,
   formatarDatasParaInput: formatarDataParaInput,
   preCadastros,
-  camposExtras: []
+  camposExtras: [],
+  mensagens: []
 });
 
 

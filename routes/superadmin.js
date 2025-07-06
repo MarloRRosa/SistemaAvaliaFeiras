@@ -557,6 +557,7 @@ criteriosOficiaisProjeto.forEach(crit => {
 
     dataForTab.projetosPorEscola = projetosPorEscola;
 }
+const mensagens = await Mensagem.find({}).sort({ data: -1 }).lean();
 
         res.render('superadmin/dashboard', {
             titulo: 'Painel Super Admin', 
@@ -566,7 +567,8 @@ criteriosOficiaisProjeto.forEach(crit => {
             success_msg: req.flash('success_msg'),
             escolasCadastradas,
             ...dataForTab,
-            projetosPorEscola: dataForTab.projetosPorEscola
+            projetosPorEscola: dataForTab.projetosPorEscola,
+            mensagens: mensagens || []
         });
 
     } catch (err) {
