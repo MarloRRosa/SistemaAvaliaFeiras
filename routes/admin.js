@@ -29,6 +29,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 const rotasPreCadastros = require('./preCadastro');
 const Mensagem = require('../models/mensagensSuporte');
 const enviarMensagemTelegram = require('../utils/telegram');
+const MensagemSuporte = require('../models/mensagensSuporte');
 
 
 
@@ -807,7 +808,7 @@ const mensagens = await Mensagem.find({ autorId: req.session.adminEscola.id })
   formatarDatasParaInput: formatarDataParaInput,
   preCadastros,
   camposExtras: [],
-  mensagens: []
+  mensagens
 });
 
 
