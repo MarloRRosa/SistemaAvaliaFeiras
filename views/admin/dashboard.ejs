@@ -601,30 +601,33 @@
                                 <td class="py-4 px-6 whitespace-nowrap">
                                     <div class="flex flex-wrap gap-2">
                                         <button class="tooltip btn-editar-avaliador btn-hover-effect bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1.5 px-3 rounded-md text-sm shadow-sm" 
-                                                data-tooltip="Editar avaliador"
-                                                data-id="<%= avaliador._id %>"
-                                                data-nome="<%= avaliador.nome %>"
-                                                data-email="<%= avaliador.email %>"
-                                                data-pin="<%= avaliador.pin %>"
-                                                data-ativo="<%= avaliador.ativo ? 'true' : 'false' %>"
-                                                data-projetos="<%= avaliador.projetosAtribuidos.map(p => p._id.toString()).join(',') %>"
-                                                data-qrcode="<%= avaliador.qrcode || '' %>">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
+        data-tooltip="Editar avaliador"
+        data-id="<%= avaliador._id %>"
+        data-nome="<%= avaliador.nome %>"
+        data-email="<%= avaliador.email %>"
+        data-pin="<%= avaliador.pin %>"
+        data-ativo="<%= avaliador.ativo ? 'true' : 'false' %>"
+        data-projetos="<%= avaliador.projetosAtribuidos.map(p => p._id.toString()).join(',') %>"
+        data-qrcode="<%= avaliador.qrcode || '' %>">
+    <i class="fas fa-edit mr-1"></i>Editar
+</button>
 
-                                        <button type="button" class="tooltip btn-reenviar-avaliador btn-hover-effect text-white font-semibold py-1.5 px-3 rounded-md text-sm shadow-sm" style="background-color: #ea580c; border: none;" onmouseover="this.style.backgroundColor='#c2410c'" onmouseout="this.style.backgroundColor='#ea580c'"
-                                                data-tooltip="Reenviar acesso"
-                                                data-id="<%= avaliador._id %>"
-                                                data-nome="<%= avaliador.nome %>"
-                                                data-email="<%= avaliador.email %>">
-                                            <i class="fas fa-paper-plane"></i>
-                                        </button>
+                                        <button type="button" class="tooltip btn-reenviar-avaliador btn-hover-effect text-white font-semibold py-1.5 px-3 rounded-md text-sm shadow-sm" 
+        style="background-color: #ea580c; border: none;" 
+        onmouseover="this.style.backgroundColor='#c2410c'" 
+        onmouseout="this.style.backgroundColor='#ea580c'"
+        data-tooltip="Reenviar acesso"
+        data-id="<%= avaliador._id %>"
+        data-nome="<%= avaliador.nome %>"
+        data-email="<%= avaliador.email %>">
+    <i class="fas fa-paper-plane mr-1"></i>Reenviar
+</button>
 
                                         <form action="/admin/avaliadores/<%= avaliador._id %>/excluir" method="POST" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar este avaliador?');">
                                             <button type="submit" class="tooltip btn-hover-effect bg-red-600 hover:bg-red-700 text-white font-semibold py-1.5 px-3 rounded-md text-sm shadow-sm" 
-                                                    data-tooltip="Excluir avaliador">
-                                                <i class="fas fa-trash-alt"></i>
-                                            </button>
+        data-tooltip="Excluir avaliador">
+    <i class="fas fa-trash-alt mr-1"></i>Excluir
+</button>
                                         </form>
                                     </div>
                                 </td>
