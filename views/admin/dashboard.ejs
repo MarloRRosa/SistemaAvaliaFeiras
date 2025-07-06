@@ -612,7 +612,7 @@
                                             <i class="fas fa-edit"></i>
                                         </button>
 
-                                        <button type="button" class="tooltip btn-reenviar-avaliador btn-hover-effect bg-orange-600 hover:bg-orange-700 text-white font-semibold py-1.5 px-3 rounded-md text-sm shadow-sm"
+                                        <button type="button" class="tooltip btn-reenviar-avaliador btn-hover-effect text-white font-semibold py-1.5 px-3 rounded-md text-sm shadow-sm" style="background-color: #ea580c; border: none;" onmouseover="this.style.backgroundColor='#c2410c'" onmouseout="this.style.backgroundColor='#ea580c'"
                                                 data-tooltip="Reenviar acesso"
                                                 data-id="<%= avaliador._id %>"
                                                 data-nome="<%= avaliador.nome %>"
@@ -821,21 +821,6 @@
             document.getElementById('mensagemPersonalizada').value = mensagem;
         });
     </script>
-
-<script>
-  document.querySelectorAll('.btn-reenviar-avaliador').forEach(button => {
-    button.addEventListener('click', () => {
-      const id = button.dataset.id;
-      document.getElementById('formReenviarAvaliador').action = `/admin/avaliadores/${id}/reenviar-email`;
-      document.getElementById('campoMensagemAvaliador').value = '';
-      document.getElementById('modalReenviarAvaliador').classList.remove('hidden');
-    });
-  });
-
-  function fecharModalReenviarAvaliador() {
-    document.getElementById('modalReenviarAvaliador').classList.add('hidden');
-  }
-</script>
 
 
 <!-- FIM ABA: AVALIADORES -->
