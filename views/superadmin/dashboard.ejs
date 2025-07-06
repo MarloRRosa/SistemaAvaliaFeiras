@@ -872,65 +872,96 @@
 
             <!-- Conteúdo da Aba: Resumo de Avaliadores por Escola -->
             <div id="resumo-avaliadores-tab" class="tab-content <%= activeTab === 'resumo-avaliadores' ? '' : 'hidden' %>">
-                <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center">
-                    <i class="fas fa-users text-green-600 mr-3"></i>
-                    Resumo de Avaliadores por Escola
-                </h2>
-                
-                <% if (typeof resumoAvaliadoresPorEscola !== 'undefined' && resumoAvaliadoresPorEscola.length > 0) { %>
-                    <% resumoAvaliadoresPorEscola.forEach(escolaInfo => { %>
-                        <div class="mb-10 p-6 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl border border-green-200">
-                            <h3 class="text-2xl font-bold text-gray-700 mb-6 flex items-center">
-                                <i class="fas fa-school text-green-600 mr-3"></i>
-                                Escola: <%= escolaInfo.escolaNome %>
-                            </h3>
-                            <% if (escolaInfo.avaliadores && escolaInfo.avaliadores.length > 0) { %>
-                                <div class="overflow-x-auto">
-                                    <table class="modern-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Nome do Avaliador</th>
-                                                <th>E-mail</th>
-                                                <th class="text-center">Status</th>
-                                                <th class="text-center">Projetos Atribuídos</th>
-                                                <th class="text-center">Projetos Avaliados</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <% escolaInfo.avaliadores.forEach(avaliador => { %>
-                                                <tr>
-                                                    <td class="font-semibold text-gray-900"><%= avaliador.nome %></td>
-                                                    <td><%= avaliador.email %></td>
-                                                    <td class="text-center">
-                                                        <span class="modern-badge <%= avaliador.status === 'Ativo' ? 'badge-success' : 'badge-danger' %>">
-                                                            <i class="fas fa-<%= avaliador.status === 'Ativo' ? 'check-circle' : 'times-circle' %>"></i>
-                                                            <%= avaliador.status %>
-                                                        </span>
-                                                    </td>
-                                                    <td class="text-center font-semibold"><%= avaliador.totalAtribuidos %></td>
-                                                    <td class="text-center font-semibold"><%= avaliador.totalAvaliados %></td>
-                                                </tr>
-                                            <% }) %>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            <% } else { %>
-                                <div class="text-center py-8">
-                                    <i class="fas fa-users text-4xl text-gray-300 mb-4"></i>
-                                    <p class="text-gray-600">Nenhum avaliador cadastrado para esta escola.</p>
-                                </div>
-                            <% } %>
-                        </div>
-                    <% }) %>
+    <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center">
+        <i class="fas fa-users text-green-600 mr-3"></i>
+        Resumo de Avaliadores por Escola
+    </h2>
+
+    <% if (escolasCadastradas && escolasCadastradas.length > 0) { %>
+        <div class="mb-6 flex items-center space-x-2 bg-green-50 p-4 rounded-md border border-green-100">
+            <label for="escolaFiltroAvaliadores" class="font-semibold text-gray-700">Filtrar por Escola:</label>
+            <select id="escolaFiltroAvaliadores" class="border rounded px-2 py-1">
+                <option value="">-- Selecione uma Escola --</option>
+                <% escolasCadastradas.forEach(esc => { %>
+                    <option value="<%= esc.nome %>"><%= esc.nome %></option>
+                <% }) %>
+            </select>
+        </div>
+    <% } %>
+
+    <% if (typeof resumoAvaliadoresPorEscola !== 'undefined' && resumoAvaliadoresPorEscola.length > 0) { %>
+        <% resumoAvaliadoresPorEscola.forEach(escolaInfo => { %>
+            <div class="mb-10 p-6 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl border border-green-200 bloco-escola-avaliadores" data-escola="<%= escolaInfo.escolaNome %>">
+                <h3 class="text-2xl font-bold text-gray-700 mb-6 flex items-center">
+                    <i class="fas fa-school text-green-600 mr-3"></i>
+                    Escola: <%= escolaInfo.escolaNome %>
+                </h3>
+                <% if (escolaInfo.avaliadores && escolaInfo.avaliadores.length > 0) { %>
+                    <div class="overflow-x-auto">
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>Nome do Avaliador</th>
+                                    <th>E-mail</th>
+                                    <th class="text-center">Status</th>
+                                    <th class="text-center">Projetos Atribuídos</th>
+                                    <th class="text-center">Projetos Avaliados</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% escolaInfo.avaliadores.forEach(avaliador => { %>
+                                    <tr>
+                                        <td class="font-semibold text-gray-900"><%= avaliador.nome %></td>
+                                        <td><%= avaliador.email %></td>
+                                        <td class="text-center">
+                                            <span class="modern-badge <%= avaliador.status === 'Ativo' ? 'badge-success' : 'badge-danger' %>">
+                                                <i class="fas fa-<%= avaliador.status === 'Ativo' ? 'check-circle' : 'times-circle' %>"></i>
+                                                <%= avaliador.status %>
+                                            </span>
+                                        </td>
+                                        <td class="text-center font-semibold"><%= avaliador.totalAtribuidos %></td>
+                                        <td class="text-center font-semibold"><%= avaliador.totalAvaliados %></td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
                 <% } else { %>
-                    <div class="text-center py-12">
-                        <i class="fas fa-users text-6xl text-gray-300 mb-4"></i>
-                        <p class="text-gray-600 text-xl">Nenhuma escola com avaliadores para exibir o resumo.</p>
+                    <div class="text-center py-8">
+                        <i class="fas fa-users text-4xl text-gray-300 mb-4"></i>
+                        <p class="text-gray-600">Nenhum avaliador cadastrado para esta escola.</p>
                     </div>
                 <% } %>
             </div>
+        <% }) %>
+    <% } else { %>
+        <div class="text-center py-12">
+            <i class="fas fa-users text-6xl text-gray-300 mb-4"></i>
+            <p class="text-gray-600 text-xl">Nenhuma escola com avaliadores para exibir o resumo.</p>
         </div>
-    </main>
+    <% } %>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const filtroAvaliadores = document.getElementById('escolaFiltroAvaliadores');
+            const blocosAvaliadores = document.querySelectorAll('.bloco-escola-avaliadores');
+
+            filtroAvaliadores.addEventListener('change', () => {
+                const escolaSelecionada = filtroAvaliadores.value;
+
+                blocosAvaliadores.forEach(bloco => {
+                    const escolaBloco = bloco.getAttribute('data-escola');
+                    if (!escolaSelecionada || escolaSelecionada === escolaBloco) {
+                        bloco.style.display = '';
+                    } else {
+                        bloco.style.display = 'none';
+                    }
+                });
+            });
+        });
+    </script>
+</div>
+
 
     <!-- Modal para Confirmação de Redefinição de Senha -->
     <div id="resetAdminPasswordModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 modern-modal hidden flex items-center justify-center z-50 p-4">
