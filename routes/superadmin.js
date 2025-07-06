@@ -1121,5 +1121,23 @@ router.post('/solicitacoes/:id/rejeitar', verificarSuperAdmin, async (req, res) 
     }
 });
 
+const Mensagem = require('../models/Mensagem');
+
+router.get('/dashboard', async (req, res) => {
+  try {
+    const mensagens = await Mensagem.find().sort({ dataEnvio: -1 });
+
+    res.render('superadmin/dashboard', {
+      layout: 'layouts/superadmin',
+      activeTab: 'mensagens',
+      mensagens
+    });
+  } catch (err) {
+    console.error('Erro ao buscar mensagens:', err);
+    req.flash('error_msg', 'Erro ao carregar mensagens.');
+    res.redirect('/superadmin/login');
+  }
+});
+
 
 module.exports = router;

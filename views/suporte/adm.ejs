@@ -1,0 +1,15 @@
+<h2>Suporte - Tira-dúvidas</h2>
+
+<form method="POST" action="/suporte">
+  <textarea name="mensagem" required></textarea>
+  <button type="submit">Enviar</button>
+</form>
+
+<hr>
+
+<h3>Mensagens Enviadas</h3>
+<ul>
+  <% mensagens.forEach(msg => { %>
+    <li><%= msg.dataEnvio.toLocaleString() %>: <%= msg.mensagem %></li>
+  <% }) %>
+</ul>

@@ -1,0 +1,10 @@
+<h2>Mensagens Recebidas</h2>
+
+<ul>
+  <% mensagens.forEach(msg => { %>
+    <li>
+      <strong><%= msg.autorTipo %></strong> - <%= msg.autorId.nome || '---' %>:
+      <%= msg.mensagem %> (<%= msg.dataEnvio.toLocaleString() %>)
+    </li>
+  <% }) %>
+</ul>

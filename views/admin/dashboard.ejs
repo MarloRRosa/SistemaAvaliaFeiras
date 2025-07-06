@@ -250,73 +250,80 @@
 
     <!-- Sidebar -->
     <aside id="sidebar" class="fixed top-0 left-0 h-full w-64 bg-gray-800 text-gray-100 transform -translate-x-full transition-transform duration-300 z-50">
-    <div class="p-4 text-center border-b border-gray-700 mb-4 flex justify-between items-center">
-      <h1 class="text-2xl font-extrabold tracking-tight text-white link-text">Painel Admin</h1>
-      
-    </div>
+  <div class="p-4 text-center border-b border-gray-700 mb-4 flex justify-between items-center">
+    <h1 class="text-2xl font-extrabold tracking-tight text-white link-text">Painel Admin</h1>
+  </div>
 
-    <nav class="flex-grow">
-      <ul class="space-y-1">
-        <li>
-          <a href="#" class="sidebar-link <% if(activeTab === 'dashboard-geral') { %>active<% } %>" data-tab="dashboard-geral">
-            <span class="icon-wrapper"><i class="fas fa-tachometer-alt"></i></span>
-            <span class="link-text">Visão Geral</span>
-          </a>
-        </li>
-        <li>
-          <a href="#" class="sidebar-link <% if(activeTab === 'projetos') { %>active<% } %>" data-tab="projetos">
-            <span class="icon-wrapper"><i class="fas fa-lightbulb"></i></span>
-            <span class="link-text">Projetos</span>
-          </a>
-        </li>
-        <li>
-          <a href="#" class="sidebar-link <% if(activeTab === 'categorias') { %>active<% } %>" data-tab="categorias">
-            <span class="icon-wrapper"><i class="fas fa-tags"></i></span>
-            <span class="link-text">Categorias</span>
-          </a>
-        </li>
-        <li>
-          <a href="#" class="sidebar-link <% if(activeTab === 'criterios') { %>active<% } %>" data-tab="criterios">
-            <span class="icon-wrapper"><i class="fas fa-clipboard-list"></i></span>
-            <span class="link-text">Critérios</span>
-          </a>
-        </li>
-        <li>
-          <a href="#" class="sidebar-link <% if(activeTab === 'avaliadores') { %>active<% } %>" data-tab="avaliadores">
-            <span class="icon-wrapper"><i class="fas fa-user-tie"></i></span>
-            <span class="link-text">Avaliadores</span>
-          </a>
-        </li>
-        <li>
-          <a href="#" class="sidebar-link <% if(activeTab === 'feiras') { %>active<% } %>" data-tab="feiras">
-            <span class="icon-wrapper"><i class="fas fa-calendar-alt"></i></span>
-            <span class="link-text">Feiras</span>
-          </a>
-        </li>
-        <li>
-          <a href="#" class="sidebar-link <% if(activeTab === 'relatorios') { %>active<% } %>" data-tab="relatorios">
-            <span class="icon-wrapper"><i class="fas fa-file-pdf"></i></span>
-            <span class="link-text">Relatórios</span>
-          </a>
-        </li>
-        <li>
-          <a href="#" class="sidebar-link <% if(activeTab === 'tab-configuracoes') { %>active<% } %>" data-tab="tab-configuracoes">
-            <span class="icon-wrapper"><i class="fas fa-cog"></i></span>
-            <span class="link-text">Configurações</span>
-          </a>
-        </li>
-      </ul>
-    </nav>
+  <nav class="flex-grow">
+    <ul class="space-y-1">
+      <li>
+        <a href="#" class="sidebar-link <% if(activeTab === 'dashboard-geral') { %>active<% } %>" data-tab="dashboard-geral">
+          <span class="icon-wrapper"><i class="fas fa-tachometer-alt"></i></span>
+          <span class="link-text">Visão Geral</span>
+        </a>
+      </li>
+      <li>
+        <a href="#" class="sidebar-link <% if(activeTab === 'projetos') { %>active<% } %>" data-tab="projetos">
+          <span class="icon-wrapper"><i class="fas fa-lightbulb"></i></span>
+          <span class="link-text">Projetos</span>
+        </a>
+      </li>
+      <li>
+        <a href="#" class="sidebar-link <% if(activeTab === 'categorias') { %>active<% } %>" data-tab="categorias">
+          <span class="icon-wrapper"><i class="fas fa-tags"></i></span>
+          <span class="link-text">Categorias</span>
+        </a>
+      </li>
+      <li>
+        <a href="#" class="sidebar-link <% if(activeTab === 'criterios') { %>active<% } %>" data-tab="criterios">
+          <span class="icon-wrapper"><i class="fas fa-clipboard-list"></i></span>
+          <span class="link-text">Critérios</span>
+        </a>
+      </li>
+      <li>
+        <a href="#" class="sidebar-link <% if(activeTab === 'avaliadores') { %>active<% } %>" data-tab="avaliadores">
+          <span class="icon-wrapper"><i class="fas fa-user-tie"></i></span>
+          <span class="link-text">Avaliadores</span>
+        </a>
+      </li>
+      <li>
+        <a href="#" class="sidebar-link <% if(activeTab === 'feiras') { %>active<% } %>" data-tab="feiras">
+          <span class="icon-wrapper"><i class="fas fa-calendar-alt"></i></span>
+          <span class="link-text">Feiras</span>
+        </a>
+      </li>
+      <li>
+        <a href="#" class="sidebar-link <% if(activeTab === 'relatorios') { %>active<% } %>" data-tab="relatorios">
+          <span class="icon-wrapper"><i class="fas fa-file-pdf"></i></span>
+          <span class="link-text">Relatórios</span>
+        </a>
+      </li>
+      <!-- ✅ NOVO BOTÃO: Mensagens -->
+      <li>
+        <a href="/suporte" class="sidebar-link <% if(activeTab === 'suporte') { %>active<% } %>" data-tab="suporte">
+          <span class="icon-wrapper"><i class="fas fa-comments"></i></span>
+          <span class="link-text">Mensagens</span>
+        </a>
+      </li>
+      <li>
+        <a href="#" class="sidebar-link <% if(activeTab === 'tab-configuracoes') { %>active<% } %>" data-tab="tab-configuracoes">
+          <span class="icon-wrapper"><i class="fas fa-cog"></i></span>
+          <span class="link-text">Configurações</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
 
-    <div class="mt-auto pt-4 border-t border-gray-700">
-      <form action="/admin/logout" method="POST" class="w-full">
-        <button type="submit" class="w-full bg-red-700 hover:bg-red-800 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out">
-          <span class="icon-wrapper"><i class="fas fa-sign-out-alt"></i></span>
-          <span class="link-text">Sair</span>
-        </button>
-      </form>
-    </div>
-  </aside>
+  <div class="mt-auto pt-4 border-t border-gray-700">
+    <form action="/admin/logout" method="POST" class="w-full">
+      <button type="submit" class="w-full bg-red-700 hover:bg-red-800 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out">
+        <span class="icon-wrapper"><i class="fas fa-sign-out-alt"></i></span>
+        <span class="link-text">Sair</span>
+      </button>
+    </form>
+  </div>
+</aside>
+
 
     <!-- Main Content Area -->
     <div id="contentArea" class="p-6">
@@ -1018,6 +1025,34 @@
 </div>
 
             <!-- FIM ABA: CONFIGURAÇÕES -->
+
+            <!-- ABA MENSAGEM-->
+             <div id="suporte-tab" class="tab-content <%= activeTab === 'suporte' ? '' : 'hidden' %>">
+  <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+    <i class="fas fa-comments text-blue-600 mr-3"></i>
+    Tira-Dúvidas com Super ADM
+  </h2>
+
+  <form action="/suporte" method="POST" class="mb-6">
+    <textarea name="mensagem" rows="3" class="w-full p-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Digite sua dúvida..." required></textarea>
+    <button type="submit" class="mt-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+      Enviar
+    </button>
+  </form>
+
+  <div class="space-y-4 max-h-80 overflow-y-auto bg-white p-4 rounded shadow-inner border border-gray-200">
+    <% mensagens.forEach(msg => { %>
+      <div class="p-3 rounded <%= msg.autorTipo === 'ADM' ? 'bg-blue-100 text-blue-900' : 'bg-gray-100 text-gray-800' %>">
+        <strong><%= msg.autorTipo === 'ADM' ? 'Você' : 'Super ADM' %>:</strong>
+        <p><%= msg.mensagem %></p>
+        <small class="block mt-1 text-xs text-gray-500"><%= msg.dataEnvio.toLocaleString() %></small>
+      </div>
+    <% }) %>
+  </div>
+</div>
+          <!-- FIM ABA: MENSAGEM -->
+
+
         </div>
     </div>
 

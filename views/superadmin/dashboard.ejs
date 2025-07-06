@@ -453,6 +453,10 @@
                 <button class="tab-button <%= activeTab === 'resumo-avaliadores' ? 'active' : '' %>" data-tab="resumo-avaliadores">
                     <i class="fas fa-users mr-2"></i>Avaliadores
                 </button>
+                <button class="tab-button <%= activeTab === 'mensagens' ? 'active' : '' %>" data-tab="mensagens">
+                    <i class="fas fa-comments mr-2"></i>Mensagens
+                </button>
+
             </div>
 
             <!-- Conteúdo da Aba: Visão Geral -->
@@ -941,7 +945,7 @@
         </div>
     <% } %>
 
-    <script>
+        <script>
         document.addEventListener("DOMContentLoaded", () => {
             const filtroAvaliadores = document.getElementById('escolaFiltroAvaliadores');
             const blocosAvaliadores = document.querySelectorAll('.bloco-escola-avaliadores');
@@ -960,6 +964,33 @@
             });
         });
     </script>
+</div>
+
+<div id="mensagens-tab" class="tab-content <%= activeTab === 'mensagens' ? '' : 'hidden' %>">
+  <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+    <i class="fas fa-comments text-blue-600 mr-3"></i>
+    Mensagens de Administradores
+  </h2>
+
+  <% if (mensagens.length === 0) { %>
+    <div class="bg-yellow-100 text-yellow-800 p-4 rounded shadow-sm">
+      Nenhuma mensagem recebida até o momento.
+    </div>
+  <% } else { %>
+    <div class="space-y-4 max-h-[500px] overflow-y-auto">
+      <% mensagens.forEach(msg => { %>
+        <div class="bg-white border border-gray-300 p-4 rounded-lg shadow-sm">
+          <div class="flex justify-between items-center mb-2">
+            <div>
+              <strong class="text-blue-800"><%= msg.autorNome || 'Administrador' %></strong>
+              <span class="text-sm text-gray-500 ml-2"><%= msg.dataEnvio.toLocaleString('pt-BR') %></span>
+            </div>
+          </div>
+          <p class="text-gray-800 whitespace-pre-line"><%= msg.mensagem %></p>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
 </div>
 
 
