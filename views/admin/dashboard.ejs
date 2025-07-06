@@ -299,7 +299,7 @@
         </a>
       </li>
       <li>
-        <a href="/admin/dashboard?tab=suporte" class="sidebar-link <% if(activeTab === 'suporte') { %>active<% } %>" data-tab="suporte">
+        <a href="#" class="sidebar-link <% if(activeTab === 'suporte') { %>active<% } %>" data-tab="suporte">
           <span class="icon-wrapper"><i class="fas fa-comments"></i></span>
           <span class="link-text">Mensagens</span>
         </a>
@@ -1026,7 +1026,7 @@
             <!-- FIM ABA: CONFIGURAÇÕES -->
 
             <!-- ABA MENSAGEM-->
-             <div id="suporte-tab" class="tab-content <%= activeTab === 'suporte' ? '' : 'hidden' %>">
+             <div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200 hidden" id="tab-suporte" role="tabpanel" aria-labelledby="tab-suporte-tab"></div>
   <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
     <i class="fas fa-comments text-blue-600 mr-3"></i>
     Tira-Dúvidas com Super ADM

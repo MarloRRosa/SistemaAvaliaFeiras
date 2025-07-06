@@ -1,0 +1,17 @@
+<div class="container mx-auto p-6">
+  <h1 class="text-2xl font-bold mb-4">Enviar Mensagem para Suporte</h1>
+  
+  <% if (success_msg) { %>
+    <div class="text-green-600 mb-4"><%= success_msg %></div>
+  <% } %>
+  <% if (error_msg) { %>
+    <div class="text-red-600 mb-4"><%= error_msg %></div>
+  <% } %>
+
+  <form action="/suporte" method="POST" class="space-y-4">
+    <textarea name="mensagem" rows="5" placeholder="Digite sua mensagem..." class="w-full border p-3 rounded" required></textarea>
+    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Enviar Mensagem</button>
+  </form>
+
+  <!-- Aqui você pode listar mensagens enviadas, se quiser -->
+</div>
