@@ -1022,7 +1022,7 @@ router.post('/solicitacoes/:id/aprovar', verificarSuperAdmin, async (req, res) =
 
         const appUrl = process.env.APP_URL || 'http://localhost:3000';
         const mailOptionsAprovacao = {
-            from: process.env.EMAIL_USER,
+            from: `"AvaliaFeiras" <${process.env.EMAIL_SENDER_ADDRESS}>`,
             to: solicitacao.emailContato,
             subject: 'Sua Solicitação de Acesso ao AvaliaFeiras foi Aprovada!',
             html: `

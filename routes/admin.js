@@ -953,7 +953,9 @@ router.get('/admin/dashboard', async (req, res) => {
 
     // Exemplo de outros dados
     const projetos = await Projeto.find({ feiraId: feiraAtual._id }).lean();
-    const avaliadores = await Avaliador.find({ feira: feiraAtual._id }).lean();
+    const avaliadores = await Avaliador.find({ feira: feiraAtual._id })
+    .populate('projetosAtribuidos', 'titulo')
+    .lean();
     const avaliacoes = await Avaliacao.find({ feiraId: feiraAtual._id }).lean();
 
     // 🔑 Consulta dos PRÉ-CADASTROS PENDENTES só da feira atual
@@ -1308,7 +1310,50 @@ router.post('/pre-cadastros/:id/aprovar', verificarAdminEscola, async (req, res)
     res.redirect('/admin/pre-cadastros');
   }
 });
+router.post('/avaliadores/:id/reenviar-email', verificarAdminEscola, async (req, res) => {
+  const { id } = req.params;
+  const { mensagemPersonalizada } = req.body;
+  const escolaId = req.session.adminEscola.escolaId;
 
+  try {
+    const avaliador = await Avaliador.findOne({ _id: id, escolaId });
+    if (!avaliador) {
+      req.flash('error_msg', 'Avaliador não encontrado.');
+      return res.redirect('/admin/dashboard?tab=avaliadores');
+    }
+
+    const url = `${process.env.APP_URL || 'http://localhost:3000'}/avaliador/acesso-direto/${avaliador.pin}`;
+
+    const transporter = nodemailer.createTransport({
+      service: 'SendGrid',
+      auth: {
+        user: 'apikey',
+        pass: process.env.SENDGRID_API_KEY
+      }
+    });
+
+    await transporter.sendMail({
+      from: 'AvaliaFeiras <docsrosas@gmail.com>',
+      to: avaliador.email,
+      subject: 'Acesso ao AvaliaFeiras',
+      html: `
+        <p>Olá ${avaliador.nome},</p>
+        <p>${mensagemPersonalizada || 'Aqui estão seus dados de acesso ao AvaliaFeiras:'}</p>
+        <p><strong>PIN:</strong> ${avaliador.pin}</p>
+        <p><a href="${url}">${url}</a></p>
+        <p>Atenciosamente,</p>
+        <p>Equipe AvaliaFeiras</p>
+      `
+    });
+
+    req.flash('success_msg', `E-mail reenviado para ${avaliador.nome} com sucesso.`);
+  } catch (err) {
+    console.error('Erro ao reenviar e-mail:', err);
+    req.flash('error_msg', 'Erro ao reenviar e-mail. Detalhes: ' + err.message);
+  }
+
+  res.redirect('/admin/dashboard?tab=avaliadores');
+});
 
 // ===========================================
 // ROTAS CRUD - FEIRAS
