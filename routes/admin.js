@@ -29,6 +29,10 @@ const upload = multer({ storage: multer.memoryStorage() });
 const rotasPreCadastros = require('./preCadastro');
 const Mensagem = require('../models/mensagensSuporte');
 const enviarMensagemTelegram = require('../utils/telegram');
+const verificarSuperAdmin = require('../middlewares/verificarSuperAdmin');
+const { verificarSuperAdmin } = require('../middlewares/auth');
+
+
 
 // Carrega variáveis de ambiente (garante que estão disponíveis para este arquivo)
 require('dotenv').config();
