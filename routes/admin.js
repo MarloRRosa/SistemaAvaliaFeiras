@@ -2516,41 +2516,42 @@ router.post('/escola/atualizar', verificarAdminEscola, upload.single('logo'), as
   }
 });
 
-router.post('/suporte', verificarSuperAdmin, async (req, res) => {
-    const { mensagem } = req.body;
-    const usuario = req.session.superadmin; // ajuste conforme seu sistema
-
-    if (!mensagem) {
-        req.flash('error_msg', 'Mensagem não pode estar vazia.');
-        return res.redirect('/suporte');
-    }
-
-    await Mensagem.create({
-        autorNome: usuario.nome,
-        autorEmail: usuario.email,
-        autorTipo: 'SUPERADM',
-        mensagem: mensagem,
-        dataEnvio: new Date()
-    });
-
-    req.flash('success_msg', 'Mensagem enviada com sucesso.');
-    res.redirect('/suporte');
-});
-
 router.post('/suporte', async (req, res) => {
-  const novaMensagem = new Mensagem({
-    autorId: req.session.adminEscola.id,
-    autorTipo: 'ADM',
-    mensagem: req.body.mensagem,
+  const { mensagem } = req.body;
+
+  if (!mensagem) {
+    req.flash('error_msg', 'Mensagem não pode estar vazia.');
+    return res.redirect('/suporte');
+  }
+
+  let autorNome = '';
+  let autorEmail = '';
+  let autorTipo = '';
+
+  if (req.session.superadmin) {
+    autorNome = req.session.superadmin.nome;
+    autorEmail = req.session.superadmin.email;
+    autorTipo = 'SUPERADM';
+  } else if (req.session.adminEscola) {
+    autorNome = req.session.adminEscola.nome;
+    autorEmail = req.session.adminEscola.email;
+    autorTipo = 'ADM';
+  } else {
+    req.flash('error_msg', 'Usuário não autenticado.');
+    return res.redirect('/suporte');
+  }
+
+  await Mensagem.create({
+    autorNome,
+    autorEmail,
+    autorTipo,
+    mensagem: mensagem,
     dataEnvio: new Date()
   });
 
-  await novaMensagem.save();
-
-  res.redirect('/admin/dashboard?tab=suporte');
+  req.flash('success_msg', 'Mensagem enviada com sucesso.');
+  res.redirect('/suporte');
 });
-
-
 
 
 module.exports = router;
