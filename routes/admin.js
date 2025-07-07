@@ -1273,6 +1273,8 @@ router.get('/pre-cadastros/:id', verificarAdminEscola, async (req, res) => {
 
 router.post('/pre-cadastros/:id/aprovar', verificarAdminEscola, async (req, res) => {
   try {
+    console.log('BODY RECEBIDO:', req.body);
+
     const { id } = req.params;
     const { nome, email, telefone, projetosAtribuidos } = req.body;
     const escolaId = req.session.adminEscola.escolaId;
