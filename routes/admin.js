@@ -1270,9 +1270,10 @@ router.get('/pre-cadastros/:id', verificarAdminEscola, async (req, res) => {
 });
 
 // Aprovar e criar Avaliador (a partir de pré-cadastro)
+// Aprovar e criar Avaliador (a partir de pré-cadastro)
 router.post('/pre-cadastros/:id/aprovar', verificarAdminEscola, async (req, res) => {
   try {
-    const { nome, email, telefone, projetosAtribuidos = [] } = req.body;
+    const { nome, email, telefone, projetosAtribuidos } = req.body;
     const escolaId = req.session.adminEscola.escolaId;
     const pre = await PreCadastroAvaliador.findById(req.params.id);
 
@@ -1288,23 +1289,28 @@ router.post('/pre-cadastros/:id/aprovar', verificarAdminEscola, async (req, res)
       return res.redirect('/admin/pre-cadastros');
     }
 
+    // Garante que seja array (ou array vazio)
+    const projetosArray = Array.isArray(projetosAtribuidos)
+      ? projetosAtribuidos
+      : (projetosAtribuidos ? [projetosAtribuidos] : []);
+
     const pin = generatePIN();
     const url = `${process.env.APP_URL || 'http://localhost:3000'}/avaliador/acesso-direto/${pin}`;
     const qrcode = await QRCode.toDataURL(url);
 
     const novo = new Avaliador({
-  nome: nome.trim(),
-  email: email.trim(),
-  telefone: telefone?.trim() || '',
-  escolaId,
-  feira: pre.feiraId,
-  pin,
-  projetosAtribuidos: Array.isArray(projetosAtribuidos) ? projetosAtribuidos : [projetosAtribuidos],
-  qrcode,
-  ativo: true,
-  criadoVia: 'pre-cadastro',
-  extras: pre.extras || {}
-});
+      nome: nome.trim(),
+      email: email.trim(),
+      telefone: telefone?.trim() || '',
+      escolaId,
+      feira: pre.feiraId,
+      pin,
+      projetosAtribuidos: projetosArray,
+      qrcode,
+      ativo: true,
+      criadoVia: 'pre-cadastro',
+      extras: pre.extras || {}
+    });
 
     await novo.save();
     await PreCadastroAvaliador.findByIdAndDelete(pre._id);
@@ -1313,10 +1319,11 @@ router.post('/pre-cadastros/:id/aprovar', verificarAdminEscola, async (req, res)
     res.redirect('/admin/dashboard?tab=avaliadores');
   } catch (err) {
     console.error('Erro ao aprovar pré-cadastro:', err);
-    req.flash('error_msg', 'Erro ao aprovar pré-cadastro.');
+    req.flash('error_msg', 'Erro ao aprovar pré-cadastro. Detalhes: ' + err.message);
     res.redirect('/admin/pre-cadastros');
   }
 });
+
 router.post('/avaliadores/:id/reenviar-email', verificarAdminEscola, async (req, res) => {
   const { id } = req.params;
   const { mensagemPersonalizada } = req.body;
