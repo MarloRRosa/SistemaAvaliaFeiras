@@ -164,7 +164,8 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-48 overflow-y-auto custom-scrollbar">
                             <% projetos.forEach(p => { %>
                                 <label class="project-item flex items-center space-x-3 p-3 rounded-lg border border-transparent cursor-pointer">
-                                    <input type="checkbox" name="projetosAtribuidos" value="<%= p._id %>" class="custom-checkbox">
+                                    <input type="checkbox" name="projetosAtribuidos[]" value="<%= p._id %>">
+
                                     <span class="text-gray-700 select-none text-sm"><%= p.titulo %></span>
                                 </label>
                             <% }) %>

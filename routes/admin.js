@@ -1270,26 +1270,33 @@ router.get('/pre-cadastros/:id', verificarAdminEscola, async (req, res) => {
 });
 
 // Aprovar e criar Avaliador (a partir de pré-cadastro)
-// Aprovar e criar Avaliador (a partir de pré-cadastro)
+
 router.post('/pre-cadastros/:id/aprovar', verificarAdminEscola, async (req, res) => {
   try {
+    const { id } = req.params;
     const { nome, email, telefone, projetosAtribuidos } = req.body;
     const escolaId = req.session.adminEscola.escolaId;
-    const pre = await PreCadastroAvaliador.findById(req.params.id);
 
+    // Verifica se o pré-cadastro existe e pertence à escola do admin
+    const pre = await PreCadastroAvaliador.findOne({ _id: id });
     if (!pre) {
       req.flash('error_msg', 'Pré-cadastro não encontrado.');
       return res.redirect('/admin/pre-cadastros');
     }
 
-    // Verifica duplicidade
+    // Valida se a feira pertence à mesma escola
+    const feira = await Feira.findOne({ _id: pre.feiraId, escolaId });
+    if (!feira) {
+      req.flash('error_msg', 'Feira não encontrada ou não pertence à sua escola.');
+      return res.redirect('/admin/pre-cadastros');
+    }
+
     const jaExiste = await Avaliador.findOne({ email, escolaId });
     if (jaExiste) {
       req.flash('error_msg', 'Já existe um avaliador com esse e-mail.');
       return res.redirect('/admin/pre-cadastros');
     }
 
-    // Garante que seja array (ou array vazio)
     const projetosArray = Array.isArray(projetosAtribuidos)
       ? projetosAtribuidos
       : (projetosAtribuidos ? [projetosAtribuidos] : []);
@@ -1303,7 +1310,7 @@ router.post('/pre-cadastros/:id/aprovar', verificarAdminEscola, async (req, res)
       email: email.trim(),
       telefone: telefone?.trim() || '',
       escolaId,
-      feira: pre.feiraId,
+      feira: feira._id,
       pin,
       projetosAtribuidos: projetosArray,
       qrcode,
