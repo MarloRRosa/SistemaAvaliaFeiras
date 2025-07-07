@@ -22,7 +22,7 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px; /* Aumentado de 1200px para 1400px */
             margin: 0 auto;
         }
 
@@ -71,10 +71,10 @@
         }
 
         /* Definindo larguras específicas para cada coluna */
-        .table th:nth-child(1) { width: 25%; } /* Nome */
-        .table th:nth-child(2) { width: 35%; } /* Email */
-        .table th:nth-child(3) { width: 20%; } /* Telefone */
-        .table th:nth-child(4) { width: 20%; } /* Ações */
+        .table th:nth-child(1) { width: 30%; } /* Nome - aumentado */
+        .table th:nth-child(2) { width: 40%; } /* Email - aumentado */
+        .table th:nth-child(3) { width: 15%; } /* Telefone - diminuído */
+        .table th:nth-child(4) { width: 15%; } /* Ações - diminuído */
 
         .table th .header-content {
             display: flex;
@@ -138,12 +138,12 @@
         .btn {
             display: inline-flex;
             align-items: center;
-            padding: 0.5rem 1rem;
+            padding: 0.4rem 0.75rem; /* Diminuído de 0.5rem 1rem */
             background-color: #2563eb;
             color: white;
-            font-size: 0.875rem;
+            font-size: 0.8rem; /* Diminuído de 0.875rem */
             font-weight: 500;
-            border-radius: 0.5rem;
+            border-radius: 0.4rem; /* Diminuído de 0.5rem */
             text-decoration: none;
             transition: background-color 0.2s;
             white-space: nowrap; /* Mantém o botão em uma linha */
@@ -156,7 +156,8 @@
         }
 
         .btn i {
-            margin-right: 0.5rem;
+            margin-right: 0.4rem; /* Diminuído de 0.5rem */
+            font-size: 0.75rem; /* Ícone menor */
         }
 
         /* Mobile Cards */
@@ -275,16 +276,21 @@
             }
         }
 
-        /* Melhorias adicionais para telas pequenas */
+        /* Adicionando mais espaço para telas maiores */
+        @media (min-width: 1200px) {
+            .container {
+                max-width: 1500px; /* Ainda maior para telas grandes */
+            }
+        }
         @media (max-width: 768px) {
-            .table th:nth-child(1) { width: 30%; }
+            .table th:nth-child(1) { width: 35%; }
             .table th:nth-child(2) { width: 40%; }
-            .table th:nth-child(3) { width: 15%; }
-            .table th:nth-child(4) { width: 15%; }
+            .table th:nth-child(3) { width: 12%; }
+            .table th:nth-child(4) { width: 13%; }
             
             .btn {
-                padding: 0.4rem 0.8rem;
-                font-size: 0.8rem;
+                padding: 0.3rem 0.6rem;
+                font-size: 0.75rem;
             }
         }
     </style>
