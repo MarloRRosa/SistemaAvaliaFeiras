@@ -945,56 +945,7 @@ router.delete('/projetos/:id', verificarAdminEscola, async (req, res) => {
 // Adicionar Avaliador (POST)
 
 // Aprovar pré-cadastro de avaliador
-router.get('/admin/dashboard', async (req, res) => {
-  try {
-    const adminEscolaId = req.session.adminEscola.escolaId;
 
-    // Busca todas as feiras dessa escola
-    const feiras = await Feira.find({ escolaId: adminEscolaId }).lean();
-
-    // Define a feira atual (pode usar req.query.feiraId se tiver seleção dinâmica)
-    let feiraAtual = await Feira.findOne({ escolaId: adminEscolaId, status: 'ativa' }).lean();
-    if (!feiraAtual) {
-      feiraAtual = feiras[0]; // fallback: pega a primeira feira se não tiver ativa
-    }
-
-    // Exemplo de outros dados
-    const projetos = await Projeto.find({ feiraId: feiraAtual._id }).lean();
-    const avaliadores = await Avaliador.find({ feira: feiraAtual._id })
-    .populate('projetosAtribuidos', 'titulo')
-    .lean();
-    const avaliacoes = await Avaliacao.find({ feiraId: feiraAtual._id }).lean();
-
-    // 🔑 Consulta dos PRÉ-CADASTROS PENDENTES só da feira atual
-    const preCadastros = await PreCadastroAvaliador.find({
-      feiraId: feiraAtual._id,
-      status: 'pendente'
-    }).lean();
-
-    // Exemplo de contagem se usar em cards
-    const totalProjetos = projetos.length;
-    const totalAvaliadores = avaliadores.length;
-
-    res.render('admin/dashboard', {
-      titulo: 'Dashboard Admin',
-      layout: false,
-      usuarioLogado: req.session.adminEscola,
-      feiras,
-      feiraAtual,
-      projetos,
-      avaliadores,
-      avaliacoes,
-      preCadastros,
-      totalProjetos,
-      totalAvaliadores,
-      camposExtras: []
-    });
-
-  } catch (err) {
-    console.error(err);
-    res.send('Erro ao carregar dashboard.');
-  }
-});
 
 
 router.post('/avaliadores', verificarAdminEscola, async (req, res) => {
