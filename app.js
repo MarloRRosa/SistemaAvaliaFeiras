@@ -11,7 +11,7 @@ const MongoDBStore = require('connect-mongodb-session')(session);
 const methodOverride = require('method-override');
 const isProduction = process.env.NODE_ENV === 'production';
 
-// Importa a função auxiliar
+// Importa função auxiliar
 const { formatarDatasParaInput } = require('./utils/helpers');
 
 const app = express();
@@ -97,12 +97,14 @@ const superadminRoutes = require('./routes/superadmin');
 const adminRoutes = require('./routes/admin');
 const avaliadorRoutes = require('./routes/avaliador');
 const preCadastroRoutes = require('./routes/preCadastro');
+const suporteRoutes = require('./routes/suporte'); // ✅ NOVA ROTA
 
 app.use('/', publicRoutes);
 app.use(preCadastroRoutes); 
 app.use('/superadmin', superadminRoutes);
 app.use('/admin', adminRoutes);
 app.use('/avaliador', avaliadorRoutes);
+app.use('/suporte', suporteRoutes); // ✅ ATIVA A ROTA DO TIRA-DÚVIDAS
 
 // =====================
 // Inicialização do Servidor

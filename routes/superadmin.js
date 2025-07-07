@@ -486,6 +486,78 @@ router.get('/dashboard', verificarSuperAdmin, async (req, res) => {
             }
             dataForTab.resumoAvaliadoresPorEscola = resumoAvaliadores;
         }
+        else if (activeTab === 'relatorio-projetos') {
+    let projetosPorEscola = [];
+
+    for (const escola of escolasCadastradas) {
+        const projetos = await Projeto.find({ escolaId: escola._id }).populate('categoria').lean();
+
+        const categoriasMap = {};
+
+        for (const proj of projetos) {
+            const categoriaNome = proj.categoria?.nome || 'Sem Categoria';
+            if (!categoriasMap[categoriaNome]) categoriasMap[categoriaNome] = [];
+
+            // Buscar avaliações do projeto
+            const avaliacoesDoProjeto = await Avaliacao.find({ projeto: proj._id }).lean();
+
+            // Buscar critérios do projeto (se existirem)
+            const criteriosOficiaisProjeto = await Criterio.find({ _id: { $in: proj.criterios } }).lean();
+
+            let mediasCriterios = {};
+let nomesCriterios = {};
+let totalPontuacao = 0;
+let totalPesos = 0;
+
+// Inicializar médias e mapear nomes
+criteriosOficiaisProjeto.forEach(crit => {
+    const critIdStr = crit._id.toString();
+    mediasCriterios[critIdStr] = 'N/A';
+    nomesCriterios[critIdStr] = crit.nome;  // adiciona o nome
+});
+
+
+            // Calcular médias por critério
+            criteriosOficiaisProjeto.forEach(crit => {
+                const notas = [];
+                avaliacoesDoProjeto.forEach(aval => {
+                    aval.itens.forEach(item => {
+                        if (String(item.criterio) === String(crit._id) && item.nota != null) {
+                            notas.push(item.nota);
+                        }
+                    });
+                });
+
+                if (notas.length > 0) {
+                    const mediaCriterio = notas.reduce((a, b) => a + b, 0) / notas.length;
+                    mediasCriterios[crit._id.toString()] = mediaCriterio.toFixed(2);
+                    totalPontuacao += mediaCriterio * crit.peso;
+                    totalPesos += crit.peso;
+                }
+            });
+
+            const mediaGeral = totalPesos > 0 ? (totalPontuacao / totalPesos).toFixed(2) : 'N/A';
+
+            categoriasMap[categoriaNome].push({
+                titulo: proj.titulo,
+                turma: proj.turma,
+                premiado: proj.premiado ? 'Sim' : 'Não',
+                numAvaliacoes: avaliacoesDoProjeto.length,
+                mediasCriterios,
+                nomesCriterios,
+                mediaGeral
+            });
+        }
+
+        projetosPorEscola.push({
+            escolaNome: escola.nome,
+            categorias: categoriasMap
+        });
+    }
+
+    dataForTab.projetosPorEscola = projetosPorEscola;
+}
+const mensagens = await Mensagem.find({}).sort({ data: -1 }).lean();
 
         res.render('superadmin/dashboard', {
             titulo: 'Painel Super Admin', 
@@ -493,7 +565,10 @@ router.get('/dashboard', verificarSuperAdmin, async (req, res) => {
             activeTab: activeTab,
             error_msg: req.flash('error_msg'),
             success_msg: req.flash('success_msg'),
-            ...dataForTab
+            escolasCadastradas,
+            ...dataForTab,
+            projetosPorEscola: dataForTab.projetosPorEscola,
+            mensagens: mensagens || []
         });
 
     } catch (err) {
@@ -949,7 +1024,7 @@ router.post('/solicitacoes/:id/aprovar', verificarSuperAdmin, async (req, res) =
 
         const appUrl = process.env.APP_URL || 'http://localhost:3000';
         const mailOptionsAprovacao = {
-            from: process.env.EMAIL_USER,
+            from: `"AvaliaFeiras" <${process.env.EMAIL_SENDER_ADDRESS}>`,
             to: solicitacao.emailContato,
             subject: 'Sua Solicitação de Acesso ao AvaliaFeiras foi Aprovada!',
             html: `
@@ -1046,6 +1121,24 @@ router.post('/solicitacoes/:id/rejeitar', verificarSuperAdmin, async (req, res) 
             res.redirect('/superadmin/solicitacoes');
         }
     }
+});
+
+const Mensagem = require('../models/mensagensSuporte');
+
+router.get('/dashboard', async (req, res) => {
+  try {
+    const mensagens = await Mensagem.find().sort({ dataEnvio: -1 });
+
+    res.render('superadmin/dashboard', {
+      layout: 'layouts/superadmin',
+      activeTab: 'mensagens',
+      mensagens
+    });
+  } catch (err) {
+    console.error('Erro ao buscar mensagens:', err);
+    req.flash('error_msg', 'Erro ao carregar mensagens.');
+    res.redirect('/superadmin/login');
+  }
 });
 
 

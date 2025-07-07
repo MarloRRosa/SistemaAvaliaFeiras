@@ -1,4 +1,3 @@
-<!--views/superadmin/dashboard.ejs-->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -6,264 +5,589 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= titulo %></title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Estilos para a navegação de abas */
+        :root {
+            /* Design System Modernizado */
+            --primary-blue: #2563eb;
+            --primary-blue-light: #dbeafe;
+            --primary-green: #059669;
+            --primary-green-light: #d1fae5;
+            --primary-yellow: #d97706;
+            --primary-yellow-light: #fef3c7;
+            --primary-purple: #7c3aed;
+            --primary-purple-light: #ede9fe;
+            --primary-indigo: #4f46e5;
+            --primary-indigo-light: #e0e7ff;
+            --primary-red: #dc2626;
+            --primary-red-light: #fee2e2;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Navegação de Abas Modernizada */
         .tab-button {
-            /* Adicionado padding, arredondamento, sombra e transições */
-            @apply px-6 py-3 text-sm font-semibold text-gray-700 bg-white rounded-lg shadow-sm border border-gray-200 
-                   hover:text-blue-600 hover:border-blue-400 hover:bg-blue-50 transition-all duration-300 ease-in-out;
-            white-space: nowrap; /* Evita que o texto quebre */
-            margin-right: 0.75rem; /* Espaçamento maior entre os botões */
-            margin-bottom: 0.5rem; /* Margem inferior para espaçamento vertical em telas menores */
-            display: inline-flex; /* Para alinhar melhor o conteúdo */
+            padding: 0.875rem 1.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #6b7280;
+            background: white;
+            border-radius: 0.75rem;
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            flex-grow: 1; /* Permite que os botões cresçam para preencher o espaço */
-            text-align: center; /* Centraliza o texto dentro do botão */
+            position: relative;
+            overflow: hidden;
         }
+
+        .tab-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+            transition: left 0.5s;
+        }
+
+        .tab-button:hover::before {
+            left: 100%;
+        }
+
+        .tab-button:hover {
+            color: var(--primary-blue);
+            border-color: var(--primary-blue);
+            background: var(--primary-blue-light);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
         .tab-button.active {
-            @apply text-blue-800 bg-blue-100 border-blue-600 shadow-md;
+            color: white;
+            background: linear-gradient(135deg, var(--primary-blue), #1d4ed8);
+            border-color: var(--primary-blue);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-1px);
         }
+
+        /* Conteúdo das Abas */
         .tab-content {
-            /* Base para o conteúdo das abas */
-            @apply p-6 rounded-b-lg shadow-md;
-            /* Cor de fundo padrão, será sobrescrita pelas classes específicas */
-            background-color: #fcfcfc; 
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: var(--shadow-lg);
+            background: white;
+            position: relative;
+            overflow: hidden;
         }
+
+        .tab-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-blue), var(--primary-purple), var(--primary-indigo));
+        }
+
         .tab-content.hidden {
             display: none;
         }
-        /* Cores de fundo específicas para cada aba */
-        #visao-geral-tab { background-color: #e0f2fe; /* blue-50 */ }
-        #gerenciar-escolas-tab { background-color: #ecfdf5; /* green-50 */ }
-        #solicitacoes-tab { background-color: #fefce8; /* yellow-50 */ }
-        #projetos-sem-avaliacao-tab { background-color: #fee2e2; /* red-50 */ }
-        #ranking-projetos-tab { background-color: #ede9fe; /* purple-50 */ }
-        #resumo-avaliadores-tab { background-color: #e0f7fa; /* cyan-50 */ }
 
-        /* Estilos personalizados para tabelas de relatório */
-        .report-table {
+        /* Cards Estatísticos Modernizados */
+        .stat-card {
+            background: white;
+            border-radius: 1.25rem;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-md);
+            border: 1px solid #f3f4f6;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            opacity: 0.1;
+            transform: translate(30px, -30px);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .stat-card.blue::after {
+            background: radial-gradient(circle, var(--primary-blue) 0%, transparent 70%);
+        }
+
+        .stat-card.green::after {
+            background: radial-gradient(circle, var(--primary-green) 0%, transparent 70%);
+        }
+
+        .stat-card.yellow::after {
+            background: radial-gradient(circle, var(--primary-yellow) 0%, transparent 70%);
+        }
+
+        .stat-card.purple::after {
+            background: radial-gradient(circle, var(--primary-purple) 0%, transparent 70%);
+        }
+
+        .stat-card.indigo::after {
+            background: radial-gradient(circle, var(--primary-indigo) 0%, transparent 70%);
+        }
+
+        .stat-card.red::after {
+            background: radial-gradient(circle, var(--primary-red) 0%, transparent 70%);
+        }
+
+        /* Ícones dos Cards */
+        .stat-icon {
+            width: 3.5rem;
+            height: 3.5rem;
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-icon.blue {
+            background: linear-gradient(135deg, var(--primary-blue-light), #bfdbfe);
+            color: var(--primary-blue);
+        }
+
+        .stat-icon.green {
+            background: linear-gradient(135deg, var(--primary-green-light), #a7f3d0);
+            color: var(--primary-green);
+        }
+
+        .stat-icon.yellow {
+            background: linear-gradient(135deg, var(--primary-yellow-light), #fed7aa);
+            color: var(--primary-yellow);
+        }
+
+        .stat-icon.purple {
+            background: linear-gradient(135deg, var(--primary-purple-light), #c4b5fd);
+            color: var(--primary-purple);
+        }
+
+        .stat-icon.indigo {
+            background: linear-gradient(135deg, var(--primary-indigo-light), #c7d2fe);
+            color: var(--primary-indigo);
+        }
+
+        .stat-icon.red {
+            background: linear-gradient(135deg, var(--primary-red-light), #fecaca);
+            color: var(--primary-red);
+        }
+
+        /* Tabelas Modernizadas */
+        .modern-table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 1rem;
-            border-radius: 0.5rem;
-            overflow: hidden; /* Garante que os cantos arredondados se apliquem ao conteúdo */
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
         }
-        .report-table th, .report-table td {
-            padding: 0.75rem 1.5rem;
-            text-align: left;
-            vertical-align: top;
-            border-bottom: 1px solid #e5e7eb; /* gray-200 */
-        }
-        .report-table th {
-            font-weight: 600;
-            background-color: #f3f4f6; /* gray-100 */
-            color: #374151; /* gray-700 */
+
+        .modern-table th {
+            padding: 1rem 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            color: #374151;
             text-transform: uppercase;
             font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            border-bottom: 2px solid #e5e7eb;
         }
-        .report-table tbody tr:nth-child(even) {
-            background-color: #f9fafb; /* faixa cinza clara */
+
+        .modern-table td {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #f3f4f6;
+            color: #374151;
+            vertical-align: middle;
         }
-        .report-table tbody tr:hover {
-            background-color: #f3f4f6; /* gray-100 ao passar o mouse */
+
+        .modern-table tbody tr {
+            transition: all 0.2s ease;
         }
-        .report-table td.text-center {
-            text-align: center;
+
+        .modern-table tbody tr:hover {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            transform: scale(1.005);
+        }
+
+        .modern-table tbody tr:nth-child(even) {
+            background: rgba(248, 250, 252, 0.5);
+        }
+
+        /* Badges Modernizados */
+        .modern-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.025em;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .badge-success {
+            background: linear-gradient(135deg, var(--primary-green-light), #a7f3d0);
+            color: var(--primary-green);
+            border: 1px solid var(--primary-green);
+        }
+
+        .badge-danger {
+            background: linear-gradient(135deg, var(--primary-red-light), #fecaca);
+            color: var(--primary-red);
+            border: 1px solid var(--primary-red);
+        }
+
+        /* Botões de Ação */
+        .action-btn {
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Header Principal */
+        .main-header {
+            background: linear-gradient(135deg, white, #f8fafc);
+            border-radius: 1.25rem;
+            padding: 2rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid #e5e7eb;
+            margin-bottom: 2rem;
+        }
+
+        /* Botões do Header */
+        .header-btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .header-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-primary-modern {
+            background: linear-gradient(135deg, var(--primary-blue), #1d4ed8);
+            color: white;
+        }
+
+        .btn-danger-modern {
+            background: linear-gradient(135deg, var(--primary-red), #b91c1c);
+            color: white;
+        }
+
+        /* Modal Modernizado */
+        .modern-modal {
+            backdrop-filter: blur(8px);
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        .modal-content-modern {
+            border-radius: 1.25rem;
+            box-shadow: var(--shadow-xl);
+            border: 1px solid #e5e7eb;
+        }
+
+        /* Formulários */
+        .modern-select {
+            border-radius: 0.75rem;
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .modern-select:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        /* Animações */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in-up {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        /* Mensagens Flash Modernizadas */
+        .flash-message {
+            border-radius: 1rem;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid;
+            box-shadow: var(--shadow-md);
+        }
+
+        .flash-success {
+            background: linear-gradient(135deg, var(--primary-green-light), #d1fae5);
+            border-left-color: var(--primary-green);
+            color: #065f46;
+        }
+
+        .flash-error {
+            background: linear-gradient(135deg, var(--primary-red-light), #fee2e2);
+            border-left-color: var(--primary-red);
+            color: #991b1b;
         }
     </style>
 </head>
-<body class="bg-gray-50 flex flex-col min-h-screen">
-    <!-- Não incluir navbar aqui conforme solicitado -->
-
-    <main class="flex-grow p-6 md:p-8">
-        <div class="max-w-7xl mx-auto bg-white rounded-xl shadow-md p-6">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-                <h2 class="text-3xl font-bold text-gray-800 mb-4 md:mb-0">Painel Super Admin</h2>
-                <div class="flex flex-col md:flex-row items-center gap-4">
-                    <a href="/superadmin/escolas/nova" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2 rounded-lg shadow-sm transition-colors duration-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-                        </svg>
-                        Nova Escola
-                    </a>
-                    
-                    <!-- NOVO LINK DE LOGOUT -->
-                    <a href="/superadmin/logout" class="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-5 py-2 rounded-lg shadow-sm transition-colors duration-200">
-                        <i class="fas fa-sign-out-alt"></i> <!-- Ícone de saída do Font Awesome -->
-                        Sair
-                    </a>
+<body class="bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen">
+    <main class="p-6 md:p-8">
+        <div class="max-w-7xl mx-auto">
+            <!-- Header Principal -->
+            <div class="main-header animate-fade-in-up">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+                    <div>
+                        <h1 class="text-4xl font-bold text-gray-800 mb-2">Painel Super Admin</h1>
+                        <p class="text-gray-600 text-lg">Gerencie escolas, projetos e avaliações do sistema</p>
+                    </div>
+                    <div class="flex flex-col md:flex-row items-center gap-4 mt-4 md:mt-0">
+                        <a href="/superadmin/escolas/nova" class="header-btn btn-primary-modern">
+                            <i class="fas fa-plus"></i>
+                            Nova Escola
+                        </a>
+                        <a href="/superadmin/logout" class="header-btn btn-danger-modern">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Sair
+                        </a>
+                    </div>
                 </div>
             </div>
 
             <!-- Mensagens Flash -->
             <% if (success_msg && success_msg.length > 0) { %>
-                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
-                    <strong class="font-bold">Sucesso!</strong>
-                    <span class="block sm:inline"><%= success_msg %></span>
+                <div class="flash-message flash-success animate-fade-in-up" role="alert">
+                    <div class="flex items-center">
+                        <i class="fas fa-check-circle text-xl mr-3"></i>
+                        <div>
+                            <strong class="font-bold">Sucesso!</strong>
+                            <span class="block sm:inline ml-2"><%= success_msg %></span>
+                        </div>
+                    </div>
                 </div>
             <% } %>
             <% if (error_msg && error_msg.length > 0) { %>
-                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-                    <strong class="font-bold">Erro!</strong>
-                    <span class="block sm:inline"><%= error_msg %></span>
+                <div class="flash-message flash-error animate-fade-in-up" role="alert">
+                    <div class="flex items-center">
+                        <i class="fas fa-exclamation-circle text-xl mr-3"></i>
+                        <div>
+                            <strong class="font-bold">Erro!</strong>
+                            <span class="block sm:inline ml-2"><%= error_msg %></span>
+                        </div>
+                    </div>
                 </div>
             <% } %>
 
             <!-- Navegação por Abas -->
-            <div class="flex flex-wrap border-b border-gray-200 mb-6 -mt-6 pb-2">
-  <button class="tab-button <%= activeTab === 'visao-geral' ? 'active' : '' %>" data-tab="visao-geral">Visão Geral</button>
-  <button class="tab-button <%= activeTab === 'gerenciar-escolas' ? 'active' : '' %>" data-tab="gerenciar-escolas">Gerenciar Escolas</button>
-  <button class="tab-button <%= activeTab === 'solicitacoes' ? 'active' : '' %>" data-tab="solicitacoes">Gerenciar Solicitações</button>
-  <button class="tab-button <%= activeTab === 'projetos-sem-avaliacao' ? 'active' : '' %>" data-tab="projetos-sem-avaliacao">Projetos Pendentes</button>
-  <button class="tab-button <%= activeTab === 'ranking-projetos' ? 'active' : '' %>" data-tab="ranking-projetos">Ranking de Projetos</button>
-  <button class="tab-button <%= activeTab === 'resumo-avaliadores' ? 'active' : '' %>" data-tab="resumo-avaliadores">Resumo de Avaliadores</button>
-</div>
+            <div class="flex flex-wrap mb-8 animate-fade-in-up" style="animation-delay: 0.2s;">
+                <button class="tab-button <%= activeTab === 'visao-geral' ? 'active' : '' %>" data-tab="visao-geral">
+                    <i class="fas fa-chart-line mr-2"></i>Visão Geral
+                </button>
+                <button class="tab-button <%= activeTab === 'gerenciar-escolas' ? 'active' : '' %>" data-tab="gerenciar-escolas">
+                    <i class="fas fa-school mr-2"></i>Gerenciar Escolas
+                </button>
+                <button class="tab-button <%= activeTab === 'solicitacoes' ? 'active' : '' %>" data-tab="solicitacoes">
+                    <i class="fas fa-envelope mr-2"></i>Solicitações
+                </button>
+                <button class="tab-button <%= activeTab === 'projetos-sem-avaliacao' ? 'active' : '' %>" data-tab="projetos-sem-avaliacao">
+                    <i class="fas fa-clock mr-2"></i>Projetos Pendentes
+                </button>
+                <button class="tab-button <%= activeTab === 'relatorio-projetos' ? 'active' : '' %>" data-tab="relatorio-projetos">
+                    <i class="fas fa-list-alt mr-2"></i>Relatório Projetos
+                </button>
+                <button class="tab-button <%= activeTab === 'ranking-projetos' ? 'active' : '' %>" data-tab="ranking-projetos">
+                    <i class="fas fa-trophy mr-2"></i>Ranking
+                </button>
+                <button class="tab-button <%= activeTab === 'resumo-avaliadores' ? 'active' : '' %>" data-tab="resumo-avaliadores">
+                    <i class="fas fa-users mr-2"></i>Avaliadores
+                </button>
+                <button class="tab-button <%= activeTab === 'mensagens' ? 'active' : '' %>" data-tab="mensagens">
+                    <i class="fas fa-comments mr-2"></i>Mensagens
+                </button>
+
+            </div>
 
             <!-- Conteúdo da Aba: Visão Geral -->
-<div id="visao-geral-tab" class="tab-content <%= activeTab === 'visao-geral' ? '' : 'hidden' %>">
-  <h3 class="text-2xl font-bold text-gray-800 mb-6 tracking-wide flex items-center gap-2">
-    <i class="fas fa-chart-line text-blue-600 text-2xl"></i>
-    Visão Geral do Sistema
-  </h3>
+            <div id="visao-geral-tab" class="tab-content <%= activeTab === 'visao-geral' ? '' : 'hidden' %> animate-fade-in-up" style="animation-delay: 0.4s;">
+                <h2 class="text-3xl font-bold text-gray-800 mb-8 flex items-center">
+                    <i class="fas fa-chart-line text-blue-600 mr-3"></i>
+                    Visão Geral do Sistema
+                </h2>
 
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-    <!-- Card: Total de Escolas -->
-    <div class="flex items-center p-5 bg-gradient-to-r from-blue-100 to-blue-50 rounded-xl shadow-sm border border-blue-200">
-      <div class="p-3 rounded-full bg-blue-200 text-blue-800 mr-4">
-        <i class="fas fa-school text-xl"></i>
-      </div>
-      <div>
-        <p class="text-sm text-blue-800 font-semibold uppercase tracking-wide">Escolas</p>
-        <p class="text-3xl font-bold text-blue-900"><%= totalEscolas ?? 'N/A' %></p>
-      </div>
-    </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Card: Total de Escolas -->
+                    <div class="stat-card blue">
+                        <div class="stat-icon blue">
+                            <i class="fas fa-school"></i>
+                        </div>
+                        <h3 class="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-1">Escolas</h3>
+                        <p class="text-3xl font-bold text-gray-800"><%= totalEscolas ?? 'N/A' %></p>
+                    </div>
 
-    <!-- Card: Total de Admins -->
-    <div class="flex items-center p-5 bg-gradient-to-r from-green-100 to-green-50 rounded-xl shadow-sm border border-green-200">
-      <div class="p-3 rounded-full bg-green-200 text-green-800 mr-4">
-        <i class="fas fa-user-shield text-xl"></i>
-      </div>
-      <div>
-        <p class="text-sm text-green-800 font-semibold uppercase tracking-wide">Administradores</p>
-        <p class="text-3xl font-bold text-green-900"><%= totalAdmins ?? 'N/A' %></p>
-      </div>
-    </div>
+                    <!-- Card: Total de Admins -->
+                    <div class="stat-card green">
+                        <div class="stat-icon green">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                        <h3 class="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-1">Administradores</h3>
+                        <p class="text-3xl font-bold text-gray-800"><%= totalAdmins ?? 'N/A' %></p>
+                    </div>
 
-    <!-- Card: Total de Avaliadores -->
-    <div class="flex items-center p-5 bg-gradient-to-r from-yellow-100 to-yellow-50 rounded-xl shadow-sm border border-yellow-200">
-      <div class="p-3 rounded-full bg-yellow-200 text-yellow-800 mr-4">
-        <i class="fas fa-user-tie text-xl"></i>
-      </div>
-      <div>
-        <p class="text-sm text-yellow-800 font-semibold uppercase tracking-wide">Avaliadores</p>
-        <p class="text-3xl font-bold text-yellow-900"><%= totalAvaliadores ?? 'N/A' %></p>
-      </div>
-    </div>
+                    <!-- Card: Total de Avaliadores -->
+                    <div class="stat-card yellow">
+                        <div class="stat-icon yellow">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <h3 class="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-1">Avaliadores</h3>
+                        <p class="text-3xl font-bold text-gray-800"><%= totalAvaliadores ?? 'N/A' %></p>
+                    </div>
 
-    <!-- Card: Total de Projetos -->
-    <div class="flex items-center p-5 bg-gradient-to-r from-purple-100 to-purple-50 rounded-xl shadow-sm border border-purple-200">
-      <div class="p-3 rounded-full bg-purple-200 text-purple-800 mr-4">
-        <i class="fas fa-lightbulb text-xl"></i>
-      </div>
-      <div>
-        <p class="text-sm text-purple-800 font-semibold uppercase tracking-wide">Projetos</p>
-        <p class="text-3xl font-bold text-purple-900"><%= totalProjetos ?? 'N/A' %></p>
-      </div>
-    </div>
+                    <!-- Card: Total de Projetos -->
+                    <div class="stat-card purple">
+                        <div class="stat-icon purple">
+                            <i class="fas fa-lightbulb"></i>
+                        </div>
+                        <h3 class="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-1">Projetos</h3>
+                        <p class="text-3xl font-bold text-gray-800"><%= totalProjetos ?? 'N/A' %></p>
+                    </div>
 
-    <!-- Card: Total de Avaliações -->
-    <div class="flex items-center p-5 bg-gradient-to-r from-indigo-100 to-indigo-50 rounded-xl shadow-sm border border-indigo-200">
-      <div class="p-3 rounded-full bg-indigo-200 text-indigo-800 mr-4">
-        <i class="fas fa-star-half-alt text-xl"></i>
-      </div>
-      <div>
-        <p class="text-sm text-indigo-800 font-semibold uppercase tracking-wide">Avaliações</p>
-        <p class="text-3xl font-bold text-indigo-900"><%= totalAvaliacoes ?? 'N/A' %></p>
-      </div>
-    </div>
+                    <!-- Card: Total de Avaliações -->
+                    <div class="stat-card indigo">
+                        <div class="stat-icon indigo">
+                            <i class="fas fa-star-half-alt"></i>
+                        </div>
+                        <h3 class="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-1">Avaliações</h3>
+                        <p class="text-3xl font-bold text-gray-800"><%= totalAvaliacoes ?? 'N/A' %></p>
+                    </div>
 
-    <!-- Card: Solicitações Pendentes -->
-    <div class="flex items-center p-5 bg-gradient-to-r from-red-100 to-red-50 rounded-xl shadow-sm border border-red-200">
-      <div class="p-3 rounded-full bg-red-200 text-red-800 mr-4">
-        <i class="fas fa-envelope-open-text text-xl"></i>
-      </div>
-      <div>
-        <p class="text-sm text-red-800 font-semibold uppercase tracking-wide">Solicitações Pendentes</p>
-        <p class="text-3xl font-bold text-red-900"><%= totalSolicitacoesPendentes ?? 'N/A' %></p>
-      </div>
-    </div>
-  </div>
-</div>
-
+                    <!-- Card: Solicitações Pendentes -->
+                    <div class="stat-card red">
+                        <div class="stat-icon red">
+                            <i class="fas fa-envelope-open-text"></i>
+                        </div>
+                        <h3 class="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-1">Solicitações Pendentes</h3>
+                        <p class="text-3xl font-bold text-gray-800"><%= totalSolicitacoesPendentes ?? 'N/A' %></p>
+                    </div>
+                </div>
+            </div>
 
             <!-- Conteúdo da Aba: Gerenciar Escolas -->
             <div id="gerenciar-escolas-tab" class="tab-content <%= activeTab === 'gerenciar-escolas' ? '' : 'hidden' %>">
-                <h3 class="text-2xl font-bold text-gray-800 mb-4">Gerenciar Escolas</h3>
+                <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-school text-blue-600 mr-3"></i>
+                    Gerenciar Escolas
+                </h2>
                 
                 <% if (typeof escolasDetalhes !== 'undefined' && escolasDetalhes.length > 0) { %>
-                    <div class="overflow-x-auto bg-white rounded-lg shadow-md">
-                        <table class="min-w-full text-sm text-left text-gray-700 divide-y divide-gray-200 report-table">
-                            <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+                    <div class="overflow-x-auto">
+                        <table class="modern-table">
+                            <thead>
                                 <tr>
-                                    <th scope="col" class="px-6 py-3">Nome da Escola</th>
-                                    <th scope="col" class="px-6 py-3">Admin Principal</th>
-                                    <th scope="col" class="px-6 py-3 text-center">Projetos</th>
-                                    <th scope="col" class="px-6 py-3 text-center">Avaliadores</th>
-                                    <th scope="col" class="px-6 py-3 text-center">Avaliações</th>
-                                    <th scope="col" class="px-6 py-3 text-center">Status</th>
-                                    <th scope="col" class="px-6 py-3 text-center">Ações</th>
+                                    <th>Nome da Escola</th>
+                                    <th>Admin Principal</th>
+                                    <th class="text-center">Projetos</th>
+                                    <th class="text-center">Avaliadores</th>
+                                    <th class="text-center">Avaliações</th>
+                                    <th class="text-center">Status</th>
+                                    <th class="text-center">Ações</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-200">
+                            <tbody>
                                 <% escolasDetalhes.forEach(escola => { %>
-                                    <tr class="bg-white hover:bg-gray-50 transition-colors duration-150">
-                                        <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"><%= escola.nome %></td>
-                                        <td class="px-6 py-4"><%= escola.adminEmail %></td>
-                                        <td class="px-6 py-4 text-center"><%= escola.numProjetos %></td>
-                                        <td class="px-6 py-4 text-center"><%= escola.numAvaliadores %></td>
-                                        <td class="px-6 py-4 text-center"><%= escola.numAvaliacoes %></td>
-                                        <td class="px-6 py-4 text-center">
+                                    <tr>
+                                        <td class="font-semibold text-gray-900"><%= escola.nome %></td>
+                                        <td><%= escola.adminEmail %></td>
+                                        <td class="text-center font-semibold"><%= escola.numProjetos %></td>
+                                        <td class="text-center font-semibold"><%= escola.numAvaliadores %></td>
+                                        <td class="text-center font-semibold"><%= escola.numAvaliacoes %></td>
+                                        <td class="text-center">
                                             <% if (escola.ativa) { %>
-                                                <span class="px-3 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">Ativa</span>
+                                                <span class="modern-badge badge-success">
+                                                    <i class="fas fa-check-circle"></i>Ativa
+                                                </span>
                                             <% } else { %>
-                                                <span class="px-3 py-1 text-xs font-semibold text-red-800 bg-red-100 rounded-full">Inativa</span>
+                                                <span class="modern-badge badge-danger">
+                                                    <i class="fas fa-times-circle"></i>Inativa
+                                                </span>
                                             <% } %>
                                         </td>
-                                        <td class="px-6 py-4 flex items-center justify-center gap-4">
-                                            <a href="/superadmin/escolas/<%= escola._id %>/editar" title="Editar" class="font-medium text-blue-600 hover:text-blue-800 transition-colors">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                                    <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
-                                                    <path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" />
-                                                </svg>
-                                            </a>
-                                            
-                                            <% if (escola.ativa) { %>
-                                                <a href="/superadmin/escolas/<%= escola._id %>/inativar" title="Inativar" class="font-medium text-yellow-600 hover:text-yellow-800 transition-colors"
-                                                    onclick="return confirm('Tem certeza que deseja INATIVAR esta escola?');">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 000 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />
-                                                    </svg>
+                                        <td class="text-center">
+                                            <div class="flex items-center justify-center gap-2">
+                                                <a href="/superadmin/escolas/<%= escola._id %>/editar" title="Editar" class="action-btn text-blue-600 hover:text-blue-800 hover:bg-blue-50">
+                                                    <i class="fas fa-edit"></i>
                                                 </a>
-                                            <% } else { %>
-                                                <a href="/superadmin/escolas/<%= escola._id %>/ativar" title="Ativar" class="font-medium text-green-600 hover:text-green-800 transition-colors"
-                                                    onclick="return confirm('Tem certeza que deseja ATIVAR esta escola?');">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
-                                                    </svg>
-                                                </a>
-                                            <% } %>
+                                                
+                                                <% if (escola.ativa) { %>
+                                                    <a href="/superadmin/escolas/<%= escola._id %>/inativar" title="Inativar" class="action-btn text-yellow-600 hover:text-yellow-800 hover:bg-yellow-50"
+                                                        onclick="return confirm('Tem certeza que deseja INATIVAR esta escola?');">
+                                                        <i class="fas fa-pause"></i>
+                                                    </a>
+                                                <% } else { %>
+                                                    <a href="/superadmin/escolas/<%= escola._id %>/ativar" title="Ativar" class="action-btn text-green-600 hover:text-green-800 hover:bg-green-50"
+                                                        onclick="return confirm('Tem certeza que deseja ATIVAR esta escola?');">
+                                                        <i class="fas fa-play"></i>
+                                                    </a>
+                                                <% } %>
 
-                                            <!-- Botão: Redefinir Senha do Admin -->
-                                            <button type="button" 
-                                                    onclick="confirmResetAdminPassword('<%= escola._id %>', '<%= escola.nome %>', '<%= escola.adminEmail %>');" 
-                                                    title="Redefinir Senha do Admin" 
-                                                    class="font-medium text-red-600 hover:text-red-800 transition-colors">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                                    <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
-                                                </svg>
-                                            </button>
+                                                <button type="button" 
+                                                        onclick="confirmResetAdminPassword('<%= escola._id %>', '<%= escola.nome %>', '<%= escola.adminEmail %>');" 
+                                                        title="Redefinir Senha do Admin" 
+                                                        class="action-btn text-red-600 hover:text-red-800 hover:bg-red-50">
+                                                    <i class="fas fa-key"></i>
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 <% }) %>
@@ -271,55 +595,57 @@
                         </table>
                     </div>
                 <% } else { %>
-                    <p class="text-gray-600 text-lg text-center mt-8">Nenhuma escola cadastrada ainda.</p>
+                    <div class="text-center py-12">
+                        <i class="fas fa-school text-6xl text-gray-300 mb-4"></i>
+                        <p class="text-gray-600 text-xl">Nenhuma escola cadastrada ainda.</p>
+                    </div>
                 <% } %>
             </div>
 
             <!-- Conteúdo da Aba: Gerenciar Solicitações -->
             <div id="solicitacoes-tab" class="tab-content <%= activeTab === 'solicitacoes' ? '' : 'hidden' %>">
-                <h3 class="text-2xl font-bold text-gray-800 mb-4">Gerenciar Solicitações de Acesso</h3>
+                <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-envelope text-yellow-600 mr-3"></i>
+                    Gerenciar Solicitações de Acesso
+                </h2>
+                
                 <% if (typeof solicitacoes !== 'undefined' && solicitacoes.length > 0) { %>
-                    <div class="overflow-x-auto bg-white rounded-lg shadow-md">
-                        <table class="min-w-full text-sm text-left text-gray-700 divide-y divide-gray-200 report-table">
-                            <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+                    <div class="overflow-x-auto">
+                        <table class="modern-table">
+                            <thead>
                                 <tr>
-                                    <th scope="col" class="px-6 py-3">Nome da Escola</th>
-                                    <th scope="col" class="px-6 py-3">Admin Solicitante</th>
-                                    <th scope="col" class="px-6 py-3">E-mail</th>
-                                    <th scope="col" class="px-6 py-3">Data da Solicitação</th>
-                                    <th scope="col" class="px-6 py-3 text-center">Ações</th>
+                                    <th>Nome da Escola</th>
+                                    <th>Admin Solicitante</th>
+                                    <th>E-mail</th>
+                                    <th>Data da Solicitação</th>
+                                    <th class="text-center">Ações</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-200">
+                            <tbody>
                                 <% solicitacoes.forEach(solicitacao => { %>
-                                    <tr class="bg-white hover:bg-gray-50 transition-colors duration-150">
-                                        <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"><%= solicitacao.nomeEscola %></td>
-                                        <td class="px-6 py-4"><%= solicitacao.nomeResponsavel %></td>
-                                        <td class="px-6 py-4"><%= solicitacao.emailContato %></td>
-                                        <td class="px-6 py-4"><%= new Date(solicitacao.dataSolicitacao).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }) %></td>
-                                        <td class="px-6 py-4 flex items-center justify-center gap-2">
-                                            <a href="/superadmin/solicitacoes/<%= solicitacao._id %>/editar" title="Ver Detalhes" class="font-medium text-blue-600 hover:text-blue-800 transition-colors">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                                                    <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
-                                                </svg>
-                                            </a>
-                                            <form action="/superadmin/solicitacoes/<%= solicitacao._id %>/aprovar" method="POST" class="inline">
-                                                <button type="submit" title="Aprovar" class="font-medium text-green-600 hover:text-green-800 transition-colors"
-                                                    onclick="return confirm('Tem certeza que deseja APROVAR esta solicitação? Uma nova senha será gerada para o admin.');">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                                                    </svg>
-                                                </button>
-                                            </form>
-                                            <form action="/superadmin/solicitacoes/<%= solicitacao._id %>/rejeitar" method="POST" class="inline">
-                                                <button type="submit" title="Rejeitar" class="font-medium text-red-600 hover:text-red-800 transition-colors"
-                                                    onclick="return confirm('Tem certeza que deseja REJEITAR esta solicitação?');">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                                                    </svg>
-                                                </button>
-                                            </form>
+                                    <tr>
+                                        <td class="font-semibold text-gray-900"><%= solicitacao.nomeEscola %></td>
+                                        <td><%= solicitacao.nomeResponsavel %></td>
+                                        <td><%= solicitacao.emailContato %></td>
+                                        <td><%= new Date(solicitacao.dataSolicitacao).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }) %></td>
+                                        <td class="text-center">
+                                            <div class="flex items-center justify-center gap-2">
+                                                <a href="/superadmin/solicitacoes/<%= solicitacao._id %>/editar" title="Ver Detalhes" class="action-btn text-blue-600 hover:text-blue-800 hover:bg-blue-50">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <form action="/superadmin/solicitacoes/<%= solicitacao._id %>/aprovar" method="POST" class="inline">
+                                                    <button type="submit" title="Aprovar" class="action-btn text-green-600 hover:text-green-800 hover:bg-green-50"
+                                                        onclick="return confirm('Tem certeza que deseja APROVAR esta solicitação? Uma nova senha será gerada para o admin.');">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                </form>
+                                                <form action="/superadmin/solicitacoes/<%= solicitacao._id %>/rejeitar" method="POST" class="inline">
+                                                    <button type="submit" title="Rejeitar" class="action-btn text-red-600 hover:text-red-800 hover:bg-red-50"
+                                                        onclick="return confirm('Tem certeza que deseja REJEITAR esta solicitação?');">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
                                         </td>
                                     </tr>
                                 <% }) %>
@@ -327,19 +653,25 @@
                         </table>
                     </div>
                 <% } else { %>
-                    <p class="text-gray-600 text-lg text-center mt-8">Nenhuma solicitação de acesso pendente.</p>
+                    <div class="text-center py-12">
+                        <i class="fas fa-envelope text-6xl text-gray-300 mb-4"></i>
+                        <p class="text-gray-600 text-xl">Nenhuma solicitação de acesso pendente.</p>
+                    </div>
                 <% } %>
             </div>
 
             <!-- Conteúdo da Aba: Projetos Sem Avaliação -->
             <div id="projetos-sem-avaliacao-tab" class="tab-content <%= activeTab === 'projetos-sem-avaliacao' ? '' : 'hidden' %>">
-                <h3 class="text-2xl font-bold text-gray-800 mb-4">Projetos Pendentes de Avaliação por Escola</h3>
+                <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-clock text-red-600 mr-3"></i>
+                    Projetos Pendentes de Avaliação
+                </h2>
                 
-                <div class="mb-6">
+                <div class="mb-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
                     <form action="/superadmin/dashboard" method="GET" class="flex items-center space-x-4">
                         <input type="hidden" name="tab" value="projetos-sem-avaliacao">
-                        <label for="filterEscola" class="text-gray-700">Filtrar por Escola:</label>
-                        <select id="filterEscola" name="escolaId" onchange="this.form.submit()" class="block w-auto px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        <label for="filterEscola" class="text-gray-700 font-semibold">Filtrar por Escola:</label>
+                        <select id="filterEscola" name="escolaId" onchange="this.form.submit()" class="modern-select block w-auto px-4 py-3 text-gray-700 bg-white">
                             <option value="">-- Selecione uma Escola --</option>
                             <% if (typeof todasEscolas !== 'undefined' && todasEscolas.length > 0) { %>
                                 <% todasEscolas.forEach(escola => { %>
@@ -354,168 +686,408 @@
 
                 <% if (typeof selectedEscolaId !== 'undefined' && selectedEscolaId) { %>
                     <% if (typeof projetosNaoAvaliados !== 'undefined' && projetosNaoAvaliados.length > 0) { %>
-                        <div class="overflow-x-auto bg-white rounded-lg shadow-md">
-                            <table class="min-w-full text-sm text-left text-gray-700 divide-y divide-gray-200 report-table">
-                                <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+                        <div class="overflow-x-auto">
+                            <table class="modern-table">
+                                <thead>
                                     <tr>
-                                        <th scope="col" class="px-6 py-3">Título do Projeto</th>
-                                        <th scope="col" class="px-6 py-3">Turma</th>
-                                        <th scope="col" class="px-6 py-3">Avaliadores Designados</th>
-                                        <th scope="col" class="px-6 py-3 text-center">Avaliações Recebidas</th>
-                                        <th scope="col" class="px-6 py-3 text-center">Critérios Necessários</th>
+                                        <th>Título do Projeto</th>
+                                        <th>Turma</th>
+                                        <th>Avaliadores Designados</th>
+                                        <th class="text-center">Avaliações Recebidas</th>
+                                        <th class="text-center">Critérios Necessários</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-gray-200">
+                                <tbody>
                                     <% projetosNaoAvaliados.forEach(projeto => { %>
-                                        <tr class="bg-white hover:bg-gray-50 transition-colors duration-150">
-                                            <td class="px-6 py-4 font-medium text-gray-900"><%= projeto.titulo %></td>
-                                            <td class="px-6 py-4"><%= projeto.turma %></td>
-                                            <td class="px-6 py-4"><%= projeto.avaliadoresDesignados %></td>
-                                            <td class="px-6 py-4 text-center"><%= projeto.numAvaliacoesRecebidas %></td>
-                                            <td class="px-6 py-4 text-center"><%= projeto.totalCriteriosNecessarios %></td>
+                                        <tr>
+                                            <td class="font-semibold text-gray-900"><%= projeto.titulo %></td>
+                                            <td><%= projeto.turma %></td>
+                                            <td><%= projeto.avaliadoresDesignados %></td>
+                                            <td class="text-center font-semibold"><%= projeto.numAvaliacoesRecebidas %></td>
+                                            <td class="text-center font-semibold"><%= projeto.totalCriteriosNecessarios %></td>
                                         </tr>
                                     <% }) %>
                                 </tbody>
                             </table>
                         </div>
                     <% } else { %>
-                        <p class="text-gray-600 text-lg text-center mt-8">Todos os projetos desta escola foram avaliados ou não há projetos.</p>
+                        <div class="text-center py-12">
+                            <i class="fas fa-check-circle text-6xl text-green-400 mb-4"></i>
+                            <p class="text-gray-600 text-xl">Todos os projetos desta escola foram avaliados ou não há projetos.</p>
+                        </div>
                     <% } %>
                 <% } else { %>
-                    <p class="text-gray-600 text-lg text-center mt-8">Selecione uma escola acima para ver os projetos pendentes de avaliação.</p>
+                    <div class="text-center py-12">
+                        <i class="fas fa-arrow-up text-6xl text-gray-300 mb-4"></i>
+                        <p class="text-gray-600 text-xl">Selecione uma escola acima para ver os projetos pendentes de avaliação.</p>
+                    </div>
                 <% } %>
             </div>
 
+            <!-- Conteúdo da Aba: relatórios-->
+
+            <div id="relatorio-projetos-tab" class="tab-content <%= activeTab === 'relatorio-projetos' ? '' : 'hidden' %> animate-fade-in-up">
+    <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+        <i class="fas fa-list-alt text-purple-600 mr-2"></i>
+        Relatório de Projetos por Escola e Categoria
+    </h2>
+
+    <% if (escolasCadastradas && escolasCadastradas.length > 0) { %>
+        <div class="mb-4 flex items-center space-x-2 bg-blue-50 p-4 rounded-md border border-blue-100">
+            <label for="escolaFiltro" class="font-semibold text-gray-700">Filtrar por Escola:</label>
+            <select id="escolaFiltro" class="border rounded px-2 py-1">
+                <option value="">-- Selecione uma Escola --</option>
+                <% escolasCadastradas.forEach(esc => { %>
+                    <option value="<%= esc.nome %>"><%= esc.nome %></option>
+                <% }) %>
+            </select>
+        </div>
+    <% } %>
+
+    <% if (projetosPorEscola && projetosPorEscola.length > 0) { %>
+        <% projetosPorEscola.forEach(escola => { %>
+            <div class="mb-6 p-3 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border border-indigo-200 bloco-escola" data-escola="<%= escola.escolaNome %>">
+                <h3 class="text-lg font-bold text-gray-700 mb-3 flex items-center">
+                    <i class="fas fa-school text-indigo-600 mr-2"></i>
+                    Escola: <%= escola.escolaNome %>
+                </h3>
+
+                <% Object.keys(escola.categorias).forEach(categoria => { %>
+                    <div class="mb-3">
+                        <h4 class="text-base font-semibold text-gray-600 mb-2">
+                            <i class="fas fa-folder-open text-purple-500 mr-2"></i>
+                            Categoria: <%= categoria %>
+                        </h4>
+
+                        <div class="overflow-x-auto">
+                            <table class="modern-table text-sm">
+                                <thead>
+                                    <tr>
+                                        <th class="px-2 py-1">Título do Projeto</th>
+                                        <th class="px-2 py-1">Turma</th>
+                                        <th class="px-2 py-1">Nº Aval.</th>
+
+                                        <% 
+                                        const primeiroProjeto = escola.categorias[categoria][0];
+                                        const criteriosProjeto = primeiroProjeto && primeiroProjeto.mediasCriterios ? Object.keys(primeiroProjeto.mediasCriterios) : [];
+                                        %>
+
+                                        <% criteriosProjeto.forEach(critId => { %>
+                                            <th class="px-2 py-1"><%= primeiroProjeto.nomesCriterios[critId] || ('Crit. ' + critId) %></th>
+                                        <% }) %>
+
+                                        <th class="px-2 py-1">Média</th>
+                                        <th class="px-2 py-1">Premiado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% escola.categorias[categoria].forEach(proj => { %>
+                                        <tr>
+                                            <td class="font-medium text-gray-900 px-2 py-1"><%= proj.titulo %></td>
+                                            <td class="px-2 py-1"><%= proj.turma %></td>
+                                            <td class="text-center px-2 py-1"><%= proj.numAvaliacoes %></td>
+
+                                            <% criteriosProjeto.forEach(critId => { %>
+                                                <td class="text-center px-2 py-1"><%= proj.mediasCriterios[critId] %></td>
+                                            <% }) %>
+
+                                            <td class="text-center font-medium px-2 py-1"><%= proj.mediaGeral %></td>
+                                            <td class="text-center px-2 py-1"><%= proj.premiado %></td>
+                                        </tr>
+                                    <% }) %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        <% }) %>
+    <% } else { %>
+        <div class="text-center py-8">
+            <i class="fas fa-info-circle text-4xl text-gray-300 mb-3"></i>
+            <p class="text-gray-600 text-lg">Nenhum projeto encontrado.</p>
+        </div>
+    <% } %>
+</div>
+
+
             <!-- Conteúdo da Aba: Ranking de Projetos por Categoria -->
             <div id="ranking-projetos-tab" class="tab-content <%= activeTab === 'ranking-projetos' ? '' : 'hidden' %>">
-                <h3 class="text-2xl font-bold text-gray-800 mb-4">Ranking de Projetos por Categoria</h3>
+                <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-trophy text-yellow-600 mr-3"></i>
+                    Ranking de Projetos por Categoria
+                </h2>
+                
                 <% if (typeof rankingProjetosPorCategoria !== 'undefined' && Object.keys(rankingProjetosPorCategoria).length > 0) { %>
                     <% for (const categoriaNome in rankingProjetosPorCategoria) { %>
                         <% const projetosNaCategoria = rankingProjetosPorCategoria[categoriaNome]; %>
-                        <div class="mb-8 p-4 border border-gray-200 rounded-lg shadow-sm bg-gray-50">
-                            <h4 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">Categoria: <%= categoriaNome %></h4>
+                        <div class="mb-10 p-6 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-200">
+                            <h3 class="text-2xl font-bold text-gray-700 mb-6 flex items-center">
+                                <i class="fas fa-medal text-purple-600 mr-3"></i>
+                                Categoria: <%= categoriaNome %>
+                            </h3>
                             <% if (projetosNaCategoria.length > 0) { %>
                                 <div class="overflow-x-auto">
-                                    <table class="min-w-full text-sm text-left text-gray-700 report-table">
+                                    <table class="modern-table">
                                         <thead>
                                             <tr>
-                                                <th scope="col" class="px-6 py-3">Posição</th>
-                                                <th scope="col" class="px-6 py-3">Título do Projeto</th>
-                                                <th scope="col" class="px-6 py-3 text-center">Média Geral</th>
-                                                <th scope="col" class="px-6 py-3 text-center">Nº Avaliações</th>
+                                                <th class="text-center">Posição</th>
+                                                <th>Título do Projeto</th>
+                                                <th class="text-center">Média Geral</th>
+                                                <th class="text-center">Nº Avaliações</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <% projetosNaCategoria.forEach((projeto, index) => { %>
                                                 <tr>
-                                                    <td class="px-6 py-4 font-bold text-center"><%= index + 1 %></td>
-                                                    <td class="px-6 py-4"><%= projeto.titulo %></td>
-                                                    <td class="px-6 py-4 text-center"><%= projeto.mediaGeral %></td>
-                                                    <td class="px-6 py-4 text-center"><%= projeto.numAvaliacoes %></td>
+                                                    <td class="text-center">
+                                                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full font-bold text-white 
+                                                            <%= index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-400' : index === 2 ? 'bg-yellow-600' : 'bg-gray-500' %>">
+                                                            <%= index + 1 %>
+                                                        </span>
+                                                    </td>
+                                                    <td class="font-semibold text-gray-900"><%= projeto.titulo %></td>
+                                                    <td class="text-center">
+                                                        <span class="modern-badge badge-success font-bold">
+                                                            <i class="fas fa-star"></i><%= projeto.mediaGeral %>
+                                                        </span>
+                                                    </td>
+                                                    <td class="text-center font-semibold"><%= projeto.numAvaliacoes %></td>
                                                 </tr>
                                             <% }) %>
                                         </tbody>
                                     </table>
                                 </div>
                             <% } else { %>
-                                <p class="text-gray-600 text-center mt-4">Nenhum projeto avaliado nesta categoria.</p>
+                                <div class="text-center py-8">
+                                    <i class="fas fa-trophy text-4xl text-gray-300 mb-4"></i>
+                                    <p class="text-gray-600">Nenhum projeto avaliado nesta categoria.</p>
+                                </div>
                             <% } %>
                         </div>
                     <% } %>
                 <% } else { %>
-                    <p class="text-gray-600 text-lg text-center mt-8">Nenhum projeto avaliado para exibir o ranking.</p>
+                    <div class="text-center py-12">
+                        <i class="fas fa-trophy text-6xl text-gray-300 mb-4"></i>
+                        <p class="text-gray-600 text-xl">Nenhum projeto avaliado para exibir o ranking.</p>
+                    </div>
                 <% } %>
             </div>
 
             <!-- Conteúdo da Aba: Resumo de Avaliadores por Escola -->
             <div id="resumo-avaliadores-tab" class="tab-content <%= activeTab === 'resumo-avaliadores' ? '' : 'hidden' %>">
-                <h3 class="text-2xl font-bold text-gray-800 mb-4">Resumo de Avaliadores por Escola</h3>
-                <% if (typeof resumoAvaliadoresPorEscola !== 'undefined' && resumoAvaliadoresPorEscola.length > 0) { %>
-                    <% resumoAvaliadoresPorEscola.forEach(escolaInfo => { %>
-                        <div class="mb-8 p-4 border border-gray-200 rounded-lg shadow-sm bg-gray-50">
-                            <h4 class="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">Escola: <%= escolaInfo.escolaNome %></h4>
-                            <% if (escolaInfo.avaliadores && escolaInfo.avaliadores.length > 0) { %>
-                                <div class="overflow-x-auto">
-                                    <table class="min-w-full text-sm text-left text-gray-700 report-table">
-                                        <thead>
-                                            <tr>
-                                                <th scope="col" class="px-6 py-3">Nome do Avaliador</th>
-                                                <th scope="col" class="px-6 py-3">E-mail</th>
-                                                <th scope="col" class="px-6 py-3 text-center">Status</th>
-                                                <th scope="col" class="px-6 py-3 text-center">Projetos Atribuídos</th>
-                                                <th scope="col" class="px-6 py-3 text-center">Projetos Avaliados</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <% escolaInfo.avaliadores.forEach(avaliador => { %>
-                                                <tr>
-                                                    <td class="px-6 py-4"><%= avaliador.nome %></td>
-                                                    <td class="px-6 py-4"><%= avaliador.email %></td>
-                                                    <td class="px-6 py-4 text-center"><%= avaliador.status %></td>
-                                                    <td class="px-6 py-4 text-center"><%= avaliador.totalAtribuidos %></td>
-                                                    <td class="px-6 py-4 text-center"><%= avaliador.totalAvaliados %></td>
-                                                </tr>
-                                            <% }) %>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            <% } else { %>
-                                <p class="text-gray-600 text-center mt-4">Nenhum avaliador cadastrado para esta escola.</p>
-                            <% } %>
-                        </div>
-                    <% }) %>
+    <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center">
+        <i class="fas fa-users text-green-600 mr-3"></i>
+        Resumo de Avaliadores por Escola
+    </h2>
+
+    <% if (escolasCadastradas && escolasCadastradas.length > 0) { %>
+        <div class="mb-6 flex items-center space-x-2 bg-green-50 p-4 rounded-md border border-green-100">
+            <label for="escolaFiltroAvaliadores" class="font-semibold text-gray-700">Filtrar por Escola:</label>
+            <select id="escolaFiltroAvaliadores" class="border rounded px-2 py-1">
+                <option value="">-- Selecione uma Escola --</option>
+                <% escolasCadastradas.forEach(esc => { %>
+                    <option value="<%= esc.nome %>"><%= esc.nome %></option>
+                <% }) %>
+            </select>
+        </div>
+    <% } %>
+
+    <% if (typeof resumoAvaliadoresPorEscola !== 'undefined' && resumoAvaliadoresPorEscola.length > 0) { %>
+        <% resumoAvaliadoresPorEscola.forEach(escolaInfo => { %>
+            <div class="mb-10 p-6 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl border border-green-200 bloco-escola-avaliadores" data-escola="<%= escolaInfo.escolaNome %>">
+                <h3 class="text-2xl font-bold text-gray-700 mb-6 flex items-center">
+                    <i class="fas fa-school text-green-600 mr-3"></i>
+                    Escola: <%= escolaInfo.escolaNome %>
+                </h3>
+                <% if (escolaInfo.avaliadores && escolaInfo.avaliadores.length > 0) { %>
+                    <div class="overflow-x-auto">
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>Nome do Avaliador</th>
+                                    <th>E-mail</th>
+                                    <th class="text-center">Status</th>
+                                    <th class="text-center">Projetos Atribuídos</th>
+                                    <th class="text-center">Projetos Avaliados</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% escolaInfo.avaliadores.forEach(avaliador => { %>
+                                    <tr>
+                                        <td class="font-semibold text-gray-900"><%= avaliador.nome %></td>
+                                        <td><%= avaliador.email %></td>
+                                        <td class="text-center">
+                                            <span class="modern-badge <%= avaliador.status === 'Ativo' ? 'badge-success' : 'badge-danger' %>">
+                                                <i class="fas fa-<%= avaliador.status === 'Ativo' ? 'check-circle' : 'times-circle' %>"></i>
+                                                <%= avaliador.status %>
+                                            </span>
+                                        </td>
+                                        <td class="text-center font-semibold"><%= avaliador.totalAtribuidos %></td>
+                                        <td class="text-center font-semibold"><%= avaliador.totalAvaliados %></td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
                 <% } else { %>
-                    <p class="text-gray-600 text-lg text-center mt-8">Nenhuma escola com avaliadores para exibir o resumo.</p>
+                    <div class="text-center py-8">
+                        <i class="fas fa-users text-4xl text-gray-300 mb-4"></i>
+                        <p class="text-gray-600">Nenhum avaliador cadastrado para esta escola.</p>
+                    </div>
                 <% } %>
             </div>
-
-
+        <% }) %>
+    <% } else { %>
+        <div class="text-center py-12">
+            <i class="fas fa-users text-6xl text-gray-300 mb-4"></i>
+            <p class="text-gray-600 text-xl">Nenhuma escola com avaliadores para exibir o resumo.</p>
         </div>
-    </main>
+    <% } %>
+
+        <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const filtroAvaliadores = document.getElementById('escolaFiltroAvaliadores');
+            const blocosAvaliadores = document.querySelectorAll('.bloco-escola-avaliadores');
+
+            filtroAvaliadores.addEventListener('change', () => {
+                const escolaSelecionada = filtroAvaliadores.value;
+
+                blocosAvaliadores.forEach(bloco => {
+                    const escolaBloco = bloco.getAttribute('data-escola');
+                    if (!escolaSelecionada || escolaSelecionada === escolaBloco) {
+                        bloco.style.display = '';
+                    } else {
+                        bloco.style.display = 'none';
+                    }
+                });
+            });
+        });
+    </script>
+</div>
+
+<div id="mensagens-tab" class="tab-content <%= activeTab === 'mensagens' ? '' : 'hidden' %>">
+  <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+    <i class="fas fa-comments text-blue-600 mr-3"></i>
+    Mensagens de Administradores
+  </h2>
+
+  <% if (mensagens.length === 0) { %>
+    <div class="bg-yellow-100 text-yellow-800 p-4 rounded shadow-sm">
+      Nenhuma mensagem recebida até o momento.
+    </div>
+  <% } else { %>
+    <div class="space-y-4 max-h-[500px] overflow-y-auto">
+      <% mensagens.forEach(msg => { %>
+        <div class="bg-white border border-gray-300 p-4 rounded-lg shadow-sm">
+          <div class="flex justify-between items-center mb-2">
+            <div>
+              <strong class="text-blue-800"><%= msg.autorNome || 'Administrador' %></strong>
+              <span class="text-sm text-gray-500 ml-2"><%= msg.dataEnvio.toLocaleString('pt-BR') %></span>
+            </div>
+          </div>
+          <p class="text-gray-800 whitespace-pre-line"><%= msg.mensagem %></p>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+
 
     <!-- Modal para Confirmação de Redefinição de Senha -->
-    <div id="resetAdminPasswordModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden flex items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
-            <h3 class="text-xl font-semibold mb-4 text-gray-800">Redefinir Senha do Admin</h3>
-            <p class="text-gray-700 mb-6">Tem certeza que deseja redefinir a senha do administrador principal da escola <strong id="escolaNomeReset"></strong> (<span id="adminEmailReset"></span>)?</p>
-            <p class="text-sm text-gray-600 mb-4">Uma nova senha provisória será gerada e exibida para você. Você deve passá-la ao administrador.</p>
-            <div class="flex justify-end gap-3">
-                <button type="button" onclick="closeResetAdminPasswordModal();" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors">Cancelar</button>
+    <div id="resetAdminPasswordModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 modern-modal hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md modal-content-modern">
+            <div class="text-center mb-6">
+                <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
+                    <i class="fas fa-key text-red-600 text-2xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-2">Redefinir Senha do Admin</h3>
+            </div>
+            <div class="text-center mb-6">
+                <p class="text-gray-700 mb-4">Tem certeza que deseja redefinir a senha do administrador principal da escola <strong id="escolaNomeReset" class="text-blue-600"></strong>?</p>
+                <p class="text-sm text-gray-600 bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+                    <i class="fas fa-exclamation-triangle text-yellow-600 mr-2"></i>
+                    Uma nova senha provisória será gerada e exibida para você. Você deve passá-la ao administrador.
+                </p>
+                <p class="text-sm text-gray-500 mt-2">Email: <span id="adminEmailReset" class="font-semibold"></span></p>
+            </div>
+            <div class="flex justify-center gap-4">
+                <button type="button" onclick="closeResetAdminPasswordModal();" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-semibold">
+                    <i class="fas fa-times mr-2"></i>Cancelar
+                </button>
                 <form id="resetAdminPasswordForm" method="POST" class="inline">
                     <input type="hidden" name="_method" value="POST">
-                    <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">Redefinir Senha</button>
+                    <button type="submit" class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-semibold">
+                        <i class="fas fa-key mr-2"></i>Redefinir Senha
+                    </button>
                 </form>
             </div>
         </div>
     </div>
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const initialTab = urlParams.get('tab') || '<%= activeTab %>' || 'visao-geral';
-    activateTab(initialTab);
 
-    document.querySelectorAll('.tab-button').forEach(button => {
-      button.addEventListener('click', function (e) {
-        e.preventDefault();
-        const tabName = this.getAttribute('data-tab');
-        // Em vez de só atualizar a aba via JavaScript, vamos recarregar:
-        window.location.href = `/superadmin/dashboard?tab=${tabName}`;
-      });
+    <script>
+     
+document.addEventListener("DOMContentLoaded", () => {
+    const filtroSelect = document.getElementById('escolaFiltro');
+    const blocosEscolas = document.querySelectorAll('#relatorio-projetos-tab > div.mb-6');
+
+    filtroSelect.addEventListener('change', () => {
+        const valorSelecionado = filtroSelect.value;
+
+        blocosEscolas.forEach(bloco => {
+            const titulo = bloco.querySelector('h3')?.textContent || '';
+            if (!valorSelecionado || titulo.includes(valorSelecionado)) {
+                bloco.style.display = '';
+            } else {
+                bloco.style.display = 'none';
+            }
+        });
     });
-  });
-
-  function activateTab(tabName) {
-    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
-    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-
-    const activeTabContent = document.getElementById(`${tabName}-tab`);
-    if (activeTabContent) activeTabContent.classList.remove('hidden');
-
-    const activeButton = document.querySelector(`.tab-button[data-tab="${tabName}"]`);
-    if (activeButton) activeButton.classList.add('active');
-  }
-</script>
+});
 
 
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const initialTab = urlParams.get('tab') || '<%= activeTab %>' || 'visao-geral';
+            activateTab(initialTab);
+
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const tabName = this.getAttribute('data-tab');
+                    window.location.href = `/superadmin/dashboard?tab=${tabName}`;
+                });
+            });
+        });
+
+        function activateTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+
+            const activeTabContent = document.getElementById(`${tabName}-tab`);
+            if (activeTabContent) activeTabContent.classList.remove('hidden');
+
+            const activeButton = document.querySelector(`.tab-button[data-tab="${tabName}"]`);
+            if (activeButton) activeButton.classList.add('active');
+        }
+
+        function confirmResetAdminPassword(escolaId, escolaNome, adminEmail) {
+            document.getElementById('escolaNomeReset').textContent = escolaNome;
+            document.getElementById('adminEmailReset').textContent = adminEmail;
+            document.getElementById('resetAdminPasswordForm').action = `/superadmin/escolas/${escolaId}/reset-password`;
+            document.getElementById('resetAdminPasswordModal').classList.remove('hidden');
+        }
+
+        function closeResetAdminPasswordModal() {
+            document.getElementById('resetAdminPasswordModal').classList.add('hidden');
+        }
+
+        // Fechar modal clicando fora dele
+        document.getElementById('resetAdminPasswordModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeResetAdminPasswordModal();
+            }
+        });
+    </script>
 </body>
 </html>
