@@ -1298,10 +1298,7 @@ router.post('/pre-cadastros/:id/aprovar', verificarAdminEscola, async (req, res)
       req.flash('error_msg', 'Já existe um avaliador com esse e-mail.');
       return res.redirect('/admin/pre-cadastros');
     }
-
-    const projetosArray = Array.isArray(projetosAtribuidos)
-      ? projetosAtribuidos
-      : (projetosAtribuidos ? [projetosAtribuidos] : []);
+    const projetosArray = [];
 
     const pin = generatePIN();
     const url = `${process.env.APP_URL || 'http://localhost:3000'}/avaliador/acesso-direto/${pin}`;
