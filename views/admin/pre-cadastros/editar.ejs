@@ -151,36 +151,7 @@
                 </div>
 
                 <!-- Seção de projetos mantendo sua estrutura original -->
-                <div class="bg-gray-50 rounded-lg p-6">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                        <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                        Projetos Atribuídos
-                    </label>
-                    
-                    <div class="bg-white rounded-lg border-2 border-gray-200 p-4">
-                        <!-- Mantendo exatamente sua estrutura de grid e loop -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-48 overflow-y-auto custom-scrollbar">
-                            <% projetos.forEach(p => { %>
-                                <label class="project-item flex items-center space-x-3 p-3 rounded-lg border border-transparent cursor-pointer">
-                                    <input type="checkbox" name="projetosAtribuidos[]" value="<%= p._id %>">
 
-                                    <span class="text-gray-700 select-none text-sm"><%= p.titulo %></span>
-                                </label>
-                            <% }) %>
-                        </div>
-                        
-                        <div class="mt-3 pt-3 border-t border-gray-200">
-                            <p class="text-sm text-gray-500 flex items-center">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                Selecione os projetos que este avaliador poderá acessar
-                            </p>
-                        </div>
-                    </div>
-                </div>
 
                 <!-- Botão de submit melhorado mantendo a funcionalidade original -->
                 <div class="pt-6">

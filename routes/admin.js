@@ -1276,7 +1276,7 @@ router.post('/pre-cadastros/:id/aprovar', verificarAdminEscola, async (req, res)
     console.log('BODY RECEBIDO:', req.body);
 
     const { id } = req.params;
-    const { nome, email, telefone, projetosAtribuidos } = req.body;
+    const { nome, email, telefone } = req.body;
     const escolaId = req.session.adminEscola.escolaId;
 
     // Verifica se o pré-cadastro existe e pertence à escola do admin
@@ -1314,7 +1314,7 @@ router.post('/pre-cadastros/:id/aprovar', verificarAdminEscola, async (req, res)
       escolaId,
       feira: feira._id,
       pin,
-      projetosAtribuidos: projetosArray,
+      projetosAtribuidos: [],
       qrcode,
       ativo: true,
       criadoVia: 'pre-cadastro',
