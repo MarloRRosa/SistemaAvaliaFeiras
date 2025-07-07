@@ -27,10 +27,6 @@ const ejs = require('ejs');
 const QRCode = require('qrcode');
 const upload = multer({ storage: multer.memoryStorage() });
 const rotasPreCadastros = require('./preCadastro');
-const Mensagem = require('../models/mensagensSuporte');
-const enviarMensagemTelegram = require('../utils/telegram');
-const MensagemSuporte = require('../models/mensagensSuporte');
-
 
 
 // Carrega variáveis de ambiente (garante que estão disponíveis para este arquivo)
@@ -776,9 +772,7 @@ if (feiraIdSelecionada && mongoose.Types.ObjectId.isValid(feiraIdSelecionada)) {
   status: 'pendente'
 }).lean();
 
-const mensagens = await Mensagem.find({ autorId: req.session.adminEscola.id })
-  .sort({ dataEnvio: -1 })
-  .lean();
+
 
         // Renderiza o dashboard principal e passa TODOS os dados necessários para as abas
         res.render('admin/dashboard', {
@@ -807,8 +801,7 @@ const mensagens = await Mensagem.find({ autorId: req.session.adminEscola.id })
   relatorioFinalPorProjeto,
   formatarDatasParaInput: formatarDataParaInput,
   preCadastros,
-  camposExtras: [],
-  mensagens
+  camposExtras: []
 });
 
 
@@ -960,9 +953,7 @@ router.get('/admin/dashboard', async (req, res) => {
 
     // Exemplo de outros dados
     const projetos = await Projeto.find({ feiraId: feiraAtual._id }).lean();
-    const avaliadores = await Avaliador.find({ feira: feiraAtual._id })
-    .populate('projetosAtribuidos', 'titulo')
-    .lean();
+    const avaliadores = await Avaliador.find({ feira: feiraAtual._id }).lean();
     const avaliacoes = await Avaliacao.find({ feiraId: feiraAtual._id }).lean();
 
     // 🔑 Consulta dos PRÉ-CADASTROS PENDENTES só da feira atual
@@ -1317,50 +1308,7 @@ router.post('/pre-cadastros/:id/aprovar', verificarAdminEscola, async (req, res)
     res.redirect('/admin/pre-cadastros');
   }
 });
-router.post('/avaliadores/:id/reenviar-email', verificarAdminEscola, async (req, res) => {
-  const { id } = req.params;
-  const { mensagemPersonalizada } = req.body;
-  const escolaId = req.session.adminEscola.escolaId;
 
-  try {
-    const avaliador = await Avaliador.findOne({ _id: id, escolaId });
-    if (!avaliador) {
-      req.flash('error_msg', 'Avaliador não encontrado.');
-      return res.redirect('/admin/dashboard?tab=avaliadores');
-    }
-
-    const url = `${process.env.APP_URL || 'http://localhost:3000'}/avaliador/acesso-direto/${avaliador.pin}`;
-
-    const transporter = nodemailer.createTransport({
-      service: 'SendGrid',
-      auth: {
-        user: 'apikey',
-        pass: process.env.SENDGRID_API_KEY
-      }
-    });
-
-    await transporter.sendMail({
-      from: 'AvaliaFeiras <docsrosas@gmail.com>',
-      to: avaliador.email,
-      subject: 'Acesso ao AvaliaFeiras',
-      html: `
-        <p>Olá ${avaliador.nome},</p>
-        <p>${mensagemPersonalizada || 'Aqui estão seus dados de acesso ao AvaliaFeiras:'}</p>
-        <p><strong>PIN:</strong> ${avaliador.pin}</p>
-        <p><a href="${url}">${url}</a></p>
-        <p>Atenciosamente,</p>
-        <p>Equipe AvaliaFeiras</p>
-      `
-    });
-
-    req.flash('success_msg', `E-mail reenviado para ${avaliador.nome} com sucesso.`);
-  } catch (err) {
-    console.error('Erro ao reenviar e-mail:', err);
-    req.flash('error_msg', 'Erro ao reenviar e-mail. Detalhes: ' + err.message);
-  }
-
-  res.redirect('/admin/dashboard?tab=avaliadores');
-});
 
 // ===========================================
 // ROTAS CRUD - FEIRAS
@@ -2513,69 +2461,6 @@ router.post('/escola/atualizar', verificarAdminEscola, upload.single('logo'), as
     console.error('Erro ao atualizar dados da escola:', err);
     req.flash('error_msg', 'Erro ao atualizar os dados da escola.');
     res.redirect('/admin/dashboard?tab=tab-configuracoes');
-  }
-});
-
-router.post('/suporte', async (req, res) => {
-  const { mensagem } = req.body;
-
-  if (!mensagem) {
-    req.flash('error_msg', 'Mensagem não pode estar vazia.');
-    return res.redirect('/suporte');
-  }
-
-  let autorNome = '';
-  let autorEmail = '';
-  let autorTipo = '';
-
-  if (req.session.superadmin) {
-    autorNome = req.session.superadmin.nome;
-    autorEmail = req.session.superadmin.email;
-    autorTipo = 'SUPERADM';
-  } else if (req.session.adminEscola) {
-    autorNome = req.session.adminEscola.nome;
-    autorEmail = req.session.adminEscola.email;
-    autorTipo = 'ADM';
-  } else {
-    req.flash('error_msg', 'Usuário não autenticado.');
-    return res.redirect('/suporte');
-  }
-
-  await Mensagem.create({
-    autorNome,
-    autorEmail,
-    autorTipo,
-    mensagem: mensagem,
-    dataEnvio: new Date()
-  });
-
-  req.flash('success_msg', 'Mensagem enviada com sucesso.');
-  res.redirect('/suporte');
-});
-
-router.post('/dashboard/suporte', verificarAdminEscola, async (req, res) => {
-  const { mensagem } = req.body;
-  const autorId = req.session.adminEscola.id;
-
-  if (!mensagem) {
-    req.flash('error_msg', 'Por favor, escreva uma mensagem.');
-    return res.redirect('/admin/dashboard?tab=suporte');
-  }
-
-  try {
-    const novaMensagem = new Mensagem({
-      autorId,
-      autorTipo: 'ADM',
-      mensagem
-    });
-
-    await novaMensagem.save();
-
-    res.redirect('/admin/dashboard?tab=suporte');
-  } catch (err) {
-    console.error('Erro ao enviar mensagem:', err);
-    req.flash('error_msg', 'Erro ao enviar mensagem.');
-    res.redirect('/admin/dashboard?tab=suporte');
   }
 });
 
