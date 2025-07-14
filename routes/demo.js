@@ -90,7 +90,7 @@ router.get('/login/demo', async (req, res) => {
       nome: 'Usuário Demo',
       email: demoEmail,
       senha: senha,
-      tipo: 'admin-escola',
+      tipo: 'demo',
       ativo: true,
       escolaId: escola._id
     });
