@@ -64,10 +64,10 @@ router.get('/login/demo', async (req, res) => {
     ]);
 
     const avaliadores = await Avaliador.insertMany([
-      { nome: 'Avaliador 1', pin: '1111', projetosAtribuidos: [projetos[0]._id, projetos[3]._id], escolaId: escola._id, feira: feira._id },
-      { nome: 'Avaliador 2', pin: '2222', projetosAtribuidos: [projetos[1]._id, projetos[4]._id], escolaId: escola._id, feira: feira._id },
-      { nome: 'Avaliador 3', pin: '3333', projetosAtribuidos: [projetos[2]._id, projetos[5]._id], escolaId: escola._id, feira: feira._id },
-    ]);
+  { nome: 'Avaliador 1', email: 'avaliador1@demo.com', pin: '1111', projetosAtribuidos: [projetos[0]._id, projetos[3]._id], escolaId: escola._id, feira: feira._id },
+  { nome: 'Avaliador 2', email: 'avaliador2@demo.com', pin: '2222', projetosAtribuidos: [projetos[1]._id, projetos[4]._id], escolaId: escola._id, feira: feira._id },
+  { nome: 'Avaliador 3', email: 'avaliador3@demo.com', pin: '3333', projetosAtribuidos: [projetos[2]._id, projetos[5]._id], escolaId: escola._id, feira: feira._id },
+]);
 
     // Criar avaliações para metade dos projetos
     for (let i = 0; i < 3; i++) {
