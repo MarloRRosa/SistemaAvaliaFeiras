@@ -10,7 +10,7 @@ const solicitacaoAcessoSchema = new Schema({
 
   nomeResponsavel: { type: String, required: true },
   cargoResponsavel: { type: String },
-  emailContato: { type: String, required: true, unique: true, lowercase: true, trim: true },
+  emailContato: { type: String, required: true, lowercase: true, trim: true },
   telefoneContato: { type: String },
 
   tipoEvento: { type: String },
