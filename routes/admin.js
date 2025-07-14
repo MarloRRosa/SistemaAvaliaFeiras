@@ -582,7 +582,7 @@ router.get('/dashboard', verificarAdminEscola, async (req, res) => {
         projetosPendentesAvaliacaoCount: 0,
         mediaGeralAvaliacoes: 0,
         relatorioFinalPorProjeto: {},
-        formatarDatasParaInput,
+        formatarDatasParaInput: formatarDataParaInput,
         preCadastros: [],
         camposExtras: [],
         mensagens: []
