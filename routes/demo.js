@@ -23,6 +23,46 @@ router.get('/login/demo', async (req, res) => {
     const escolaDemo = await Escola.findOneAndDelete({ nome: 'Escola Demonstração GPT' });
     const usuarioDemo = await Usuario.findOneAndDelete({ email: demoEmail });
 
+    const escola = await Escola.create({
+      nome: 'Escola Demonstração GPT',
+      endereco: 'Rua Exemplo, 123',
+      telefone: '(00) 0000-0000',
+      email: 'escola@gptdemo.com',
+      descricao: 'Uma escola exemplo para demonstração do sistema.',
+      diretor: 'Diretora Demo',
+      responsavel: 'Responsável Demo'
+    });
+
+    const feira = await Feira.create({
+      nome: 'Feira de Ciências Demo',
+      inicioFeira: new Date(),
+      fimFeira: new Date(Date.now() + 86400000),
+      status: 'ativa',
+      escolaId: escola._id
+    });
+
+    const criterios = await Criterio.insertMany([
+      { nome: 'METODOLOGIA', peso: 1, observacoes: 'Apresentou caráter investigativo...', ordemDesempate: 3, feira: feira._id, escolaId: escola._id },
+      { nome: 'DOCUMENTOS', peso: 1, observacoes: 'Relatório de Pesquisa, Caderno...', ordemDesempate: 1, feira: feira._id, escolaId: escola._id },
+      { nome: 'APRESENTAÇÃO VISUAL', peso: 1, observacoes: 'O espaço destinado à apresentação...', ordemDesempate: 2, feira: feira._id, escolaId: escola._id },
+      { nome: 'APRESENTAÇÃO ORAL', peso: 1, observacoes: 'O grupo demonstrou domínio...', ordemDesempate: 4, feira: feira._id, escolaId: escola._id },
+      { nome: 'RELEVÂNCIA', peso: 1, observacoes: 'A pesquisa representou uma contribuição...', ordemDesempate: 5, feira: feira._id, escolaId: escola._id },
+    ]);
+
+    const categorias = await Categoria.insertMany([
+      { nome: 'Categoria 1', descricao: 'Projetos da categoria 1', feira: feira._id, escolaId: escola._id },
+      { nome: 'Categoria 2', descricao: 'Projetos da categoria 2', feira: feira._id, escolaId: escola._id },
+    ]);
+
+    const projetos = await Projeto.insertMany([
+      { titulo: 'Projeto A', alunos: ['Ana', 'Carlos'], categoria: categorias[0]._id, criterios: criterios.map(c => c._id), feira: feira._id, escolaId: escola._id },
+      { titulo: 'Projeto B', alunos: ['Beatriz'], categoria: categorias[0]._id, criterios: criterios.map(c => c._id), feira: feira._id, escolaId: escola._id },
+      { titulo: 'Projeto C', alunos: ['Caio', 'Joana'], categoria: categorias[0]._id, criterios: criterios.map(c => c._id), feira: feira._id, escolaId: escola._id },
+      { titulo: 'Projeto D', alunos: ['Diego'], categoria: categorias[1]._id, criterios: criterios.map(c => c._id), feira: feira._id, escolaId: escola._id },
+      { titulo: 'Projeto E', alunos: ['Elisa', 'Renan'], categoria: categorias[1]._id, criterios: criterios.map(c => c._id), feira: feira._id, escolaId: escola._id },
+      { titulo: 'Projeto F', alunos: ['Fábio'], categoria: categorias[1]._id, criterios: criterios.map(c => c._id), feira: feira._id, escolaId: escola._id },
+    ]);
+
 
     // Criar avaliações para metade dos projetos
     for (let i = 0; i < 3; i++) {
