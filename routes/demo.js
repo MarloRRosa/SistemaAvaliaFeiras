@@ -63,23 +63,6 @@ router.get('/login/demo', async (req, res) => {
       { titulo: 'Projeto F', alunos: ['Fábio'], categoria: categorias[1]._id, criterios: criterios.map(c => c._id), feira: feira._id, escolaId: escola._id },
     ]);
 
-
-    // Criar avaliações para metade dos projetos
-    for (let i = 0; i < 3; i++) {
-      const projeto = projetos[i];
-      for (const avaliador of avaliadores) {
-        if (avaliador.projetosAtribuidos.includes(projeto._id)) {
-          await Avaliacao.create({
-            projeto: projeto._id,
-            avaliador: avaliador._id,
-            escolaId: escola._id,
-            feira: feira._id,
-            notas: criterios.map(c => ({ criterio: c._id, nota: gerarNotaAleatoria() }))
-          });
-        }
-      }
-    }
-
     const senha = await bcrypt.hash('demo123', 10);
     const usuario = await Usuario.create({
       nome: 'Usuário Demo',
