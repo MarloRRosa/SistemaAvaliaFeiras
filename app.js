@@ -98,8 +98,10 @@ const adminRoutes = require('./routes/admin');
 const avaliadorRoutes = require('./routes/avaliador');
 const preCadastroRoutes = require('./routes/preCadastro');
 const suporteRoutes = require('./routes/suporte'); // ✅ NOVA ROTA
+const demoRoutes = require('./routes/demo');
 
 app.use('/', publicRoutes);
+app.use('/', demoRoutes);
 app.use(preCadastroRoutes); 
 app.use('/superadmin', superadminRoutes);
 app.use('/admin', adminRoutes);
