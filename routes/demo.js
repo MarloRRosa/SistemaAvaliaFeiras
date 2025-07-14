@@ -76,7 +76,8 @@ router.get('/login/demo', async (req, res) => {
     req.session.adminEscola = {
       _id: usuario._id,
       nome: usuario.nome,
-      escolaId: escola._id
+      escolaId: escola._id,
+      role: 'admin'
     };
 
     res.redirect('/admin/dashboard');
