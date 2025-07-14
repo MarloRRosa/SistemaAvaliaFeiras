@@ -526,45 +526,68 @@ async function generatePdfReport(req, res, templateName, data, filename) {
 
 // Rota principal do Dashboard Admin
 router.get('/dashboard', verificarAdminEscola, async (req, res) => {
-    // É crucial verificar res.headersSent para evitar o erro "Cannot set headers after they are sent to the client"
-    if (res.headersSent) {
-        console.warn('Headers já enviados na rota do dashboard, abortando renderização.');
-        return;
+  if (res.headersSent) {
+    console.warn('Headers já enviados na rota do dashboard, abortando renderização.');
+    return;
+  }
+
+  try {
+    const escolaId = req.session.adminEscola.escolaId;
+    const feiraIdSelecionada = req.query.feiraId;
+    let feiraAtual;
+
+    if (feiraIdSelecionada && mongoose.Types.ObjectId.isValid(feiraIdSelecionada)) {
+      feiraAtual = await Feira.findOne({ _id: feiraIdSelecionada, escolaId });
+    } else {
+      feiraAtual = await Feira.findOne({ status: 'ativa', escolaId });
     }
-    try {
-        // Obtém o escolaId da sessão do admin logado
-        const escolaId = req.session.adminEscola.escolaId;
 
-        // Filtra todas as consultas por escolaId
-        const feiraIdSelecionada = req.query.feiraId;
-let feiraAtual;
+    const feiras = await Feira.find({ escolaId }).sort({ inicioFeira: -1 });
+    const escolaDoAdmin = await Escola.findById(escolaId);
+    const escolas = await Escola.find({});
 
-if (feiraIdSelecionada && mongoose.Types.ObjectId.isValid(feiraIdSelecionada)) {
-    feiraAtual = await Feira.findOne({ _id: feiraIdSelecionada, escolaId });
-} else {
-    feiraAtual = await Feira.findOne({ status: 'ativa', escolaId });
-}
+    const escola = escolaDoAdmin || {
+      nome: "Nome da Escola",
+      endereco: "Endereço da Escola",
+      telefone: "(XX) XXXX-XXXX",
+      email: "email@escola.com",
+      descricao: "Descrição da escola.",
+      diretor: "Nome do Diretor",
+      responsavel: "Nome do Responsável",
+      _id: null
+    };
 
-        const feiras = await Feira.find({ escolaId: escolaId }).sort({ inicioFeira: -1 }); // USANDO escolaId AQUI
-
-        const escolaDoAdmin = await Escola.findById(escolaId); // Pega a escola do admin logado
-        const escolas = await Escola.find({}); // Todas as escolas para o dropdown de avaliadores (se necessário para algum modal)
-
-        const escola = escolaDoAdmin || { // Garante que 'escola' sempre tenha um valor padrão
-            nome: "Nome da Escola",
-            endereco: "Endereço da Escola",
-            telefone: "(XX) XXXX-XXXX",
-            email: "email@escola.com",
-            descricao: "Descrição da escola.",
-            diretor: "Nome do Diretor",
-            responsavel: "Nome do Responsável",
-            _id: null
-        };
-
-        if (feiraAtual) {
-            feiraAtual.inicioFeiraFormatted = formatarDataParaInput(feiraAtual.inicioFeira);
-            feiraAtual.fimFeiraFormatted = formatarDataParaInput(feiraAtual.fimFeira);
-        }
+    if (!feiraAtual) {
+      return res.render('admin/dashboard', {
+        titulo: 'Dashboard Admin',
+        layout: false,
+        usuarioLogado: req.session.adminEscola,
+        activeTab: req.query.tab || 'dashboard-geral',
+        feiras,
+        escolas,
+        feiraAtual: null,
+        projetos: [],
+        categorias: [],
+        criterios: [],
+        avaliadores: [],
+        avaliacoes: [],
+        projetosPorCategoria: {},
+        avaliacoesPorAvaliadorCount: {},
+        mediaAvaliacaoPorCriterio: {},
+        statusProjetosCount: {},
+        escola,
+        totalProjetos: 0,
+        totalAvaliadores: 0,
+        projetosAvaliadosCompletosCount: 0,
+        projetosPendentesAvaliacaoCount: 0,
+        mediaGeralAvaliacoes: 0,
+        relatorioFinalPorProjeto: {},
+        formatarDatasParaInput,
+        preCadastros: [],
+        camposExtras: [],
+        mensagens: []
+      });
+    }
 
         // --- INÍCIO: PREPARAÇÃO DE DADOS PARA O DASHBOARD GERAL (TODAS AS ABAS) ---
         // Todas as buscas agora incluem o filtro 'escolaId: escolaId'
