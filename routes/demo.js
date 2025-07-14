@@ -21,7 +21,7 @@ router.get('/login/demo', async (req, res) => {
       console.log('Usuário demo criado automaticamente.');
     }
 
-    req.session.usuario = demoUser;
+    req.session.adminEscola = demoUser;
     res.redirect('/admin/dashboard');
 
   } catch (err) {
