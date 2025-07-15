@@ -1,1113 +1,258 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema Avalia - Plataforma para Feiras Escolares</title>
-  <meta name="description" content="Sistema gratuito e online para organizar feiras escolares, cadastrar projetos e avaliar com critérios personalizados. Desenvolvido por Marlo Rosa.">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sistema Avalia</title>
+  <meta name="description" content="Sistema para gerenciamento e avaliação de feiras escolares.">
+  <meta name="author" content="Marlo Rosa">
+  <meta property="og:title" content="Sistema Avalia">
+  <meta property="og:description" content="Plataforma para feiras escolares com avaliação inteligente.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://sistema.avalia.com.br">
+  <meta property="og:image" content="/img/thumb-avalia.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --primary: #3b82f6;
+      --secondary: #8b5cf6;
+      --dark: #0f172a;
+      --light: #f1f5f9;
+    }
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
-
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: 'Inter', sans-serif;
       line-height: 1.6;
-      color: #0f172a;
-      background: #0f172a;
-      overflow-x: hidden;
+      color: var(--dark);
+      background: var(--light);
     }
-
-    /* Animated Background */
-    .animated-bg {
-      position: fixed;
+    header {
+      background: white;
+      padding: 1rem 2rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      position: sticky;
       top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
-      z-index: -2;
+      z-index: 100;
     }
-
-    .animated-bg::before {
-      content: '';
-      position: absolute;
-      width: 300px;
-      height: 300px;
-      background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
-      border-radius: 50%;
-      animation: float 20s ease-in-out infinite;
-      top: 20%;
-      left: 10%;
-    }
-
-    .animated-bg::after {
-      content: '';
-      position: absolute;
-      width: 200px;
-      height: 200px;
-      background: radial-gradient(circle, rgba(168, 85, 247, 0.1) 0%, transparent 70%);
-      border-radius: 50%;
-      animation: float 15s ease-in-out infinite reverse;
-      top: 60%;
-      right: 10%;
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(-20px) rotate(180deg); }
-    }
-
-    /* Navigation */
-    .navbar {
-      background: rgba(15, 23, 42, 0.95);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 1rem 0;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1000;
-      transition: all 0.3s ease;
-    }
-
-    .navbar.scrolled {
-      background: rgba(15, 23, 42, 0.98);
-      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
-    }
-
-    .nav-container {
+    .container {
       max-width: 1200px;
       margin: 0 auto;
+    }
+    nav {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 0 2rem;
     }
-
     .logo {
-      color: white;
       font-size: 1.5rem;
-      font-weight: 800;
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      transition: all 0.3s ease;
+      font-weight: 700;
+      color: var(--primary);
     }
-
-    .logo:hover {
-      transform: scale(1.05);
-    }
-
-    .logo i {
-      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
     .nav-links {
       display: flex;
-      gap: 0.5rem;
-      align-items: center;
+      gap: 1.5rem;
     }
-
-    .nav-btn {
-      padding: 0.7rem 1.5rem;
-      border-radius: 50px;
+    .nav-links a {
       text-decoration: none;
-      font-size: 0.9rem;
-      font-weight: 600;
-      transition: all 0.3s ease;
-      border: 2px solid transparent;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      position: relative;
-      overflow: hidden;
+      color: var(--dark);
+      font-weight: 500;
+      transition: color 0.3s;
     }
-
-    .nav-btn::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-      transition: left 0.5s ease;
+    .nav-links a:hover {
+      color: var(--primary);
     }
-
-    .nav-btn:hover::before {
-      left: 100%;
-    }
-
-    .nav-btn.primary {
-      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-      color: white;
-      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
-    }
-
-    .nav-btn.primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5);
-    }
-
-    .nav-btn.secondary {
-      background: rgba(255, 255, 255, 0.1);
-      color: white;
-      border-color: rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(10px);
-    }
-
-    .nav-btn.secondary:hover {
-      background: rgba(255, 255, 255, 0.2);
-      border-color: rgba(255, 255, 255, 0.4);
-      transform: translateY(-2px);
-    }
-
-    .nav-btn.outline {
-      background: transparent;
-      color: rgba(255, 255, 255, 0.8);
-      border-color: rgba(255, 255, 255, 0.3);
-      font-size: 0.8rem;
-    }
-
-    .nav-btn.outline:hover {
-      background: rgba(255, 255, 255, 0.1);
-      color: white;
-      border-color: white;
-    }
-
-    /* Mobile menu */
     .mobile-menu-btn {
       display: none;
-      background: none;
-      border: none;
-      color: white;
       font-size: 1.5rem;
       cursor: pointer;
-      padding: 0.5rem;
-      border-radius: 8px;
-      transition: all 0.3s ease;
-    }
-
-    .mobile-menu-btn:hover {
-      background: rgba(255, 255, 255, 0.1);
+      background: none;
+      border: none;
     }
 
     @media (max-width: 768px) {
       .nav-links {
         display: none;
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        background: rgba(15, 23, 42, 0.98);
-        backdrop-filter: blur(20px);
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
         flex-direction: column;
+        background: white;
+        position: absolute;
+        top: 70px;
+        right: 20px;
         padding: 1rem;
-        gap: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 0.5rem;
       }
-
       .nav-links.active {
         display: flex;
       }
-
       .mobile-menu-btn {
         display: block;
       }
-
-      .nav-container {
-        position: relative;
-      }
     }
 
-    /* Hero Section */
     .hero {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 6rem 0 2rem;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .hero-content {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 2rem;
       text-align: center;
-      position: relative;
-      z-index: 1;
+      padding: 6rem 2rem 4rem;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
     }
-
-    .hero-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.5rem 1rem;
-      background: rgba(59, 130, 246, 0.1);
-      border: 1px solid rgba(59, 130, 246, 0.3);
-      border-radius: 50px;
-      color: #60a5fa;
-      font-size: 0.8rem;
-      font-weight: 600;
-      margin-bottom: 2rem;
-      animation: pulse 2s infinite;
-    }
-
     .hero h1 {
-      font-size: clamp(2.5rem, 6vw, 4.5rem);
-      font-weight: 900;
-      margin-bottom: 1.5rem;
-      line-height: 1.1;
-      background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      animation: slideInUp 1s ease-out;
-    }
-
-    .hero p {
-      font-size: 1.3rem;
-      margin-bottom: 3rem;
-      color: #94a3b8;
-      max-width: 700px;
-      margin-left: auto;
-      margin-right: auto;
-      animation: slideInUp 1s ease-out 0.2s both;
-    }
-
-    .cta-buttons {
-      display: flex;
-      gap: 1rem;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin-bottom: 3rem;
-      animation: slideInUp 1s ease-out 0.4s both;
-    }
-
-    .btn {
-      padding: 1.2rem 2.5rem;
-      border-radius: 50px;
-      text-decoration: none;
-      font-weight: 700;
-      transition: all 0.3s ease;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 1.1rem;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .btn::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-      transition: left 0.5s ease;
-    }
-
-    .btn:hover::before {
-      left: 100%;
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-      color: white;
-      box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 15px 35px rgba(59, 130, 246, 0.5);
-    }
-
-    .btn-secondary {
-      background: rgba(255, 255, 255, 0.1);
-      color: white;
-      border: 2px solid rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(10px);
-    }
-
-    .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.2);
-      border-color: rgba(255, 255, 255, 0.4);
-      transform: translateY(-3px);
-    }
-
-    /* Statistics Section */
-    .stats {
-      padding: 4rem 0;
-      background: rgba(255, 255, 255, 0.02);
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .stats-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 2rem;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 2rem;
-    }
-
-    .stat-card {
-      text-align: center;
-      padding: 2rem 1rem;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 20px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(20px);
-      transition: all 0.3s ease;
-    }
-
-    .stat-card:hover {
-      transform: translateY(-5px);
-      background: rgba(255, 255, 255, 0.08);
-      border-color: rgba(255, 255, 255, 0.2);
-    }
-
-    .stat-number {
       font-size: 3rem;
-      font-weight: 900;
-      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      display: block;
-      margin-bottom: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .hero p {
+      font-size: 1.2rem;
+      margin-bottom: 2rem;
+    }
+    .cta-buttons a {
+      display: inline-block;
+      background: white;
+      color: var(--primary);
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      margin: 0.5rem;
+      font-weight: bold;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .cta-buttons a:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.1);
     }
 
-    .stat-label {
-      color: #94a3b8;
-      font-weight: 600;
-      text-transform: uppercase;
-      font-size: 0.9rem;
-      letter-spacing: 0.5px;
+    section {
+      padding: 4rem 2rem;
     }
-
-    /* Features Section */
-    .features {
-      padding: 6rem 0;
-      background: rgba(255, 255, 255, 0.02);
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 2rem;
-    }
-
     .section-title {
       text-align: center;
-      font-size: 3rem;
-      font-weight: 900;
-      margin-bottom: 1rem;
-      background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      position: relative;
-    }
-
-    .section-subtitle {
-      text-align: center;
-      font-size: 1.2rem;
-      color: #94a3b8;
-      margin-bottom: 4rem;
-      max-width: 600px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-      gap: 2rem;
-      margin-bottom: 4rem;
-    }
-
-    .feature-card {
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 2.5rem;
-      border-radius: 20px;
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .feature-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, var(--card-color), var(--card-color-light));
-    }
-
-    .feature-card::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      right: 0;
-      bottom: 0;
-      left: 0;
-      background: linear-gradient(135deg, var(--card-color), var(--card-color-light));
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      z-index: -1;
-    }
-
-    .feature-card:hover {
-      transform: translateY(-10px);
-      border-color: var(--card-color);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-    }
-
-    .feature-card:hover::after {
-      opacity: 0.05;
-    }
-
-    .feature-icon {
-      font-size: 3.5rem;
-      margin-bottom: 1.5rem;
-      background: linear-gradient(135deg, var(--card-color), var(--card-color-light));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      display: inline-block;
-    }
-
-    .feature-card h3 {
-      font-size: 1.5rem;
+      font-size: 2rem;
+      margin-bottom: 2rem;
       font-weight: 700;
-      margin-bottom: 1rem;
-      color: white;
     }
 
-    .feature-card p {
-      color: #94a3b8;
-      line-height: 1.6;
-      font-size: 1.1rem;
-    }
-
-    .feature-card:nth-child(1) { --card-color: #3b82f6; --card-color-light: #60a5fa; }
-    .feature-card:nth-child(2) { --card-color: #8b5cf6; --card-color-light: #a78bfa; }
-    .feature-card:nth-child(3) { --card-color: #06b6d4; --card-color-light: #22d3ee; }
-    .feature-card:nth-child(4) { --card-color: #f59e0b; --card-color-light: #fbbf24; }
-    .feature-card:nth-child(5) { --card-color: #ef4444; --card-color-light: #f87171; }
-    .feature-card:nth-child(6) { --card-color: #10b981; --card-color-light: #34d399; }
-
-    /* How it works */
-    .how-it-works {
-      padding: 6rem 0;
-      background: rgba(255, 255, 255, 0.02);
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .steps-container {
+    .features, .steps {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 3rem;
-      margin-top: 4rem;
-      position: relative;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
     }
 
-    .step-card {
+    .feature-card, .step-card {
+      background: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
       text-align: center;
-      padding: 3rem 2rem;
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 20px;
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
-
-    .step-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(135deg, var(--step-color), var(--step-color-light));
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      z-index: -1;
-    }
-
-    .step-card:hover {
+    .feature-card:hover, .step-card:hover {
       transform: translateY(-10px);
-      border-color: var(--step-color);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-    }
-
-    .step-card:hover::before {
-      opacity: 0.05;
-    }
-
-    .step-number {
-      position: absolute;
-      top: -20px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 50px;
-      height: 50px;
-      background: linear-gradient(135deg, var(--step-color), var(--step-color-light));
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-weight: 900;
-      font-size: 1.3rem;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    }
-
-    .step-icon {
-      font-size: 4rem;
-      margin: 1.5rem 0;
-      background: linear-gradient(135deg, var(--step-color), var(--step-color-light));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
     }
 
     .step-card h3 {
-      font-size: 1.5rem;
-      font-weight: 700;
-      margin-bottom: 1rem;
-      color: white;
+      margin-bottom: 0.5rem;
     }
 
-    .step-card p {
-      color: #94a3b8;
-      line-height: 1.6;
-      font-size: 1.1rem;
-    }
-
-    .step-card:nth-child(1) { --step-color: #3b82f6; --step-color-light: #60a5fa; }
-    .step-card:nth-child(2) { --step-color: #10b981; --step-color-light: #34d399; }
-    .step-card:nth-child(3) { --step-color: #8b5cf6; --step-color-light: #a78bfa; }
-
-    /* Final CTA */
-    .final-cta {
-      padding: 6rem 0;
+    footer {
+      background: #1e293b;
+      color: #e2e8f0;
       text-align: center;
-      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .final-cta h2 {
-      font-size: 3rem;
-      font-weight: 900;
-      margin-bottom: 1rem;
-      background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .final-cta p {
-      font-size: 1.3rem;
-      margin-bottom: 3rem;
-      color: #94a3b8;
-      max-width: 600px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    /* Footer */
-    .footer {
-      background: rgba(0, 0, 0, 0.3);
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      color: #94a3b8;
-      padding: 3rem 0;
-      text-align: center;
-    }
-
-    .footer-content {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 2rem;
-    }
-
-    .footer-links {
-      margin-top: 1.5rem;
-      display: flex;
-      justify-content: center;
-      gap: 2rem;
-      flex-wrap: wrap;
-    }
-
-    .footer-links a {
-      color: #94a3b8;
-      text-decoration: none;
-      transition: all 0.3s ease;
-      font-weight: 500;
-    }
-
-    .footer-links a:hover {
-      color: white;
-      transform: translateY(-2px);
-    }
-
-    .footer-links a.super-admin {
-      color: #fbbf24;
-    }
-
-    .footer-links a.super-admin:hover {
-      color: #f59e0b;
-    }
-
-    /* Animations */
-    @keyframes slideInUp {
-      from {
-        opacity: 0;
-        transform: translateY(50px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .animate-fade-in { animation: fadeIn 0.8s ease-out forwards; }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-      .hero {
-        padding: 4rem 0 2rem;
-      }
-
-      .cta-buttons {
-        flex-direction: column;
-        align-items: center;
-      }
-
-      .btn {
-        width: 100%;
-        max-width: 300px;
-        justify-content: center;
-      }
-
-      .features-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .steps-container {
-        grid-template-columns: 1fr;
-        gap: 2rem;
-      }
-
-      .section-title {
-        font-size: 2.5rem;
-      }
-
-      .hero h1 {
-        font-size: 2.5rem;
-      }
-
-      .hero p {
-        font-size: 1.1rem;
-      }
-
-      .stats-container {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    /* Smooth scrolling */
-    html {
-      scroll-behavior: smooth;
-    }
-
-    /* Custom scrollbar */
-    ::-webkit-scrollbar {
-      width: 8px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: rgba(255, 255, 255, 0.1);
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-      border-radius: 4px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      padding: 2rem;
     }
   </style>
 </head>
 <body>
-  <!-- Animated Background -->
-  <div class="animated-bg"></div>
 
-  <!-- Navigation -->
-  <nav class="navbar" id="navbar">
-    <div class="nav-container">
-      <a href="/" class="logo">
-        <i class="fas fa-graduation-cap"></i>
-        Sistema Avalia
-      </a>
-      
-      <div class="nav-links" id="navLinks">
-        <a href="/login/demo" class="nav-btn secondary">
-          <i class="fas fa-play-circle"></i> Demo
-        </a>
-        <a href="/solicitar-acesso" class="nav-btn primary">
-          <i class="fas fa-handshake"></i> Solicitar Acesso
-        </a>
-        <a href="/admin/login" class="nav-btn outline">
-          <i class="fas fa-user-shield"></i> Admin
-        </a>
-        <a href="/avaliador/login" class="nav-btn outline">
-          <i class="fas fa-chalkboard-teacher"></i> Avaliador
-        </a>
-      </div>
-      
-      <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
-        <i class="fas fa-bars"></i>
-      </button>
+  <header>
+    <div class="container">
+      <nav role="navigation" aria-label="Menu principal">
+        <div class="logo">Sistema Avalia</div>
+        <button class="mobile-menu-btn" aria-label="Abrir menu mobile">&#9776;</button>
+        <div class="nav-links" id="navLinks">
+          <a href="#funcionalidades">Funcionalidades</a>
+          <a href="#como-funciona">Como Funciona</a>
+          <a href="#cadastro">Acessar</a>
+        </div>
+      </nav>
     </div>
-  </nav>
+  </header>
 
-  <!-- Hero Section -->
   <section class="hero">
-    <div class="hero-content">
-      <div class="hero-badge">
-        <i class="fas fa-rocket"></i>
-        <span>Revolucione suas Feiras Escolares</span>
+    <h1>Gerencie e Avalie sua Feira Escolar</h1>
+    <p>Uma plataforma completa para organização, avaliação e resultados de feiras de ciências e projetos escolares.</p>
+    <div class="cta-buttons">
+      <a href="#cadastro">Acessar Sistema</a>
+    </div>
+  </section>
+
+  <section id="funcionalidades">
+    <h2 class="section-title">Funcionalidades</h2>
+    <div class="features">
+      <div class="feature-card">
+        <h3>Cadastro de Projetos</h3>
+        <p>Registre os trabalhos dos alunos com dados completos e organização por categorias.</p>
       </div>
-      
-      <h1>Transforme Avaliações em Experiências Extraordinárias</h1>
-      <p>Plataforma completa que simplifica a gestão de feiras escolares com avaliações inteligentes, relatórios em tempo real e interface intuitiva.</p>
-      
-      <div class="cta-buttons">
-        <a href="/solicitar-acesso" class="btn btn-primary">
-          <i class="fas fa-rocket"></i> Começar Agora
-        </a>
-        <a href="/login/demo" class="btn btn-secondary">
-          <i class="fas fa-play-circle"></i> Ver Demonstração
-        </a>
-        <a href="#funcionalidades" class="btn btn-secondary">
-          <i class="fas fa-arrow-down"></i> Descobrir Mais
-        </a>
+      <div class="feature-card">
+        <h3>Avaliação Inteligente</h3>
+        <p>Critérios configuráveis e atribuição automática de avaliadores para cada projeto.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Relatórios e Resultados</h3>
+        <p>Geração automática de relatórios, rankings e certificados.</p>
       </div>
     </div>
   </section>
 
-  <!-- Statistics Section -->
-  <section class="stats">
-    <div class="stats-container">
-      <div class="stat-card">
-        <span class="stat-number">100%</span>
-        <span class="stat-label">Gratuito</span>
+  <section id="como-funciona">
+    <h2 class="section-title">Como Funciona</h2>
+    <div class="steps">
+      <div class="step-card">
+        <h3>1. Crie sua Feira</h3>
+        <p>Defina nome, datas, categorias e critérios personalizados.</p>
       </div>
-      <div class="stat-card">
-        <span class="stat-number">3</span>
-        <span class="stat-label">Passos Simples</span>
+      <div class="step-card">
+        <h3>2. Cadastre os Projetos</h3>
+        <p>Adicione os projetos e vincule a turmas, professores e categorias.</p>
       </div>
-      <div class="stat-card">
-        <span class="stat-number">∞</span>
-        <span class="stat-label">Projetos</span>
+      <div class="step-card">
+        <h3>3. Atribua Avaliadores</h3>
+        <p>O sistema distribui automaticamente os projetos para cada avaliador.</p>
       </div>
-      <div class="stat-card">
-        <span class="stat-number">24/7</span>
-        <span class="stat-label">Disponível</span>
-      </div>
-    </div>
-  </section>
-
-  <!-- Features Section -->
-  <section id="funcionalidades" class="features">
-    <div class="container">
-      <h2 class="section-title">Funcionalidades que Impressionam</h2>
-      <p class="section-subtitle">Descubra como nosso sistema revoluciona a gestão de feiras escolares com tecnologia de ponta</p>
-      
-      <div class="features-grid">
-        <div class="feature-card">
-          <div class="feature-icon">
-            <i class="fas fa-school"></i>
-          </div>
-          <h3>Gestão Inteligente</h3>
-          <p>Cadastre escolas, usuários e avaliadores com segurança máxima e interface intuitiva que facilita todo o processo.</p>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon">
-            <i class="fas fa-user-shield"></i>
-          </div>
-          <h3>Acesso Seguro</h3>
-          <p>Sistema de PIN exclusivo para avaliadores com criptografia avançada, garantindo segurança total dos dados.</p>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon">
-            <i class="fas fa-chart-line"></i>
-          </div>
-          <h3>Relatórios Inteligentes</h3>
-          <p>Gere relatórios detalhados em tempo real com análises avançadas e visualizações que facilitam a tomada de decisões.</p>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon">
-            <i class="fas fa-medal"></i>
-          </div>
-          <h3>Rankings Automáticos</h3>
-          <p>Classificação automática e instantânea por categoria e turma, com algoritmos que garantem avaliações justas e precisas.</p>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon">
-            <i class="fas fa-calendar-alt"></i>
-          </div>
-          <h3>Organização Total</h3>
-          <p>Gerencie eventos, categorias e cronogramas com facilidade, mantendo tudo organizado em uma única plataforma.</p>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon">
-            <i class="fas fa-envelope-open-text"></i>
-          </div>
-          <h3>Comunicação Integrada</h3>
-          <p>Conecte administradores, avaliadores e escolas através de um sistema de comunicação eficiente e em tempo real.</p>
-        </div>
+      <div class="step-card">
+        <h3>4. Acompanhe os Resultados</h3>
+        <p>Visualize notas, rankings e relatórios em tempo real.</p>
       </div>
     </div>
   </section>
 
-  <!-- How it Works -->
-  <section class="how-it-works">
-    <div class="container">
-      <h2 class="section-title">Como Funciona</h2>
-      <p class="section-subtitle">Três passos simples para revolucionar suas feiras escolares</p>
-      
-      <div class="steps-container">
-        <div class="step-card">
-          <div class="step-number">1</div>
-          <div class="step-icon">
-            <i class="fas fa-rocket"></i>
-          </div>
-          <h3>Configure</h3>
-          <p>Registre sua escola e configure critérios personalizados, categorias, projetos e avaliadores de forma intuitiva e rápida.</p>
-        </div>
-
-        <div class="step-card">
-          <div class="step-number">2</div>
-          <div class="step-icon">
-            <i class="fas fa-clipboard-check"></i>
-          </div>
-          <h3>Avalie</h3>
-          <p>Avaliadores acessam via PIN seguro e avaliam projetos designados com critérios claros e interface amigável.</p>
-        </div>
-
-        <div class="step-card">
-          <div class="step-number">3</div>
-          <div class="step-icon">
-            <i class="fas fa-trophy"></i>
-          </div>
-          <h3>Resultados</h3>
-          <p>Acompanhe relatórios detalhados, rankings automáticos e análises em tempo real para tomar decisões informadas.</p>
-        </div>
-      </div>
+  <section id="cadastro">
+    <h2 class="section-title">Comece Agora</h2>
+    <div class="cta-buttons" style="text-align:center;">
+      <a href="/login" target="_blank" rel="noopener noreferrer">Entrar no Sistema</a>
     </div>
   </section>
 
-  <!-- Final CTA -->
-  <section class="final-cta">
-    <div class="container">
-      <h2>Pronto para a Transformação?</h2>
-      <p>Junte-se às escolas que já revolucionaram suas feiras escolares com nossa plataforma inovadora.</p>
-      <a href="/solicitar-acesso" class="btn btn-primary">
-        <i class="fas fa-rocket"></i> Começar Transformação
-      </a>
-    </div>
-  </section>
-
-  <!-- Footer -->
-  <footer class="footer">
-    <div class="footer-content">
-      <p>&copy; 2025 Sistema Avalia - Plataforma de Avaliação Escolar. Desenvolvido com ❤️ por <strong>Marlo Rosa</strong>.</p>
-      <div class="footer-links">
-        <a href="/politica-privacidade">Política de Privacidade</a>
-        <span>•</span>
-        <a href="/termos-de-uso">Termos de Uso</a>
-        <span>•</span>
-        <a href="/superadmin/login" class="super-admin">Super Admin</a>
-      </div>
-    </div>
+  <footer>
+    <p>&copy; 2025 Sistema Avalia. Todos os direitos reservados.</p>
   </footer>
 
-<script>
-  // Mobile menu toggle
-  function toggleMobileMenu() {
-    const navLinks = document.getElementById('navLinks');
-    navLinks.classList.toggle('active');
-  }
+  <script>
+    const menuBtn = document.querySelector(".mobile-menu-btn");
+    const navLinks = document.getElementById("navLinks");
 
-  // Navbar scroll effect
-  window.addEventListener('scroll', () => {
-    const navbar = document.getElementById('navbar');
-    if (window.scrollY > 50) {
-      navbar.classList.add('scrolled');
-    } else {
-      navbar.classList.remove('scrolled');
-    }
-  });
-
-  // Smooth scrolling for anchor links
-  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-      e.preventDefault();
-      const target = document.querySelector(this.getAttribute('href'));
-      if (target) {
-        const offsetTop = target.offsetTop - 80;
-        window.scrollTo({
-          top: offsetTop,
-          behavior: 'smooth'
-        });
-      }
+    menuBtn.addEventListener("click", () => {
+      navLinks.classList.toggle("active");
     });
-  });
 
-  // Animation on scroll
-  const observerOptions = {
-    threshold: 0.1,
-    rootMargin: '0px 0px -50px 0px'
-  };
-
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.style.opacity = '1';
-        entry.target.style.transform = 'translateY(0)';
-      }
+    document.querySelectorAll('#navLinks a').forEach(link => {
+      link.addEventListener('click', () => {
+        navLinks.classList.remove('active');
+      });
     });
-  }, observerOptions);
-
-  // Observe all cards for animation
-  document.querySelectorAll('.feature-card, .step-card, .stat-card').forEach(el => {
-    el.style.opacity = '0';
-    el.style.transform = 'translateY(30px)';
-    el.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
-    observer.observe(el);
-  });
-
-  // Counter animation for stats
-  const animateCounter = (element, target, duration = 2000) => {
-    const start = 0;
-    const startTime = Date.now();
-    
-    const updateCounter = () => {
-      const elapsed = Date.now() - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      
-      if (target === '∞') {
-        element.textContent = '∞';
-        return;
-      }
-      
-      if (target.includes('%')) {
-        const number = parseInt(target);
-        const current = Math.floor(progress * number);
-        element.textContent = current + '%';
-      } else {
-        const number = parseInt(target);
-        const current = Math.floor(progress * number);
-        element.textContent = current;
-      }
-      
-      if (progress < 1) {
-        requestAnimationFrame(updateCounter);
-      }
-    };
-    
-    updateCounter();
-  };
-
-  // Animate counters when stats section is visible
-  const statsObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const statNumbers = entry.target.querySelectorAll('.stat-number');
-        statNumbers.forEach(stat => {
-          const target = stat.textContent;
-          animateCounter(stat, target);
-        });
-        statsObserver.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.5 });
-
-  const statsSection = document.querySelector('.stats');
-  if (statsSection) {
-    statsObserver.observe(statsSection);
-  }
-
-  // Add parallax effect to hero
-  window.addEventListener('scroll', () => {
-    const scrolled = window.pageYOffset;
-    const hero = document.querySelector('.hero');
-    if (hero) {
-      hero.style.transform = `translateY(${scrolled * 0.5}px)`;
-    }
-  });
-
-  // Add interactive hover effects
-  document.querySelectorAll('.feature-card, .step-card').forEach(card => {
-    card.addEventListener('mouseenter', () => {
-      card.style.transform = 'translateY(-10px) scale(1.02)';
-    });
-    
-    card.addEventListener('mouseleave', () => {
-      card.style.transform = 'translateY(0) scale(1)';
-    });
-  });
-
-  // CORRIGIDO: Add floating animation to hero badge
-  const heroBadge = document.querySelector('.hero-badge');
-  if (heroBadge) {
-    setInterval(() => {
-      heroBadge.style.transform = 'translateY(-5px)';
-      setTimeout(() => {
-        heroBadge.style.transform = 'translateY(0)';
-      }, 500);
-    }, 3000);
-  }
-</script>
-
+  </script>
 </body>
 </html>
