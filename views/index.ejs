@@ -1,258 +1,299 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sistema Avalia</title>
-  <meta name="description" content="Sistema para gerenciamento e avaliação de feiras escolares.">
-  <meta name="author" content="Marlo Rosa">
-  <meta property="og:title" content="Sistema Avalia">
-  <meta property="og:description" content="Plataforma para feiras escolares com avaliação inteligente.">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://sistema.avalia.com.br">
-  <meta property="og:image" content="/img/thumb-avalia.png">
-  <meta name="twitter:card" content="summary_large_image">
-  <link rel="icon" href="/favicon.ico" type="image/x-icon">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema Avalia - Plataforma para Feiras Escolares</title>
+  <meta name="description" content="Sistema gratuito e online para organizar feiras escolares, cadastrar projetos e avaliar com critérios personalizados. Desenvolvido por Marlo Rosa.">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
   <style>
     :root {
       --primary: #3b82f6;
       --secondary: #8b5cf6;
       --dark: #0f172a;
-      --light: #f1f5f9;
+      --muted: #94a3b8;
+      --light: #e2e8f0;
     }
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
+
     body {
       font-family: 'Inter', sans-serif;
+      background: var(--dark);
+      color: white;
       line-height: 1.6;
-      color: var(--dark);
-      background: var(--light);
     }
-    header {
-      background: white;
+
+    a { text-decoration: none; color: inherit; }
+
+    /* Animated Background */
+    .animated-bg::before,
+    .animated-bg::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      animation: float 20s ease-in-out infinite;
+      z-index: -1;
+    }
+
+    .animated-bg::before {
+      top: 20%; left: 10%;
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(59,130,246,0.1), transparent 70%);
+    }
+
+    .animated-bg::after {
+      top: 60%; right: 10%;
+      width: 200px; height: 200px;
+      background: radial-gradient(circle, rgba(168,85,247,0.1), transparent 70%);
+      animation-direction: reverse;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
+    }
+
+    /* Navbar */
+    .navbar {
+      position: fixed;
+      top: 0; width: 100%; z-index: 100;
       padding: 1rem 2rem;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-    nav {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      background: rgba(15,23,42,0.95);
+      backdrop-filter: blur(10px);
     }
-    .logo {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--primary);
-    }
+
     .nav-links {
       display: flex;
-      gap: 1.5rem;
-    }
-    .nav-links a {
-      text-decoration: none;
-      color: var(--dark);
-      font-weight: 500;
-      transition: color 0.3s;
-    }
-    .nav-links a:hover {
-      color: var(--primary);
-    }
-    .mobile-menu-btn {
-      display: none;
-      font-size: 1.5rem;
-      cursor: pointer;
-      background: none;
-      border: none;
+      gap: 1rem;
+      align-items: center;
     }
 
-    @media (max-width: 768px) {
-      .nav-links {
-        display: none;
-        flex-direction: column;
-        background: white;
-        position: absolute;
-        top: 70px;
-        right: 20px;
-        padding: 1rem;
-        border: 1px solid #ddd;
-        border-radius: 0.5rem;
-      }
-      .nav-links.active {
-        display: flex;
-      }
-      .mobile-menu-btn {
-        display: block;
-      }
+    .nav-btn {
+      padding: 0.6rem 1.2rem;
+      border-radius: 999px;
+      font-weight: 600;
+      transition: 0.3s;
     }
 
-    .hero {
-      text-align: center;
-      padding: 6rem 2rem 4rem;
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
+    .nav-btn.primary {
+      background: linear-gradient(to right, var(--primary), var(--secondary));
       color: white;
     }
-    .hero h1 {
-      font-size: 3rem;
-      margin-bottom: 1rem;
-    }
-    .hero p {
-      font-size: 1.2rem;
-      margin-bottom: 2rem;
-    }
-    .cta-buttons a {
-      display: inline-block;
-      background: white;
-      color: var(--primary);
-      padding: 0.75rem 1.5rem;
-      border-radius: 0.5rem;
-      margin: 0.5rem;
-      font-weight: bold;
-      transition: transform 0.3s, box-shadow 0.3s;
-    }
-    .cta-buttons a:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+
+    .nav-btn.secondary {
+      background: rgba(255,255,255,0.1);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.2);
     }
 
-    section {
-      padding: 4rem 2rem;
+    .nav-btn.outline {
+      border: 1px solid rgba(255,255,255,0.2);
+      color: white;
     }
+
+    /* Hero */
+    .hero {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 6rem 2rem 4rem;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      background: linear-gradient(to right, white, var(--light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      color: var(--muted);
+      margin: 1.5rem 0 2rem;
+      max-width: 700px;
+    }
+
+    .cta-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+    }
+
+    .btn {
+      padding: 1rem 2rem;
+      border-radius: 999px;
+      font-weight: bold;
+      transition: 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary {
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      color: white;
+    }
+
+    .btn-secondary {
+      background: rgba(255,255,255,0.1);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    /* Sections */
+    section {
+      padding: 5rem 2rem;
+      max-width: 1200px;
+      margin: auto;
+    }
+
     .section-title {
       text-align: center;
-      font-size: 2rem;
-      margin-bottom: 2rem;
-      font-weight: 700;
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
     }
 
-    .features, .steps {
+    .section-subtitle {
+      text-align: center;
+      color: var(--muted);
+      margin-bottom: 3rem;
+    }
+
+    .features-grid, .steps-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 2rem;
     }
 
-    .feature-card, .step-card {
-      background: white;
+    .card {
+      background: rgba(255,255,255,0.05);
       padding: 2rem;
       border-radius: 1rem;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
       text-align: center;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .feature-card:hover, .step-card:hover {
-      transform: translateY(-10px);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
     }
 
-    .step-card h3 {
+    .card i {
+      font-size: 2rem;
+      color: var(--secondary);
+      margin-bottom: 1rem;
+    }
+
+    .card h3 {
       margin-bottom: 0.5rem;
     }
 
+    .card p {
+      color: var(--muted);
+    }
+
+    /* Footer */
     footer {
-      background: #1e293b;
-      color: #e2e8f0;
       text-align: center;
-      padding: 2rem;
+      padding: 3rem 2rem;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    footer a {
+      color: var(--muted);
+      margin: 0 0.5rem;
+      transition: 0.3s;
+    }
+
+    footer a:hover {
+      color: white;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
     }
   </style>
 </head>
 <body>
-
-  <header>
-    <div class="container">
-      <nav role="navigation" aria-label="Menu principal">
-        <div class="logo">Sistema Avalia</div>
-        <button class="mobile-menu-btn" aria-label="Abrir menu mobile">&#9776;</button>
-        <div class="nav-links" id="navLinks">
-          <a href="#funcionalidades">Funcionalidades</a>
-          <a href="#como-funciona">Como Funciona</a>
-          <a href="#cadastro">Acessar</a>
-        </div>
-      </nav>
+  <div class="animated-bg"></div>
+  <nav class="navbar">
+    <a href="/" class="logo"><i class="fas fa-graduation-cap"></i> Sistema Avalia</a>
+    <div class="nav-links">
+      <a href="/login/demo" class="nav-btn secondary">Demo</a>
+      <a href="/solicitar-acesso" class="nav-btn primary">Solicitar Acesso</a>
+      <a href="/admin/login" class="nav-btn outline">Admin</a>
+      <a href="/avaliador/login" class="nav-btn outline">Avaliador</a>
     </div>
-  </header>
+  </nav>
 
   <section class="hero">
-    <h1>Gerencie e Avalie sua Feira Escolar</h1>
-    <p>Uma plataforma completa para organização, avaliação e resultados de feiras de ciências e projetos escolares.</p>
+    <h1>Transforme Avaliações em Experiências</h1>
+    <p>Plataforma gratuita que simplifica a gestão de feiras escolares com avaliações inteligentes e relatórios automáticos.</p>
     <div class="cta-buttons">
-      <a href="#cadastro">Acessar Sistema</a>
+      <a href="/solicitar-acesso" class="btn btn-primary">Começar Agora</a>
+      <a href="/login/demo" class="btn btn-secondary">Ver Demonstração</a>
     </div>
   </section>
 
-  <section id="funcionalidades">
+  <section>
     <h2 class="section-title">Funcionalidades</h2>
-    <div class="features">
-      <div class="feature-card">
-        <h3>Cadastro de Projetos</h3>
-        <p>Registre os trabalhos dos alunos com dados completos e organização por categorias.</p>
+    <p class="section-subtitle">Recursos criados para facilitar sua feira escolar</p>
+    <div class="features-grid">
+      <div class="card">
+        <i class="fas fa-school"></i>
+        <h3>Gestão de Escolas</h3>
+        <p>Administre escolas, projetos e usuários com segurança.</p>
       </div>
-      <div class="feature-card">
-        <h3>Avaliação Inteligente</h3>
-        <p>Critérios configuráveis e atribuição automática de avaliadores para cada projeto.</p>
+      <div class="card">
+        <i class="fas fa-user-shield"></i>
+        <h3>PIN Seguro</h3>
+        <p>Acesso exclusivo com segurança total para avaliadores.</p>
       </div>
-      <div class="feature-card">
-        <h3>Relatórios e Resultados</h3>
-        <p>Geração automática de relatórios, rankings e certificados.</p>
+      <div class="card">
+        <i class="fas fa-trophy"></i>
+        <h3>Rankings Automáticos</h3>
+        <p>Resultados por categoria e critérios definidos.</p>
       </div>
     </div>
   </section>
 
-  <section id="como-funciona">
+  <section>
     <h2 class="section-title">Como Funciona</h2>
-    <div class="steps">
-      <div class="step-card">
-        <h3>1. Crie sua Feira</h3>
-        <p>Defina nome, datas, categorias e critérios personalizados.</p>
+    <p class="section-subtitle">Três passos simples para começar</p>
+    <div class="steps-grid">
+      <div class="card">
+        <i class="fas fa-cogs"></i>
+        <h3>1. Configure</h3>
+        <p>Cadastre sua escola, critérios, avaliadores e categorias.</p>
       </div>
-      <div class="step-card">
-        <h3>2. Cadastre os Projetos</h3>
-        <p>Adicione os projetos e vincule a turmas, professores e categorias.</p>
+      <div class="card">
+        <i class="fas fa-check"></i>
+        <h3>2. Avalie</h3>
+        <p>Os avaliadores acessam com PIN e avaliam projetos designados.</p>
       </div>
-      <div class="step-card">
-        <h3>3. Atribua Avaliadores</h3>
-        <p>O sistema distribui automaticamente os projetos para cada avaliador.</p>
+      <div class="card">
+        <i class="fas fa-chart-bar"></i>
+        <h3>3. Acompanhe</h3>
+        <p>Veja os resultados em tempo real e gere relatórios finais.</p>
       </div>
-      <div class="step-card">
-        <h3>4. Acompanhe os Resultados</h3>
-        <p>Visualize notas, rankings e relatórios em tempo real.</p>
-      </div>
-    </div>
-  </section>
-
-  <section id="cadastro">
-    <h2 class="section-title">Comece Agora</h2>
-    <div class="cta-buttons" style="text-align:center;">
-      <a href="/login" target="_blank" rel="noopener noreferrer">Entrar no Sistema</a>
     </div>
   </section>
 
   <footer>
-    <p>&copy; 2025 Sistema Avalia. Todos os direitos reservados.</p>
+    <p>&copy; 2025 Sistema Avalia - Desenvolvido por Marlo Rosa</p>
+    <div>
+      <a href="/politica-privacidade">Política de Privacidade</a> •
+      <a href="/termos-de-uso">Termos de Uso</a> •
+      <a href="/superadmin/login">Super Admin</a>
+    </div>
   </footer>
-
-  <script>
-    const menuBtn = document.querySelector(".mobile-menu-btn");
-    const navLinks = document.getElementById("navLinks");
-
-    menuBtn.addEventListener("click", () => {
-      navLinks.classList.toggle("active");
-    });
-
-    document.querySelectorAll('#navLinks a').forEach(link => {
-      link.addEventListener('click', () => {
-        navLinks.classList.remove('active');
-      });
-    });
-  </script>
 </body>
 </html>
