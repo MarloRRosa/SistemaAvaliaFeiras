@@ -20,19 +20,16 @@ router.get('/login/demo', async (req, res) => {
   try {
     const demoEmail = 'demo@seudominio.com';
 
-    // Tenta encontrar e excluir o usuário demo diretamente
+    // Excluir usuário demo, se existir
     const usuarioExistente = await Usuario.findOne({ email: demoEmail });
     if (usuarioExistente) {
       await Usuario.deleteOne({ _id: usuarioExistente._id });
     }
 
-    // Verifica e exclui dados da escola demo e tudo relacionado
+    // Excluir escola demo e dados relacionados
     const escolaAntiga = await Escola.findOne({ nome: 'Escola Demonstração GPT' });
-
     if (escolaAntiga) {
       const escolaId = escolaAntiga._id;
-
-      // Exclui todos os dados relacionados à escola demo
       await Promise.all([
         Feira.deleteMany({ escolaId }),
         Categoria.deleteMany({ escolaId }),
@@ -44,10 +41,7 @@ router.get('/login/demo', async (req, res) => {
       ]);
     }
 
-    // (continua com a criação da nova escola e dados)
-
-
-    // Criação da nova escola demo
+    // Criar nova escola demo
     const escola = await Escola.create({
       nome: 'Escola Demonstração GPT',
       endereco: 'Rua Exemplo, 123',
@@ -89,6 +83,7 @@ router.get('/login/demo', async (req, res) => {
       { titulo: 'Projeto F', alunos: ['Fábio'], categoria: categorias[1]._id, criterios: criterios.map(c => c._id), feira: feira._id, escolaId: escola._id },
     ]);
 
+    // Criar avaliadores demo
     const avaliadores = await Avaliador.insertMany([
       { nome: 'Avaliador 1', email: 'avaliador1@demo.com', pin: '1111', projetosAtribuidos: [projetos[0]._id, projetos[3]._id], escolaId: escola._id, feira: feira._id },
       { nome: 'Avaliador 2', email: 'avaliador2@demo.com', pin: '2222', projetosAtribuidos: [projetos[1]._id, projetos[4]._id], escolaId: escola._id, feira: feira._id },
@@ -99,7 +94,7 @@ router.get('/login/demo', async (req, res) => {
     for (let i = 0; i < 3; i++) {
       const projeto = projetos[i];
       for (const avaliador of avaliadores) {
-        if (avaliador.projetosAtribuidos.includes(projeto._id)) {
+        if (avaliador.projetosAtribuidos.some(pid => pid.equals(projeto._id))) {
           await Avaliacao.create({
             projeto: projeto._id,
             avaliador: avaliador._id,
@@ -111,6 +106,7 @@ router.get('/login/demo', async (req, res) => {
       }
     }
 
+    // Criar usuário demo
     const senha = await bcrypt.hash('demo123', 10);
     const usuario = await Usuario.create({
       nome: 'Usuário Demo',
@@ -121,6 +117,7 @@ router.get('/login/demo', async (req, res) => {
       escolaId: escola._id
     });
 
+    // Criar sessão
     req.session.adminEscola = {
       _id: usuario._id,
       nome: usuario.nome,
