@@ -20,13 +20,20 @@ router.get('/login/demo', async (req, res) => {
   try {
     const demoEmail = 'demo@seudominio.com';
 
-    // Limpa escola demo anterior (se existir)
+    // Tenta encontrar e excluir o usuário demo diretamente
+    const usuarioExistente = await Usuario.findOne({ email: demoEmail });
+    if (usuarioExistente) {
+      await Usuario.deleteOne({ _id: usuarioExistente._id });
+    }
+
+    // Verifica e exclui dados da escola demo e tudo relacionado
     const escolaAntiga = await Escola.findOne({ nome: 'Escola Demonstração GPT' });
 
     if (escolaAntiga) {
       const escolaId = escolaAntiga._id;
+
+      // Exclui todos os dados relacionados à escola demo
       await Promise.all([
-        Usuario.deleteMany({ escolaId }),
         Feira.deleteMany({ escolaId }),
         Categoria.deleteMany({ escolaId }),
         Criterio.deleteMany({ escolaId }),
@@ -36,6 +43,9 @@ router.get('/login/demo', async (req, res) => {
         Escola.deleteOne({ _id: escolaId })
       ]);
     }
+
+    // (continua com a criação da nova escola e dados)
+
 
     // Criação da nova escola demo
     const escola = await Escola.create({
