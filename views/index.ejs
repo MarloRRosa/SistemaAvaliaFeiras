@@ -124,6 +124,142 @@
       background: var(--gradient-hero);
       overflow-x: hidden;
       scroll-behavior: smooth;
+      cursor: none;
+    }
+
+    /* Custom Cursor */
+    .cursor {
+      position: fixed;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--gradient-primary);
+      pointer-events: none;
+      z-index: 9999;
+      transition: all 0.1s ease;
+      opacity: 0;
+      mix-blend-mode: difference;
+    }
+
+    .cursor.active {
+      opacity: 1;
+    }
+
+    .cursor-follower {
+      position: fixed;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid var(--primary-400);
+      pointer-events: none;
+      z-index: 9998;
+      transition: all 0.3s ease;
+      opacity: 0;
+    }
+
+    .cursor-follower.active {
+      opacity: 0.6;
+    }
+
+    .cursor-hover {
+      transform: scale(2);
+      background: var(--gradient-secondary);
+    }
+
+    .cursor-click {
+      transform: scale(0.5);
+      background: var(--gradient-accent);
+    }
+
+    /* Progress Bar */
+    .progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 4px;
+      background: var(--gradient-primary);
+      z-index: 1001;
+      transition: width 0.3s ease;
+      border-radius: 0 2px 2px 0;
+      box-shadow: var(--shadow-glow);
+    }
+
+    /* Dark Mode Toggle */
+    .dark-mode-toggle {
+      position: fixed;
+      top: 50%;
+      right: 20px;
+      transform: translateY(-50%);
+      background: var(--gradient-glass);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: var(--border-radius-full);
+      padding: 15px;
+      cursor: pointer;
+      transition: all var(--transition-normal);
+      z-index: 1000;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .dark-mode-toggle:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateY(-50%) scale(1.1);
+      box-shadow: var(--shadow-xl);
+    }
+
+    .dark-mode-toggle i {
+      color: var(--primary-400);
+      font-size: var(--font-size-xl);
+      transition: all var(--transition-normal);
+    }
+
+    .dark-mode-toggle:hover i {
+      transform: rotate(180deg);
+      color: var(--secondary-400);
+    }
+
+    /* Particle System */
+    .particle {
+      position: fixed;
+      width: 4px;
+      height: 4px;
+      background: var(--gradient-primary);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9997;
+      animation: float-up 3s ease-out forwards;
+    }
+
+    @keyframes float-up {
+      0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-100px) scale(0);
+      }
+    }
+
+    /* Skeleton Loading */
+    .skeleton {
+      background: linear-gradient(90deg, 
+        var(--gradient-glass) 25%, 
+        rgba(255, 255, 255, 0.1) 50%, 
+        var(--gradient-glass) 75%);
+      background-size: 200% 100%;
+      animation: skeleton-loading 1.5s infinite;
+      border-radius: var(--border-radius-md);
+    }
+
+    @keyframes skeleton-loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
     }
 
     /* Animated Background */
@@ -1083,6 +1219,18 @@
   </style>
 </head>
 <body>
+  <!-- Custom Cursor -->
+  <div class="cursor"></div>
+  <div class="cursor-follower"></div>
+  
+  <!-- Progress Bar -->
+  <div class="progress-bar"></div>
+  
+  <!-- Dark Mode Toggle -->
+  <div class="dark-mode-toggle" onclick="toggleDarkMode()">
+    <i class="fas fa-moon"></i>
+  </div>
+  
   <!-- Animated Background -->
   <div class="animated-bg"></div>
   <div class="floating-elements"></div>
@@ -1286,6 +1434,107 @@
   </footer>
 
 <script>
+  // Custom Cursor System
+  let cursor = document.querySelector('.cursor');
+  let cursorFollower = document.querySelector('.cursor-follower');
+  
+  document.addEventListener('mousemove', (e) => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top = e.clientY + 'px';
+    cursor.classList.add('active');
+    
+    setTimeout(() => {
+      cursorFollower.style.left = e.clientX + 'px';
+      cursorFollower.style.top = e.clientY + 'px';
+      cursorFollower.classList.add('active');
+    }, 100);
+  });
+
+  // Cursor hover effects
+  document.querySelectorAll('a, button, .nav-btn, .btn').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      cursor.classList.add('cursor-hover');
+      cursorFollower.style.transform = 'scale(1.5)';
+    });
+    
+    el.addEventListener('mouseleave', () => {
+      cursor.classList.remove('cursor-hover');
+      cursorFollower.style.transform = 'scale(1)';
+    });
+    
+    el.addEventListener('mousedown', () => {
+      cursor.classList.add('cursor-click');
+    });
+    
+    el.addEventListener('mouseup', () => {
+      cursor.classList.remove('cursor-click');
+    });
+  });
+
+  // Progress Bar
+  function updateProgressBar() {
+    const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    const scrolled = (winScroll / height) * 100;
+    document.querySelector('.progress-bar').style.width = scrolled + '%';
+  }
+
+  window.addEventListener('scroll', updateProgressBar);
+
+  // Dark Mode Toggle (Visual Only)
+  function toggleDarkMode() {
+    const body = document.body;
+    const isDark = body.classList.toggle('dark-mode');
+    const icon = document.querySelector('.dark-mode-toggle i');
+    
+    if (isDark) {
+      icon.classList.replace('fa-moon', 'fa-sun');
+      // Add confetti effect
+      createConfetti();
+    } else {
+      icon.classList.replace('fa-sun', 'fa-moon');
+    }
+  }
+
+  // Particle System
+  function createParticle(x, y) {
+    const particle = document.createElement('div');
+    particle.className = 'particle';
+    particle.style.left = x + 'px';
+    particle.style.top = y + 'px';
+    particle.style.background = `hsl(${Math.random() * 360}, 70%, 60%)`;
+    document.body.appendChild(particle);
+    
+    setTimeout(() => {
+      particle.remove();
+    }, 3000);
+  }
+
+  // Confetti Effect
+  function createConfetti() {
+    for (let i = 0; i < 50; i++) {
+      setTimeout(() => {
+        const x = Math.random() * window.innerWidth;
+        const y = Math.random() * window.innerHeight;
+        createParticle(x, y);
+      }, i * 50);
+    }
+  }
+
+  // Loading States for Buttons
+  function addLoadingState(button) {
+    const originalText = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Carregando...';
+    button.disabled = true;
+    button.style.pointerEvents = 'none';
+    
+    setTimeout(() => {
+      button.innerHTML = originalText;
+      button.disabled = false;
+      button.style.pointerEvents = 'auto';
+    }, 2000);
+  }
+
   // Enhanced Mobile Menu Toggle
   function toggleMobileMenu() {
     const navLinks = document.getElementById('navLinks');
@@ -1448,7 +1697,7 @@
   
   window.addEventListener('scroll', requestParallaxUpdate);
 
-  // Enhanced Card Hover Effects
+  // Enhanced Card Hover Effects with 3D Perspective
   document.querySelectorAll('.feature-card, .step-card').forEach(card => {
     card.addEventListener('mouseenter', (e) => {
       const rect = card.getBoundingClientRect();
@@ -1456,11 +1705,27 @@
       const y = e.clientY - rect.top;
       
       card.style.transformOrigin = `${x}px ${y}px`;
-      card.style.transform = 'scale(1.05) rotateX(5deg)';
+      card.style.transform = 'scale(1.05) rotateX(5deg) translateZ(20px)';
+      card.style.boxShadow = '0 20px 40px rgba(0, 0, 0, 0.4)';
+      
+      // Add particle effect on hover
+      createParticle(e.clientX, e.clientY);
     });
     
     card.addEventListener('mouseleave', () => {
-      card.style.transform = 'scale(1) rotateX(0deg)';
+      card.style.transform = 'scale(1) rotateX(0deg) translateZ(0px)';
+      card.style.boxShadow = '';
+    });
+    
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      const rotateX = (y - rect.height / 2) / 10;
+      const rotateY = (x - rect.width / 2) / 10;
+      
+      card.style.transform = `perspective(1000px) rotateX(${-rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
     });
   });
 
@@ -1475,9 +1740,15 @@
     }, 2000);
   }
 
-  // Dynamic Button Ripple Effect
+  // Enhanced Button Effects with Loading States
   document.querySelectorAll('.btn, .nav-btn').forEach(button => {
+    // Ripple effect
     button.addEventListener('click', function(e) {
+      // Add loading state for primary buttons
+      if (this.classList.contains('btn-primary')) {
+        addLoadingState(this);
+      }
+      
       const ripple = document.createElement('div');
       const rect = this.getBoundingClientRect();
       const size = Math.max(rect.width, rect.height);
@@ -1495,6 +1766,7 @@
         width: ${size}px;
         height: ${size}px;
         pointer-events: none;
+        z-index: 1;
       `;
       
       this.appendChild(ripple);
@@ -1502,6 +1774,15 @@
       setTimeout(() => {
         ripple.remove();
       }, 600);
+    });
+    
+    // Enhanced hover effects
+    button.addEventListener('mouseenter', function() {
+      this.style.boxShadow = '0 20px 40px rgba(0, 0, 0, 0.3)';
+    });
+    
+    button.addEventListener('mouseleave', function() {
+      this.style.boxShadow = '';
     });
   });
 
@@ -1530,6 +1811,67 @@
       }
     });
   }
+
+  // Easter Eggs & Special Effects
+  let clickCount = 0;
+  document.addEventListener('click', (e) => {
+    clickCount++;
+    
+    // Every 10 clicks, create a burst of particles
+    if (clickCount % 10 === 0) {
+      for (let i = 0; i < 20; i++) {
+        setTimeout(() => {
+          createParticle(e.clientX + Math.random() * 100 - 50, e.clientY + Math.random() * 100 - 50);
+        }, i * 20);
+      }
+    }
+  });
+
+  // Keyboard Shortcuts
+  document.addEventListener('keydown', (e) => {
+    // Ctrl/Cmd + D for dark mode toggle
+    if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+      e.preventDefault();
+      toggleDarkMode();
+    }
+    
+    // Ctrl/Cmd + P for party mode (confetti)
+    if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+      e.preventDefault();
+      createConfetti();
+    }
+  });
+
+  // Shake animation for intense interactions
+  function shakeElement(element) {
+    element.style.animation = 'shake 0.5s ease-in-out';
+    setTimeout(() => {
+      element.style.animation = '';
+    }, 500);
+  }
+
+  // Add shake animation keyframes
+  const shakeStyle = document.createElement('style');
+  shakeStyle.textContent += `
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+  `;
+  document.head.appendChild(shakeStyle);
+
+  // Scroll-triggered animations for icons
+  document.querySelectorAll('.feature-icon, .step-icon').forEach(icon => {
+    icon.addEventListener('mouseenter', () => {
+      icon.style.transform = 'scale(1.2) rotate(360deg)';
+      icon.style.transition = 'transform 0.5s ease';
+    });
+    
+    icon.addEventListener('mouseleave', () => {
+      icon.style.transform = 'scale(1) rotate(0deg)';
+    });
+  });
 
   // Accessibility: Focus management
   document.querySelectorAll('.btn, .nav-btn').forEach(button => {
