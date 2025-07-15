@@ -27,7 +27,7 @@ router.get('/login/demo', async (req, res) => {
     }
 
     // Excluir escola demo e dados relacionados
-    const escolaAntiga = await Escola.findOne({ nome: 'Escola Demonstração GPT' });
+    const escolaAntiga = await Escola.findOne({ nome: 'Escola Demonstração' });
     if (escolaAntiga) {
       const escolaId = escolaAntiga._id;
       await Promise.all([
@@ -43,7 +43,7 @@ router.get('/login/demo', async (req, res) => {
 
     // Criar nova escola demo
     const escola = await Escola.create({
-      nome: 'Escola Demonstração GPT',
+      nome: 'Escola Demonstração',
       endereco: 'Rua Exemplo, 123',
       telefone: '(00) 0000-0000',
       email: 'escola@gptdemo.com',
@@ -53,14 +53,16 @@ router.get('/login/demo', async (req, res) => {
       tipo: 'demo'
     });
 
+    // Criar feira
     const feira = await Feira.create({
       nome: 'Feira de Ciências Demo',
       inicioFeira: new Date(),
-      fimFeira: new Date(Date.now() + 86400000),
+      fimFeira: new Date(Date.now() + 86400000), // +1 dia
       status: 'ativa',
       escolaId: escola._id
     });
 
+    // Criar critérios
     const criterios = await Criterio.insertMany([
       { nome: 'METODOLOGIA', peso: 1, observacoes: 'Apresentou caráter investigativo...', ordemDesempate: 3, feira: feira._id, escolaId: escola._id },
       { nome: 'DOCUMENTOS', peso: 1, observacoes: 'Relatório de Pesquisa, Caderno...', ordemDesempate: 1, feira: feira._id, escolaId: escola._id },
@@ -69,11 +71,13 @@ router.get('/login/demo', async (req, res) => {
       { nome: 'RELEVÂNCIA', peso: 1, observacoes: 'A pesquisa representou uma contribuição...', ordemDesempate: 5, feira: feira._id, escolaId: escola._id },
     ]);
 
+    // Criar categorias
     const categorias = await Categoria.insertMany([
       { nome: 'Categoria 1', descricao: 'Projetos da categoria 1', feira: feira._id, escolaId: escola._id },
       { nome: 'Categoria 2', descricao: 'Projetos da categoria 2', feira: feira._id, escolaId: escola._id },
     ]);
 
+    // Criar projetos
     const projetos = await Projeto.insertMany([
       { titulo: 'Projeto A', alunos: ['Ana', 'Carlos'], categoria: categorias[0]._id, criterios: criterios.map(c => c._id), feira: feira._id, escolaId: escola._id },
       { titulo: 'Projeto B', alunos: ['Beatriz'], categoria: categorias[0]._id, criterios: criterios.map(c => c._id), feira: feira._id, escolaId: escola._id },
@@ -83,7 +87,7 @@ router.get('/login/demo', async (req, res) => {
       { titulo: 'Projeto F', alunos: ['Fábio'], categoria: categorias[1]._id, criterios: criterios.map(c => c._id), feira: feira._id, escolaId: escola._id },
     ]);
 
-    // Criar avaliadores demo
+    // Criar avaliadores
     const avaliadores = await Avaliador.insertMany([
       { nome: 'Avaliador 1', email: 'avaliador1@demo.com', pin: '1111', projetosAtribuidos: [projetos[0]._id, projetos[3]._id], escolaId: escola._id, feira: feira._id },
       { nome: 'Avaliador 2', email: 'avaliador2@demo.com', pin: '2222', projetosAtribuidos: [projetos[1]._id, projetos[4]._id], escolaId: escola._id, feira: feira._id },
@@ -100,13 +104,16 @@ router.get('/login/demo', async (req, res) => {
             avaliador: avaliador._id,
             escolaId: escola._id,
             feira: feira._id,
-            notas: criterios.map(c => ({ criterio: c._id, nota: gerarNotaAleatoria() }))
+            notas: criterios.map(c => ({
+              criterio: c._id,
+              nota: gerarNotaAleatoria()
+            }))
           });
         }
       }
     }
 
-    // Criar usuário demo
+    // Criar usuário admin-escola para login
     const senha = await bcrypt.hash('demo123', 10);
     const usuario = await Usuario.create({
       nome: 'Usuário Demo',
@@ -117,7 +124,7 @@ router.get('/login/demo', async (req, res) => {
       escolaId: escola._id
     });
 
-    // Criar sessão
+    // Iniciar sessão
     req.session.adminEscola = {
       _id: usuario._id,
       nome: usuario.nome,
@@ -125,6 +132,7 @@ router.get('/login/demo', async (req, res) => {
       role: 'admin'
     };
 
+    // Redirecionar para o painel admin
     res.redirect('/admin/dashboard');
   } catch (err) {
     console.error('Erro no login demo:', err);
