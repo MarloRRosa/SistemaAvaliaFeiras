@@ -30,7 +30,6 @@ const rotasPreCadastros = require('./preCadastro');
 const Mensagem = require('../models/mensagensSuporte');
 const enviarMensagemTelegram = require('../utils/telegram');
 const MensagemSuporte = require('../models/mensagensSuporte');
-const multer = require('multer');
 const { storage } = require('../config/cloudinary');
 
 
