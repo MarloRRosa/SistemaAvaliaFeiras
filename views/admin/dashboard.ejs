@@ -1133,10 +1133,11 @@
     <p class="text-xs text-gray-500 mt-1">Envie o relatório em formato PDF.</p>
 
     <!-- Link para PDF existente -->
-    <div id="pdfExistenteContainer" class="mt-2 hidden">
-        <span class="text-sm font-semibold text-gray-700">Relatório atual: </span>
-        <a id="linkRelatorioPdf" href="#" target="_blank" class="text-blue-600 hover:underline">Ver Relatório</a>
-    </div>
+<div id="pdfExistenteContainer" class="mt-2 hidden">
+  <span class="text-sm font-semibold text-gray-700">Relatório atual: </span>
+  <a id="linkRelatorioPdf" href="#" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">
+    Ver Relatório
+  </a>
 </div>
     <div class="flex items-center justify-end mt-6">
         <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-5 rounded-lg focus:outline-none focus:shadow-outline shadow-md transition duration-300 ease-in-out">
@@ -1533,17 +1534,21 @@ const inputAlunos = document.getElementById('alunosTextArea');
     });
 
     // Mostrar link do PDF existente, se houver
-    const pdfExistenteContainer = document.getElementById('pdfExistenteContainer');
-    const linkRelatorioPdf = document.getElementById('linkRelatorioPdf');
+  const pdfExistenteContainer = document.getElementById('pdfExistenteContainer');
+const linkRelatorioPdf = document.getElementById('linkRelatorioPdf');
 
-    if (event.target.dataset.relatorioPdf) {
-  linkRelatorioPdf.href = event.target.dataset.relatorioPdf;
+const pdfUrl = event.target.dataset.relatorioPdf;
+
+if (pdfUrl && pdfUrl !== '#') {
+  const visualizadorGoogle = `https://docs.google.com/viewer?url=${encodeURIComponent(pdfUrl)}&embedded=true`;
+  linkRelatorioPdf.href = visualizadorGoogle;
+  linkRelatorioPdf.textContent = "Ver Relatório";
   pdfExistenteContainer.classList.remove('hidden');
 } else {
   linkRelatorioPdf.href = '#';
+  linkRelatorioPdf.textContent = "";
   pdfExistenteContainer.classList.add('hidden');
 }
-
 
     modalProjeto.classList.remove('hidden');
     modalProjeto.classList.add('flex');
