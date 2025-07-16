@@ -25,12 +25,12 @@ const fs = require('fs');
 const path = require('path');
 const ejs = require('ejs');
 const QRCode = require('qrcode');
-const upload = multer({ storage: multer.memoryStorage() });
+const { storage } = require('../config/cloudinary');
+const upload = multer({ storage });
 const rotasPreCadastros = require('./preCadastro');
 const Mensagem = require('../models/mensagensSuporte');
 const enviarMensagemTelegram = require('../utils/telegram');
 const MensagemSuporte = require('../models/mensagensSuporte');
-const { storage } = require('../config/cloudinary');
 
 
 // Carrega variáveis de ambiente (garante que estão disponíveis para este arquivo)
@@ -857,7 +857,7 @@ router.post('/projetos', verificarAdminEscola, upload.single('relatorioPdf'), as
   try {
     const feira = await Feira.findOne({ status: 'ativa', escolaId: adminEscolaId });
     if (!feira) {
-      req.flash('error_msg', 'Nenhuma feira ativa encontrada para esta escola. Não é possível criar um projeto.');
+      req.flash('error_msg', 'Nenhuma feira ativa encontrada para esta escola.');
       return res.redirect('/admin/dashboard?tab=projetos');
     }
 
@@ -887,7 +887,6 @@ router.post('/projetos', verificarAdminEscola, upload.single('relatorioPdf'), as
   res.redirect('/admin/dashboard?tab=projetos');
 });
 
-
 // Editar Projeto (PUT)
 router.post('/projetos/:id/editar', verificarAdminEscola, upload.single('relatorioPdf'), async (req, res) => {
   const { id } = req.params;
@@ -913,7 +912,6 @@ router.post('/projetos/:id/editar', verificarAdminEscola, upload.single('relator
         : (criterios ? [criterios].filter(Boolean) : [])
     };
 
-    // Atualiza o relatório PDF se um arquivo for enviado
     if (req.file) {
       updateData.relatorioPdf = req.file.path;
     }
@@ -956,11 +954,13 @@ router.delete('/projetos/:id', verificarAdminEscola, async (req, res) => {
       return res.redirect('/admin/dashboard?tab=projetos');
     }
 
-    // Remove arquivo PDF do disco, se existir
+    // Remove PDF do disco se existir
     if (projetoParaExcluir.relatorioPdf) {
-      const arquivoPath = path.join(__dirname, '..', projetoParaExcluir.relatorioPdf);
-      fs.unlink(arquivoPath, (err) => {
-        if (err) console.error('Erro ao excluir arquivo PDF:', err);
+      const arquivoPath = path.resolve(projetoParaExcluir.relatorioPdf);
+      fs.unlink(arquivoPath, err => {
+        if (err) {
+          console.warn('Falha ao remover PDF:', err.message);
+        }
       });
     }
 
@@ -975,6 +975,7 @@ router.delete('/projetos/:id', verificarAdminEscola, async (req, res) => {
 
   res.redirect('/admin/dashboard?tab=projetos');
 });
+
 
 // ===========================================
 // ROTAS CRUD - AVALIADORES

@@ -1,18 +1,18 @@
+// config/cloudinary.js
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
 cloudinary.config({
-  cloud_name: 'dm2ksqim7',
-  api_key: '619366191197768',
-  api_secret: 'Pwctw1Q4QEHvB4U5egaNWAjs2J4',
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
+  cloudinary,
   params: {
     folder: 'relatorios_projetos',
-    resource_type: 'raw',
-    format: async () => 'pdf',
+    resource_type: 'raw' // Necessário para PDFs
   },
 });
 
