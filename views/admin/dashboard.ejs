@@ -402,7 +402,7 @@
   data-criterios="<%= projeto.criterios && projeto.criterios.length > 0 ? projeto.criterios.map(c => c._id).join(',') : '' %>"
   data-turma="<%= projeto.turma %>"
   data-alunos="<%= projeto.alunos.join(',') %>"
-  data-relatorio-pdf="<%= projeto.relatorioPdf ? ('/' + projeto.relatorioPdf) : '' %>"
+  data-relatorio-pdf="<%= projeto.relatorioPdf || '' %>"
 >
   <i class="fas fa-edit mr-1"></i>Editar
 </button>
