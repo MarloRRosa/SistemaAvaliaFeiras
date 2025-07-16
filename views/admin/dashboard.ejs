@@ -1066,7 +1066,7 @@
             <h2 id="tituloModalProjeto" class="text-3xl font-extrabold mb-6 text-center text-gray-800">Adicionar Novo Projeto</h2>
             <button id="btnFecharModalProjeto" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-4xl leading-none transition duration-300 ease-in-out">&times;</button>
 
-            <form id="formProjeto" action="/admin/projetos" method="POST">
+            <form id="formProjeto" action="/admin/projetos" method="POST" enctype="multipart/form-data">
                 <input type="hidden" id="projetoId" name="id">
 
                 <div class="mb-4">
@@ -1125,6 +1125,17 @@
                         <i class="fas fa-save mr-2"></i>Salvar Projeto
                     </button>
                 </div>
+                <div class="mb-4">
+                <label for="relatorioPdf" class="block text-gray-700 text-sm font-bold mb-2">Relatório (PDF):</label>
+                     <input type="file" id="relatorioPdf" name="relatorioPdf" accept="application/pdf"
+                     class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out">
+                 </div>
+
+                 <div class="flex items-center justify-end mt-6">
+                     <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-5 rounded-lg focus:outline-none focus:shadow-outline shadow-md transition duration-300 ease-in-out">
+                  <i class="fas fa-save mr-2"></i>Salvar Projeto
+                   </button>
+                  </div>
             </form>
         </div>
     </div>

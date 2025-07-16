@@ -30,7 +30,8 @@ const rotasPreCadastros = require('./preCadastro');
 const Mensagem = require('../models/mensagensSuporte');
 const enviarMensagemTelegram = require('../utils/telegram');
 const MensagemSuporte = require('../models/mensagensSuporte');
-
+const multer = require('multer');
+const { storage } = require('../config/cloudinary');
 
 
 // Carrega variáveis de ambiente (garante que estão disponíveis para este arquivo)
@@ -960,6 +961,31 @@ router.delete('/projetos/:id', verificarAdminEscola, async (req, res) => {
 
     res.redirect('/admin/dashboard?tab=projetos');
 });
+
+//Rota adicionar relatório
+
+router.post('/projetos', upload.single('relatorioPdf'), async (req, res) => {
+  try {
+    const { titulo, categoria, turma } = req.body;
+    const relatorioUrl = req.file ? req.file.path : null;
+
+    const novoProjeto = new Projeto({
+      titulo,
+      categoria,
+      turma,
+      relatorioPdf: relatorioUrl
+    });
+
+    await novoProjeto.save();
+    req.flash('success_msg', 'Projeto cadastrado com sucesso!');
+    res.redirect('/admin/dashboard');
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'Erro ao cadastrar projeto.');
+    res.redirect('/admin/dashboard');
+  }
+});
+
 
 // ===========================================
 // ROTAS CRUD - AVALIADORES

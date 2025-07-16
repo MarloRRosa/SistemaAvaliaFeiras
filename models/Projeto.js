@@ -40,7 +40,12 @@ const ProjetoSchema = new mongoose.Schema({
     dataCadastro: {
         type: Date,
         default: Date.now
-    }
+    },
+    relatorioPdf: {
+  type: String,
+  required: false
+}
+
 });
 
 const Projeto = mongoose.model('Projeto', ProjetoSchema);
