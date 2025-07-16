@@ -393,16 +393,20 @@
                                         <td class="py-3 px-4 text-gray-800"><%= projeto.titulo %></td>
                                         <td class="py-3 px-4 text-gray-800"><%= projeto.turma || 'Não informado' %></td>
                                         <td class="py-3 px-4 whitespace-nowrap">
-                                            <button class="btn-editar-projeto bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1.5 px-3 rounded-md text-sm mr-2 shadow-sm transition duration-300 ease-in-out"
-                                                data-id="<%= projeto._id %>"
-                                                data-titulo="<%= projeto.titulo %>"
-                                                data-descricao="<%= projeto.descricao %>"
-                                                data-categoria-id="<%= projeto.categoria ? projeto.categoria._id : '' %>"
-                                                data-criterios="<%= projeto.criterios && projeto.criterios.length > 0 ? projeto.criterios.map(c => c._id).join(',') : '' %>"
-                                                data-turma="<%= projeto.turma %>"
-                                                data-alunos="<%= projeto.alunos.join(',') %>"
-                                                <i class="fas fa-edit mr-1"></i>Editar
-                                            </button>
+                                            <button 
+  class="btn-editar-projeto bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1.5 px-3 rounded-md text-sm mr-2 shadow-sm transition duration-300 ease-in-out"
+  data-id="<%= projeto._id %>"
+  data-titulo="<%= projeto.titulo %>"
+  data-descricao="<%= projeto.descricao %>"
+  data-categoria-id="<%= projeto.categoria ? projeto.categoria._id : '' %>"
+  data-criterios="<%= projeto.criterios && projeto.criterios.length > 0 ? projeto.criterios.map(c => c._id).join(',') : '' %>"
+  data-turma="<%= projeto.turma %>"
+  data-alunos="<%= projeto.alunos.join(',') %>"
+  data-relatorio-pdf="<%= projeto.relatorioPdf ? ('/' + projeto.relatorioPdf) : '' %>"
+>
+  <i class="fas fa-edit mr-1"></i>Editar
+</button>
+
              
                                             <form method="POST" action="/admin/projetos/<%= projeto._id %>?_method=DELETE" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar este projeto?');">
                                                 <input type="hidden"  name="_method" value="DELETE">
@@ -1124,11 +1128,16 @@
 
     <!-- NOVO CAMPO UPLOAD PDF -->
     <div class="mb-6">
-        <label for="relatorioPdf" class="block text-gray-700 text-sm font-bold mb-2">Relatório (PDF):</label>
-        <input type="file" id="relatorioPdf" name="relatorioPdf" accept="application/pdf" class="block w-full text-gray-700">
-        <p class="text-xs text-gray-500 mt-1">Envie o relatório em formato PDF.</p>
-    </div>
+    <label for="relatorioPdf" class="block text-gray-700 text-sm font-bold mb-2">Relatório (PDF):</label>
+    <input type="file" id="relatorioPdf" name="relatorioPdf" accept="application/pdf" class="block w-full text-gray-700">
+    <p class="text-xs text-gray-500 mt-1">Envie o relatório em formato PDF.</p>
 
+    <!-- Link para PDF existente -->
+    <div id="pdfExistenteContainer" class="mt-2 hidden">
+        <span class="text-sm font-semibold text-gray-700">Relatório atual: </span>
+        <a id="linkRelatorioPdf" href="#" target="_blank" class="text-blue-600 underline">Abrir PDF</a>
+    </div>
+</div>
     <div class="flex items-center justify-end mt-6">
         <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-5 rounded-lg focus:outline-none focus:shadow-outline shadow-md transition duration-300 ease-in-out">
             <i class="fas fa-save mr-2"></i>Salvar Projeto
@@ -1507,26 +1516,38 @@ const inputAlunos = document.getElementById('alunosTextArea');
             });
 
            document.querySelectorAll('.btn-editar-projeto').forEach(button => {
-    button.addEventListener('click', (event) => {
-        tituloModalProjeto.textContent = 'Editar Projeto';
-        formProjeto.action = `/admin/projetos/${event.target.dataset.id}/editar`; // Use POST com rota personalizada
-        projetoId.value = event.target.dataset.id;
-        inputTitulo.value = event.target.dataset.titulo;
-        inputDescricao.value = event.target.dataset.descricao; // CORRIGIDO AQUI
-        selectCategoria.value = event.target.dataset.categoriaId;
-        inputTurmaProjeto.value = event.target.dataset.turma;
-        inputAlunos.value = event.target.dataset.alunos ? event.target.dataset.alunos.split(',').join('\n') : '';
+  button.addEventListener('click', (event) => {
+    tituloModalProjeto.textContent = 'Editar Projeto';
+    formProjeto.action = `/admin/projetos/${event.target.dataset.id}/editar`; // Use POST com rota personalizada
+    projetoId.value = event.target.dataset.id;
+    inputTitulo.value = event.target.dataset.titulo;
+    inputDescricao.value = event.target.dataset.descricao; // CORRIGIDO AQUI
+    selectCategoria.value = event.target.dataset.categoriaId;
+    inputTurmaProjeto.value = event.target.dataset.turma;
+    inputAlunos.value = event.target.dataset.alunos ? event.target.dataset.alunos.split(',').join('\n') : '';
 
-                    // Marcar checkboxes de critérios
-                    const criteriosIds = event.target.dataset.criterios ? event.target.dataset.criterios.split(',') : [];
-                    criteriosProjetoCheckboxesDiv.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                        checkbox.checked = criteriosIds.includes(checkbox.value);
-                    });
+    // Marcar checkboxes de critérios
+    const criteriosIds = event.target.dataset.criterios ? event.target.dataset.criterios.split(',') : [];
+    criteriosProjetoCheckboxesDiv.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+      checkbox.checked = criteriosIds.includes(checkbox.value);
+    });
 
-                    modalProjeto.classList.remove('hidden');
-                    modalProjeto.classList.add('flex');
-                });
-            });
+    // Mostrar link do PDF existente, se houver
+    const pdfExistenteContainer = document.getElementById('pdfExistenteContainer');
+    const linkRelatorioPdf = document.getElementById('linkRelatorioPdf');
+
+    if (event.target.dataset.relatorioPdf) {
+      linkRelatorioPdf.href = event.target.dataset.relatorioPdf;
+      pdfExistenteContainer.classList.remove('hidden');
+    } else {
+      linkRelatorioPdf.href = '#';
+      pdfExistenteContainer.classList.add('hidden');
+    }
+
+    modalProjeto.classList.remove('hidden');
+    modalProjeto.classList.add('flex');
+  });
+});
 
             // Mostrar modal de Categoria
             const modalCategoria = document.getElementById('modalCategoria');

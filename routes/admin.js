@@ -913,7 +913,8 @@ router.post('/projetos/:id/editar', verificarAdminEscola, upload.single('relator
     };
 
     if (req.file) {
-      updateData.relatorioPdf = req.file.path;
+      // Ajuste para pegar a URL correta do arquivo enviado via Cloudinary ou outro storage
+      updateData.relatorioPdf = req.file.path || req.file.secure_url || req.file.url;
     }
 
     const updatedProjeto = await Projeto.findOneAndUpdate(
