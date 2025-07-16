@@ -1135,7 +1135,7 @@
     <!-- Link para PDF existente -->
     <div id="pdfExistenteContainer" class="mt-2 hidden">
         <span class="text-sm font-semibold text-gray-700">Relatório atual: </span>
-        <a id="linkRelatorioPdf" href="#" target="_blank" class="text-blue-600 underline">Abrir PDF</a>
+        <a id="linkRelatorioPdf" href="#" target="_blank" class="text-blue-600 hover:underline">Ver Relatório</a>
     </div>
 </div>
     <div class="flex items-center justify-end mt-6">
@@ -1537,12 +1537,13 @@ const inputAlunos = document.getElementById('alunosTextArea');
     const linkRelatorioPdf = document.getElementById('linkRelatorioPdf');
 
     if (event.target.dataset.relatorioPdf) {
-      linkRelatorioPdf.href = event.target.dataset.relatorioPdf;
-      pdfExistenteContainer.classList.remove('hidden');
-    } else {
-      linkRelatorioPdf.href = '#';
-      pdfExistenteContainer.classList.add('hidden');
-    }
+  linkRelatorioPdf.href = event.target.dataset.relatorioPdf;
+  pdfExistenteContainer.classList.remove('hidden');
+} else {
+  linkRelatorioPdf.href = '#';
+  pdfExistenteContainer.classList.add('hidden');
+}
+
 
     modalProjeto.classList.remove('hidden');
     modalProjeto.classList.add('flex');

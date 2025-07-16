@@ -851,25 +851,23 @@ const mensagens = await Mensagem.find({ autorId: req.session.adminEscola.id })
 
 // Criar Projeto (POST)
 router.post('/projetos', verificarAdminEscola, upload.single('relatorioPdf'), async (req, res) => {
-  const { titulo, descricao, turma, alunos, categoria, criterios } = req.body;
-  const adminEscolaId = req.session.adminEscola.escolaId;
-
   try {
+    const { titulo, descricao, turma, alunos, categoria, criterios } = req.body;
+    const adminEscolaId = req.session.adminEscola.escolaId;
+
     const feira = await Feira.findOne({ status: 'ativa', escolaId: adminEscolaId });
     if (!feira) {
       req.flash('error_msg', 'Nenhuma feira ativa encontrada para esta escola.');
       return res.redirect('/admin/dashboard?tab=projetos');
     }
 
-    const relatorioUrl = req.file ? req.file.path : null;
+    const relatorioUrl = req.file ? req.file.path : null; // URL do Cloudinary
 
     const novoProjeto = new Projeto({
       titulo,
       descricao,
       turma,
-      alunos: typeof alunos === 'string'
-        ? alunos.split('\n').map(a => a.trim()).filter(Boolean)
-        : Array.isArray(alunos) ? alunos : [],
+      alunos: typeof alunos === 'string' ? alunos.split('\n').map(a => a.trim()).filter(Boolean) : [],
       criterios: Array.isArray(criterios) ? criterios : (criterios ? [criterios] : []),
       categoria,
       escolaId: adminEscolaId,
@@ -881,11 +879,12 @@ router.post('/projetos', verificarAdminEscola, upload.single('relatorioPdf'), as
     req.flash('success_msg', 'Projeto criado com sucesso!');
   } catch (err) {
     console.error('Erro ao criar projeto:', err);
-    req.flash('error_msg', 'Erro ao criar projeto. Detalhes: ' + err.message);
+    req.flash('error_msg', 'Erro ao criar projeto: ' + err.message);
   }
 
   res.redirect('/admin/dashboard?tab=projetos');
 });
+
 
 // Editar Projeto (PUT)
 router.post('/projetos/:id/editar', verificarAdminEscola, upload.single('relatorioPdf'), async (req, res) => {
@@ -914,7 +913,7 @@ router.post('/projetos/:id/editar', verificarAdminEscola, upload.single('relator
 
     if (req.file) {
       // Ajuste para pegar a URL correta do arquivo enviado via Cloudinary ou outro storage
-      updateData.relatorioPdf = req.file.path || req.file.secure_url || req.file.url;
+        updateData.relatorioPdf = req.file.secure_url || req.file.path || req.file.url;
     }
 
     const updatedProjeto = await Projeto.findOneAndUpdate(
