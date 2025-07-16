@@ -31,6 +31,7 @@ const rotasPreCadastros = require('./preCadastro');
 const Mensagem = require('../models/mensagensSuporte');
 const enviarMensagemTelegram = require('../utils/telegram');
 const MensagemSuporte = require('../models/mensagensSuporte');
+const cloudinary = require('cloudinary').v2;
 
 
 // Carrega variáveis de ambiente (garante que estão disponíveis para este arquivo)
