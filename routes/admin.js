@@ -850,141 +850,131 @@ const mensagens = await Mensagem.find({ autorId: req.session.adminEscola.id })
 // ===========================================
 
 // Criar Projeto (POST)
-router.post('/projetos', verificarAdminEscola, async (req, res) => {
-    const { titulo, descricao, turma, alunos, categoria, criterios } = req.body;
-    const adminEscolaId = req.session.adminEscola.escolaId; // Obtém o ID da escola da sessão
+router.post('/projetos', verificarAdminEscola, upload.single('relatorioPdf'), async (req, res) => {
+  const { titulo, descricao, turma, alunos, categoria, criterios } = req.body;
+  const adminEscolaId = req.session.adminEscola.escolaId;
 
-    try {
-        const feira = await Feira.findOne({ status: 'ativa', escolaId: adminEscolaId }); // USANDO escolaId AQUI
-
-        if (!feira) {
-            req.flash('error_msg', 'Nenhuma feira ativa encontrada para esta escola. Não é possível criar um projeto.');
-            return res.redirect('/admin/dashboard?tab=projetos');
-        }
-
-        const novoProjeto = new Projeto({
-            titulo,
-            descricao,
-            turma,
-            alunos: typeof alunos === 'string'
-            ? alunos.split('\n').map(a => a.trim()).filter(Boolean)
-            : Array.isArray(alunos) ? alunos : [],
-            criterios: Array.isArray(criterios) ? criterios : (criterios ? [criterios] : []),
-            categoria,
-            escolaId: adminEscolaId, // Vincula à escola do admin logado (USANDO escolaId AQUI)
-            feira: feira._id // Vincula à feira ativa
-        });
-
-        await novoProjeto.save();
-        req.flash('success_msg', 'Projeto criado com sucesso!');
-    } catch (err) {
-        console.error('Erro ao criar projeto:', err);
-        req.flash('error_msg', 'Erro ao criar projeto. Detalhes: ' + err.message);
+  try {
+    const feira = await Feira.findOne({ status: 'ativa', escolaId: adminEscolaId });
+    if (!feira) {
+      req.flash('error_msg', 'Nenhuma feira ativa encontrada para esta escola. Não é possível criar um projeto.');
+      return res.redirect('/admin/dashboard?tab=projetos');
     }
 
-    res.redirect('/admin/dashboard?tab=projetos');
+    const relatorioUrl = req.file ? req.file.path : null;
+
+    const novoProjeto = new Projeto({
+      titulo,
+      descricao,
+      turma,
+      alunos: typeof alunos === 'string'
+        ? alunos.split('\n').map(a => a.trim()).filter(Boolean)
+        : Array.isArray(alunos) ? alunos : [],
+      criterios: Array.isArray(criterios) ? criterios : (criterios ? [criterios] : []),
+      categoria,
+      escolaId: adminEscolaId,
+      feira: feira._id,
+      relatorioPdf: relatorioUrl
+    });
+
+    await novoProjeto.save();
+    req.flash('success_msg', 'Projeto criado com sucesso!');
+  } catch (err) {
+    console.error('Erro ao criar projeto:', err);
+    req.flash('error_msg', 'Erro ao criar projeto. Detalhes: ' + err.message);
+  }
+
+  res.redirect('/admin/dashboard?tab=projetos');
 });
 
 
 // Editar Projeto (PUT)
-router.post('/projetos/:id/editar', verificarAdminEscola, async (req, res) => {
-    const { id } = req.params;
-    const { titulo, descricao, categoria, turma, alunos, criterios } = req.body;
-    const adminEscolaId = req.session.adminEscola.escolaId;
+router.post('/projetos/:id/editar', verificarAdminEscola, upload.single('relatorioPdf'), async (req, res) => {
+  const { id } = req.params;
+  const { titulo, descricao, categoria, turma, alunos, criterios } = req.body;
+  const adminEscolaId = req.session.adminEscola.escolaId;
 
-    // Validação de ID antes de tentar a operação no banco
-    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-        req.flash('error_msg', 'ID do projeto inválido para edição.');
-        return res.redirect('/admin/dashboard?tab=projetos');
+  if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+    req.flash('error_msg', 'ID do projeto inválido para edição.');
+    return res.redirect('/admin/dashboard?tab=projetos');
+  }
+
+  try {
+    const updateData = {
+      titulo,
+      descricao,
+      categoria,
+      turma,
+      alunos: typeof alunos === 'string'
+        ? alunos.split('\n').map(a => a.trim()).filter(Boolean)
+        : Array.isArray(alunos) ? alunos : [],
+      criterios: Array.isArray(criterios)
+        ? criterios.filter(Boolean)
+        : (criterios ? [criterios].filter(Boolean) : [])
+    };
+
+    // Atualiza o relatório PDF se um arquivo for enviado
+    if (req.file) {
+      updateData.relatorioPdf = req.file.path;
     }
 
-    try {
-        // Garante que o projeto a ser atualizado pertence à escola do admin
-        const updatedProjeto = await Projeto.findOneAndUpdate(
-            { _id: id, escolaId: adminEscolaId }, // USANDO escolaId AQUI
-            {
-                titulo,
-                descricao,
-                categoria,
-                turma,
-                alunos: typeof alunos === 'string'
-                ? alunos.split('\n').map(a => a.trim()).filter(Boolean)
-                : Array.isArray(alunos) ? alunos : [],
-                criterios: Array.isArray(criterios) ? criterios.filter(Boolean) : (criterios ? [criterios].filter(Boolean) : [])
-            },
-            { new: true }
-        );
+    const updatedProjeto = await Projeto.findOneAndUpdate(
+      { _id: id, escolaId: adminEscolaId },
+      updateData,
+      { new: true }
+    );
 
-        if (!updatedProjeto) {
-            req.flash('error_msg', 'Projeto não encontrado ou você não tem permissão para editá-lo.');
-            return res.redirect('/admin/dashboard?tab=projetos');
-        }
-
-        req.flash('success_msg', 'Projeto atualizado com sucesso!');
-    } catch (err) {
-        console.error('Erro ao atualizar projeto:', err);
-        req.flash('error_msg', 'Erro ao atualizar projeto. Detalhes: ' + err.message);
+    if (!updatedProjeto) {
+      req.flash('error_msg', 'Projeto não encontrado ou você não tem permissão para editá-lo.');
+      return res.redirect('/admin/dashboard?tab=projetos');
     }
 
-    res.redirect('/admin/dashboard?tab=projetos');
+    req.flash('success_msg', 'Projeto atualizado com sucesso!');
+  } catch (err) {
+    console.error('Erro ao atualizar projeto:', err);
+    req.flash('error_msg', 'Erro ao atualizar projeto. Detalhes: ' + err.message);
+  }
+
+  res.redirect('/admin/dashboard?tab=projetos');
 });
 
 
 // Excluir Projeto (DELETE)
 router.delete('/projetos/:id', verificarAdminEscola, async (req, res) => {
-    const { id } = req.params;
-    const adminEscolaId = req.session.adminEscola.escolaId;
+  const { id } = req.params;
+  const adminEscolaId = req.session.adminEscola.escolaId;
 
-    // Validação de ID antes de tentar a operação no banco
-    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-        req.flash('error_msg', 'ID do projeto inválido para exclusão.');
-        return res.redirect('/admin/dashboard?tab=projetos');
-    }
-
-    try {
-        // Encontra o projeto e garante que pertence à escola do admin
-        const projetoParaExcluir = await Projeto.findOne({ _id: id, escolaId: adminEscolaId }); // USANDO escolaId AQUI
-        if (!projetoParaExcluir) {
-            req.flash('error_msg', 'Projeto não encontrado ou você não tem permissão para excluí-lo.');
-            return res.redirect('/admin/dashboard?tab=projetos');
-        }
-
-        await Avaliacao.deleteMany({ projeto: id, escolaId: adminEscolaId }); // Exclui avaliações do projeto nesta escola (USANDO escolaId AQUI)
-        await Projeto.deleteOne({ _id: id, escolaId: adminEscolaId }); // Exclui o projeto da escola (USANDO escolaId AQUI)
-
-        req.flash('success_msg', 'Projeto e suas avaliações excluídos com sucesso!');
-    } catch (err) {
-        console.error('Erro ao excluir projeto:', err);
-        req.flash('error_msg', 'Erro ao excluir projeto. Detalhes: ' + err.message);
-    }
-
-    res.redirect('/admin/dashboard?tab=projetos');
-});
-
-//Rota adicionar relatório
-
-router.post('/projetos', upload.single('relatorioPdf'), async (req, res) => {
-  try {
-    const { titulo, categoria, turma } = req.body;
-    const relatorioUrl = req.file ? req.file.path : null;
-
-    const novoProjeto = new Projeto({
-      titulo,
-      categoria,
-      turma,
-      relatorioPdf: relatorioUrl
-    });
-
-    await novoProjeto.save();
-    req.flash('success_msg', 'Projeto cadastrado com sucesso!');
-    res.redirect('/admin/dashboard');
-  } catch (err) {
-    console.error(err);
-    req.flash('error_msg', 'Erro ao cadastrar projeto.');
-    res.redirect('/admin/dashboard');
+  if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+    req.flash('error_msg', 'ID do projeto inválido para exclusão.');
+    return res.redirect('/admin/dashboard?tab=projetos');
   }
-});
 
+  try {
+    const projetoParaExcluir = await Projeto.findOne({ _id: id, escolaId: adminEscolaId });
+    if (!projetoParaExcluir) {
+      req.flash('error_msg', 'Projeto não encontrado ou você não tem permissão para excluí-lo.');
+      return res.redirect('/admin/dashboard?tab=projetos');
+    }
+
+    // Remove arquivo PDF do disco, se existir
+    if (projetoParaExcluir.relatorioPdf) {
+      const arquivoPath = path.join(__dirname, '..', projetoParaExcluir.relatorioPdf);
+      fs.unlink(arquivoPath, (err) => {
+        if (err) console.error('Erro ao excluir arquivo PDF:', err);
+      });
+    }
+
+    await Avaliacao.deleteMany({ projeto: id, escolaId: adminEscolaId });
+    await Projeto.deleteOne({ _id: id, escolaId: adminEscolaId });
+
+    req.flash('success_msg', 'Projeto e suas avaliações excluídos com sucesso!');
+  } catch (err) {
+    console.error('Erro ao excluir projeto:', err);
+    req.flash('error_msg', 'Erro ao excluir projeto. Detalhes: ' + err.message);
+  }
+
+  res.redirect('/admin/dashboard?tab=projetos');
+});
 
 // ===========================================
 // ROTAS CRUD - AVALIADORES

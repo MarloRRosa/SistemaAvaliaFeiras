@@ -1067,76 +1067,75 @@
             <button id="btnFecharModalProjeto" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-4xl leading-none transition duration-300 ease-in-out">&times;</button>
 
             <form id="formProjeto" action="/admin/projetos" method="POST" enctype="multipart/form-data">
-                <input type="hidden" id="projetoId" name="id">
+    <input type="hidden" id="projetoId" name="id">
 
-                <div class="mb-4">
-                    <label for="titulo" class="block text-gray-700 text-sm font-bold mb-2">Título do Projeto:</label>
-                    <input type="text" id="titulo" name="titulo" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out" required>
-                </div>
+    <div class="mb-4">
+        <label for="titulo" class="block text-gray-700 text-sm font-bold mb-2">Título do Projeto:</label>
+        <input type="text" id="titulo" name="titulo" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out" required>
+    </div>
 
-                <div class="mb-4">
-                    <label for="descricao" class="block text-gray-700 text-sm font-bold mb-2">Descrição:</label>
-                    <textarea style="max-height: 120px;" id="descricao" name="descricao" rows="3" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out"></textarea>
-                </div>
+    <div class="mb-4">
+        <label for="descricao" class="block text-gray-700 text-sm font-bold mb-2">Descrição:</label>
+        <textarea style="max-height: 120px;" id="descricao" name="descricao" rows="3" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out"></textarea>
+    </div>
 
-                <div class="mb-4">
-                    <label for="categoria" class="block text-gray-700 text-sm font-bold mb-2">Categoria:</label>
-                    <select id="categoria" name="categoria" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out" required>
-                        <option value="">Selecione uma Categoria</option>
-                        <% categorias.forEach(cat => { %>
-                            <option value="<%= cat._id %>"><%= cat.nome %></option>
-                        <% }) %>
-                    </select>
-                </div>
-                <div class="mb-6">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Critérios de Avaliação:</label>
-                     <div class="mb-2">
-                            <label class="inline-flex items-center">
-                                <input type="checkbox" id="selecionarTodosCriterios" class="form-checkbox h-4 w-4 text-blue-600">
-                                <span class="ml-2 text-sm text-gray-700">Selecionar todos os critérios</span>
-                            </label>
-                        </div>
-                    <div id="criteriosProjetoCheckboxes" class="max-h-48 overflow-y-auto border border-gray-300 p-3 rounded-lg bg-gray-50 shadow-inner">
+    <div class="mb-4">
+        <label for="categoria" class="block text-gray-700 text-sm font-bold mb-2">Categoria:</label>
+        <select id="categoria" name="categoria" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out" required>
+            <option value="">Selecione uma Categoria</option>
+            <% categorias.forEach(cat => { %>
+                <option value="<%= cat._id %>"><%= cat.nome %></option>
+            <% }) %>
+        </select>
+    </div>
 
-                        <% if (criterios && criterios.length > 0) { %>
-                            <% criterios.forEach(criterio => { %>
-                                <div class="flex items-center mb-2">
-                                    <input type="checkbox" id="criterio_<%= criterio._id %>" name="criterios" value="<%= criterio._id %>" class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-                                    <label for="criterio_<%= criterio._id %>" class="text-gray-700 text-base"><%= criterio.nome %> (Peso: <%= criterio.peso %>)</label>
-                                </div>
-                            <% }) %>
-                        <% } else { %>
-                            <p class="text-gray-500">Nenhum critério disponível.</p>
-                        <% } %>
+    <div class="mb-6">
+        <label class="block text-gray-700 text-sm font-bold mb-2">Critérios de Avaliação:</label>
+         <div class="mb-2">
+                <label class="inline-flex items-center">
+                    <input type="checkbox" id="selecionarTodosCriterios" class="form-checkbox h-4 w-4 text-blue-600">
+                    <span class="ml-2 text-sm text-gray-700">Selecionar todos os critérios</span>
+                </label>
+            </div>
+        <div id="criteriosProjetoCheckboxes" class="max-h-48 overflow-y-auto border border-gray-300 p-3 rounded-lg bg-gray-50 shadow-inner">
+
+            <% if (criterios && criterios.length > 0) { %>
+                <% criterios.forEach(criterio => { %>
+                    <div class="flex items-center mb-2">
+                        <input type="checkbox" id="criterio_<%= criterio._id %>" name="criterios" value="<%= criterio._id %>" class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                        <label for="criterio_<%= criterio._id %>" class="text-gray-700 text-base"><%= criterio.nome %> (Peso: <%= criterio.peso %>)</label>
                     </div>
-                </div>
+                <% }) %>
+            <% } else { %>
+                <p class="text-gray-500">Nenhum critério disponível.</p>
+            <% } %>
+        </div>
+    </div>
 
-                <div class="mb-4">
-                    <label for="turmaProjeto" class="block text-gray-700 text-sm font-bold mb-2">Turma:</label>
-                    <input type="text" id="turmaProjeto" name="turma" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out" required>
-                </div>
-                <div class="mb-4">
-                    <label for="alunosTextArea" class="block text-gray-700 text-sm font-bold mb-2">Alunos (um por linha):</label>
-                    <textarea id="alunosTextArea" name="alunos" rows="4" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out"></textarea>
-                </div>
+    <div class="mb-4">
+        <label for="turmaProjeto" class="block text-gray-700 text-sm font-bold mb-2">Turma:</label>
+        <input type="text" id="turmaProjeto" name="turma" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out" required>
+    </div>
 
-                <div class="flex items-center justify-end mt-6">
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-5 rounded-lg focus:outline-none focus:shadow-outline shadow-md transition duration-300 ease-in-out">
-                        <i class="fas fa-save mr-2"></i>Salvar Projeto
-                    </button>
-                </div>
-                <div class="mb-4">
-                <label for="relatorioPdf" class="block text-gray-700 text-sm font-bold mb-2">Relatório (PDF):</label>
-                     <input type="file" id="relatorioPdf" name="relatorioPdf" accept="application/pdf"
-                     class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out">
-                 </div>
+    <div class="mb-4">
+        <label for="alunosTextArea" class="block text-gray-700 text-sm font-bold mb-2">Alunos (um por linha):</label>
+        <textarea id="alunosTextArea" name="alunos" rows="4" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out"></textarea>
+    </div>
 
-                 <div class="flex items-center justify-end mt-6">
-                     <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-5 rounded-lg focus:outline-none focus:shadow-outline shadow-md transition duration-300 ease-in-out">
-                  <i class="fas fa-save mr-2"></i>Salvar Projeto
-                   </button>
-                  </div>
-            </form>
+    <!-- NOVO CAMPO UPLOAD PDF -->
+    <div class="mb-6">
+        <label for="relatorioPdf" class="block text-gray-700 text-sm font-bold mb-2">Relatório (PDF):</label>
+        <input type="file" id="relatorioPdf" name="relatorioPdf" accept="application/pdf" class="block w-full text-gray-700">
+        <p class="text-xs text-gray-500 mt-1">Envie o relatório em formato PDF.</p>
+    </div>
+
+    <div class="flex items-center justify-end mt-6">
+        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-5 rounded-lg focus:outline-none focus:shadow-outline shadow-md transition duration-300 ease-in-out">
+            <i class="fas fa-save mr-2"></i>Salvar Projeto
+        </button>
+    </div>
+</form>
+
         </div>
     </div>
 
