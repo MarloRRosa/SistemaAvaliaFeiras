@@ -54,7 +54,15 @@ if (!Feira || typeof Feira.findOne !== 'function' ||
     // Isso pode causar um erro de inicialização ou impedir o servidor de subir corretamente.
     // Dependendo da criticidade, você pode querer encerrar o processo: process.exit(1);
 }
-
+function getCloudinaryPublicId(url) {
+  if (!url) return null;
+  const parts = url.split('/');
+  const fileName = parts.pop(); // ex: relatorio.pdf
+  const folderIndex = parts.indexOf('upload') + 1;
+  const folder = parts.slice(folderIndex).join('/');
+  const publicId = `${folder}/${fileName.replace(/\.[^/.]+$/, '')}`;
+  return publicId;
+}
 
 // ===========================================
 // FUNÇÕES AUXILIARES
@@ -954,14 +962,12 @@ router.delete('/projetos/:id', verificarAdminEscola, async (req, res) => {
       return res.redirect('/admin/dashboard?tab=projetos');
     }
 
-    // Remove PDF do disco se existir
+    // Remover relatório PDF do Cloudinary, se existir
     if (projetoParaExcluir.relatorioPdf) {
-      const arquivoPath = path.resolve(projetoParaExcluir.relatorioPdf);
-      fs.unlink(arquivoPath, err => {
-        if (err) {
-          console.warn('Falha ao remover PDF:', err.message);
-        }
-      });
+      const publicId = getCloudinaryPublicId(projetoParaExcluir.relatorioPdf);
+      if (publicId) {
+        await cloudinary.uploader.destroy(publicId, { resource_type: 'raw' });
+      }
     }
 
     await Avaliacao.deleteMany({ projeto: id, escolaId: adminEscolaId });
@@ -975,7 +981,6 @@ router.delete('/projetos/:id', verificarAdminEscola, async (req, res) => {
 
   res.redirect('/admin/dashboard?tab=projetos');
 });
-
 
 // ===========================================
 // ROTAS CRUD - AVALIADORES

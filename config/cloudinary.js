@@ -1,4 +1,3 @@
-// config/cloudinary.js
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
@@ -10,9 +9,12 @@ cloudinary.config({
 
 const storage = new CloudinaryStorage({
   cloudinary,
-  params: {
-    folder: 'relatorios_projetos',
-    resource_type: 'raw' // Necessário para PDFs
+  params: async (req, file) => {
+    return {
+      folder: 'relatorios_projetos',
+      resource_type: 'raw', // garante que PDFs e outros arquivos não-imagem sejam aceitos
+      public_id: file.originalname.replace(/\.[^/.]+$/, '') // nome sem extensão
+    };
   },
 });
 
