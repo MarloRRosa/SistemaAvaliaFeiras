@@ -710,169 +710,159 @@
     </div>
 
     <script>
-        // Funcionalidades JavaScript melhoradas
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeSubtabs();
-            initializeFilters();
-            initializeAnimations();
-            initializeEditarAvaliador();
-        });
+    // Funcionalidades JavaScript melhoradas
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeSubtabs();
+        initializeFilters();
+        initializeAnimations();
+        initializeEditarAvaliador();
+    });
 
-        function initializeSubtabs() {
-    const subtabBtns = document.querySelectorAll('.subtab-btn');
-    const subtabContents = document.querySelectorAll('.subtab-content');
+    function initializeSubtabs() {
+        const subtabBtns = document.querySelectorAll('.subtab-btn');
+        const subtabContents = document.querySelectorAll('.subtab-content');
 
-    subtabBtns.forEach(btn => {
-        btn.addEventListener('click', function () {
-            const targetTab = this.dataset.subtab;
+        subtabBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                const targetTab = this.dataset.subtab;
 
-            subtabBtns.forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
+                subtabBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
 
-            subtabContents.forEach(content => {
-                content.classList.add('hidden');
-                content.classList.remove('block', 'animate-fade-in');
-            });
+                subtabContents.forEach(content => {
+                    content.classList.add('hidden');
+                    content.classList.remove('block', 'animate-fade-in');
+                });
 
-            const targetContent = document.getElementById(targetTab);
-            if (targetContent) {
-                targetContent.classList.remove('hidden');
-                targetContent.classList.add('block', 'animate-fade-in');
+                const targetContent = document.getElementById(targetTab);
+                if (targetContent) {
+                    targetContent.classList.remove('hidden');
+                    targetContent.classList.add('block', 'animate-fade-in');
 
-                // Reaplica os botões de editar após exibir a aba
-                if (targetTab === 'sub-avaliadores-cadastrados') {
-                    initializeEditarAvaliador();
+                    // Reaplica os botões de editar após exibir a aba
+                    if (targetTab === 'sub-avaliadores-cadastrados') {
+                        initializeEditarAvaliador();
+                    }
                 }
-            }
+            });
+        });
+    }
+
+    function initializeFilters() {
+        const searchInput = document.getElementById('searchInput');
+        const statusFilter = document.getElementById('statusFilter');
+        const tableRows = document.querySelectorAll('tbody tr');
+
+        function filterTable() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const statusValue = statusFilter.value;
+
+            tableRows.forEach(row => {
+                const nome = row.querySelector('td:nth-child(1)').textContent.toLowerCase();
+                const email = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                const pin = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+                const ativo = row.querySelector('td:nth-child(4) span').textContent.trim() === 'Ativo';
+
+                const matchesSearch = nome.includes(searchTerm) || 
+                                    email.includes(searchTerm) || 
+                                    pin.includes(searchTerm);
+                
+                const matchesStatus = statusValue === '' || 
+                                    (statusValue === 'true' && ativo) || 
+                                    (statusValue === 'false' && !ativo);
+
+                if (matchesSearch && matchesStatus) {
+                    row.style.display = '';
+                    row.classList.add('animate-fade-in');
+                } else {
+                    row.style.display = 'none';
+                    row.classList.remove('animate-fade-in');
+                }
+            });
+        }
+
+        searchInput.addEventListener('input', filterTable);
+        statusFilter.addEventListener('change', filterTable);
+    }
+
+    function limparFiltros() {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('statusFilter').value = '';
+        
+        // Mostrar todas as linhas
+        document.querySelectorAll('tbody tr').forEach(row => {
+            row.style.display = '';
+            row.classList.add('animate-fade-in');
+        });
+    }
+
+    function initializeAnimations() {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-fade-in');
+                }
+            });
+        });
+
+        document.querySelectorAll('.table-row-hover').forEach(row => {
+            observer.observe(row);
+        });
+    }
+
+    // ✅ Corrigido: agora está fora de qualquer outra função
+    function initializeEditarAvaliador() {
+        document.querySelectorAll('.btn-editar-avaliador').forEach(button => {
+            button.addEventListener('click', (event) => {
+                const button = event.currentTarget;
+                tituloAvaliador.textContent = 'Editar Avaliador';
+                formAvaliador.action = `/admin/avaliadores/${button.dataset.id}?_method=PUT`;
+                avaliadorId.value = button.dataset.id;
+                inputNomeAvaliador.value = button.dataset.nome;
+                inputEmailAvaliador.value = button.dataset.email;
+                inputAtivoAvaliador.checked = button.dataset.ativo === 'true';
+                avaliadorPinDisplay.textContent = button.dataset.pin;
+                pinDisplayDiv.classList.remove('hidden');
+
+                const projetosIds = button.dataset.projetos ? button.dataset.projetos.split(',') : [];
+                projetosAvaliadorCheckboxesDiv.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                    checkbox.checked = projetosIds.includes(checkbox.value);
+                });
+
+                const qrCodeUrl = button.dataset.qrcode || '';
+                if (qrCodeUrl) {
+                    document.getElementById('qrCodeImage').src = qrCodeUrl;
+                    document.getElementById('qrCodePreview').classList.remove('hidden');
+                } else {
+                    document.getElementById('qrCodePreview').classList.add('hidden');
+                }
+
+                modalAvaliador.classList.remove('hidden');
+                modalAvaliador.classList.add('flex');
+            });
+        });
+    }
+
+    function fecharModalReenviarAvaliador() {
+        document.getElementById('modalReenviarAvaliador').classList.add('hidden');
+    }
+
+    document.querySelectorAll('.btn-reenviar-avaliador').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const modal = document.getElementById('modalReenviarAvaliador');
+            const form = document.getElementById('formReenviarAvaliador');
+            form.action = `/admin/avaliadores/${this.dataset.id}/reenviar`;
+            modal.classList.remove('hidden');
+            document.getElementById('campoMensagemAvaliador').focus();
         });
     });
-}
 
-
-        function initializeFilters() {
-            const searchInput = document.getElementById('searchInput');
-            const statusFilter = document.getElementById('statusFilter');
-            const tableRows = document.querySelectorAll('tbody tr');
-
-            function filterTable() {
-                const searchTerm = searchInput.value.toLowerCase();
-                const statusValue = statusFilter.value;
-
-                tableRows.forEach(row => {
-                    const nome = row.querySelector('td:nth-child(1)').textContent.toLowerCase();
-                    const email = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
-                    const pin = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
-                    const ativo = row.querySelector('td:nth-child(4) span').textContent.trim() === 'Ativo';
-
-                    const matchesSearch = nome.includes(searchTerm) || 
-                                        email.includes(searchTerm) || 
-                                        pin.includes(searchTerm);
-                    
-                    const matchesStatus = statusValue === '' || 
-                                        (statusValue === 'true' && ativo) || 
-                                        (statusValue === 'false' && !ativo);
-
-                    if (matchesSearch && matchesStatus) {
-                        row.style.display = '';
-                        row.classList.add('animate-fade-in');
-                    } else {
-                        row.style.display = 'none';
-                        row.classList.remove('animate-fade-in');
-                    }
-                });
-            }
-
-            searchInput.addEventListener('input', filterTable);
-            statusFilter.addEventListener('change', filterTable);
-        }
-
-        function limparFiltros() {
-            document.getElementById('searchInput').value = '';
-            document.getElementById('statusFilter').value = '';
-            
-            // Mostrar todas as linhas
-            document.querySelectorAll('tbody tr').forEach(row => {
-                row.style.display = '';
-                row.classList.add('animate-fade-in');
-            });
-        }
-
-        function initializeAnimations() {
-            // Adicionar animações aos elementos quando aparecem
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('animate-fade-in');
-                    }
-                });
-            });
-
-            function initializeEditarAvaliador() {
-    document.querySelectorAll('.btn-editar-avaliador').forEach(button => {
-        button.addEventListener('click', (event) => {
-            const button = event.currentTarget;
-            tituloAvaliador.textContent = 'Editar Avaliador';
-            formAvaliador.action = `/admin/avaliadores/${button.dataset.id}?_method=PUT`;
-            avaliadorId.value = button.dataset.id;
-            inputNomeAvaliador.value = button.dataset.nome;
-            inputEmailAvaliador.value = button.dataset.email;
-            inputAtivoAvaliador.checked = button.dataset.ativo === 'true';
-            avaliadorPinDisplay.textContent = button.dataset.pin;
-            pinDisplayDiv.classList.remove('hidden');
-
-            const projetosIds = button.dataset.projetos ? button.dataset.projetos.split(',') : [];
-            projetosAvaliadorCheckboxesDiv.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                checkbox.checked = projetosIds.includes(checkbox.value);
-            });
-
-            const qrCodeUrl = button.dataset.qrcode || '';
-            if (qrCodeUrl) {
-                document.getElementById('qrCodeImage').src = qrCodeUrl;
-                document.getElementById('qrCodePreview').classList.remove('hidden');
-            } else {
-                document.getElementById('qrCodePreview').classList.add('hidden');
-            }
-
-            modalAvaliador.classList.remove('hidden');
-            modalAvaliador.classList.add('flex');
-        });
+    document.getElementById('formReenviarAvaliador').addEventListener('submit', function(e) {
+        const mensagem = document.getElementById('campoMensagemAvaliador').value;
+        document.getElementById('mensagemPersonalizada').value = mensagem;
     });
-}
+</script>
 
-
-            document.querySelectorAll('.table-row-hover').forEach(row => {
-                observer.observe(row);
-            });
-        }
-
-        // Função para o modal (mantendo compatibilidade com o backend)
-        function fecharModalReenviarAvaliador() {
-            document.getElementById('modalReenviarAvaliador').classList.add('hidden');
-        }
-
-        // Event listeners para os botões de reenviar
-        document.querySelectorAll('.btn-reenviar-avaliador').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const modal = document.getElementById('modalReenviarAvaliador');
-                const form = document.getElementById('formReenviarAvaliador');
-                
-                // Configurar o action do formulário
-                form.action = `/admin/avaliadores/${this.dataset.id}/reenviar`;
-                
-                // Mostrar o modal
-                modal.classList.remove('hidden');
-                
-                // Focar no textarea
-                document.getElementById('campoMensagemAvaliador').focus();
-            });
-        });
-
-        // Event listener para o form de reenvio
-        document.getElementById('formReenviarAvaliador').addEventListener('submit', function(e) {
-            const mensagem = document.getElementById('campoMensagemAvaliador').value;
-            document.getElementById('mensagemPersonalizada').value = mensagem;
-        });
-    </script>
 
 
 <!-- FIM ABA: AVALIADORES -->
@@ -1597,7 +1587,6 @@ document.querySelectorAll('.btn-editar-projeto').forEach(button => {
     modalProjeto.classList.add('flex');
   });
 });
-
 
             // Mostrar modal de Categoria
             const modalCategoria = document.getElementById('modalCategoria');
