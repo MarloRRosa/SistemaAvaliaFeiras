@@ -861,7 +861,7 @@ const mensagens = await Mensagem.find({ autorId: req.session.adminEscola.id })
 // Criar Projeto (POST)
 router.post('/projetos', verificarAdminEscola, upload.single('relatorioPdf'), async (req, res) => {
   try {
-    const { titulo, descricao, turma, alunos, categoria, criterios } = req.body;
+    const { titulo, descricao, turma, alunos, categoria, criterios, orientador, coorientador } = req.body;
     const adminEscolaId = req.session.adminEscola.escolaId;
 
     const feira = await Feira.findOne({ status: 'ativa', escolaId: adminEscolaId });
@@ -870,7 +870,7 @@ router.post('/projetos', verificarAdminEscola, upload.single('relatorioPdf'), as
       return res.redirect('/admin/dashboard?tab=projetos');
     }
 
-    const relatorioUrl = req.file ? req.file.path : null; // URL do Cloudinary
+    const relatorioUrl = req.file ? req.file.path : null;
 
     const novoProjeto = new Projeto({
       titulo,
@@ -881,6 +881,8 @@ router.post('/projetos', verificarAdminEscola, upload.single('relatorioPdf'), as
       categoria,
       escolaId: adminEscolaId,
       feira: feira._id,
+      orientador,
+      coorientador,
       relatorioPdf: relatorioUrl
     });
 
@@ -894,11 +896,10 @@ router.post('/projetos', verificarAdminEscola, upload.single('relatorioPdf'), as
   res.redirect('/admin/dashboard?tab=projetos');
 });
 
-
 // Editar Projeto (PUT)
 router.post('/projetos/:id/editar', verificarAdminEscola, upload.single('relatorioPdf'), async (req, res) => {
   const { id } = req.params;
-  const { titulo, descricao, categoria, turma, alunos, criterios } = req.body;
+  const { titulo, descricao, categoria, turma, alunos, criterios, orientador, coorientador } = req.body;
   const adminEscolaId = req.session.adminEscola.escolaId;
 
   if (!id || !mongoose.Types.ObjectId.isValid(id)) {
@@ -912,6 +913,8 @@ router.post('/projetos/:id/editar', verificarAdminEscola, upload.single('relator
       descricao,
       categoria,
       turma,
+      orientador,
+      coorientador,
       alunos: typeof alunos === 'string'
         ? alunos.split('\n').map(a => a.trim()).filter(Boolean)
         : Array.isArray(alunos) ? alunos : [],
@@ -921,8 +924,7 @@ router.post('/projetos/:id/editar', verificarAdminEscola, upload.single('relator
     };
 
     if (req.file) {
-      // Ajuste para pegar a URL correta do arquivo enviado via Cloudinary ou outro storage
-        updateData.relatorioPdf = req.file.secure_url || req.file.path || req.file.url;
+      updateData.relatorioPdf = req.file.secure_url || req.file.path || req.file.url;
     }
 
     const updatedProjeto = await Projeto.findOneAndUpdate(
@@ -944,7 +946,6 @@ router.post('/projetos/:id/editar', verificarAdminEscola, upload.single('relator
 
   res.redirect('/admin/dashboard?tab=projetos');
 });
-
 
 // Excluir Projeto (DELETE)
 router.delete('/projetos/:id', verificarAdminEscola, async (req, res) => {

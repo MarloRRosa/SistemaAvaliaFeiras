@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title><%= titulo %></title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -14,18 +14,21 @@
       <h2 class="text-xl font-semibold mb-4">Informações do Projeto</h2>
       <p class="mb-2"><strong>Turma:</strong> <%= projeto.turma %></p>
       <p class="mb-2"><strong>Integrantes:</strong> <%= projeto.alunos %></p>
+      <p class="mb-2"><strong>Orientador:</strong> <%= projeto.orientador || 'Não informado' %></p>
+      <p class="mb-4"><strong>Coorientador:</strong> <%= projeto.coorientador || 'Não informado' %></p>
       <p class="mb-4"><strong>Resumo:</strong> <%= projeto.descricao %></p>
+
       <% if (projeto.relatorioPdf) { 
-     const visualizadorGoogle = `https://docs.google.com/viewer?url=${encodeURIComponent(projeto.relatorioPdf)}&embedded=true`; %>
-  <p class="mb-4">
-    <strong>Relatório:</strong>
-    <a href="<%= visualizadorGoogle %>" target="_blank" class="text-blue-600 hover:underline ml-1">
-      Ver Relatório em PDF
-    </a>
-  </p>
-<% } else { %>
-  <p class="mb-4 text-gray-400 italic">Relatório não disponível.</p>
-<% } %>
+        const visualizadorGoogle = `https://docs.google.com/viewer?url=${encodeURIComponent(projeto.relatorioPdf)}&embedded=true`; %>
+        <p class="mb-4">
+          <strong>Relatório:</strong>
+          <a href="<%= visualizadorGoogle %>" target="_blank" class="text-blue-600 hover:underline ml-1">
+            Ver Relatório em PDF
+          </a>
+        </p>
+      <% } else { %>
+        <p class="mb-4 text-gray-400 italic">Relatório não disponível.</p>
+      <% } %>
 
       <% if (error_msg && error_msg.length > 0) { %>
         <div class="bg-red-100 text-red-700 p-3 rounded mb-4">
@@ -82,8 +85,7 @@
                          value="<%= i %>"
                          class="form-radio text-purple-600"
                          <%= (Number(notaSalva) === i) ? 'checked' : '' %>
-                         <%= avaliador.statusAvaliacaoGeral ? 'disabled' : '' %>
-                  >
+                         <%= avaliador.statusAvaliacaoGeral ? 'disabled' : '' %> >
                   <label for="nota_<%= criterio._id %>_<%= i %>" class="cursor-pointer"><%= i %></label>
                 <% } %>
               </div>
@@ -93,8 +95,7 @@
                         name="criterios[<%= criterio._id %>][comentario]"
                         rows="3"
                         class="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
-                        <%= avaliador.statusAvaliacaoGeral ? 'disabled' : '' %>
-              ><%= comentarioSalvo %></textarea>
+                        <%= avaliador.statusAvaliacaoGeral ? 'disabled' : '' %>><%= comentarioSalvo %></textarea>
             </div>
           <% }); %>
         <% } else { %>
@@ -112,5 +113,6 @@
         <a href="/avaliador/dashboard" class="text-blue-600 hover:underline">Voltar para o Dashboard</a>
       </div>
     </div>
+  </div>
 </body>
 </html>

@@ -13,8 +13,16 @@ const ProjetoSchema = new mongoose.Schema({
         type: String
     },
     alunos: [{
-        type: String // Assumindo que alunos são nomes ou IDs simples. Se for um modelo separado, mude para ObjectId e ref.
+        type: String
     }],
+    orientador: {
+        type: String,
+        required: true
+    },
+    coorientador: {
+        type: String,
+        default: ''
+    },
     categoria: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Categoria'
@@ -33,7 +41,7 @@ const ProjetoSchema = new mongoose.Schema({
         ref: 'Escola',
         required: true
     },
-    avaliadores: [{ // <--- CAMPO 'AVALIADORES' ADICIONADO AQUI
+    avaliadores: [{ 
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Avaliador'
     }],
@@ -42,10 +50,9 @@ const ProjetoSchema = new mongoose.Schema({
         default: Date.now
     },
     relatorioPdf: {
-  type: String,
-  required: false
-}
-
+        type: String,
+        required: false
+    }
 });
 
 const Projeto = mongoose.model('Projeto', ProjetoSchema);
