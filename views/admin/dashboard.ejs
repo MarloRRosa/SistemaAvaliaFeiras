@@ -1518,6 +1518,8 @@ const inputTurmaProjeto = document.getElementById('turmaProjeto');
 const inputAlunos = document.getElementById('alunosTextArea');
 const pdfExistenteContainer = document.getElementById('pdfExistenteContainer');
 const linkRelatorioPdf = document.getElementById('linkRelatorioPdf');
+const inputOrientador = document.getElementById('orientador');
+const inputCoorientador = document.getElementById('coorientador');
 
 // Abrir modal para adicionar novo projeto
 btnAbrirModalProjeto.addEventListener('click', () => {
@@ -1553,7 +1555,7 @@ btnFecharModalProjeto.addEventListener('click', () => {
 // Editar projeto
 document.querySelectorAll('.btn-editar-projeto').forEach(button => {
   button.addEventListener('click', (event) => {
-    const btn = event.currentTarget; 
+    const btn = event.currentTarget;
 
     tituloModalProjeto.textContent = 'Editar Projeto';
     formProjeto.action = `/admin/projetos/${btn.dataset.id}/editar`;
@@ -1563,6 +1565,10 @@ document.querySelectorAll('.btn-editar-projeto').forEach(button => {
     selectCategoria.value = btn.dataset.categoriaId;
     inputTurmaProjeto.value = btn.dataset.turma;
     inputAlunos.value = btn.dataset.alunos ? btn.dataset.alunos.split(',').join('\n') : '';
+
+    // Preencher orientador e coorientador
+    inputOrientador.value = btn.dataset.orientador || '';
+    inputCoorientador.value = btn.dataset.coorientador || '';
 
     const criteriosIds = btn.dataset.criterios ? btn.dataset.criterios.split(',') : [];
     criteriosProjetoCheckboxesDiv.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
