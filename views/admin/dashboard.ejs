@@ -564,7 +564,11 @@
                                             </span>
                                         </div>
                                         <div>
-                                            <div class="font-semibold text-gray-900"><%= avaliador.nome %></div>
+                                            <div class="font-semibold text-blue-600 hover:underline cursor-pointer"
+     onclick="abrirModalEdicaoAvaliador('<%= avaliador._id %>')"
+     title="Clique para editar">
+  <%= avaliador.nome %>
+</div>
                                         </div>
                                     </div>
                                 </td>
@@ -596,15 +600,15 @@
                                 <td class="py-4 px-6 whitespace-nowrap">
                                     <div class="flex flex-wrap gap-2">
                                         <button class="tooltip btn-editar-avaliador btn-hover-effect bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1.5 px-3 rounded-md text-sm shadow-sm" 
-        data-tooltip="Editar avaliador"
-        data-id="<%= avaliador._id %>"
-        data-nome="<%= avaliador.nome %>"
-        data-email="<%= avaliador.email %>"
-        data-pin="<%= avaliador.pin %>"
-        data-ativo="<%= avaliador.ativo ? 'true' : 'false' %>"
-        data-projetos="<%= avaliador.projetosAtribuidos.map(p => p._id.toString()).join(',') %>"
-        data-qrcode="<%= avaliador.qrcode || '' %>">
-    <i class="fas fa-edit mr-1"></i>Editar
+    data-tooltip="Editar avaliador"
+    data-id="<%= avaliador._id %>"
+    data-nome="<%= avaliador.nome %>"
+    data-email="<%= avaliador.email %>"
+    data-pin="<%= avaliador.pin %>"
+    data-ativo="<%= avaliador.ativo ? 'true' : 'false' %>"
+    data-projetos="<%= avaliador.projetosAtribuidos && avaliador.projetosAtribuidos.length ? avaliador.projetosAtribuidos.map(p => p._id.toString()).join(',') : '' %>"
+    data-qrcode="<%= avaliador.qrcode || '' %>">
+    <i class="fas fa-edit mr-1"></i><span>Editar</span>
 </button>
 
                                         <button type="button" class="tooltip btn-reenviar-avaliador btn-hover-effect text-white font-semibold py-1.5 px-3 rounded-md text-sm shadow-sm" 
@@ -845,6 +849,11 @@
         const mensagem = document.getElementById('campoMensagemAvaliador').value;
         document.getElementById('mensagemPersonalizada').value = mensagem;
     });
+
+     function abrirModalEdicaoAvaliador(id) {
+    const btn = document.querySelector(`.btn-editar-avaliador[data-id="${id}"]`);
+    if (btn) btn.click(); 
+  }
 </script>
 
 
