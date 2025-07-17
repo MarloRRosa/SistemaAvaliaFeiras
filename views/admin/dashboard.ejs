@@ -508,7 +508,7 @@
                                         </span>
                                     </div>
                                     <div>
-                                        <div class="font-semibold text-gray-900"><%= avaliador.nome %></div>
+                                        <div class="font-semibold text-blue-600 hover:underline cursor-pointer" onclick="abrirModalEdicaoAvaliador('<%= avaliador._id %>')" title="Clique para editar">  <%= avaliador.nome %></div>
                                     </div>
                                 </div>
                             </td>
@@ -790,6 +790,11 @@
         const mensagem = document.getElementById('campoMensagemAvaliador').value;
         document.getElementById('mensagemPersonalizada').value = mensagem;
     });
+    function abrirModalEdicaoAvaliador(id) {
+    const btn = document.querySelector(`.btn-editar-avaliador[data-id="${id}"]`);
+    if (btn) btn.click();
+}
+
 </script>
 
 
