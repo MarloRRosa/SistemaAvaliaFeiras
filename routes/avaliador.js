@@ -8,7 +8,7 @@ const Criterio = require('../models/Criterio');
 const Feira = require('../models/Feira'); // Importe o modelo Feira
 const Escola = require('../models/Escola'); // Importe o modelo Escola
 const QRCode = require('qrcode');
-
+const Feedback = require('../models/Feedback');
 
 // Middleware para verificar sessão do avaliador e se o PIN está ativo
 async function verificarAvaliador(req, res, next) {
@@ -428,6 +428,24 @@ router.get('/acesso-direto/:pin', async (req, res) => {
   } catch (err) {
     console.error('Erro no acesso direto via PIN:', err);
     res.status(500).send('Erro ao acessar o sistema.');
+  }
+});
+router.post('/feedback', async (req, res) => {
+  try {
+    const { tipo, mensagem } = req.body;
+
+    if (!mensagem || mensagem.trim() === '') {
+      return res.status(400).send('Mensagem não pode estar vazia.');
+    }
+
+    await Feedback.create({ tipo, mensagem });
+
+    res.render('avaliador/agradecimento', {
+      sucesso: 'Obrigado pelo feedback!'
+    });
+  } catch (err) {
+    console.error('Erro ao salvar feedback:', err);
+    res.status(500).send('Erro ao enviar feedback.');
   }
 });
 

@@ -14,6 +14,7 @@ const bcrypt = require('bcryptjs');
 const SolicitacaoAcesso = require('../models/SolicitacaoAcesso');
 const nodemailer = require('nodemailer');
 require('dotenv').config();
+const Feedback = require('../models/Feedback');
 
 // ========================================================================
 // Funções Auxiliares e Configurações
@@ -1138,6 +1139,23 @@ router.get('/dashboard', async (req, res) => {
     console.error('Erro ao buscar mensagens:', err);
     req.flash('error_msg', 'Erro ao carregar mensagens.');
     res.redirect('/superadmin/login');
+  }
+});
+
+router.get('/feedbacks', verificarSuperAdmin, async (req, res) => {
+  try {
+    const feedbacks = await Feedback.find().sort({ createdAt: -1 }).lean();
+    res.render('superadmin/feedbacks', {
+      titulo: 'Feedbacks Recebidos',
+      feedbacks,
+      layout: 'layouts/admin', // ajuste para seu layout de superadmin
+      error_msg: req.flash('error_msg'),
+      success_msg: req.flash('success_msg')
+    });
+  } catch (err) {
+    console.error('Erro ao carregar feedbacks:', err);
+    req.flash('error_msg', 'Erro ao carregar feedbacks.');
+    res.redirect('/superadmin/dashboard');
   }
 });
 

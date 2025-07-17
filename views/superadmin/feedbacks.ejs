@@ -1,0 +1,24 @@
+<h1 class="text-2xl font-bold mb-4"><%= titulo %></h1>
+
+<% if (feedbacks.length === 0) { %>
+  <p>Nenhum feedback recebido ainda.</p>
+<% } else { %>
+  <table class="min-w-full table-auto border-collapse border border-gray-300">
+    <thead>
+      <tr>
+        <th class="border border-gray-300 px-4 py-2">Tipo</th>
+        <th class="border border-gray-300 px-4 py-2">Mensagem</th>
+        <th class="border border-gray-300 px-4 py-2">Data</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% feedbacks.forEach(feedback => { %>
+        <tr>
+          <td class="border border-gray-300 px-4 py-2"><%= feedback.tipo || 'Geral' %></td>
+          <td class="border border-gray-300 px-4 py-2"><%= feedback.mensagem %></td>
+          <td class="border border-gray-300 px-4 py-2"><%= new Date(feedback.createdAt).toLocaleString('pt-BR') %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+<% } %>
