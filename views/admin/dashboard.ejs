@@ -715,36 +715,39 @@
             initializeSubtabs();
             initializeFilters();
             initializeAnimations();
+            initializeEditarAvaliador();
         });
 
         function initializeSubtabs() {
-            const subtabBtns = document.querySelectorAll('.subtab-btn');
-            const subtabContents = document.querySelectorAll('.subtab-content');
+    const subtabBtns = document.querySelectorAll('.subtab-btn');
+    const subtabContents = document.querySelectorAll('.subtab-content');
 
-            subtabBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const targetTab = this.dataset.subtab;
-                    
-                    // Remove active class from all buttons
-                    subtabBtns.forEach(b => b.classList.remove('active'));
-                    // Add active class to clicked button
-                    this.classList.add('active');
-                    
-                    // Hide all content
-                    subtabContents.forEach(content => {
-                        content.classList.add('hidden');
-                        content.classList.remove('block', 'animate-fade-in');
-                    });
-                    
-                    // Show target content
-                    const targetContent = document.getElementById(targetTab);
-                    if (targetContent) {
-                        targetContent.classList.remove('hidden');
-                        targetContent.classList.add('block', 'animate-fade-in');
-                    }
-                });
+    subtabBtns.forEach(btn => {
+        btn.addEventListener('click', function () {
+            const targetTab = this.dataset.subtab;
+
+            subtabBtns.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+
+            subtabContents.forEach(content => {
+                content.classList.add('hidden');
+                content.classList.remove('block', 'animate-fade-in');
             });
-        }
+
+            const targetContent = document.getElementById(targetTab);
+            if (targetContent) {
+                targetContent.classList.remove('hidden');
+                targetContent.classList.add('block', 'animate-fade-in');
+
+                // Reaplica os botões de editar após exibir a aba
+                if (targetTab === 'sub-avaliadores-cadastrados') {
+                    initializeEditarAvaliador();
+                }
+            }
+        });
+    });
+}
+
 
         function initializeFilters() {
             const searchInput = document.getElementById('searchInput');
@@ -803,6 +806,39 @@
                     }
                 });
             });
+
+            function initializeEditarAvaliador() {
+    document.querySelectorAll('.btn-editar-avaliador').forEach(button => {
+        button.addEventListener('click', (event) => {
+            const button = event.currentTarget;
+            tituloAvaliador.textContent = 'Editar Avaliador';
+            formAvaliador.action = `/admin/avaliadores/${button.dataset.id}?_method=PUT`;
+            avaliadorId.value = button.dataset.id;
+            inputNomeAvaliador.value = button.dataset.nome;
+            inputEmailAvaliador.value = button.dataset.email;
+            inputAtivoAvaliador.checked = button.dataset.ativo === 'true';
+            avaliadorPinDisplay.textContent = button.dataset.pin;
+            pinDisplayDiv.classList.remove('hidden');
+
+            const projetosIds = button.dataset.projetos ? button.dataset.projetos.split(',') : [];
+            projetosAvaliadorCheckboxesDiv.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                checkbox.checked = projetosIds.includes(checkbox.value);
+            });
+
+            const qrCodeUrl = button.dataset.qrcode || '';
+            if (qrCodeUrl) {
+                document.getElementById('qrCodeImage').src = qrCodeUrl;
+                document.getElementById('qrCodePreview').classList.remove('hidden');
+            } else {
+                document.getElementById('qrCodePreview').classList.add('hidden');
+            }
+
+            modalAvaliador.classList.remove('hidden');
+            modalAvaliador.classList.add('flex');
+        });
+    });
+}
+
 
             document.querySelectorAll('.table-row-hover').forEach(row => {
                 observer.observe(row);
