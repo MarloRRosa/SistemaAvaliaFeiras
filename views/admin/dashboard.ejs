@@ -388,9 +388,12 @@
   data-turma="<%= projeto.turma %>"
   data-alunos="<%= projeto.alunos.join(',') %>"
   data-relatorio-pdf="<%= projeto.relatorioPdf || '' %>"
+  data-orientador="<%= projeto.orientador || '' %>"
+  data-coorientador="<%= projeto.coorientador || '' %>"
 >
   <i class="fas fa-edit mr-1"></i>Editar
 </button>
+
 
              
                                             <form method="POST" action="/admin/projetos/<%= projeto._id %>?_method=DELETE" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar este projeto?');">
