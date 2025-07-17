@@ -46,7 +46,7 @@ router.get('/login/demo', async (req, res) => {
       nome: 'Escola Demonstração',
       endereco: 'Rua Exemplo, 123',
       telefone: '(00) 0000-0000',
-      email: 'escola@gptdemo.com',
+      email: 'escola@demo.com',
       descricao: 'Uma escola exemplo para demonstração do sistema.',
       diretor: 'Diretora Demo',
       responsavel: 'Responsável Demo',

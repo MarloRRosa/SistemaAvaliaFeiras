@@ -27,8 +27,7 @@
         .animate-slide-in {
             animation: slideIn 0.3s ease-out;
         }
-        
-        /* Efeitos de hover melhorados */
+
         .btn-hover-effect {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
@@ -55,7 +54,6 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.15);
         }
         
-        /* Tabela responsiva aprimorada */
         .table-responsive {
             border-radius: 12px;
             overflow: hidden;
@@ -71,8 +69,7 @@
             transform: translateX(2px);
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
-        
-        /* Badges melhoradas */
+
         .badge-animate {
             transition: all 0.2s ease;
         }
@@ -80,8 +77,7 @@
         .badge-animate:hover {
             transform: scale(1.05);
         }
-        
-        /* Modal melhorado */
+
         .modal-backdrop {
             backdrop-filter: blur(4px);
             background-color: rgba(0, 0, 0, 0.6);
@@ -91,7 +87,6 @@
             animation: fadeIn 0.3s ease-out;
         }
         
-        /* Subtabs melhoradas */
         .subtab-btn {
             position: relative;
             padding: 12px 20px;
@@ -111,7 +106,6 @@
             color: #1e40af;
         }
         
-        /* Tooltip personalizado */
         .tooltip {
             position: relative;
         }
@@ -140,7 +134,6 @@
             bottom: calc(100% + 5px);
         }
         
-        /* Filtros e busca aprimorados */
         .search-input {
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
@@ -149,7 +142,6 @@
             padding-left: 40px;
         }
         
-        /* Status indicators melhorados */
         .status-indicator {
             position: relative;
             display: inline-flex;
@@ -178,7 +170,6 @@
             50% { opacity: 0.5; }
         }
         
-        /* Melhorias na responsividade */
         @media (max-width: 768px) {
             .table-responsive {
                 font-size: 14px;
@@ -189,7 +180,6 @@
                 font-size: 14px;
             }
         }
-
 
     #projetosAvaliador, #criteriosProjeto {
       max-height: 200px;
@@ -208,18 +198,16 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: opacity 0.3s ease-in-out; /* Adiciona transição para o fade */
+      transition: opacity 0.3s ease-in-out;
     }
     .modal-full.hidden {
       opacity: 0;
-      pointer-events: none; /* Impede interações quando oculto */
+      pointer-events: none; 
     }
     .modal-full:not(.hidden) {
       opacity: 1;
-      pointer-events: auto; /* Permite interações quando visível */
+      pointer-events: auto;
     }
-    
-
   </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -323,7 +311,6 @@
   </div>
 </aside>
 
-
     <!-- Main Content Area -->
     <div id="contentArea" class="p-6">
         <header class="bg-white p-4 shadow-md rounded-lg mb-6">
@@ -363,8 +350,6 @@
         formatarData: formatarDatasParaInput
     }) %>
 </div>
-
-
            
             <!-- ABA: PROJETOS -->
             <div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200 hidden" id="projetos" role="tabpanel" aria-labelledby="projetos-tab">
@@ -520,7 +505,7 @@
          <!-- ABA: AVALIADORES -->
  <div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200" id="avaliadores" role="tabpanel" aria-labelledby="avaliadores-tab">
         
-        <!-- Header melhorado -->
+        <!-- Header -->
         <div class="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-100">
             <div class="flex flex-wrap items-center justify-between gap-4">
                 <div>
@@ -530,7 +515,7 @@
             </div>
         </div>
 
-        <!-- Botões principais com melhor design -->
+        <!-- Botões principais -->
         <div class="flex flex-wrap items-center gap-3 mb-6">
             <button id="btnAbrirModalAvaliador" class="btn-hover-effect bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-2.5 px-5 rounded-lg shadow-md">
                 <i class="fas fa-plus-circle mr-2"></i>Adicionar Novo Avaliador
@@ -543,7 +528,7 @@
             </a>
         </div>
 
-        <!-- Subabas melhoradas -->
+        <!-- Subabas -->
         <div class="flex gap-2 mb-6 bg-gray-100 p-1 rounded-lg">
             <button class="subtab-btn active flex-1 text-sm transition-all duration-200" data-subtab="sub-avaliadores-cadastrados">
                 <i class="fas fa-users mr-2"></i>Cadastrados
@@ -710,7 +695,7 @@
     </div>
 
     <script>
-    // Funcionalidades JavaScript melhoradas
+    // Funcionalidades JavaScript
     document.addEventListener('DOMContentLoaded', function() {
         initializeSubtabs();
         initializeFilters();
@@ -810,7 +795,6 @@
         });
     }
 
-    // ✅ Corrigido: agora está fora de qualquer outra função
     function initializeEditarAvaliador() {
         document.querySelectorAll('.btn-editar-avaliador').forEach(button => {
             button.addEventListener('click', (event) => {
@@ -1052,7 +1036,6 @@
 </form>
 
 </div>
-
             <!-- FIM ABA: CONFIGURAÇÕES -->
 
             <!-- ABA MENSAGEM-->
@@ -1087,10 +1070,9 @@
   </div>
 
 </div>
-
           <!-- FIM ABA: MENSAGEM -->
 
-    <!-- Modals (permanecem os mesmos) -->
+    <!-- Modals -->
     <div id="modalProjeto" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden justify-center items-center z-50 p-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg relative p-6 overflow-y-auto" style="max-height: 90vh;">
             <h2 id="tituloModalProjeto" class="text-3xl font-extrabold mb-6 text-center text-gray-800">Adicionar Novo Projeto</h2>
@@ -1382,7 +1364,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const sidebar = document.getElementById('sidebar');
     const sidebarToggle = document.getElementById('sidebarToggle');
-    const sidebarIcon = sidebarToggle.querySelector('i'); // ícone do botão
+    const sidebarIcon = sidebarToggle.querySelector('i');
     const contentArea = document.getElementById('contentArea');
     const tabLinks = document.querySelectorAll('.sidebar-link');
     const tabContents = document.querySelectorAll('.tab-content');
@@ -1501,11 +1483,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Responsivo ao redimensionamento
     window.addEventListener('resize', applySidebarState);
-    applySidebarState(); // aplicar ao iniciar
-
-            // Funções para os modais (permanecem as mesmas)
-
-            // Mostrar modal de Projeto
+    applySidebarState();
+    
+                // Mostrar modal de Projeto
             const modalProjeto = document.getElementById('modalProjeto');
 const btnAbrirModalProjeto = document.getElementById('btnAbrirModalProjeto');
 const btnFecharModalProjeto = document.getElementById('btnFecharModalProjeto');
@@ -1555,7 +1535,7 @@ btnFecharModalProjeto.addEventListener('click', () => {
 // Editar projeto
 document.querySelectorAll('.btn-editar-projeto').forEach(button => {
   button.addEventListener('click', (event) => {
-    const btn = event.currentTarget; // Sempre o <button>
+    const btn = event.currentTarget; 
 
     tituloModalProjeto.textContent = 'Editar Projeto';
     formProjeto.action = `/admin/projetos/${btn.dataset.id}/editar`;
@@ -1600,7 +1580,7 @@ document.querySelectorAll('.btn-editar-projeto').forEach(button => {
 
             btnAbrirModalCategoria.addEventListener('click', () => {
                 tituloModalCategoria.textContent = 'Adicionar Nova Categoria';
-                formCategoria.action = '/admin/categorias'; // Rota de criação
+                formCategoria.action = '/admin/categorias'; 
                 categoriaId.value = '';
                 inputNomeCategoria.value = '';
                 modalCategoria.classList.remove('hidden');
@@ -1615,7 +1595,7 @@ document.querySelectorAll('.btn-editar-projeto').forEach(button => {
             document.querySelectorAll('.btn-editar-categoria').forEach(button => {
                 button.addEventListener('click', (event) => {
                     tituloModalCategoria.textContent = 'Editar Categoria';
-                    formCategoria.action = `/admin/categorias/${event.target.dataset.id}?_method=PUT`; // Rota de edição
+                    formCategoria.action = `/admin/categorias/${event.target.dataset.id}?_method=PUT`; 
                     categoriaId.value = event.target.dataset.id;
                     inputNomeCategoria.value = event.target.dataset.nome;
                     modalCategoria.classList.remove('hidden');
@@ -1638,7 +1618,7 @@ document.querySelectorAll('.btn-editar-projeto').forEach(button => {
 
             btnAbrirModalCriterio.addEventListener('click', () => {
                 tituloModalCriterio.textContent = 'Adicionar Novo Critério';
-                formCriterio.action = '/admin/criterios'; // Rota de criação
+                formCriterio.action = '/admin/criterios'; 
                 criterioId.value = '';
                 inputNomeCriterio.value = '';
                 inputPesoCriterio.value = '';
@@ -1660,7 +1640,7 @@ document.querySelectorAll('.btn-editar-projeto').forEach(button => {
             document.querySelectorAll('.btn-editar-criterio').forEach(button => {
                 button.addEventListener('click', (event) => {
                     tituloModalCriterio.textContent = 'Editar Critério';
-                    formCriterio.action = `/admin/criterios/${event.target.dataset.id}?_method=PUT`; // Rota de edição
+                    formCriterio.action = `/admin/criterios/${event.target.dataset.id}?_method=PUT`;
                     criterioId.value = event.target.dataset.id;
                     inputNomeCriterio.value = event.target.dataset.nome;
                     inputPesoCriterio.value = event.target.dataset.peso;
@@ -1687,13 +1667,13 @@ document.querySelectorAll('.btn-editar-projeto').forEach(button => {
 
             btnAbrirModalAvaliador.addEventListener('click', () => {
                 tituloAvaliador.textContent = 'Adicionar Novo Avaliador';
-                formAvaliador.action = '/admin/avaliadores'; // Rota de criação
+                formAvaliador.action = '/admin/avaliadores';
                 avaliadorId.value = '';
                 inputNomeAvaliador.value = '';
                 inputEmailAvaliador.value = '';
-                inputAtivoAvaliador.checked = true; // Novo avaliador é ativo por padrão
+                inputAtivoAvaliador.checked = true;
                 avaliadorPinDisplay.textContent = 'Gerado Automaticamente';
-                pinDisplayDiv.classList.remove('hidden'); // Esconde o PIN para novos
+                pinDisplayDiv.classList.remove('hidden');
 
                 // Limpar todos os checkboxes de projetos
                 projetosAvaliadorCheckboxesDiv.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
@@ -1712,13 +1692,13 @@ document.querySelectorAll('.btn-editar-projeto').forEach(button => {
             document.querySelectorAll('.btn-editar-avaliador').forEach(button => {
                 button.addEventListener('click', (event) => {
                     tituloAvaliador.textContent = 'Editar Avaliador';
-                    formAvaliador.action = `/admin/avaliadores/${event.target.dataset.id}?_method=PUT`; // Rota de edição
+                    formAvaliador.action = `/admin/avaliadores/${event.target.dataset.id}?_method=PUT`;
                     avaliadorId.value = event.target.dataset.id;
                     inputNomeAvaliador.value = event.target.dataset.nome;
                     inputEmailAvaliador.value = event.target.dataset.email;
                     inputAtivoAvaliador.checked = event.target.dataset.ativo === 'true';
                     avaliadorPinDisplay.textContent = event.target.dataset.pin;
-                    pinDisplayDiv.classList.remove('hidden'); // Mostra o PIN para edição
+                    pinDisplayDiv.classList.remove('hidden'); 
 
                     // Marcar checkboxes de projetos
                     const projetosIds = event.target.dataset.projetos ? event.target.dataset.projetos.split(',') : [];
@@ -1766,12 +1746,12 @@ if (qrCodeUrl) {
 
             btnAbrirModalFeira.addEventListener('click', () => {
                 tituloModalFeira.textContent = 'Adicionar Nova Feira';
-                formFeira.action = '/admin/feiras'; // Rota de criação (ajustei para /admin/feiras conforme seu admin.js)
+                formFeira.action = '/admin/feiras'; 
                 feiraId.value = '';
                 inputNomeFeira.value = '';
                 inputInicioFeiraModal.value = '';
                 inputFimFeiraModal.value = '';
-                selectStatusFeiraModal.value = 'ativa'; // Nova feira é ativa por padrão
+                selectStatusFeiraModal.value = 'ativa'; 
                 modalFeira.classList.remove('hidden');
                 modalFeira.classList.add('flex');
             });
@@ -1797,7 +1777,7 @@ if (qrCodeUrl) {
             });
         });
 
-        // Função auxiliar para formatar datas (se já não estiver definida globalmente)
+        // Função auxiliar para formatar datas
         function formatarDatasParaInput(dateString) {
             if (!dateString) return '';
             const date = new Date(dateString);
@@ -1814,7 +1794,7 @@ if (qrCodeUrl) {
         document.getElementById('modalFeira').classList.add('hidden');
         }
 
-        // ✅ Abrir modal e preencher dados
+        //Abrir modal e preencher dados
   document.querySelectorAll('.btn-editar-feira').forEach(btn => {
     btn.addEventListener('click', () => {
       document.getElementById('editarFeiraId').value = btn.dataset.id;

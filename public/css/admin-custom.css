@@ -146,3 +146,277 @@ input:focus, select:focus, textarea:focus {
     padding-right: 1rem;
   }
 }
+
+/* Container principal da tabela */
+.table-responsive {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  
+  /* CORREÇÃO PRINCIPAL: Adiciona scroll horizontal */
+  overflow-x: auto;
+  max-width: 100%;
+  position: relative;
+}
+
+/* Define largura mínima para evitar compressão */
+.table-responsive table {
+  min-width: 1200px; /* Ajustado para acomodar todas as colunas */
+  width: 100%;
+}
+
+/* Melhora o espaçamento das células */
+.table-responsive td,
+.table-responsive th {
+  padding: 12px 16px;
+  vertical-align: top;
+}
+
+/* Células que podem quebrar texto (Email e Projetos) */
+.table-responsive td:nth-child(2) { /* Email */
+  max-width: 220px;
+  word-break: break-word;
+  white-space: normal;
+}
+
+.table-responsive td:nth-child(5) { /* Projetos */
+  max-width: 200px;
+  white-space: normal;
+}
+
+/* Limita altura dos badges de projetos */
+.table-responsive td:nth-child(5) .badge-animate {
+  display: inline-block;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin: 2px;
+}
+
+/* Hover nos badges mostra texto completo */
+.table-responsive td:nth-child(5) .badge-animate:hover {
+  max-width: none;
+  white-space: normal;
+  z-index: 10;
+  position: relative;
+  background-color: #4f46e5 !important;
+}
+
+/* Melhora o scroll horizontal */
+.table-responsive::-webkit-scrollbar {
+  height: 12px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 6px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 6px;
+  border: 2px solid #f1f5f9;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Indicador visual de scroll */
+.table-responsive::after {
+  content: "← Deslize horizontalmente para ver mais colunas →";
+  position: sticky;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: linear-gradient(135deg, #dbeafe, #e0e7ff);
+  text-align: center;
+  padding: 8px 16px;
+  font-size: 12px;
+  color: #3b82f6;
+  border-top: 1px solid #e2e8f0;
+  z-index: 2;
+  font-weight: 500;
+}
+
+/* Esconde indicador em telas grandes */
+@media (min-width: 1280px) {
+  .table-responsive::after {
+    display: none;
+  }
+  
+  .table-responsive table {
+    min-width: auto;
+  }
+}
+
+/* Responsividade para tablets (768px - 1023px) */
+@media (max-width: 1023px) {
+  .table-responsive {
+    font-size: 14px;
+  }
+  
+  .table-responsive td,
+  .table-responsive th {
+    padding: 10px 12px;
+  }
+  
+  /* Reduz largura das colunas de ações */
+  .table-responsive td:nth-child(6) .btn-hover-effect {
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+  
+  /* Esconde texto dos botões menores, mantém ícones */
+  .table-responsive td:nth-child(6) .btn-hover-effect span {
+    display: none;
+  }
+  
+  .table-responsive td:nth-child(6) .btn-hover-effect i {
+    margin-right: 0;
+  }
+}
+
+/* Responsividade para mobile (até 767px) */
+@media (max-width: 767px) {
+  .table-responsive {
+    font-size: 13px;
+  }
+  
+  .table-responsive td,
+  .table-responsive th {
+    padding: 8px 10px;
+  }
+  
+  /* Esconde colunas menos importantes */
+  .table-responsive th:nth-child(7), /* QR Code */
+  .table-responsive td:nth-child(7) {
+    display: none;
+  }
+  
+  /* Reduz ainda mais os botões */
+  .table-responsive td:nth-child(6) .btn-hover-effect {
+    padding: 4px 8px;
+    font-size: 12px;
+    margin: 1px;
+  }
+  
+  /* Empilha botões verticalmente se necessário */
+  .table-responsive td:nth-child(6) > div {
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+
+/* Responsividade extrema (até 479px) */
+@media (max-width: 479px) {
+  /* Esconde mais colunas */
+  .table-responsive th:nth-child(3), /* PIN */
+  .table-responsive td:nth-child(3),
+  .table-responsive th:nth-child(5), /* Projetos */
+  .table-responsive td:nth-child(5),
+  .table-responsive th:nth-child(7), /* QR Code */
+  .table-responsive td:nth-child(7) {
+    display: none;
+  }
+  
+  .table-responsive table {
+    min-width: 600px;
+  }
+  
+  /* Ajusta avatar */
+  .table-responsive td:nth-child(1) .w-10 {
+    width: 32px;
+    height: 32px;
+  }
+  
+  /* Reduz fonte do email */
+  .table-responsive td:nth-child(2) {
+    font-size: 12px;
+    max-width: 150px;
+  }
+}
+
+/* Melhorias visuais extras */
+.table-row-hover {
+  transition: all 0.2s ease;
+}
+
+.table-row-hover:hover {
+  background-color: #f8fafc;
+  transform: translateX(2px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* Melhora os status indicators */
+.status-indicator {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  font-weight: 600;
+}
+
+.status-indicator::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 8px;
+  animation: pulse 2s infinite;
+}
+
+.status-active::before {
+  background-color: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+.status-inactive::before {
+  background-color: #ef4444;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+}
+
+/* Animação suave para os badges */
+.badge-animate {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.badge-animate:hover {
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Melhora o modal backdrop */
+.modal-backdrop {
+  backdrop-filter: blur(8px);
+  background-color: rgba(15, 23, 42, 0.7);
+  transition: all 0.3s ease;
+}
+
+/* Animação de entrada dos elementos */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-in-up {
+  animation: slideInUp 0.3s ease-out;
+}
+
+/* Aplica animação às linhas da tabela */
+.table-responsive tbody tr {
+  animation: slideInUp 0.3s ease-out;
+  animation-fill-mode: both;
+}
+
+.table-responsive tbody tr:nth-child(1) { animation-delay: 0.1s; }
+.table-responsive tbody tr:nth-child(2) { animation-delay: 0.2s; }
+.table-responsive tbody tr:nth-child(3) { animation-delay: 0.3s; }
+.table-responsive tbody tr:nth-child(4) { animation-delay: 0.4s; }
+.table-responsive tbody tr:nth-child(5) { animation-delay: 0.5s; }
