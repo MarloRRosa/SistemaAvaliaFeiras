@@ -1490,70 +1490,78 @@ const inputDescricao = document.getElementById('descricao');
 const selectCategoria = document.getElementById('categoria');
 const criteriosProjetoCheckboxesDiv = document.getElementById('criteriosProjetoCheckboxes');
 const inputTurmaProjeto = document.getElementById('turmaProjeto');
-const inputAlunos = document.getElementById('alunosTextArea'); 
+const inputAlunos = document.getElementById('alunosTextArea');
+const pdfExistenteContainer = document.getElementById('pdfExistenteContainer');
+const linkRelatorioPdf = document.getElementById('linkRelatorioPdf');
 
-            btnAbrirModalProjeto.addEventListener('click', () => {
-    tituloModalProjeto.textContent = 'Adicionar Novo Projeto';
-    formProjeto.action = '/admin/projetos'; // Rota de criação
-    projetoId.value = '';
-    inputTitulo.value = '';
-    inputDescricao.value = '';
-    selectCategoria.value = '';
-    inputTurmaProjeto.value = '';
-    inputAlunos.value = '';
+// Abrir modal para adicionar novo projeto
+btnAbrirModalProjeto.addEventListener('click', () => {
+  tituloModalProjeto.textContent = 'Adicionar Novo Projeto';
+  formProjeto.action = '/admin/projetos';
+  projetoId.value = '';
+  inputTitulo.value = '';
+  inputDescricao.value = '';
+  selectCategoria.value = '';
+  inputTurmaProjeto.value = '';
+  inputAlunos.value = '';
 
-                // Limpar todos os checkboxes de critérios
-                criteriosProjetoCheckboxesDiv.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                    checkbox.checked = false;
-                });
+  // Limpar checkboxes
+  criteriosProjetoCheckboxesDiv.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+    checkbox.checked = false;
+  });
 
-                modalProjeto.classList.remove('hidden');
-                modalProjeto.classList.add('flex');
-            });
+  // Esconder PDF anterior
+  pdfExistenteContainer.classList.add('hidden');
+  linkRelatorioPdf.href = '#';
+  linkRelatorioPdf.textContent = '';
 
-            btnFecharModalProjeto.addEventListener('click', () => {
-                modalProjeto.classList.remove('flex');
-                modalProjeto.classList.add('hidden');
-            });
+  modalProjeto.classList.remove('hidden');
+  modalProjeto.classList.add('flex');
+});
 
-           document.querySelectorAll('.btn-editar-projeto').forEach(button => {
+// Fechar modal
+btnFecharModalProjeto.addEventListener('click', () => {
+  modalProjeto.classList.remove('flex');
+  modalProjeto.classList.add('hidden');
+});
+
+// Editar projeto
+document.querySelectorAll('.btn-editar-projeto').forEach(button => {
   button.addEventListener('click', (event) => {
-    tituloModalProjeto.textContent = 'Editar Projeto';
-    formProjeto.action = `/admin/projetos/${event.target.dataset.id}/editar`; // Use POST com rota personalizada
-    projetoId.value = event.target.dataset.id;
-    inputTitulo.value = event.target.dataset.titulo;
-    inputDescricao.value = event.target.dataset.descricao; // CORRIGIDO AQUI
-    selectCategoria.value = event.target.dataset.categoriaId;
-    inputTurmaProjeto.value = event.target.dataset.turma;
-    inputAlunos.value = event.target.dataset.alunos ? event.target.dataset.alunos.split(',').join('\n') : '';
+    const btn = event.currentTarget; // Sempre o <button>
 
-    // Marcar checkboxes de critérios
-    const criteriosIds = event.target.dataset.criterios ? event.target.dataset.criterios.split(',') : [];
+    tituloModalProjeto.textContent = 'Editar Projeto';
+    formProjeto.action = `/admin/projetos/${btn.dataset.id}/editar`;
+    projetoId.value = btn.dataset.id;
+    inputTitulo.value = btn.dataset.titulo;
+    inputDescricao.value = btn.dataset.descricao;
+    selectCategoria.value = btn.dataset.categoriaId;
+    inputTurmaProjeto.value = btn.dataset.turma;
+    inputAlunos.value = btn.dataset.alunos ? btn.dataset.alunos.split(',').join('\n') : '';
+
+    const criteriosIds = btn.dataset.criterios ? btn.dataset.criterios.split(',') : [];
     criteriosProjetoCheckboxesDiv.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
       checkbox.checked = criteriosIds.includes(checkbox.value);
     });
 
-    // Mostrar link do PDF existente, se houver
-  const pdfExistenteContainer = document.getElementById('pdfExistenteContainer');
-const linkRelatorioPdf = document.getElementById('linkRelatorioPdf');
-
-const pdfUrl = event.target.dataset.relatorioPdf;
-
-if (pdfUrl && pdfUrl !== '#') {
-  const visualizadorGoogle = `https://docs.google.com/viewer?url=${encodeURIComponent(pdfUrl)}&embedded=true`;
-  linkRelatorioPdf.href = visualizadorGoogle;
-  linkRelatorioPdf.textContent = "Ver Relatório";
-  pdfExistenteContainer.classList.remove('hidden');
-} else {
-  linkRelatorioPdf.href = '#';
-  linkRelatorioPdf.textContent = "";
-  pdfExistenteContainer.classList.add('hidden');
-}
+    // Mostrar PDF se houver
+    const pdfUrl = btn.dataset.relatorioPdf;
+    if (pdfUrl && pdfUrl !== '#') {
+      const visualizadorGoogle = `https://docs.google.com/viewer?url=${encodeURIComponent(pdfUrl)}&embedded=true`;
+      linkRelatorioPdf.href = visualizadorGoogle;
+      linkRelatorioPdf.textContent = "Ver Relatório";
+      pdfExistenteContainer.classList.remove('hidden');
+    } else {
+      linkRelatorioPdf.href = '#';
+      linkRelatorioPdf.textContent = "";
+      pdfExistenteContainer.classList.add('hidden');
+    }
 
     modalProjeto.classList.remove('hidden');
     modalProjeto.classList.add('flex');
   });
 });
+
 
             // Mostrar modal de Categoria
             const modalCategoria = document.getElementById('modalCategoria');
