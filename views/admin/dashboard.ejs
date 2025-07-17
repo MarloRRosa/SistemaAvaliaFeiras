@@ -539,17 +539,17 @@
                             </td>
                             <td class="py-4 px-6 whitespace-nowrap">
                                 <div class="flex flex-wrap gap-2">
-                                    <button class="tooltip btn-editar-avaliador btn-hover-effect bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1.5 px-3 rounded-md text-sm shadow-sm" 
-                                        data-tooltip="Editar avaliador"
-                                        data-id="<%= avaliador._id %>"
-                                        data-nome="<%= avaliador.nome %>"
-                                        data-email="<%= avaliador.email %>"
-                                        data-pin="<%= avaliador.pin %>"
-                                        data-ativo="<%= avaliador.ativo ? 'true' : 'false' %>"
-                                        data-projetos="<%= avaliador.projetosAtribuidos.map(p => p._id.toString()).join(',') %>"
-                                        data-qrcode="<%= avaliador.qrcode || '' %>">
-                                        <i class="fas fa-edit mr-1"></i><span>Editar</span>
-                                    </button>
+                                   <button class="tooltip btn-editar-avaliador btn-hover-effect bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1.5 px-3 rounded-md text-sm shadow-sm" 
+    data-tooltip="Editar avaliador"
+    data-id="<%= avaliador._id %>"
+    data-nome="<%= avaliador.nome %>"
+    data-email="<%= avaliador.email %>"
+    data-pin="<%= avaliador.pin %>"
+    data-ativo="<%= avaliador.ativo ? 'true' : 'false' %>"
+    data-projetos="<%= avaliador.projetosAtribuidos && avaliador.projetosAtribuidos.length ? avaliador.projetosAtribuidos.map(p => p._id.toString()).join(',') : '' %>"
+    data-qrcode="<%= avaliador.qrcode || '' %>">
+    <i class="fas fa-edit mr-1"></i><span>Editar</span>
+</button>
 
                                     <button type="button" class="tooltip btn-reenviar-avaliador btn-hover-effect text-white font-semibold py-1.5 px-3 rounded-md text-sm shadow-sm" 
                                         style="background-color: #ea580c; border: none;" 
@@ -742,8 +742,8 @@
 
     function initializeEditarAvaliador() {
         document.querySelectorAll('.btn-editar-avaliador').forEach(button => {
-            button.addEventListener('click', (event) => {
-                const button = event.currentTarget;
+    button.addEventListener('click', (event) => {
+        const button = event.currentTarget;
                 tituloAvaliador.textContent = 'Editar Avaliador';
                 formAvaliador.action = `/admin/avaliadores/${button.dataset.id}?_method=PUT`;
                 avaliadorId.value = button.dataset.id;
