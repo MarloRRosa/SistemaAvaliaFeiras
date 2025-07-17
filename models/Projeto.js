@@ -17,7 +17,7 @@ const ProjetoSchema = new mongoose.Schema({
     }],
     orientador: {
         type: String,
-        required: true
+        required: ''
     },
     coorientador: {
         type: String,
