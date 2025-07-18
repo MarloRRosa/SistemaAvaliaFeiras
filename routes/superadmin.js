@@ -1142,21 +1142,19 @@ router.get('/dashboard', async (req, res) => {
   }
 });
 
-router.get('/feedbacks', verificarSuperAdmin, async (req, res) => {
-  try {
-    const feedbacks = await Feedback.find().sort({ createdAt: -1 }).lean();
-    res.render('superadmin/feedbacks', {
-      titulo: 'Feedbacks Recebidos',
-      feedbacks,
-      layout: 'layouts/admin', // ajuste para seu layout de superadmin
-      error_msg: req.flash('error_msg'),
-      success_msg: req.flash('success_msg')
-    });
-  } catch (err) {
-    console.error('Erro ao carregar feedbacks:', err);
-    req.flash('error_msg', 'Erro ao carregar feedbacks.');
-    res.redirect('/superadmin/dashboard');
-  }
+router.get('/feedbacks', async (req, res) => {
+    try {
+        const feedbacks = await Feedback.find().sort({ createdAt: -1 }).lean();
+        res.render('superadmin/feedbacks', {
+            layout: 'layouts/superadmin',
+            titulo: 'Sugestões e Feedbacks',
+            feedbacks
+        });
+    } catch (err) {
+        console.error('Erro ao carregar feedbacks:', err);
+        req.flash('error_msg', 'Erro ao carregar feedbacks.');
+        res.redirect('/superadmin/dashboard');
+    }
 });
 
 
