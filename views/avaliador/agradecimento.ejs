@@ -1,54 +1,201 @@
-<div class="max-w-xl mx-auto mt-20 p-8 bg-white shadow-lg rounded text-center">
-  <h1 class="text-3xl font-bold text-green-600 mb-6">Avaliação Finalizada!</h1>
-  <% if (typeof sucesso !== 'undefined') { %>
-  <p class="bg-green-100 text-green-700 border border-green-300 rounded p-3 mb-4"><%= sucesso %></p>
-<% } %>
-  <p class="text-gray-700 text-lg">Obrigado por participar do processo de avaliação.</p>
-  <p class="text-gray-600 mt-4">Seu PIN foi desativado e sua sessão foi encerrada com sucesso.</p>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avaliação Finalizada</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="max-w-xl mx-auto mt-20 p-8 bg-white shadow-lg rounded-lg text-center">
+        <div class="mb-6">
+            <i class="fas fa-check-circle text-6xl text-green-500 mb-4"></i>
+            <h1 class="text-3xl font-bold text-green-600">Avaliação Finalizada!</h1>
+        </div>
+        
+        <!-- Mensagem de sucesso do backend -->
+        <div class="bg-green-100 text-green-700 border border-green-300 rounded p-3 mb-4">
+            Avaliação enviada com sucesso!
+        </div>
+        
+        <p class="text-gray-700 text-lg mb-2">Obrigado por participar do processo de avaliação.</p>
+        <p class="text-gray-600 mb-6">Seu PIN foi desativado e sua sessão foi encerrada com sucesso.</p>
 
-  <a href="/" class="mt-6 inline-block px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Voltar ao Início</a>
+        <!-- Botões de ação -->
+        <div class="space-y-3">
+            <a href="/" class="w-full inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                <i class="fas fa-home mr-2"></i>Voltar ao Início
+            </a>
+            
+            <button 
+                id="abrirModalFeedback"
+                class="w-full px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+            >
+                <i class="fas fa-comment-dots mr-2"></i>Enviar Sugestão
+            </button>
+            
+            <button 
+                id="abrirModalContato"
+                class="w-full px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            >
+                <i class="fas fa-phone mr-2"></i>Entrar em Contato
+            </button>
+        </div>
 
-  <!-- Botão para abrir o modal -->
-  <button 
-    id="abrirModalFeedback"
-    class="mt-4 inline-block px-6 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
-  >
-    Enviar sugestão sobre o sistema
-  </button>
-</div>
+        <!-- Links rápidos -->
+        <div class="mt-8 pt-6 border-t border-gray-200">
+            <h3 class="text-sm font-semibold text-gray-600 mb-3">Links Úteis</h3>
+            <div class="flex justify-center space-x-4 text-sm">
+                <a href="#" class="text-blue-600 hover:text-blue-800 transition-colors">
+                    <i class="fas fa-question-circle mr-1"></i>FAQ
+                </a>
+                <a href="#" class="text-blue-600 hover:text-blue-800 transition-colors">
+                    <i class="fas fa-file-alt mr-1"></i>Documentação
+                </a>
+                <a href="#" class="text-blue-600 hover:text-blue-800 transition-colors">
+                    <i class="fas fa-headset mr-1"></i>Suporte
+                </a>
+            </div>
+        </div>
+    </div>
 
-<!-- Modal -->
-<div id="modalFeedback" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center hidden z-50">
-  <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">
-    <button id="fecharModalFeedback" class="absolute top-2 right-2 text-gray-600 hover:text-red-500 text-2xl">
-      &times;
-    </button>
-    <h2 class="text-xl font-semibold mb-4 text-gray-700">Enviar Feedback</h2>
-    <form action="/avaliador/feedback" method="POST">
-      <textarea name="mensagem" rows="4" required class="w-full p-2 border rounded text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Digite aqui sua sugestão ou comentário..."></textarea>
-      <input type="hidden" name="tipo" value="Avaliador">
-      <button type="submit" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-        Enviar
-      </button>
-    </form>
-  </div>
-</div>
+    <!-- Modal de Feedback -->
+    <div id="modalFeedback" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md relative transform transition-all">
+            <button id="fecharModalFeedback" class="absolute top-3 right-3 text-gray-400 hover:text-red-500 text-2xl transition-colors">
+                &times;
+            </button>
+            
+            <div class="text-center mb-4">
+                <i class="fas fa-comment-dots text-3xl text-blue-600 mb-2"></i>
+                <h2 class="text-xl font-semibold text-gray-700">Enviar Feedback</h2>
+                <p class="text-sm text-gray-500">Sua opinião é importante para nós</p>
+            </div>
+            
+            <form action="/avaliador/feedback" method="POST">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Categoria</label>
+                    <select name="categoria" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="sugestao">Sugestão</option>
+                        <option value="bug">Reportar Bug</option>
+                        <option value="melhoria">Melhoria</option>
+                        <option value="outro">Outro</option>
+                    </select>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Mensagem</label>
+                    <textarea 
+                        name="mensagem" 
+                        rows="4" 
+                        required 
+                        class="w-full p-3 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                        placeholder="Digite aqui sua sugestão ou comentário..."
+                    ></textarea>
+                </div>
+                
+                <input type="hidden" name="tipo" value="Avaliador">
+                
+                <button type="submit" class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                    <i class="fas fa-paper-plane mr-2"></i>Enviar Feedback
+                </button>
+            </form>
+        </div>
+    </div>
 
-<!-- Script -->
-<script>
-  document.getElementById('abrirModalFeedback').addEventListener('click', () => {
-    document.getElementById('modalFeedback').classList.remove('hidden');
-  });
+    <!-- Modal de Contato -->
+    <div id="modalContato" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md relative transform transition-all">
+            <button id="fecharModalContato" class="absolute top-3 right-3 text-gray-400 hover:text-red-500 text-2xl transition-colors">
+                &times;
+            </button>
+            
+            <div class="text-center mb-6">
+                <i class="fas fa-phone text-3xl text-purple-600 mb-2"></i>
+                <h2 class="text-xl font-semibold text-gray-700">Entre em Contato</h2>
+                <p class="text-sm text-gray-500">Escolha a melhor forma de nos contatar</p>
+            </div>
+            
+            <div class="space-y-3">
+               <!-- <a href="tel:+5511999999999" class="flex items-center p-3 bg-green-50 hover:bg-green-100 rounded-lg transition-colors">
+                    <i class="fas fa-phone text-green-600 mr-3"></i>
+                    <div>
+                        <p class="font-medium text-gray-700">Telefone</p>
+                        <p class="text-sm text-gray-500">(11) 99999-9999</p>
+                    </div>
+                </a>-->
+                
+                <a href="mailto:contato@exemplo.com" class="flex items-center p-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors">
+                    <i class="fas fa-envelope text-blue-600 mr-3"></i>
+                    <div>
+                        <p class="font-medium text-gray-700">Email</p>
+                        <p class="text-sm text-gray-500">docsrosas@gmail.com</p>
+                    </div>
+                </a>
+                
+                <a href="https://wa.me/5511999999999" target="_blank" class="flex items-center p-3 bg-green-50 hover:bg-green-100 rounded-lg transition-colors">
+                    <i class="fab fa-whatsapp text-green-600 mr-3"></i>
+                    <div>
+                        <p class="font-medium text-gray-700">WhatsApp</p>
+                        <p class="text-sm text-gray-500">Clique para conversar</p>
+                    </div>
+                </a>
+                
+                <div class="flex items-center p-3 bg-gray-50 rounded-lg">
+                    <i class="fas fa-clock text-gray-600 mr-3"></i>
+                    <div>
+                        <p class="font-medium text-gray-700">Horário de Atendimento</p>
+                        <p class="text-sm text-gray-500">Seg - Sex: 8h às 18h</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-  document.getElementById('fecharModalFeedback').addEventListener('click', () => {
-    document.getElementById('modalFeedback').classList.add('hidden');
-  });
+    <script>
+        // Modal de Feedback
+        document.getElementById('abrirModalFeedback').addEventListener('click', () => {
+            document.getElementById('modalFeedback').classList.remove('hidden');
+        });
 
-  // Também fecha o modal se clicar fora do conteúdo
-  window.addEventListener('click', function (e) {
-    const modal = document.getElementById('modalFeedback');
-    if (e.target === modal) {
-      modal.classList.add('hidden');
-    }
-  });
-</script>
+        document.getElementById('fecharModalFeedback').addEventListener('click', () => {
+            document.getElementById('modalFeedback').classList.add('hidden');
+        });
+
+        // Modal de Contato
+        document.getElementById('abrirModalContato').addEventListener('click', () => {
+            document.getElementById('modalContato').classList.remove('hidden');
+        });
+
+        document.getElementById('fecharModalContato').addEventListener('click', () => {
+            document.getElementById('modalContato').classList.add('hidden');
+        });
+
+        // Fecha modais ao clicar fora
+        window.addEventListener('click', function (e) {
+            const modalFeedback = document.getElementById('modalFeedback');
+            const modalContato = document.getElementById('modalContato');
+            
+            if (e.target === modalFeedback) {
+                modalFeedback.classList.add('hidden');
+            }
+            if (e.target === modalContato) {
+                modalContato.classList.add('hidden');
+            }
+        });
+
+        // Animação de entrada dos modais
+        document.querySelectorAll('[id^="abrirModal"]').forEach(button => {
+            button.addEventListener('click', function() {
+                setTimeout(() => {
+                    const modal = document.querySelector('.fixed:not(.hidden)');
+                    if (modal) {
+                        modal.querySelector('.transform').classList.add('scale-100');
+                    }
+                }, 10);
+            });
+        });
+    </script>
+</body>
+</html>
