@@ -79,13 +79,13 @@ router.get('/login/demo', async (req, res) => {
 
     // Criar projetos
     const projetos = await Projeto.insertMany([
-      { titulo: 'Projeto A', alunos: ['Ana', 'Carlos'], categoria: categorias[0]._id, criterios: criterios.map(c => c._id), feira: feira._id, escolaId: escola._id },
-      { titulo: 'Projeto B', alunos: ['Beatriz'], categoria: categorias[0]._id, criterios: criterios.map(c => c._id), feira: feira._id, escolaId: escola._id },
-      { titulo: 'Projeto C', alunos: ['Caio', 'Joana'], categoria: categorias[0]._id, criterios: criterios.map(c => c._id), feira: feira._id, escolaId: escola._id },
-      { titulo: 'Projeto D', alunos: ['Diego'], categoria: categorias[1]._id, criterios: criterios.map(c => c._id), feira: feira._id, escolaId: escola._id },
-      { titulo: 'Projeto E', alunos: ['Elisa', 'Renan'], categoria: categorias[1]._id, criterios: criterios.map(c => c._id), feira: feira._id, escolaId: escola._id },
-      { titulo: 'Projeto F', alunos: ['Fábio'], categoria: categorias[1]._id, criterios: criterios.map(c => c._id), feira: feira._id, escolaId: escola._id },
-    ]);
+  { titulo: 'Projeto A', alunos: ['Ana', 'Carlos'], orientador: 'Prof. A', categoria: categorias[0]._id, criterios: criterios.map(c => c._id), feira: feira._id, escolaId: escola._id },
+  { titulo: 'Projeto B', alunos: ['Beatriz'], orientador: 'Prof. B', categoria: categorias[0]._id, criterios: criterios.map(c => c._id), feira: feira._id, escolaId: escola._id },
+  { titulo: 'Projeto C', alunos: ['Caio', 'Joana'], orientador: 'Prof. C', categoria: categorias[0]._id, criterios: criterios.map(c => c._id), feira: feira._id, escolaId: escola._id },
+  { titulo: 'Projeto D', alunos: ['Diego'], orientador: 'Prof. D', categoria: categorias[1]._id, criterios: criterios.map(c => c._id), feira: feira._id, escolaId: escola._id },
+  { titulo: 'Projeto E', alunos: ['Elisa', 'Renan'], orientador: 'Prof. E', categoria: categorias[1]._id, criterios: criterios.map(c => c._id), feira: feira._id, escolaId: escola._id },
+  { titulo: 'Projeto F', alunos: ['Fábio'], orientador: 'Prof. F', categoria: categorias[1]._id, criterios: criterios.map(c => c._id), feira: feira._id, escolaId: escola._id },
+]);
 
     // Criar avaliadores
     const avaliadores = await Avaliador.insertMany([
