@@ -430,5 +430,26 @@ router.get('/acesso-direto/:pin', async (req, res) => {
     res.status(500).send('Erro ao acessar o sistema.');
   }
 });
+router.post('/feedback', async (req, res) => {
+    try {
+        const { tipo, mensagem, categoria, nome, email } = req.body;
 
-module.exports = mongoose.model('Feedback', FeedbackSchema);
+        const novoFeedback = new Feedback({
+            tipo: tipo || 'Avaliador',
+            mensagem,
+            categoria,
+            nome: nome?.trim() || '',
+            email: email?.trim() || ''
+        });
+
+        await novoFeedback.save();
+        req.flash('success_msg', 'Feedback enviado com sucesso!');
+        res.redirect('back'); // Volta para a página anterior
+    } catch (error) {
+        console.error('Erro ao enviar feedback:', error);
+        req.flash('error_msg', 'Ocorreu um erro ao enviar o feedback. Tente novamente.');
+        res.redirect('back');
+    }
+});
+
+module.exports = router;
