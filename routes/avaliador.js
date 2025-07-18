@@ -444,11 +444,11 @@ router.post('/feedback', async (req, res) => {
 
         await novoFeedback.save();
         req.flash('success_msg', 'Feedback enviado com sucesso!');
-        res.redirect('back'); // Volta para a página anterior
+        res.redirect('/');
     } catch (error) {
         console.error('Erro ao enviar feedback:', error);
         req.flash('error_msg', 'Ocorreu um erro ao enviar o feedback. Tente novamente.');
-        res.redirect('back');
+        res.redirect('/');
     }
 });
 
