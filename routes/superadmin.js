@@ -574,7 +574,8 @@ const mensagens = await Mensagem.find({}).sort({ data: -1 }).lean();
             escolasCadastradas,
             ...dataForTab,
             projetosPorEscola: dataForTab.projetosPorEscola,
-            mensagens: mensagens || []
+            mensagens: mensagens || [],
+            feedbacks: dataForTab.feedbacks || []
         });
 
     } catch (err) {
