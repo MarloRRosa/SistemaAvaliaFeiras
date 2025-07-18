@@ -15,6 +15,7 @@ const SolicitacaoAcesso = require('../models/SolicitacaoAcesso');
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 const Feedback = require('../models/Feedback');
+const Mensagem = require('../models/mensagensSuporte');
 
 // ========================================================================
 // Funções Auxiliares e Configurações
@@ -486,6 +487,10 @@ router.get('/dashboard', verificarSuperAdmin, async (req, res) => {
                 });
             }
             dataForTab.resumoAvaliadoresPorEscola = resumoAvaliadores;
+        }
+
+        else if (activeTab === 'feedback') {
+    dataForTab.feedbacks = await Feedback.find().sort({ criadoEm: -1 }).lean();
         }
         else if (activeTab === 'relatorio-projetos') {
     let projetosPorEscola = [];
@@ -1123,41 +1128,5 @@ router.post('/solicitacoes/:id/rejeitar', verificarSuperAdmin, async (req, res) 
         }
     }
 });
-
-const Mensagem = require('../models/mensagensSuporte');
-
-router.get('/dashboard', async (req, res) => {
-  try {
-    const mensagens = await Mensagem.find().sort({ dataEnvio: -1 });
-
-    res.render('superadmin/dashboard', {
-      layout: 'layouts/superadmin',
-      activeTab: 'mensagens',
-      mensagens
-    });
-  } catch (err) {
-    console.error('Erro ao buscar mensagens:', err);
-    req.flash('error_msg', 'Erro ao carregar mensagens.');
-    res.redirect('/superadmin/login');
-  }
-});
-
-router.get('/feedback', async (req, res) => {
-    try {
-        const feedbacks = await Feedback.find().sort({ createdAt: -1 }).lean();
-        res.render('superadmin/dashsuperadminlayout', {
-            layout: 'layouts/superadmin',
-            titulo: 'Feedback dos Avaliadores',
-            activeTab: 'feedback',
-            feedbacks
-        });
-    } catch (err) {
-        console.error('Erro ao carregar feedbacks:', err);
-        req.flash('error_msg', 'Erro ao carregar feedbacks.');
-        res.redirect('/superadmin/dashboard');
-    }
-});
-
-
 
 module.exports = router;

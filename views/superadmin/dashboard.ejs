@@ -460,31 +460,32 @@
                 <button class="tab-button <%= activeTab === 'feedback' ? 'active' : '' %>" data-tab="feedback">
                     <i class="fas fa-comment-dots mr-2"></i>Feedback
                 </button>
-
             </div>
 
-            <div id="feedback" class="tab-content <%= activeTab === 'feedback' ? '' : 'hidden' %>">
-    <div class="p-4">
-        <h2 class="text-xl font-bold mb-4">Feedbacks Recebidos</h2>
+           <div class="tab-content <%= activeTab === 'feedback' ? '' : 'hidden' %>" id="tab-feedback">
+    <h2 class="text-xl font-bold mb-4">Feedbacks Recebidos</h2>
 
-        <% if (feedbacks && feedbacks.length > 0) { %>
-            <div class="space-y-4">
-                <% feedbacks.forEach(fb => { %>
-                    <div class="bg-white shadow rounded-lg p-4 border">
-                        <p><strong>Categoria:</strong> <%= fb.categoria %></p>
-                        <p><strong>Mensagem:</strong> <%= fb.mensagem %></p>
-                        <% if (fb.nome) { %><p><strong>Nome:</strong> <%= fb.nome %></p><% } %>
-                        <% if (fb.email) { %><p><strong>Email:</strong> <%= fb.email %></p><% } %>
-                        <p class="text-sm text-gray-500 mt-2">Enviado em: <%= new Date(fb.createdAt).toLocaleString() %></p>
-                    </div>
-                <% }); %>
-            </div>
-        <% } else { %>
-            <p class="text-gray-500">Nenhum feedback enviado até o momento.</p>
-        <% } %>
-    </div>
+    <% if (feedbacks && feedbacks.length > 0) { %>
+        <ul class="space-y-4">
+            <% feedbacks.forEach(fb => { %>
+                <li class="p-4 border rounded shadow-sm bg-white">
+                    <p class="text-gray-800"><strong>Categoria:</strong> <%= fb.categoria %></p>
+                    <p class="text-gray-800"><strong>Tipo:</strong> <%= fb.tipo %></p>
+                    <p class="text-gray-800"><strong>Mensagem:</strong> <%= fb.mensagem %></p>
+                    <% if (fb.nome) { %>
+                        <p class="text-gray-600 text-sm mt-1"><strong>Nome:</strong> <%= fb.nome %></p>
+                    <% } %>
+                    <% if (fb.email) { %>
+                        <p class="text-gray-600 text-sm"><strong>Email:</strong> <%= fb.email %></p>
+                    <% } %>
+                    <p class="text-gray-500 text-sm mt-2"><%= fb.criadoEm.toLocaleString() %></p>
+                </li>
+            <% }); %>
+        </ul>
+    <% } else { %>
+        <p class="text-gray-600">Nenhum feedback enviado ainda.</p>
+    <% } %>
 </div>
-
 
             <!-- Conteúdo da Aba: Visão Geral -->
             <div id="visao-geral-tab" class="tab-content <%= activeTab === 'visao-geral' ? '' : 'hidden' %> animate-fade-in-up" style="animation-delay: 0.4s;">
@@ -1115,6 +1116,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 closeResetAdminPasswordModal();
             }
         });
+
     </script>
 </body>
 </html>
