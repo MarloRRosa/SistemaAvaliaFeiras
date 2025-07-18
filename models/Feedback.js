@@ -29,4 +29,5 @@ const FeedbackSchema = new mongoose.Schema({
   }
 });
 
-module.exports = mongoose.model('Feedback', FeedbackSchema);
+// ✅ Verifica se o modelo já foi registrado
+module.exports = mongoose.models.Feedback || mongoose.model('Feedback', FeedbackSchema);
