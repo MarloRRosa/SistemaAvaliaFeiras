@@ -6,9 +6,22 @@ const FeedbackSchema = new mongoose.Schema({
     enum: ['Avaliador', 'ADM', 'SuperADM', 'Outro'],
     required: true,
   },
+  categoria: {
+    type: String,
+    enum: ['Sugestão', 'Crítica', 'Erro', 'Elogio', 'Outro'],
+    required: true,
+  },
   mensagem: {
     type: String,
     required: true,
+  },
+  nome: {
+    type: String,
+    default: ''
+  },
+  email: {
+    type: String,
+    default: ''
   },
   criadoEm: {
     type: Date,

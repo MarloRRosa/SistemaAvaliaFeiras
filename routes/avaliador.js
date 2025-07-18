@@ -430,24 +430,35 @@ router.get('/acesso-direto/:pin', async (req, res) => {
     res.status(500).send('Erro ao acessar o sistema.');
   }
 });
-router.post('/feedback', async (req, res) => {
-  try {
-    const { tipo, mensagem } = req.body;
+const mongoose = require('mongoose');
 
-    if (!mensagem || mensagem.trim() === '') {
-      return res.status(400).send('Mensagem não pode estar vazia.');
-    }
-
-    await Feedback.create({ tipo, mensagem });
-
-    res.render('avaliador/agradecimento', {
-      sucesso: 'Obrigado pelo feedback!'
-    });
-  } catch (err) {
-    console.error('Erro ao salvar feedback:', err);
-    res.status(500).send('Erro ao enviar feedback.');
+const FeedbackSchema = new mongoose.Schema({
+  tipo: {
+    type: String,
+    enum: ['Avaliador', 'ADM', 'SuperADM', 'Outro'],
+    required: true,
+  },
+  categoria: {
+    type: String,
+    enum: ['Sugestão', 'Crítica', 'Erro', 'Elogio', 'Outro'],
+    required: true,
+  },
+  mensagem: {
+    type: String,
+    required: true,
+  },
+  nome: {
+    type: String,
+    default: ''
+  },
+  email: {
+    type: String,
+    default: ''
+  },
+  criadoEm: {
+    type: Date,
+    default: Date.now,
   }
 });
 
-
-module.exports = router;
+module.exports = mongoose.model('Feedback', FeedbackSchema);
