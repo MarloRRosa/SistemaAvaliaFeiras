@@ -1142,12 +1142,13 @@ router.get('/dashboard', async (req, res) => {
   }
 });
 
-router.get('/feedbacks', async (req, res) => {
+router.get('/feedback', async (req, res) => {
     try {
         const feedbacks = await Feedback.find().sort({ createdAt: -1 }).lean();
-        res.render('superadmin/feedbacks', {
+        res.render('superadmin/dashsuperadminlayout', {
             layout: 'layouts/superadmin',
-            titulo: 'Sugestões e Feedbacks',
+            titulo: 'Feedback dos Avaliadores',
+            activeTab: 'feedback',
             feedbacks
         });
     } catch (err) {
@@ -1156,6 +1157,7 @@ router.get('/feedbacks', async (req, res) => {
         res.redirect('/superadmin/dashboard');
     }
 });
+
 
 
 module.exports = router;
