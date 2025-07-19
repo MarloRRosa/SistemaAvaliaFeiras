@@ -602,6 +602,7 @@ const mensagens = await Mensagem.find({}).sort({ data: -1 }).lean();
             mensagens: mensagens || [],
             feedbacks: dataForTab.feedbacks || [],
             query: req.query,
+            periodoSelecionado: req.query.periodo || '',
             categoriaSelecionada: req.query.categoria || 'todos'
         });
 
