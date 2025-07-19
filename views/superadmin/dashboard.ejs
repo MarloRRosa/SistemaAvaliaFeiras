@@ -472,20 +472,19 @@
 
     <!-- Filtro por Categoria -->
     <div>
-      <label class="block text-sm font-medium text-gray-700">Categoria</label>
-      <select name="categoria" class="mt-1 block w-full border border-gray-300 rounded p-2">
-        <option value="todos">Todas</option>
+      <label for="filtroCategoria" class="block text-sm font-medium text-gray-700">Categoria</label>
+      <select id="filtroCategoria" name="categoria" class="mt-1 block w-full border border-gray-300 rounded p-2">
+        <option value="todos" <%= req.query.categoria === 'todos' ? 'selected' : '' %>>Todas</option>
         <option value="elogio" <%= req.query.categoria === 'elogio' ? 'selected' : '' %>>Elogio</option>
         <option value="sugestao" <%= req.query.categoria === 'sugestao' ? 'selected' : '' %>>Sugestão</option>
         <option value="critica" <%= req.query.categoria === 'critica' ? 'selected' : '' %>>Crítica</option>
-        <!-- Adicione mais categorias conforme necessário -->
       </select>
     </div>
 
     <!-- Filtro por Período -->
     <div>
-      <label class="block text-sm font-medium text-gray-700">Período</label>
-      <select name="periodo" class="mt-1 block w-full border border-gray-300 rounded p-2" onchange="toggleDatasPersonalizadas(this.value)">
+      <label for="filtroPeriodo" class="block text-sm font-medium text-gray-700">Período</label>
+      <select id="filtroPeriodo" name="periodo" class="mt-1 block w-full border border-gray-300 rounded p-2" onchange="toggleDatasPersonalizadas(this.value)">
         <option value="">Todos</option>
         <option value="7" <%= req.query.periodo === '7' ? 'selected' : '' %>>Últimos 7 dias</option>
         <option value="30" <%= req.query.periodo === '30' ? 'selected' : '' %>>Últimos 30 dias</option>
@@ -495,15 +494,16 @@
 
     <!-- Datas Personalizadas -->
     <div id="datasPersonalizadas" class="<%= req.query.periodo === 'personalizado' ? '' : 'hidden' %>">
-      <label class="block text-sm font-medium text-gray-700">De:</label>
-      <input type="date" name="dataInicio" value="<%= req.query.dataInicio || '' %>" class="block w-full border border-gray-300 rounded p-2">
+      <label for="dataInicio" class="block text-sm font-medium text-gray-700">De:</label>
+      <input type="date" id="dataInicio" name="dataInicio" value="<%= req.query.dataInicio || '' %>" autocomplete="off" class="block w-full border border-gray-300 rounded p-2">
 
-      <label class="block text-sm font-medium text-gray-700 mt-2">Até:</label>
-      <input type="date" name="dataFim" value="<%= req.query.dataFim || '' %>" class="block w-full border border-gray-300 rounded p-2">
+      <label for="dataFim" class="block text-sm font-medium text-gray-700 mt-2">Até:</label>
+      <input type="date" id="dataFim" name="dataFim" value="<%= req.query.dataFim || '' %>" autocomplete="off" class="block w-full border border-gray-300 rounded p-2">
     </div>
 
-    <div>
-      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded mt-4">Filtrar</button>
+    <!-- Botão Filtrar -->
+    <div class="w-full sm:w-auto">
+      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded mt-4 sm:mt-0">Filtrar</button>
     </div>
   </form>
 

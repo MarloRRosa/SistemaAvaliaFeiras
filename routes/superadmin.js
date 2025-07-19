@@ -600,7 +600,8 @@ const mensagens = await Mensagem.find({}).sort({ data: -1 }).lean();
             ...dataForTab,
             projetosPorEscola: dataForTab.projetosPorEscola,
             mensagens: mensagens || [],
-            feedbacks: dataForTab.feedbacks || []
+            feedbacks: dataForTab.feedbacks || [],
+            query: req.query
         });
 
     } catch (err) {
