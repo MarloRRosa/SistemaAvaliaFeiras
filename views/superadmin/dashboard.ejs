@@ -461,23 +461,36 @@
                     <i class="fas fa-comment-dots mr-2"></i>Feedback
                 </button>
             </div>
-
-           <!-- ABA: FEEDBACK -->
+            
 <!-- ABA: FEEDBACK -->
 <div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200 <%= activeTab === 'feedback' ? '' : 'hidden' %>" id="feedback-tab" role="tabpanel" aria-labelledby="feedback-tab-button">
-  <h2 class="text-2xl font-bold mb-4">🔧 TESTE: Aba Feedback</h2>
+  <h2 class="text-2xl font-bold mb-4">Feedbacks Recebidos</h2>
 
-  <p class="text-green-600 font-semibold">✅ A aba está sendo exibida corretamente.</p>
+  <% if (feedbacks && feedbacks.length > 0) { %>
+    <ul class="space-y-4">
+      <% feedbacks.forEach(fb => { %>
+        <li class="p-4 border rounded shadow-sm bg-white">
+          <p class="text-gray-800"><strong>Categoria:</strong> <%= fb.categoria %></p>
+          <p class="text-gray-800"><strong>Tipo:</strong> <%= fb.tipo %></p>
+          <p class="text-gray-800"><strong>Mensagem:</strong> <%= fb.mensagem %></p>
 
-  <ul class="mt-4 list-disc list-inside text-sm text-gray-700">
-    <li>Teste item 1</li>
-    <li>Teste item 2</li>
-    <li>Teste item 3</li>
-  </ul>
+          <% if (fb.nome) { %>
+            <p class="text-gray-600 text-sm mt-1"><strong>Nome:</strong> <%= fb.nome %></p>
+          <% } %>
+          <% if (fb.email) { %>
+            <p class="text-gray-600 text-sm"><strong>Email:</strong> <%= fb.email %></p>
+          <% } %>
+
+          <p class="text-gray-500 text-sm mt-2">
+            <%= new Date(fb.criadoEm).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }) %>
+          </p>
+        </li>
+      <% }); %>
+    </ul>
+  <% } else { %>
+    <p class="text-gray-600">Nenhum feedback enviado ainda.</p>
+  <% } %>
 </div>
-
-
-
 
             <!-- Conteúdo da Aba: Visão Geral -->
             <div id="visao-geral-tab" class="tab-content <%= activeTab === 'visao-geral' ? '' : 'hidden' %> animate-fade-in-up" style="animation-delay: 0.4s;">
