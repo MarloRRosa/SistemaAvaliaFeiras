@@ -463,13 +463,11 @@
             </div>
 
            <!-- ABA: FEEDBACK -->
-<!-- TESTE DE VISUALIZAÇÃO ABA FEEDBACK -->
-<div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200" id="feedback" role="tabpanel" aria-labelledby="feedback-tab">
+<!-- ABA: FEEDBACK -->
+<div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200 <%= activeTab === 'feedback' ? '' : 'hidden' %>" id="feedback-tab" role="tabpanel" aria-labelledby="feedback-tab-button">
   <h2 class="text-2xl font-bold mb-4">🔧 TESTE: Aba Feedback</h2>
 
   <p class="text-green-600 font-semibold">✅ A aba está sendo exibida corretamente.</p>
-
-  <p class="mt-2">Este é um conteúdo de teste estático.</p>
 
   <ul class="mt-4 list-disc list-inside text-sm text-gray-700">
     <li>Teste item 1</li>
@@ -477,6 +475,7 @@
     <li>Teste item 3</li>
   </ul>
 </div>
+
 
 
 
