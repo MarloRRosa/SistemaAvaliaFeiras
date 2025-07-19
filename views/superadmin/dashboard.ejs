@@ -463,31 +463,21 @@
             </div>
 
            <!-- ABA: FEEDBACK -->
+<!-- TESTE DE VISUALIZAÇÃO ABA FEEDBACK -->
 <div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200" id="feedback" role="tabpanel" aria-labelledby="feedback-tab">
-  <h2 class="text-2xl font-bold mb-4">Feedbacks Recebidos</h2>
+  <h2 class="text-2xl font-bold mb-4">🔧 TESTE: Aba Feedback</h2>
 
-  <% if (feedbacks && feedbacks.length > 0) { %>
-    <div class="space-y-4">
-      <% feedbacks.forEach(fb => { %>
-        <div class="border border-gray-200 p-4 rounded-lg shadow-sm">
-          <div class="flex justify-between items-center">
-            <span class="font-semibold text-gray-800"><%= fb.tipo %> - <%= fb.categoria %></span>
-            <span class="text-xs text-gray-500"><%= new Date(fb.criadoEm).toLocaleString('pt-BR') %></span>
-          </div>
-          <p class="mt-2 text-gray-700"><%= fb.mensagem %></p>
-          <% if (fb.nome || fb.email) { %>
-            <p class="mt-2 text-sm text-gray-500">Enviado por: 
-              <%= fb.nome ? fb.nome : 'Anônimo' %>
-              <% if (fb.email) { %> | <%= fb.email %> <% } %>
-            </p>
-          <% } %>
-        </div>
-      <% }) %>
-    </div>
-  <% } else { %>
-    <p class="text-gray-500">Nenhum feedback enviado ainda.</p>
-  <% } %>
+  <p class="text-green-600 font-semibold">✅ A aba está sendo exibida corretamente.</p>
+
+  <p class="mt-2">Este é um conteúdo de teste estático.</p>
+
+  <ul class="mt-4 list-disc list-inside text-sm text-gray-700">
+    <li>Teste item 1</li>
+    <li>Teste item 2</li>
+    <li>Teste item 3</li>
+  </ul>
 </div>
+
 
 
             <!-- Conteúdo da Aba: Visão Geral -->
