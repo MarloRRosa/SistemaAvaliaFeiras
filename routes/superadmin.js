@@ -603,7 +603,10 @@ const mensagens = await Mensagem.find({}).sort({ data: -1 }).lean();
             feedbacks: dataForTab.feedbacks || [],
             query: req.query,
             periodoSelecionado: req.query.periodo || '',
-            categoriaSelecionada: req.query.categoria || 'todos'
+            categoriaSelecionada: req.query.categoria || 'todos',
+            periodoSelecionado: req.query.periodo || '',
+            dataInicioSelecionado: req.query.dataInicio || '',
+            dataFimSelecionado: req.query.dataFim || ''
         });
 
     } catch (err) {

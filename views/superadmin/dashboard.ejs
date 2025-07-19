@@ -493,13 +493,13 @@
     </div>
 
     <!-- Datas Personalizadas -->
-    <div id="datasPersonalizadas" class="<%= req.query.periodo === 'personalizado' ? '' : 'hidden' %>">
-      <label for="dataInicio" class="block text-sm font-medium text-gray-700">De:</label>
-      <input type="date" id="dataInicio" name="dataInicio" value="<%= req.query.dataInicio || '' %>" autocomplete="off" class="block w-full border border-gray-300 rounded p-2">
+    <div id="datasPersonalizadas" class="<%= periodoSelecionado === 'personalizado' ? '' : 'hidden' %>">
+  <label for="dataInicio" class="block text-sm font-medium text-gray-700">De:</label>
+  <input type="date" id="dataInicio" name="dataInicio" value="<%= dataInicioSelecionado %>" autocomplete="off" class="block w-full border border-gray-300 rounded p-2">
 
-      <label for="dataFim" class="block text-sm font-medium text-gray-700 mt-2">Até:</label>
-      <input type="date" id="dataFim" name="dataFim" value="<%= req.query.dataFim || '' %>" autocomplete="off" class="block w-full border border-gray-300 rounded p-2">
-    </div>
+  <label for="dataFim" class="block text-sm font-medium text-gray-700 mt-2">Até:</label>
+  <input type="date" id="dataFim" name="dataFim" value="<%= dataFimSelecionado %>" autocomplete="off" class="block w-full border border-gray-300 rounded p-2">
+</div>
 
     <!-- Botão Filtrar -->
     <div class="w-full sm:w-auto">
