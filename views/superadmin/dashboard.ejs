@@ -471,15 +471,15 @@
     <input type="hidden" name="tab" value="feedback">
 
     <!-- Filtro por Categoria -->
-    <div>
-      <label for="filtroCategoria" class="block text-sm font-medium text-gray-700">Categoria</label>
-      <select id="filtroCategoria" name="categoria" class="mt-1 block w-full border border-gray-300 rounded p-2">
-        <option value="todos" <%= req.query.categoria === 'todos' ? 'selected' : '' %>>Todas</option>
-        <option value="elogio" <%= req.query.categoria === 'elogio' ? 'selected' : '' %>>Elogio</option>
-        <option value="sugestao" <%= req.query.categoria === 'sugestao' ? 'selected' : '' %>>Sugestão</option>
-        <option value="critica" <%= req.query.categoria === 'critica' ? 'selected' : '' %>>Crítica</option>
-      </select>
-    </div>
+   <div class="mb-4">
+  <label for="filtroCategoria" class="block text-sm font-medium text-gray-700">Categoria</label>
+  <select id="filtroCategoria" name="categoria" class="mt-1 block w-full border border-gray-300 rounded p-2">
+    <option value="todos" <%= categoriaSelecionada === 'todos' ? 'selected' : '' %>>Todas</option>
+    <option value="elogio" <%= categoriaSelecionada === 'elogio' ? 'selected' : '' %>>Elogio</option>
+    <option value="sugestao" <%= categoriaSelecionada === 'sugestao' ? 'selected' : '' %>>Sugestão</option>
+    <option value="critica" <%= categoriaSelecionada === 'critica' ? 'selected' : '' %>>Crítica</option>
+  </select>
+</div>
 
     <!-- Filtro por Período -->
     <div>

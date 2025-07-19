@@ -601,7 +601,8 @@ const mensagens = await Mensagem.find({}).sort({ data: -1 }).lean();
             projetosPorEscola: dataForTab.projetosPorEscola,
             mensagens: mensagens || [],
             feedbacks: dataForTab.feedbacks || [],
-            query: req.query
+            query: req.query,
+            categoriaSelecionada: req.query.categoria || 'todos'
         });
 
     } catch (err) {
