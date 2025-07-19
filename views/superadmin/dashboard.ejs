@@ -468,17 +468,25 @@
     <% if (feedbacks && feedbacks.length > 0) { %>
         <ul class="space-y-4">
             <% feedbacks.forEach(fb => { %>
-                <li class="p-4 border rounded shadow-sm bg-white">
-                    <p class="text-gray-800"><strong>Categoria:</strong> <%= fb.categoria %></p>
-                    <p class="text-gray-800"><strong>Tipo:</strong> <%= fb.tipo %></p>
-                    <p class="text-gray-800"><strong>Mensagem:</strong> <%= fb.mensagem %></p>
-                    <% if (fb.nome) { %>
-                        <p class="text-gray-600 text-sm mt-1"><strong>Nome:</strong> <%= fb.nome %></p>
-                    <% } %>
-                    <% if (fb.email) { %>
-                        <p class="text-gray-600 text-sm"><strong>Email:</strong> <%= fb.email %></p>
-                    <% } %>
-                    <p class="text-gray-500 text-sm mt-2"><%= fb.criadoEm.toLocaleString() %></p>
+  <li class="p-4 border rounded shadow-sm bg-white">
+    <p class="text-gray-800"><strong>Categoria:</strong> <%= fb.categoria %></p>
+    <p class="text-gray-800"><strong>Tipo:</strong> <%= fb.tipo %></p>
+    <p class="text-gray-800"><strong>Mensagem:</strong> <%= fb.mensagem %></p>
+    <% if (fb.nome) { %>
+      <p class="text-gray-600 text-sm mt-1"><strong>Nome:</strong> <%= fb.nome %></p>
+    <% } %>
+    <% if (fb.email) { %>
+      <p class="text-gray-600 text-sm"><strong>Email:</strong> <%= fb.email %></p>
+    <% } %>
+
+    <!-- Linha para mostrar a data formatada -->
+    <p class="text-gray-500 text-sm mt-2">
+      <%= new Date(fb.criadoEm).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }) %>
+    </p>
+
+  </li>
+<% }); %>
+
                 </li>
             <% }); %>
         </ul>

@@ -489,7 +489,7 @@ router.get('/dashboard', verificarSuperAdmin, async (req, res) => {
             dataForTab.resumoAvaliadoresPorEscola = resumoAvaliadores;
         } else if (activeTab === 'feedback') {
     dataForTab.feedbacks = await Feedback.find().sort({ criadoEm: -1 }).lean();
-    console.log("🔎 Feedbacks encontrados:", dataForTab.feedbacks);
+    
         }
         else if (activeTab === 'relatorio-projetos') {
     let projetosPorEscola = [];
@@ -563,6 +563,8 @@ criteriosOficiaisProjeto.forEach(crit => {
     dataForTab.projetosPorEscola = projetosPorEscola;
 }
 const mensagens = await Mensagem.find({}).sort({ data: -1 }).lean();
+
+console.log("🔎 Feedbacks encontrados:", dataForTab.feedbacks);
 
         res.render('superadmin/dashboard', {
             titulo: 'Painel Super Admin', 
