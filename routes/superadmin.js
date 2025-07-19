@@ -488,9 +488,35 @@ router.get('/dashboard', verificarSuperAdmin, async (req, res) => {
             }
             dataForTab.resumoAvaliadoresPorEscola = resumoAvaliadores;
         } else if (activeTab === 'feedback') {
-    dataForTab.feedbacks = await Feedback.find().sort({ criadoEm: -1 }).lean();
-    
-        }
+    const { categoria, periodo, dataInicio, dataFim } = req.query;
+    let filtro = {};
+
+    // Filtro por categoria
+    if (categoria && categoria !== 'todos') {
+        filtro.categoria = categoria;
+    }
+
+    // Filtro por período (últimos X dias)
+    if (periodo && periodo !== 'personalizado') {
+        const dias = parseInt(periodo);
+        const dataLimite = new Date();
+        dataLimite.setDate(dataLimite.getDate() - dias);
+        filtro.criadoEm = { $gte: dataLimite };
+    }
+
+    // Filtro por intervalo de datas personalizado
+    if (periodo === 'personalizado' && dataInicio && dataFim) {
+        filtro.criadoEm = {
+            $gte: new Date(dataInicio),
+            $lte: new Date(dataFim + 'T23:59:59')
+        };
+    }
+
+    // Busca os feedbacks com os filtros aplicados
+    const feedbacks = await Feedback.find(filtro).sort({ criadoEm: -1 }).lean();
+    dataForTab.feedbacks = feedbacks;
+}
+
         else if (activeTab === 'relatorio-projetos') {
     let projetosPorEscola = [];
 
@@ -563,8 +589,6 @@ criteriosOficiaisProjeto.forEach(crit => {
     dataForTab.projetosPorEscola = projetosPorEscola;
 }
 const mensagens = await Mensagem.find({}).sort({ data: -1 }).lean();
-
-console.log("🔎 Feedbacks encontrados:", dataForTab.feedbacks);
 
         res.render('superadmin/dashboard', {
             titulo: 'Painel Super Admin', 
