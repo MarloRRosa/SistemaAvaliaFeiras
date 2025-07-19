@@ -464,76 +464,199 @@
 
 <!-- ABA: FEEDBACK -->
 <div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200 <%= activeTab === 'feedback' ? '' : 'hidden' %>" id="feedback-tab" role="tabpanel" aria-labelledby="feedback-tab-button">
-  <h2 class="text-2xl font-bold mb-4">Feedbacks Recebidos</h2>
-
-  <!-- Formulário de Filtro -->
-  <form method="GET" class="mb-6 flex flex-wrap gap-4 items-end">
-    <input type="hidden" name="tab" value="feedback">
-
-    <!-- Filtro por Categoria -->
-   <div class="mb-4">
-  <label for="filtroCategoria" class="block text-sm font-medium text-gray-700">Categoria</label>
-  <select id="filtroCategoria" name="categoria" class="mt-1 block w-full border border-gray-300 rounded p-2">
-    <option value="todos" <%= categoriaSelecionada === 'todos' ? 'selected' : '' %>>Todas</option>
-    <option value="elogio" <%= categoriaSelecionada === 'elogio' ? 'selected' : '' %>>Elogio</option>
-    <option value="sugestao" <%= categoriaSelecionada === 'sugestao' ? 'selected' : '' %>>Sugestão</option>
-    <option value="critica" <%= categoriaSelecionada === 'critica' ? 'selected' : '' %>>Crítica</option>
-  </select>
-</div>
-
-    <!-- Filtro por Período -->
-    <div>
-      <label for="filtroPeriodo" class="block text-sm font-medium text-gray-700">Período</label>
-      <select id="filtroPeriodo" name="periodo" class="mt-1 block w-full border border-gray-300 rounded p-2" onchange="toggleDatasPersonalizadas(this.value)">
-        <option value="">Todos</option>
-        <option value="7" <%= periodoSelecionado === '7' ? 'selected' : '' %>>Últimos 7 dias</option>
-        <option value="30" <%= periodoSelecionado === '30' ? 'selected' : '' %>>Últimos 30 dias</option>
-        <option value="personalizado" <%= periodoSelecionado === 'personalizado' ? 'selected' : '' %>>Personalizado</option>
-      </select>
+  <div class="flex items-center justify-between mb-6">
+    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+      <svg class="w-8 h-8 mr-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+      </svg>
+      Feedbacks Recebidos
+    </h2>
+    <div class="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+      <% if (feedbacks && feedbacks.length > 0) { %>
+        <%= feedbacks.length %> feedback<%= feedbacks.length !== 1 ? 's' : '' %> encontrado<%= feedbacks.length !== 1 ? 's' : '' %>
+      <% } else { %>
+        0 feedbacks
+      <% } %>
     </div>
+  </div>
 
-    <!-- Datas Personalizadas -->
-    <div id="datasPersonalizadas" class="<%= periodoSelecionado === 'personalizado' ? '' : 'hidden' %>">
-  <label for="dataInicio" class="block text-sm font-medium text-gray-700">De:</label>
-  <input type="date" id="dataInicio" name="dataInicio" value="<%= dataInicioSelecionado %>" autocomplete="off" class="block w-full border border-gray-300 rounded p-2">
+  <!-- Formulário de Filtro Melhorado -->
+  <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-100 mb-8 shadow-sm">
+    <h3 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+      <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
+      </svg>
+      Filtros
+    </h3>
+    
+    <form method="GET" class="space-y-4">
+      <input type="hidden" name="tab" value="feedback">
 
-  <label for="dataFim" class="block text-sm font-medium text-gray-700 mt-2">Até:</label>
-  <input type="date" id="dataFim" name="dataFim" value="<%= dataFimSelecionado %>" autocomplete="off" class="block w-full border border-gray-300 rounded p-2">
-</div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Filtro por Categoria -->
+        <div>
+          <label for="filtroCategoria" class="block text-sm font-semibold text-gray-700 mb-2">Categoria</label>
+          <div class="relative">
+            <select id="filtroCategoria" name="categoria" class="w-full appearance-none bg-white border-2 border-gray-200 rounded-lg px-4 py-3 pr-10 text-gray-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200">
+              <option value="todos" <%= categoriaSelecionada === 'todos' ? 'selected' : '' %>>📋 Todas as categorias</option>
+              <option value="elogio" <%= categoriaSelecionada === 'elogio' ? 'selected' : '' %>>👏 Elogios</option>
+              <option value="sugestao" <%= categoriaSelecionada === 'sugestao' ? 'selected' : '' %>>💡 Sugestões</option>
+              <option value="critica" <%= categoriaSelecionada === 'critica' ? 'selected' : '' %>>⚠️ Críticas</option>
+            </select>
+            <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+              <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
 
-    <!-- Botão Filtrar -->
-    <div class="w-full sm:w-auto">
-      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded mt-4 sm:mt-0">Filtrar</button>
-    </div>
-  </form>
+        <!-- Filtro por Período -->
+        <div>
+          <label for="filtroPeriodo" class="block text-sm font-semibold text-gray-700 mb-2">Período</label>
+          <div class="relative">
+            <select id="filtroPeriodo" name="periodo" class="w-full appearance-none bg-white border-2 border-gray-200 rounded-lg px-4 py-3 pr-10 text-gray-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200" onchange="toggleDatasPersonalizadas(this.value)">
+              <option value="">📅 Todos os períodos</option>
+              <option value="7" <%= periodoSelecionado === '7' ? 'selected' : '' %>>📊 Últimos 7 dias</option>
+              <option value="30" <%= periodoSelecionado === '30' ? 'selected' : '' %>>📈 Últimos 30 dias</option>
+              <option value="personalizado" <%= periodoSelecionado === 'personalizado' ? 'selected' : '' %>>🗓️ Período personalizado</option>
+            </select>
+            <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+              <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
 
-  <!-- Lista de Feedbacks -->
+        <!-- Botão Filtrar -->
+        <div class="flex items-end">
+          <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            Filtrar
+          </button>
+        </div>
+      </div>
+
+      <!-- Datas Personalizadas -->
+      <div id="datasPersonalizadas" class="<%= periodoSelecionado === 'personalizado' ? '' : 'hidden' %> mt-4 p-4 bg-white rounded-lg border-2 border-dashed border-blue-300">
+        <h4 class="text-sm font-semibold text-gray-700 mb-3">Selecione o período personalizado:</h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label for="dataInicio" class="block text-sm font-medium text-gray-600 mb-1">Data de início:</label>
+            <input type="date" id="dataInicio" name="dataInicio" value="<%= dataInicioSelecionado %>" autocomplete="off" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200">
+          </div>
+          <div>
+            <label for="dataFim" class="block text-sm font-medium text-gray-600 mb-1">Data de fim:</label>
+            <input type="date" id="dataFim" name="dataFim" value="<%= dataFimSelecionado %>" autocomplete="off" class="w-full border-2 border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200">
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Lista de Feedbacks Melhorada -->
   <% if (feedbacks && feedbacks.length > 0) { %>
-    <ul class="space-y-4">
-      <% feedbacks.forEach(fb => { %>
-        <li class="p-4 border rounded shadow-sm bg-white">
-          <p class="text-gray-800"><strong>Categoria:</strong> <%= fb.categoria %></p>
-          <p class="text-gray-800"><strong>Tipo:</strong> <%= fb.tipo %></p>
-          <p class="text-gray-800"><strong>Mensagem:</strong> <%= fb.mensagem %></p>
+    <div class="space-y-4">
+      <% feedbacks.forEach((fb, index) => { %>
+        <div class="bg-white border-l-4 <%= fb.categoria === 'elogio' ? 'border-green-500' : fb.categoria === 'sugestao' ? 'border-blue-500' : 'border-red-500' %> rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden">
+          <div class="p-6">
+            <div class="flex items-start justify-between mb-4">
+              <div class="flex items-center space-x-3">
+                <div class="flex-shrink-0">
+                  <% if (fb.categoria === 'elogio') { %>
+                    <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                      <span class="text-2xl">👏</span>
+                    </div>
+                  <% } else if (fb.categoria === 'sugestao') { %>
+                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                      <span class="text-2xl">💡</span>
+                    </div>
+                  <% } else { %>
+                    <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                      <span class="text-2xl">⚠️</span>
+                    </div>
+                  <% } %>
+                </div>
+                <div>
+                  <h3 class="text-lg font-semibold text-gray-800 capitalize"><%= fb.categoria %></h3>
+                  <p class="text-sm text-gray-500"><%= fb.tipo %></p>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="text-xs text-gray-400">
+                  #<%= String(index + 1).padStart(3, '0') %>
+                </div>
+                <div class="text-sm text-gray-500 mt-1">
+                  <%= new Date(fb.criadoEm).toLocaleString('pt-BR', { 
+                    timeZone: 'America/Sao_Paulo',
+                    day: '2-digit',
+                    month: '2-digit', 
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  }) %>
+                </div>
+              </div>
+            </div>
 
-          <% if (fb.nome) { %>
-            <p class="text-gray-600 text-sm mt-1"><strong>Nome:</strong> <%= fb.nome %></p>
-          <% } %>
-          <% if (fb.email) { %>
-            <p class="text-gray-600 text-sm"><strong>Email:</strong> <%= fb.email %></p>
-          <% } %>
+            <div class="mb-4">
+              <blockquote class="text-gray-700 text-base leading-relaxed italic border-l-2 border-gray-200 pl-4 py-2 bg-gray-50 rounded-r-lg">
+                "<%= fb.mensagem %>"
+              </blockquote>
+            </div>
 
-          <p class="text-gray-500 text-sm mt-2">
-            <%= new Date(fb.criadoEm).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }) %>
-          </p>
-        </li>
+            <% if (fb.nome || fb.email) { %>
+              <div class="flex flex-wrap items-center gap-4 pt-4 border-t border-gray-100">
+                <% if (fb.nome) { %>
+                  <div class="flex items-center text-sm text-gray-600">
+                    <svg class="w-4 h-4 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    <strong>Nome:</strong>&nbsp;<%= fb.nome %>
+                  </div>
+                <% } %>
+                <% if (fb.email) { %>
+                  <div class="flex items-center text-sm text-gray-600">
+                    <svg class="w-4 h-4 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path>
+                    </svg>
+                    <strong>Email:</strong>&nbsp;<a href="mailto:<%= fb.email %>" class="text-blue-600 hover:text-blue-800 hover:underline"><%= fb.email %></a>
+                  </div>
+                <% } %>
+              </div>
+            <% } %>
+          </div>
+        </div>
       <% }); %>
-    </ul>
+    </div>
   <% } else { %>
-    <p class="text-gray-600">Nenhum feedback enviado ainda.</p>
+    <div class="text-center py-16">
+      <svg class="w-24 h-24 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+      </svg>
+      <h3 class="text-xl font-medium text-gray-500 mb-2">Nenhum feedback encontrado</h3>
+      <p class="text-gray-400 max-w-md mx-auto">
+        Não há feedbacks que correspondam aos filtros selecionados. Tente ajustar os critérios de busca ou aguarde novos feedbacks dos usuários.
+      </p>
+    </div>
   <% } %>
 </div>
 
+<script>
+function toggleDatasPersonalizadas(valor) {
+  const datasPersonalizadas = document.getElementById('datasPersonalizadas');
+  if (valor === 'personalizado') {
+    datasPersonalizadas.classList.remove('hidden');
+    datasPersonalizadas.style.display = 'block';
+  } else {
+    datasPersonalizadas.classList.add('hidden');
+    datasPersonalizadas.style.display = 'none';
+  }
+}
+</script>
             <!-- Conteúdo da Aba: Visão Geral -->
             <div id="visao-geral-tab" class="tab-content <%= activeTab === 'visao-geral' ? '' : 'hidden' %> animate-fade-in-up" style="animation-delay: 0.4s;">
                 <h2 class="text-3xl font-bold text-gray-800 mb-8 flex items-center">
