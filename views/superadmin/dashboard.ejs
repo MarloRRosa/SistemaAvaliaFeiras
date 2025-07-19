@@ -486,9 +486,9 @@
       <label for="filtroPeriodo" class="block text-sm font-medium text-gray-700">Período</label>
       <select id="filtroPeriodo" name="periodo" class="mt-1 block w-full border border-gray-300 rounded p-2" onchange="toggleDatasPersonalizadas(this.value)">
         <option value="">Todos</option>
-        <option value="7" <%= req.query.periodo === '7' ? 'selected' : '' %>>Últimos 7 dias</option>
-        <option value="30" <%= req.query.periodo === '30' ? 'selected' : '' %>>Últimos 30 dias</option>
-        <option value="personalizado" <%= req.query.periodo === 'personalizado' ? 'selected' : '' %>>Personalizado</option>
+        <option value="7" <%= periodoSelecionado === '7' ? 'selected' : '' %>>Últimos 7 dias</option>
+        <option value="30" <%= periodoSelecionado === '30' ? 'selected' : '' %>>Últimos 30 dias</option>
+        <option value="personalizado" <%= periodoSelecionado === 'personalizado' ? 'selected' : '' %>>Personalizado</option>
       </select>
     </div>
 
