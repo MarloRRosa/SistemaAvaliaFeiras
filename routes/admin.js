@@ -2586,10 +2586,10 @@ router.post('/suporte', async (req, res) => {
   let autorId = null;
   let autorTipo = '';
 
-  if (req.session.superadmin) {
+  if (req.session.superadmin && req.session.superadmin._id) {
     autorId = req.session.superadmin._id;
     autorTipo = 'SUPERADM';
-  } else if (req.session.adminEscola) {
+  } else if (req.session.adminEscola && req.session.adminEscola._id) {
     autorId = req.session.adminEscola._id;
     autorTipo = 'ADM';
   } else {
@@ -2598,6 +2598,11 @@ router.post('/suporte', async (req, res) => {
   }
 
   try {
+    console.log('🛠 Dados para salvar mensagem de suporte:', {
+    autorId: autorId?.toString(), // Mostra o ID como string se existir
+    autorTipo,
+    mensagem
+  });
     await Mensagem.create({
       autorId,
       autorTipo,
@@ -2608,11 +2613,10 @@ router.post('/suporte', async (req, res) => {
     res.redirect('/suporte');
   } catch (err) {
     console.error('Erro ao enviar mensagem:', err);
-    req.flash('error_msg', 'Erro ao enviar mensagem.');
+    req.flash('error_msg', 'Erro ao enviar mensagem. Tente novamente.');
     res.redirect('/suporte');
   }
 });
-
 
 router.post('/dashboard/suporte', verificarAdminEscola, async (req, res) => {
   const { mensagem } = req.body;
