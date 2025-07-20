@@ -2583,34 +2583,36 @@ router.post('/suporte', async (req, res) => {
     return res.redirect('/suporte');
   }
 
-  let autorNome = '';
-  let autorEmail = '';
+  let autorId = null;
   let autorTipo = '';
 
   if (req.session.superadmin) {
-    autorNome = req.session.superadmin.nome;
-    autorEmail = req.session.superadmin.email;
+    autorId = req.session.superadmin._id;
     autorTipo = 'SUPERADM';
   } else if (req.session.adminEscola) {
-    autorNome = req.session.adminEscola.nome;
-    autorEmail = req.session.adminEscola.email;
+    autorId = req.session.adminEscola._id;
     autorTipo = 'ADM';
   } else {
     req.flash('error_msg', 'Usuário não autenticado.');
     return res.redirect('/suporte');
   }
 
-  await Mensagem.create({
-    autorNome,
-    autorEmail,
-    autorTipo,
-    mensagem: mensagem,
-    dataEnvio: new Date()
-  });
+  try {
+    await Mensagem.create({
+      autorId,
+      autorTipo,
+      mensagem
+    });
 
-  req.flash('success_msg', 'Mensagem enviada com sucesso.');
-  res.redirect('/suporte');
+    req.flash('success_msg', 'Mensagem enviada com sucesso.');
+    res.redirect('/suporte');
+  } catch (err) {
+    console.error('Erro ao enviar mensagem:', err);
+    req.flash('error_msg', 'Erro ao enviar mensagem.');
+    res.redirect('/suporte');
+  }
 });
+
 
 router.post('/dashboard/suporte', verificarAdminEscola, async (req, res) => {
   const { mensagem } = req.body;
