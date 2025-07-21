@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Mensagem = require('../models/mensagensSuporte');
 const enviarMensagemTelegram = require('../utils/telegram');
+const mongoose = require('mongoose');
 
 // Middleware de verificação de sessão
 function verificarUsuario(req, res, next) {
@@ -50,13 +51,13 @@ router.post('/', verificarUsuario, async (req, res) => {
 
   try {
     const novaMensagem = new Mensagem({
-      autorId: user._id,
-      autorNome: user.nome,
-      autorEmail: user.email,
-      autorTipo: tipo,
-      mensagem,
-      respostaDe: respostaDe || null
-    });
+  autorId: mongoose.Types.ObjectId(user._id || user.id),
+  autorNome: user.nome,
+  autorEmail: user.email,
+  autorTipo: tipo,
+  mensagem,
+  respostaDe: respostaDe || null
+});
 
     await novaMensagem.save();
 
