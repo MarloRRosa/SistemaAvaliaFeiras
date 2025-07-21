@@ -2583,30 +2583,31 @@ router.post('/suporte', async (req, res) => {
     return res.redirect('/suporte');
   }
 
-  let autorNome = '';
-  let autorEmail = '';
-  let autorTipo = '';
+  let autorId = '';
+let autorNome = '';
+let autorEmail = '';
+let autorTipo = '';
 
   if (req.session.superadmin) {
-    autorNome = req.session.superadmin.nome;
-    autorEmail = req.session.superadmin.email;
-    autorTipo = 'SUPERADM';
-  } else if (req.session.adminEscola) {
-    autorNome = req.session.adminEscola.nome;
-    autorEmail = req.session.adminEscola.email;
-    autorTipo = 'ADM';
-  } else {
-    req.flash('error_msg', 'Usuário não autenticado.');
-    return res.redirect('/suporte');
-  }
+  autorNome = req.session.superadmin.nome;
+  autorEmail = req.session.superadmin.email;
+  autorTipo = 'SUPERADM';
+} else if (req.session.adminEscola) {
+  autorId = req.session.adminEscola._id;
+  autorTipo = 'ADM';
+} else {
+  req.flash('error_msg', 'Usuário não autenticado.');
+  return res.redirect('/suporte');
+}
 
   await Mensagem.create({
-    autorNome,
-    autorEmail,
-    autorTipo,
-    mensagem: mensagem,
-    dataEnvio: new Date()
-  });
+  autorId,
+  autorNome,
+  autorEmail,
+  autorTipo,
+  mensagem,
+  dataEnvio: new Date()
+});
 
   req.flash('success_msg', 'Mensagem enviada com sucesso.');
   res.redirect('/suporte');
@@ -2620,6 +2621,7 @@ router.post('/dashboard/suporte', verificarAdminEscola, async (req, res) => {
     req.flash('error_msg', 'Por favor, escreva uma mensagem.');
     return res.redirect('/admin/dashboard?tab=suporte');
   }
+  console.log('Sessão atual:', req.session);
 
   try {
     const novaMensagem = new Mensagem({
