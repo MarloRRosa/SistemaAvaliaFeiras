@@ -3,103 +3,95 @@ const router = express.Router();
 const Mensagem = require('../models/mensagensSuporte');
 const enviarMensagemTelegram = require('../utils/telegram');
 
-// Middleware simples para verificar se usuário está logado
-function verificarLogin(req, res, next) {
-  if (!req.user || !req.user._id) {
-    req.flash('error_msg', 'Você precisa estar logado para acessar essa página.');
-    return res.redirect('/login'); // ajuste essa rota se necessário
+// Middleware de verificação de sessão
+function verificarUsuario(req, res, next) {
+  if (req.session.superadmin || req.session.adminEscola) {
+    return next();
   }
-  next();
+  req.flash('error_msg', 'Usuário não autenticado.');
+  return res.redirect('/login');
 }
 
-// Tela do ADM – suporte
-router.get('/', verificarLogin, async (req, res) => {
+// Rota principal do suporte – para ADM ou SuperADM
+router.get('/', verificarUsuario, async (req, res) => {
+  const user = req.session.superadmin || req.session.adminEscola;
+  const filtro = { autorEmail: user.email };
+
   try {
-    const mensagens = await Mensagem.find({ autorId: req.user._id }).sort({ dataEnvio: -1 });
-    res.render('suporte/adm', { mensagens });
+    const mensagens = await Mensagem.find({
+      $or: [
+        { autorEmail: user.email },
+        { autorTipo: user.tipo === 'SUPERADM' ? 'ADM' : 'SUPERADM' } // opcional: mostrar também as respostas
+      ]
+    }).sort({ dataEnvio: 1 });
+
+    res.render(user.tipo === 'SUPERADM' ? 'suporte/superadm' : 'suporte/adm', {
+      mensagens,
+      usuario: user
+    });
   } catch (err) {
-    console.error('Erro ao buscar mensagens do suporte:', err);
+    console.error('Erro ao buscar mensagens:', err);
     req.flash('error_msg', 'Erro ao carregar mensagens.');
     res.redirect('/');
   }
 });
 
-// Enviar nova dúvida (ADM)
-router.post('/', verificarLogin, async (req, res) => {
-  const { mensagem } = req.body;
+// Enviar nova mensagem (ADM ou SuperADM)
+router.post('/', verificarUsuario, async (req, res) => {
+  const { mensagem, respostaDe } = req.body;
 
-  if (!mensagem || mensagem.trim() === '') {
+  if (!mensagem) {
     req.flash('error_msg', 'Mensagem não pode estar vazia.');
     return res.redirect('/suporte');
   }
 
+  const user = req.session.superadmin || req.session.adminEscola;
+  const tipo = req.session.superadmin ? 'SUPERADM' : 'ADM';
+
   try {
-    const nova = new Mensagem({
-      autorId: req.user._id,
-      autorTipo: 'ADM',
-      mensagem: mensagem.trim()
+    const novaMensagem = new Mensagem({
+      autorId: user._id,
+      autorNome: user.nome,
+      autorEmail: user.email,
+      autorTipo: tipo,
+      mensagem,
+      respostaDe: respostaDe || null
     });
 
-    console.log('Salvando mensagem suporte:', {
-      autorId: req.user._id.toString(),
-      autorTipo: 'ADM',
-      mensagem: mensagem.trim()
-    });
+    await novaMensagem.save();
 
-    await nova.save();
-
-    // Enviar notificação para o Super ADM no Telegram
-    const texto = `📩 Nova dúvida recebida:
-Escola: ${req.user.escola || 'Desconhecida'}
-Usuário: ${req.user.email}
-Mensagem: ${mensagem.trim()}`;
-    await enviarMensagemTelegram(texto);
+    // Notificação para o Telegram (apenas se for ADM enviando)
+    if (tipo === 'ADM') {
+      const texto = `📩 Nova dúvida recebida:
+Escola: ${user.escola || 'Não informada'}
+Usuário: ${user.email}
+Mensagem: ${mensagem}`;
+      await enviarMensagemTelegram(texto);
+    }
 
     req.flash('success_msg', 'Mensagem enviada com sucesso.');
     res.redirect('/suporte');
   } catch (err) {
-    console.error('Erro ao enviar mensagem de suporte:', err);
-    req.flash('error_msg', 'Erro ao enviar mensagem. Tente novamente.');
+    console.error('Erro ao enviar mensagem:', err);
+    req.flash('error_msg', 'Erro ao enviar mensagem.');
     res.redirect('/suporte');
   }
 });
 
-// Super ADM – ver todas as mensagens
-router.get('/admin', verificarLogin, async (req, res) => {
+// (Opcional) Página exclusiva para SuperADM visualizar mensagens agrupadas
+router.get('/admin', verificarUsuario, async (req, res) => {
+  if (!req.session.superadmin) {
+    req.flash('error_msg', 'Acesso restrito ao Super ADM.');
+    return res.redirect('/');
+  }
+
   try {
     const mensagens = await Mensagem.find().populate('autorId').sort({ dataEnvio: -1 });
     res.render('suporte/superadm', { mensagens });
   } catch (err) {
-    console.error('Erro ao carregar mensagens para Super ADM:', err);
+    console.error('Erro ao buscar mensagens:', err);
     req.flash('error_msg', 'Erro ao carregar mensagens.');
     res.redirect('/');
-  }
-});
-
-// Super ADM responde (opcional)
-router.post('/responder/:id', verificarLogin, async (req, res) => {
-  const { resposta } = req.body;
-
-  if (!resposta || resposta.trim() === '') {
-    req.flash('error_msg', 'Resposta não pode estar vazia.');
-    return res.redirect('/suporte/admin');
-  }
-
-  try {
-    const respostaMsg = new Mensagem({
-      autorId: req.user._id,
-      autorTipo: 'SUPERADM',
-      mensagem: resposta.trim()
-    });
-
-    await respostaMsg.save();
-
-    req.flash('success_msg', 'Resposta enviada com sucesso.');
-    res.redirect('/suporte/admin');
-  } catch (err) {
-    console.error('Erro ao enviar resposta do Super ADM:', err);
-    req.flash('error_msg', 'Erro ao enviar resposta. Tente novamente.');
-    res.redirect('/suporte/admin');
   }
 });
 

@@ -1170,27 +1170,35 @@ function toggleDatasPersonalizadas(valor) {
     Mensagens de Administradores
   </h2>
 
-  <% if (mensagens.length === 0) { %>
+  <% if (!mensagens || mensagens.length === 0) { %>
     <div class="bg-yellow-100 text-yellow-800 p-4 rounded shadow-sm">
       Nenhuma mensagem recebida até o momento.
     </div>
   <% } else { %>
-    <div class="space-y-4 max-h-[500px] overflow-y-auto">
+    <div class="space-y-4 max-h-[500px] overflow-y-auto pr-1">
       <% mensagens.forEach(msg => { %>
-        <div class="bg-white border border-gray-300 p-4 rounded-lg shadow-sm">
+        <div class="bg-white border border-gray-200 p-4 rounded-lg shadow-sm">
           <div class="flex justify-between items-center mb-2">
             <div>
               <strong class="text-blue-800"><%= msg.autorNome || 'Administrador' %></strong>
-              <span class="text-sm text-gray-500 ml-2"><%= msg.dataEnvio.toLocaleString('pt-BR') %></span>
+              <% if (msg.autorEmail) { %>
+                <span class="text-xs text-gray-500 ml-2"><%= msg.autorEmail %></span>
+              <% } %>
+              <span class="text-sm text-gray-400 ml-2"><%= msg.dataEnvio ? new Date(msg.dataEnvio).toLocaleString('pt-BR') : '' %></span>
             </div>
           </div>
-          <p class="text-gray-800 whitespace-pre-line"><%= msg.mensagem %></p>
+          <p class="text-gray-800 whitespace-pre-line text-sm leading-relaxed"><%= msg.mensagem %></p>
+
+          <% if (msg.respostaDe) { %>
+            <div class="mt-2 text-xs text-gray-500 italic">
+              Resposta à mensagem: <%= msg.respostaDe %>
+            </div>
+          <% } %>
         </div>
       <% }) %>
     </div>
   <% } %>
 </div>
-
 
     <!-- Modal para Confirmação de Redefinição de Senha -->
     <div id="resetAdminPasswordModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 modern-modal hidden flex items-center justify-center z-50 p-4">

@@ -1051,36 +1051,46 @@
 
             <!-- ABA MENSAGEM-->
           <div class="tab-content p-4 bg-white rounded-lg shadow-inner border border-gray-200 hidden max-w-4xl mx-auto" id="tab-suporte" role="tabpanel" aria-labelledby="tab-suporte-tab">
-    <h2 class="text-xl font-bold text-gray-800 mb-3 flex items-center">
-        <i class="fas fa-comments text-blue-600 mr-2 text-lg"></i>
-        Tira-Dúvidas com Super ADM
-    </h2>
-    
-    <form action="/admin/suporte" method="POST" class="mb-4">
-        <textarea name="mensagem" rows="2" class="w-full p-2 text-sm rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none" placeholder="Digite sua dúvida..." required></textarea>
-        <button type="submit" class="mt-2 bg-blue-600 text-white px-3 py-1.5 text-sm rounded hover:bg-blue-700 transition">
-            Enviar
-        </button>
-    </form>
+  <h2 class="text-xl font-bold text-gray-800 mb-3 flex items-center">
+    <i class="fas fa-comments text-blue-600 mr-2 text-lg"></i>
+    Tira-Dúvidas com Super ADM
+  </h2>
 
-    <div class="space-y-2 max-h-64 overflow-y-auto bg-gray-50 p-3 rounded border border-gray-200">
-        <% if (mensagens && mensagens.length > 0) { %>
-            <% mensagens.forEach(msg => { %>
-                <div class="p-2 text-sm rounded <%= msg.autorTipo === 'ADM' ? 'bg-blue-100 text-blue-900' : 'bg-white text-gray-800 shadow-sm' %>">
-                    <div class="flex justify-between items-start mb-1">
-                        <strong class="text-xs font-semibold"><%= msg.autorTipo === 'ADM' ? 'Você' : 'Super ADM' %></strong>
-                        <small class="text-xs text-gray-500 flex-shrink-0 ml-2"><%= msg.dataEnvio ? msg.dataEnvio.toLocaleString('pt-BR', {day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'}) : '' %></small>
-                    </div>
-                    <p class="text-sm leading-relaxed"><%= msg.mensagem %></p>
-                </div>
-            <% }) %>
-        <% } else { %>
-            <div class="bg-yellow-50 text-yellow-700 p-3 rounded text-sm text-center">
-                Nenhuma mensagem enviada ainda.
-            </div>
-        <% } %>
-    </div>
+  <!-- Formulário de envio -->
+  <form action="/suporte" method="POST" class="mb-4">
+    <textarea name="mensagem" rows="2" class="w-full p-2 text-sm rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none" placeholder="Digite sua dúvida..." required></textarea>
+    <button type="submit" class="mt-2 bg-blue-600 text-white px-3 py-1.5 text-sm rounded hover:bg-blue-700 transition">
+      Enviar
+    </button>
+  </form>
+
+  <!-- Lista de mensagens -->
+  <div class="space-y-2 max-h-64 overflow-y-auto bg-gray-50 p-3 rounded border border-gray-200">
+    <% if (mensagens && mensagens.length > 0) { %>
+      <% mensagens.forEach(msg => { %>
+        <div class="p-2 text-sm rounded 
+          <%= msg.autorTipo === 'ADM' ? 'bg-blue-100 text-blue-900' : 'bg-green-100 text-green-900' %>">
+          <div class="flex justify-between items-start mb-1">
+            <strong class="text-xs font-semibold">
+              <%= msg.autorTipo === 'ADM' ? 'Você' : 'Super ADM' %>
+            </strong>
+            <small class="text-xs text-gray-500 ml-2">
+              <%= msg.dataEnvio ? new Date(msg.dataEnvio).toLocaleString('pt-BR', {
+                day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'
+              }) : '' %>
+            </small>
+          </div>
+          <p class="text-sm leading-relaxed whitespace-pre-line"><%= msg.mensagem %></p>
+        </div>
+      <% }) %>
+    <% } else { %>
+      <div class="bg-yellow-50 text-yellow-700 p-3 rounded text-sm text-center">
+        Nenhuma mensagem enviada ainda.
+      </div>
+    <% } %>
+  </div>
 </div>
+
           <!-- FIM ABA: MENSAGEM -->
 
     <!-- Modals -->

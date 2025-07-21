@@ -2583,39 +2583,33 @@ router.post('/suporte', async (req, res) => {
     return res.redirect('/suporte');
   }
 
-  let autorId = null;
+  let autorNome = '';
+  let autorEmail = '';
   let autorTipo = '';
 
-  if (req.session.superadmin && req.session.superadmin._id) {
-    autorId = req.session.superadmin._id;
+  if (req.session.superadmin) {
+    autorNome = req.session.superadmin.nome;
+    autorEmail = req.session.superadmin.email;
     autorTipo = 'SUPERADM';
-  } else if (req.session.adminEscola && req.session.adminEscola._id) {
-    autorId = req.session.adminEscola._id;
+  } else if (req.session.adminEscola) {
+    autorNome = req.session.adminEscola.nome;
+    autorEmail = req.session.adminEscola.email;
     autorTipo = 'ADM';
   } else {
     req.flash('error_msg', 'Usuário não autenticado.');
     return res.redirect('/suporte');
   }
 
-  try {
-    console.log('🛠 Dados para salvar mensagem de suporte:', {
-    autorId: autorId?.toString(), // Mostra o ID como string se existir
+  await Mensagem.create({
+    autorNome,
+    autorEmail,
     autorTipo,
-    mensagem
+    mensagem: mensagem,
+    dataEnvio: new Date()
   });
-    await Mensagem.create({
-      autorId,
-      autorTipo,
-      mensagem
-    });
 
-    req.flash('success_msg', 'Mensagem enviada com sucesso.');
-    res.redirect('/suporte');
-  } catch (err) {
-    console.error('Erro ao enviar mensagem:', err);
-    req.flash('error_msg', 'Erro ao enviar mensagem. Tente novamente.');
-    res.redirect('/suporte');
-  }
+  req.flash('success_msg', 'Mensagem enviada com sucesso.');
+  res.redirect('/suporte');
 });
 
 router.post('/dashboard/suporte', verificarAdminEscola, async (req, res) => {
