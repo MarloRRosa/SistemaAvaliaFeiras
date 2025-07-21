@@ -51,7 +51,7 @@ router.post('/', verificarUsuario, async (req, res) => {
 
   try {
     const novaMensagem = new Mensagem({
-  autorId: mongoose.Types.ObjectId(user._id || user.id),
+  autorId: new mongoose.Types.ObjectId(user._id || user.id),
   autorNome: user.nome,
   autorEmail: user.email,
   autorTipo: tipo,
