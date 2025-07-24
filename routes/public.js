@@ -5,6 +5,7 @@ const router = express.Router();
 const SolicitacaoAcesso = require('../models/SolicitacaoAcesso');
 const nodemailer = require('nodemailer');
 require('dotenv').config();
+const Feedback = require('../models/Feedback');
 
 // Configuração do Nodemailer
 const transporter = nodemailer.createTransport({
@@ -176,5 +177,50 @@ router.get('/termos-de-uso', (req, res) => {
         layout: 'layouts/public'
     });
 });
+
+
+router.post('/feedback', async (req, res) => {
+  const { tipo, mensagem, categoria, nome, email } = req.body;
+
+  try {
+    const novoFeedback = new Feedback({
+      tipo: tipo || 'Index',
+      mensagem,
+      categoria,
+      nome: nome?.trim() || '',
+      email: email?.trim() || '',
+      dataEnvio: new Date()
+    });
+
+    await novoFeedback.save();
+
+    // (Opcional) Enviar e-mail para o super admin
+    if (process.env.SUPER_ADMIN_EMAIL) {
+      try {
+        await transporter.sendMail({
+          from: `"Sistema Avalia" <${process.env.EMAIL_SENDER_ADDRESS}>`,
+          to: process.env.SUPER_ADMIN_EMAIL,
+          subject: 'Novo Feedback recebido pelo site',
+          html: `
+            <p><strong>Categoria:</strong> ${categoria || 'Não informada'}</p>
+            <p><strong>Mensagem:</strong> ${mensagem}</p>
+            <p><strong>Nome:</strong> ${nome || 'Anônimo'}</p>
+            <p><strong>Email:</strong> ${email || 'Não informado'}</p>
+          `
+        });
+      } catch (err) {
+        console.error('Erro ao enviar e-mail de feedback:', err);
+      }
+    }
+
+    req.flash('success_msg', 'Feedback enviado com sucesso!');
+    res.redirect('/');
+  } catch (error) {
+    console.error('Erro ao enviar feedback:', error);
+    req.flash('error_msg', 'Erro ao enviar feedback. Tente novamente.');
+    res.redirect('/');
+  }
+});
+
 
 module.exports = router;
