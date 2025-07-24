@@ -5,4 +5,4 @@ Disallow: /superadmin/
 Disallow: /suporte/
 Allow: /
 
-Sitemap: https://sistema-avalia.onrender.com/sitemap.xml
+Sitemap: https://sistemaavalia.onrender.com/sitemap.xml
