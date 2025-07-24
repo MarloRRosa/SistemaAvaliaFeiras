@@ -3,17 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema Avalia - Plataforma Gratuita para Avaliação de Feiras Escolares</title>
-  <meta name="description" content="Sistema Avalia: plataforma online gratuita para avaliação de projetos escolares, feiras de ciências e eventos educacionais. Gerencie categorias, avaliadores, rankings e relatórios com segurança e praticidade.">
+  <title>Sistema Avalia - Gestão de Avaliações Escolares</title>
+  <meta name="description" content="Plataforma online para avaliação de projetos escolares, feiras de ciências e mostras pedagógicas. Organize critérios, avaliadores e relatórios com eficiência e segurança.">
   <meta name="robots" content="index, follow">
   <meta name="author" content="Marlo Rosa">
-  <meta property="og:title" content="Sistema Avalia - Avaliação Escolar Inteligente">
-  <meta property="og:description" content="Transforme a forma como sua escola realiza feiras e avalia projetos. Plataforma moderna, gratuita e eficiente.">
+  <meta property="og:title" content="Sistema Avalia - Avaliação Inteligente para Escolas">
+  <meta property="og:description" content="Sistema profissional para feiras escolares. Organize avaliações, projetos, rankings e relatórios com segurança e praticidade.">
   <meta property="og:url" content="https://sistemaavalia.onrender.com/">
   <meta property="og:type" content="website">
   <meta property="og:image" content="https://sistemaavalia.onrender.com/assets/preview.png">
   <link rel="canonical" href="https://sistemaavalia.onrender.com/">
-  <link rel="icon" href="/favicon.ico" type="image/x-icon">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
@@ -21,7 +20,7 @@
       font-family: 'Inter', sans-serif;
       margin: 0;
       padding: 0;
-      background: #f8f9fc;
+      background: #f9fafb;
       color: #1f2937;
     }
 
@@ -42,10 +41,6 @@
       gap: 0.5rem;
     }
 
-    nav .logo i {
-      font-size: 1.5rem;
-    }
-
     nav .links a {
       color: white;
       text-decoration: none;
@@ -59,30 +54,31 @@
     }
 
     .hero {
-      padding: 4rem 2rem;
-      text-align: center;
+      padding: 5rem 2rem;
       background: #1e40af;
       color: white;
+      text-align: center;
     }
 
     .hero h1 {
-      font-size: 2.5rem;
+      font-size: 2.75rem;
       margin-bottom: 1rem;
+      font-weight: 800;
     }
 
     .hero p {
-      font-size: 1.125rem;
-      margin-bottom: 2rem;
+      font-size: 1.2rem;
+      max-width: 700px;
+      margin: 0 auto 2rem;
     }
 
     .cta-buttons a {
       display: inline-block;
-      margin: 0 0.5rem;
+      margin: 0.5rem;
       padding: 0.75rem 1.5rem;
       border-radius: 6px;
       font-weight: 600;
       text-decoration: none;
-      transition: background 0.3s;
     }
 
     .btn-primary {
@@ -103,63 +99,49 @@
       background: #e0e7ff;
     }
 
-    section.stats, section.features, section.how-it-works, section.final-cta {
+    section.content {
       padding: 4rem 2rem;
-      max-width: 1000px;
+      max-width: 1100px;
       margin: 0 auto;
     }
 
-    .stats {
-      display: flex;
-      justify-content: space-between;
-      gap: 1.5rem;
+    .section-title {
       text-align: center;
-    }
-
-    .stat {
-      flex: 1;
-    }
-
-    .stat span {
-      display: block;
-    }
-
-    .stat .number {
       font-size: 2rem;
-      font-weight: 700;
-      color: #1e40af;
+      margin-bottom: 2rem;
     }
 
-    .features-grid {
+    .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 2rem;
     }
 
-    .feature {
+    .card {
       background: white;
       padding: 1.5rem;
       border-radius: 8px;
       border: 1px solid #e5e7eb;
       box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      text-align: center;
     }
 
-    .feature i {
+    .card i {
       font-size: 2rem;
       color: #2563eb;
-      margin-bottom: 1rem;
+      margin-bottom: 0.75rem;
     }
 
-    .final-cta {
-      background: #eff6ff;
-      text-align: center;
+    .card h3 {
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
     }
 
     footer {
       background: #1e293b;
       color: #94a3b8;
       text-align: center;
-      padding: 2rem;
+      padding: 2rem 1rem;
       font-size: 0.875rem;
     }
 
@@ -188,64 +170,57 @@
   </nav>
 
   <section class="hero">
-    <h1>Transforme Avaliações em Experiências</h1>
-    <p>Plataforma gratuita para feiras escolares, com inteligência, segurança e organização.</p>
+    <h1>Gestão Profissional de Avaliações Escolares</h1>
+    <p>Organize suas feiras científicas e mostras pedagógicas com tecnologia, clareza e eficiência. Desenvolvido para escolas públicas e privadas.</p>
     <div class="cta-buttons">
-      <a href="/solicitar-acesso" class="btn-primary">Começar Agora</a>
+      <a href="/solicitar-acesso" class="btn-primary">Solicitar Acesso</a>
       <a href="/login/demo" class="btn-secondary">Ver Demonstração</a>
     </div>
   </section>
 
-  <section class="stats">
-    <div class="stat">
-      <span class="number">100%</span>
-      <span>Gratuito</span>
-    </div>
-    <div class="stat">
-      <span class="number">3</span>
-      <span>Passos Simples</span>
-    </div>
-    <div class="stat">
-      <span class="number">∞</span>
-      <span>Projetos</span>
-    </div>
-    <div class="stat">
-      <span class="number">24/7</span>
-      <span>Disponível</span>
-    </div>
-  </section>
-
-  <section class="features">
-    <h2>Funcionalidades</h2>
-    <div class="features-grid">
-      <div class="feature">
+  <section class="content">
+    <h2 class="section-title">Funcionalidades que facilitam sua rotina</h2>
+    <div class="grid">
+      <div class="card">
         <i class="fas fa-school"></i>
         <h3>Gestão Escolar</h3>
-        <p>Cadastre escolas, avaliadores e projetos com total controle e facilidade.</p>
+        <p>Cadastro de escolas, turmas, categorias, projetos e avaliadores com fluxo simples e rápido.</p>
       </div>
-      <div class="feature">
-        <i class="fas fa-user-shield"></i>
-        <h3>Acesso Seguro</h3>
-        <p>Autenticação por PIN exclusivo com criptografia e privacidade.</p>
+      <div class="card">
+        <i class="fas fa-user-lock"></i>
+        <h3>PIN Seguro</h3>
+        <p>Avaliadores acessam com PIN criptografado, sem necessidade de criar senha.</p>
       </div>
-      <div class="feature">
-        <i class="fas fa-chart-line"></i>
-        <h3>Relatórios Avançados</h3>
-        <p>Gere relatórios em tempo real para análise e tomada de decisão.</p>
+      <div class="card">
+        <i class="fas fa-trophy"></i>
+        <h3>Rankings e Resultados</h3>
+        <p>Classificações automáticas por turma e categoria com critérios personalizados.</p>
+      </div>
+      <div class="card">
+        <i class="fas fa-file-alt"></i>
+        <h3>Relatórios PDF</h3>
+        <p>Relatórios por avaliador, por projeto e por categoria prontos para impressão.</p>
+      </div>
+      <div class="card">
+        <i class="fas fa-cloud"></i>
+        <h3>Sistema Online</h3>
+        <p>Acesse de qualquer lugar, sem precisar instalar nada. Interface leve e intuitiva.</p>
+      </div>
+      <div class="card">
+        <i class="fas fa-lightbulb"></i>
+        <h3>Flexível e Escalável</h3>
+        <p>Ideal para escolas de todos os portes. Suporte a múltiplas feiras e edições anuais.</p>
       </div>
     </div>
   </section>
 
-  <section class="final-cta">
-    <h2>Pronto para Começar?</h2>
-    <p>Transforme sua feira escolar com o Sistema Avalia. É gratuito e pronto para sua escola.</p>
-    <div class="cta-buttons">
-      <a href="/solicitar-acesso" class="btn-primary">Solicitar Acesso</a>
-    </div>
+  <section class="content" style="background: #f1f5f9;">
+    <h2 class="section-title">Tecnologia pensada para a educação</h2>
+    <p style="max-width: 700px; margin: 0 auto; text-align: center;">Sistema Avalia foi projetado por educadores para atender às reais necessidades de coordenações, professores e avaliadores em eventos escolares. Em breve, novas funcionalidades e planos para instituições privadas.</p>
   </section>
 
   <footer>
-    <p>&copy; 2025 Sistema Avalia - Desenvolvido por Marlo Rosa</p>
+    <p>&copy; 2025 Sistema Avalia - Desenvolvido com responsabilidade educacional por Marlo Rosa</p>
     <div>
       <a href="/politica-privacidade">Política de Privacidade</a>
       •
