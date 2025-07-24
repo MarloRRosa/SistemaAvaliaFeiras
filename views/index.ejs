@@ -14,146 +14,492 @@
   <meta property="og:image" content="https://sistemaavalia.onrender.com/assets/preview.png">
   <link rel="canonical" href="https://sistemaavalia.onrender.com/">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: 'Inter', sans-serif;
+    * {
       margin: 0;
       padding: 0;
-      background: #f9fafb;
-      color: #1f2937;
+      box-sizing: border-box;
     }
 
+    :root {
+      --primary-600: #2563eb;
+      --primary-700: #1d4ed8;
+      --primary-800: #1e40af;
+      --primary-900: #1e3a8a;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+      --gray-900: #111827;
+      --blue-50: #eff6ff;
+      --blue-100: #dbeafe;
+      --slate-800: #1e293b;
+      --slate-400: #94a3b8;
+      --emerald-500: #10b981;
+      --amber-500: #f59e0b;
+      --purple-600: #9333ea;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, var(--gray-50) 0%, #ffffff 100%);
+      color: var(--gray-800);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Navigation */
     nav {
-      background: #1e3a8a;
+      background: linear-gradient(135deg, var(--primary-900) 0%, var(--primary-800) 100%);
+      backdrop-filter: blur(20px);
       color: white;
-      padding: 1rem 2rem;
+      padding: 1.25rem 2rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      box-shadow: 0 4px 20px rgba(30, 58, 138, 0.15);
+      position: relative;
+      overflow: hidden;
+    }
+
+    nav::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(45deg, rgba(37, 99, 235, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
+      pointer-events: none;
     }
 
     nav .logo {
-      font-size: 1.5rem;
-      font-weight: 700;
+      font-size: 1.75rem;
+      font-weight: 800;
       display: flex;
       align-items: center;
+      gap: 0.75rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    nav .logo i {
+      background: linear-gradient(135deg, #60a5fa, #3b82f6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-size: 2rem;
+    }
+
+    nav .links {
+      display: flex;
       gap: 0.5rem;
+      position: relative;
+      z-index: 1;
     }
 
     nav .links a {
-      color: white;
+      color: rgba(255, 255, 255, 0.9);
       text-decoration: none;
-      margin-left: 1.5rem;
+      padding: 0.75rem 1.25rem;
       font-weight: 500;
-      transition: color 0.2s;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    nav .links a::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+    }
+
+    nav .links a:hover::before {
+      transform: translateX(0);
     }
 
     nav .links a:hover {
-      color: #cbd5e1;
+      color: white;
+      transform: translateY(-1px);
     }
 
+    /* Hero Section */
     .hero {
-      padding: 5rem 2rem;
-      background: #1e40af;
+      padding: 8rem 2rem 6rem;
+      background: linear-gradient(135deg, var(--primary-800) 0%, var(--primary-900) 50%, #1e1b4b 100%);
       color: white;
       text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: 
+        radial-gradient(circle at 25% 25%, rgba(59, 130, 246, 0.2) 0%, transparent 50%),
+        radial-gradient(circle at 75% 75%, rgba(147, 51, 234, 0.2) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
     }
 
     .hero h1 {
-      font-size: 2.75rem;
-      margin-bottom: 1rem;
+      font-size: 3.5rem;
+      margin-bottom: 1.5rem;
       font-weight: 800;
+      line-height: 1.1;
+      background: linear-gradient(135deg, #ffffff 0%, #e0e7ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
     .hero p {
-      font-size: 1.2rem;
+      font-size: 1.3rem;
       max-width: 700px;
-      margin: 0 auto 2rem;
+      margin: 0 auto 3rem;
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 400;
+    }
+
+    .cta-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
     }
 
     .cta-buttons a {
-      display: inline-block;
-      margin: 0.5rem;
-      padding: 0.75rem 1.5rem;
-      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 1rem 2rem;
+      border-radius: 12px;
       font-weight: 600;
       text-decoration: none;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
     }
 
     .btn-primary {
-      background: #2563eb;
+      background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 100%);
       color: white;
+      box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
     }
 
     .btn-primary:hover {
-      background: #1d4ed8;
+      transform: translateY(-2px);
+      box-shadow: 0 12px 35px rgba(37, 99, 235, 0.4);
     }
 
     .btn-secondary {
-      background: white;
-      color: #1e3a8a;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      color: var(--primary-800);
+      border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
     .btn-secondary:hover {
-      background: #e0e7ff;
+      background: white;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(255, 255, 255, 0.2);
     }
 
+    /* Content Sections */
     section.content {
-      padding: 4rem 2rem;
-      max-width: 1100px;
+      padding: 6rem 2rem;
+      max-width: 1200px;
       margin: 0 auto;
+      position: relative;
     }
 
     .section-title {
       text-align: center;
-      font-size: 2rem;
-      margin-bottom: 2rem;
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: var(--gray-900);
+      position: relative;
+    }
+
+    .section-subtitle {
+      text-align: center;
+      font-size: 1.1rem;
+      color: var(--gray-600);
+      margin-bottom: 4rem;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
       gap: 2rem;
+      margin-top: 3rem;
     }
 
     .card {
       background: white;
-      padding: 1.5rem;
-      border-radius: 8px;
-      border: 1px solid #e5e7eb;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      padding: 2.5rem 2rem;
+      border-radius: 16px;
+      border: 1px solid var(--gray-200);
+      box-shadow: 0 4px 25px rgba(0, 0, 0, 0.08);
       text-align: center;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
     }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(135deg, var(--primary-600), var(--purple-600));
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+    }
+
+    .card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+    }
+
+    .card-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 1.5rem;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .card:nth-child(1) .card-icon { background: linear-gradient(135deg, #dbeafe, #bfdbfe); }
+    .card:nth-child(2) .card-icon { background: linear-gradient(135deg, #d1fae5, #a7f3d0); }
+    .card:nth-child(3) .card-icon { background: linear-gradient(135deg, #fef3c7, #fde68a); }
+    .card:nth-child(4) .card-icon { background: linear-gradient(135deg, #fce7f3, #fbcfe8); }
+    .card:nth-child(5) .card-icon { background: linear-gradient(135deg, #ede9fe, #ddd6fe); }
+    .card:nth-child(6) .card-icon { background: linear-gradient(135deg, #fef2f2, #fecaca); }
 
     .card i {
       font-size: 2rem;
-      color: #2563eb;
-      margin-bottom: 0.75rem;
+      color: var(--primary-600);
     }
+
+    .card:nth-child(2) i { color: var(--emerald-500); }
+    .card:nth-child(3) i { color: var(--amber-500); }
+    .card:nth-child(4) i { color: #ec4899; }
+    .card:nth-child(5) i { color: var(--purple-600); }
+    .card:nth-child(6) i { color: #ef4444; }
 
     .card h3 {
-      font-size: 1.25rem;
-      margin-bottom: 0.5rem;
+      font-size: 1.4rem;
+      margin-bottom: 1rem;
+      font-weight: 600;
+      color: var(--gray-900);
     }
 
-    footer {
-      background: #1e293b;
-      color: #94a3b8;
+    .card p {
+      color: var(--gray-600);
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+
+    /* About Section */
+    .about-section {
+      background: linear-gradient(135deg, var(--blue-50) 0%, #ffffff 100%);
+      border-radius: 24px;
+      margin: 4rem 0;
+      padding: 4rem 3rem;
       text-align: center;
-      padding: 2rem 1rem;
-      font-size: 0.875rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .about-section::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(37, 99, 235, 0.03) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .about-section h2 {
+      font-size: 2.2rem;
+      margin-bottom: 1.5rem;
+      color: var(--gray-900);
+      position: relative;
+      z-index: 1;
+    }
+
+    .about-section p {
+      font-size: 1.1rem;
+      max-width: 700px;
+      margin: 0 auto;
+      color: var(--gray-600);
+      line-height: 1.7;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Footer */
+    footer {
+      background: linear-gradient(135deg, var(--slate-800) 0%, var(--gray-900) 100%);
+      color: var(--slate-400);
+      text-align: center;
+      padding: 3rem 2rem 2rem;
+      margin-top: 4rem;
+      position: relative;
+    }
+
+    footer::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.3), transparent);
+    }
+
+    footer p {
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
     }
 
     footer a {
       color: #60a5fa;
       text-decoration: none;
-      margin: 0 0.5rem;
+      margin: 0 0.75rem;
+      transition: color 0.2s ease;
     }
 
     footer a:hover {
+      color: #3b82f6;
       text-decoration: underline;
     }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      nav {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1.5rem;
+      }
+
+      nav .links {
+        gap: 0.25rem;
+      }
+
+      nav .links a {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+      }
+
+      .hero {
+        padding: 4rem 1.5rem 3rem;
+      }
+
+      .hero h1 {
+        font-size: 2.5rem;
+      }
+
+      .hero p {
+        font-size: 1.1rem;
+      }
+
+      .cta-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .cta-buttons a {
+        width: 100%;
+        max-width: 300px;
+        justify-content: center;
+      }
+
+      section.content {
+        padding: 4rem 1.5rem;
+      }
+
+      .section-title {
+        font-size: 2rem;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+
+      .card {
+        padding: 2rem 1.5rem;
+      }
+
+      .about-section {
+        padding: 3rem 2rem;
+        margin: 2rem 0;
+      }
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .card {
+      animation: fadeInUp 0.6s ease forwards;
+    }
+
+    .card:nth-child(1) { animation-delay: 0.1s; }
+    .card:nth-child(2) { animation-delay: 0.2s; }
+    .card:nth-child(3) { animation-delay: 0.3s; }
+    .card:nth-child(4) { animation-delay: 0.4s; }
+    .card:nth-child(5) { animation-delay: 0.5s; }
+    .card:nth-child(6) { animation-delay: 0.6s; }
   </style>
 </head>
 <body>
@@ -162,65 +508,92 @@
       <i class="fas fa-graduation-cap"></i> Sistema Avalia
     </div>
     <div class="links">
-      <a href="/login/demo">Demo</a>
-      <a href="/solicitar-acesso">Solicitar Acesso</a>
-      <a href="/admin/login">Admin</a>
-      <a href="/avaliador/login">Avaliador</a>
+      <a href="/login/demo"><i class="fas fa-play-circle"></i> Demo</a>
+      <a href="/solicitar-acesso"><i class="fas fa-key"></i> Solicitar Acesso</a>
+      <a href="/admin/login"><i class="fas fa-user-shield"></i> Admin</a>
+      <a href="/avaliador/login"><i class="fas fa-user-check"></i> Avaliador</a>
     </div>
   </nav>
 
   <section class="hero">
-    <h1>Gestão Profissional de Avaliações Escolares</h1>
-    <p>Organize suas feiras científicas e mostras pedagógicas com tecnologia, clareza e eficiência. Desenvolvido para escolas públicas e privadas.</p>
-    <div class="cta-buttons">
-      <a href="/solicitar-acesso" class="btn-primary">Solicitar Acesso</a>
-      <a href="/login/demo" class="btn-secondary">Ver Demonstração</a>
+    <div class="hero-content">
+      <h1>Gestão Profissional de Avaliações Escolares</h1>
+      <p>Organize suas feiras científicas e mostras pedagógicas com tecnologia de ponta, transparência e máxima eficiência. Desenvolvido especialmente para instituições de ensino públicas e privadas.</p>
+      <div class="cta-buttons">
+        <a href="/solicitar-acesso" class="btn-primary">
+          <i class="fas fa-rocket"></i> Solicitar Acesso
+        </a>
+        <a href="/login/demo" class="btn-secondary">
+          <i class="fas fa-eye"></i> Ver Demonstração
+        </a>
+      </div>
     </div>
   </section>
 
   <section class="content">
     <h2 class="section-title">Funcionalidades que facilitam sua rotina</h2>
+    <p class="section-subtitle">Descubra como o Sistema Avalia pode transformar a gestão de eventos educacionais na sua instituição</p>
+    
     <div class="grid">
       <div class="card">
-        <i class="fas fa-school"></i>
-        <h3>Gestão Escolar</h3>
-        <p>Cadastro de escolas, turmas, categorias, projetos e avaliadores com fluxo simples e rápido.</p>
+        <div class="card-icon">
+          <i class="fas fa-school"></i>
+        </div>
+        <h3>Gestão Escolar Completa</h3>
+        <p>Cadastro intuitivo de escolas, turmas, categorias, projetos e avaliadores com fluxo otimizado e interface moderna.</p>
       </div>
+      
       <div class="card">
-        <i class="fas fa-user-lock"></i>
-        <h3>PIN Seguro</h3>
-        <p>Avaliadores acessam com PIN criptografado, sem necessidade de criar senha.</p>
+        <div class="card-icon">
+          <i class="fas fa-user-lock"></i>
+        </div>
+        <h3>Segurança Avançada</h3>
+        <p>Sistema de PIN com criptografia de ponta para avaliadores, eliminando a necessidade de senhas complexas.</p>
       </div>
+      
       <div class="card">
-        <i class="fas fa-trophy"></i>
-        <h3>Rankings e Resultados</h3>
-        <p>Classificações automáticas por turma e categoria com critérios personalizados.</p>
+        <div class="card-icon">
+          <i class="fas fa-trophy"></i>
+        </div>
+        <h3>Rankings Inteligentes</h3>
+        <p>Classificações automáticas e personalizáveis por turma e categoria com critérios flexíveis e justos.</p>
       </div>
+      
       <div class="card">
-        <i class="fas fa-file-alt"></i>
-        <h3>Relatórios PDF</h3>
-        <p>Relatórios por avaliador, por projeto e por categoria prontos para impressão.</p>
+        <div class="card-icon">
+          <i class="fas fa-file-alt"></i>
+        </div>
+        <h3>Relatórios Profissionais</h3>
+        <p>Documentos em PDF com design profissional, prontos para apresentação e arquivo institucional.</p>
       </div>
+      
       <div class="card">
-        <i class="fas fa-cloud"></i>
-        <h3>Sistema Online</h3>
-        <p>Acesse de qualquer lugar, sem precisar instalar nada. Interface leve e intuitiva.</p>
+        <div class="card-icon">
+          <i class="fas fa-cloud"></i>
+        </div>
+        <h3>Plataforma Online</h3>
+        <p>Acesso universal via navegador, sem instalações. Interface responsiva e experiência otimizada.</p>
       </div>
+      
       <div class="card">
-        <i class="fas fa-lightbulb"></i>
-        <h3>Flexível e Escalável</h3>
-        <p>Ideal para escolas de todos os portes. Suporte a múltiplas feiras e edições anuais.</p>
+        <div class="card-icon">
+          <i class="fas fa-lightbulb"></i>
+        </div>
+        <h3>Escalabilidade Total</h3>
+        <p>Perfeito para instituições de qualquer porte, com suporte a múltiplas feiras e eventos simultâneos.</p>
       </div>
     </div>
   </section>
 
-  <section class="content" style="background: #f1f5f9;">
-    <h2 class="section-title">Tecnologia pensada para a educação</h2>
-    <p style="max-width: 700px; margin: 0 auto; text-align: center;">Sistema Avalia foi projetado por educadores para atender às reais necessidades de coordenações, professores e avaliadores em eventos escolares. Em breve, novas funcionalidades e planos para instituições privadas.</p>
+  <section class="content">
+    <div class="about-section">
+      <h2>Tecnologia pensada para a educação</h2>
+      <p>O Sistema Avalia foi meticulosamente desenvolvido por educadores experientes para atender às necessidades reais de coordenações pedagógicas, professores e avaliadores em eventos escolares. Nossa plataforma combina simplicidade operacional com robustez técnica, oferecendo uma solução completa e confiável para sua instituição.</p>
+    </div>
   </section>
 
   <footer>
-    <p>&copy; 2025 Sistema Avalia - Desenvolvido com responsabilidade educacional por Marlo Rosa</p>
+    <p>&copy; 2025 Sistema Avalia - Desenvolvido com excelência e responsabilidade educacional por Marlo Rosa</p>
     <div>
       <a href="/politica-privacidade">Política de Privacidade</a>
       •
