@@ -15,7 +15,7 @@
   <meta property="og:image" content="https://sistemaavalia.onrender.com/assets/preview.png">
   <link rel="canonical" href="https://sistemaavalia.onrender.com/">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
@@ -43,6 +43,9 @@
       --emerald-500: #10b981;
       --amber-500: #f59e0b;
       --purple-600: #9333ea;
+      --purple-700: #7c3aed;
+      --indigo-600: #4f46e5;
+      --teal-500: #14b8a6;
     }
 
     body {
@@ -55,39 +58,33 @@
       overflow-x: hidden;
     }
 
-    /* Navigation */
+    /* Navigation with glassmorphism effect */
     nav {
-      background: linear-gradient(135deg, var(--primary-900) 0%, var(--primary-800) 100%);
+      background: rgba(30, 58, 138, 0.95);
       backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       color: white;
-      padding: 1.25rem 2rem;
+      padding: 1.5rem 2rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 0 4px 20px rgba(30, 58, 138, 0.15);
-      position: relative;
-      overflow: hidden;
-    }
-
-    nav::before {
-      content: '';
-      position: absolute;
+      box-shadow: 0 8px 32px rgba(30, 58, 138, 0.2);
+      position: sticky;
       top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(45deg, rgba(37, 99, 235, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
-      pointer-events: none;
+      z-index: 1000;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     nav .logo {
-      font-size: 1.75rem;
-      font-weight: 800;
+      font-size: 1.8rem;
+      font-weight: 900;
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      position: relative;
-      z-index: 1;
+      background: linear-gradient(135deg, #ffffff 0%, #dbeafe 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
     nav .logo i {
@@ -95,14 +92,13 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      font-size: 2rem;
+      font-size: 2.2rem;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
     }
 
     nav .links {
       display: flex;
-      gap: 0.5rem;
-      position: relative;
-      z-index: 1;
+      gap: 0.25rem;
     }
 
     nav .links a {
@@ -110,37 +106,24 @@
       text-decoration: none;
       padding: 0.75rem 1.25rem;
       font-weight: 500;
-      border-radius: 8px;
-      transition: all 0.3s ease;
+      border-radius: 12px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
-      overflow: hidden;
-    }
-
-    nav .links a::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(255, 255, 255, 0.1);
-      transform: translateX(-100%);
-      transition: transform 0.3s ease;
-    }
-
-    nav .links a:hover::before {
-      transform: translateX(0);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     nav .links a:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
       color: white;
-      transform: translateY(-1px);
     }
 
-    /* Hero Section */
+    /* Enhanced Hero Section */
     .hero {
-      padding: 8rem 2rem 6rem;
-      background: linear-gradient(135deg, var(--primary-800) 0%, var(--primary-900) 50%, #1e1b4b 100%);
+      padding: 10rem 2rem 8rem;
+      background: linear-gradient(135deg, #0f172a 0%, var(--primary-900) 40%, #1e1b4b 100%);
       color: white;
       text-align: center;
       position: relative;
@@ -155,40 +138,65 @@
       right: 0;
       bottom: 0;
       background-image: 
-        radial-gradient(circle at 25% 25%, rgba(59, 130, 246, 0.2) 0%, transparent 50%),
-        radial-gradient(circle at 75% 75%, rgba(147, 51, 234, 0.2) 0%, transparent 50%);
+        radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(147, 51, 234, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(16, 185, 129, 0.2) 0%, transparent 50%);
+      animation: gradientShift 8s ease-in-out infinite;
+    }
+
+    @keyframes gradientShift {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
       pointer-events: none;
     }
 
     .hero-content {
       position: relative;
       z-index: 1;
-      max-width: 900px;
+      max-width: 1000px;
       margin: 0 auto;
     }
 
     .hero h1 {
-      font-size: 3.5rem;
-      margin-bottom: 1.5rem;
-      font-weight: 800;
+      font-size: 4rem;
+      margin-bottom: 2rem;
+      font-weight: 900;
       line-height: 1.1;
-      background: linear-gradient(135deg, #ffffff 0%, #e0e7ff 100%);
+      background: linear-gradient(135deg, #ffffff 0%, #e0e7ff 50%, #dbeafe 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      animation: titleGlow 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes titleGlow {
+      from { filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.3)); }
+      to { filter: drop-shadow(0 0 30px rgba(147, 51, 234, 0.4)); }
     }
 
     .hero p {
-      font-size: 1.3rem;
-      max-width: 700px;
-      margin: 0 auto 3rem;
+      font-size: 1.4rem;
+      max-width: 800px;
+      margin: 0 auto 3.5rem;
       color: rgba(255, 255, 255, 0.9);
       font-weight: 400;
+      line-height: 1.7;
     }
 
     .cta-buttons {
       display: flex;
-      gap: 1rem;
+      gap: 1.5rem;
       justify-content: center;
       flex-wrap: wrap;
     }
@@ -196,82 +204,88 @@
     .cta-buttons a {
       display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
-      padding: 1rem 2rem;
-      border-radius: 12px;
-      font-weight: 600;
+      gap: 0.75rem;
+      padding: 1.25rem 2.5rem;
+      border-radius: 16px;
+      font-weight: 700;
+      font-size: 1.1rem;
       text-decoration: none;
-      transition: all 0.3s ease;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
       overflow: hidden;
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 100%);
+      background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 50%, var(--purple-600) 100%);
       color: white;
-      box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
+      box-shadow: 0 10px 40px rgba(37, 99, 235, 0.4);
+      border: 2px solid rgba(255, 255, 255, 0.1);
     }
 
     .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 35px rgba(37, 99, 235, 0.4);
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 20px 60px rgba(37, 99, 235, 0.5);
     }
 
     .btn-secondary {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(10px);
-      color: var(--primary-800);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      color: white;
+      border: 2px solid rgba(255, 255, 255, 0.3);
     }
 
     .btn-secondary:hover {
-      background: white;
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 20px 60px rgba(255, 255, 255, 0.2);
     }
 
-    /* Content Sections */
+    /* Enhanced Content Sections */
     section.content {
-      padding: 6rem 2rem;
-      max-width: 1200px;
+      padding: 8rem 2rem;
+      max-width: 1300px;
       margin: 0 auto;
       position: relative;
     }
 
     .section-title {
       text-align: center;
-      font-size: 2.5rem;
-      font-weight: 700;
-      margin-bottom: 1rem;
+      font-size: 3rem;
+      font-weight: 800;
+      margin-bottom: 1.5rem;
       color: var(--gray-900);
-      position: relative;
+      background: linear-gradient(135deg, var(--gray-900) 0%, var(--primary-700) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
     .section-subtitle {
       text-align: center;
-      font-size: 1.1rem;
+      font-size: 1.2rem;
       color: var(--gray-600);
-      margin-bottom: 4rem;
-      max-width: 600px;
+      margin-bottom: 5rem;
+      max-width: 700px;
       margin-left: auto;
       margin-right: auto;
+      line-height: 1.7;
     }
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-      gap: 2rem;
-      margin-top: 3rem;
+      grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+      gap: 2.5rem;
+      margin-top: 4rem;
     }
 
     .card {
       background: white;
-      padding: 2.5rem 2rem;
-      border-radius: 16px;
+      padding: 3rem 2.5rem;
+      border-radius: 24px;
       border: 1px solid var(--gray-200);
-      box-shadow: 0 4px 25px rgba(0, 0, 0, 0.08);
-      text-align: center;
-      transition: all 0.3s ease;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+      text-align: left;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
       overflow: hidden;
     }
@@ -282,41 +296,78 @@
       top: 0;
       left: 0;
       right: 0;
-      height: 4px;
+      height: 5px;
       background: linear-gradient(135deg, var(--primary-600), var(--purple-600));
       transform: scaleX(0);
-      transition: transform 0.3s ease;
+      transition: transform 0.4s ease;
+    }
+
+    .card::after {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(135deg, var(--primary-600), var(--purple-600), var(--teal-500));
+      border-radius: 24px;
+      z-index: -1;
+      opacity: 0;
+      transition: opacity 0.4s ease;
     }
 
     .card:hover::before {
       transform: scaleX(1);
     }
 
+    .card:hover::after {
+      opacity: 0.1;
+    }
+
     .card:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+      transform: translateY(-12px) scale(1.02);
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15);
     }
 
     .card-icon {
-      width: 80px;
-      height: 80px;
-      margin: 0 auto 1.5rem;
-      border-radius: 20px;
+      width: 90px;
+      height: 90px;
+      margin-bottom: 2rem;
+      border-radius: 24px;
       display: flex;
       align-items: center;
       justify-content: center;
       position: relative;
+      background: linear-gradient(135deg, var(--blue-50), var(--blue-100));
     }
 
-    .card:nth-child(1) .card-icon { background: linear-gradient(135deg, #dbeafe, #bfdbfe); }
-    .card:nth-child(2) .card-icon { background: linear-gradient(135deg, #d1fae5, #a7f3d0); }
-    .card:nth-child(3) .card-icon { background: linear-gradient(135deg, #fef3c7, #fde68a); }
-    .card:nth-child(4) .card-icon { background: linear-gradient(135deg, #fce7f3, #fbcfe8); }
-    .card:nth-child(5) .card-icon { background: linear-gradient(135deg, #ede9fe, #ddd6fe); }
-    .card:nth-child(6) .card-icon { background: linear-gradient(135deg, #fef2f2, #fecaca); }
+    .card:nth-child(1) .card-icon { 
+      background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+      box-shadow: 0 8px 32px rgba(37, 99, 235, 0.2);
+    }
+    .card:nth-child(2) .card-icon { 
+      background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+      box-shadow: 0 8px 32px rgba(16, 185, 129, 0.2);
+    }
+    .card:nth-child(3) .card-icon { 
+      background: linear-gradient(135deg, #fef3c7, #fde68a);
+      box-shadow: 0 8px 32px rgba(245, 158, 11, 0.2);
+    }
+    .card:nth-child(4) .card-icon { 
+      background: linear-gradient(135deg, #fce7f3, #fbcfe8);
+      box-shadow: 0 8px 32px rgba(236, 72, 153, 0.2);
+    }
+    .card:nth-child(5) .card-icon { 
+      background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+      box-shadow: 0 8px 32px rgba(147, 51, 234, 0.2);
+    }
+    .card:nth-child(6) .card-icon { 
+      background: linear-gradient(135deg, #fef2f2, #fecaca);
+      box-shadow: 0 8px 32px rgba(239, 68, 68, 0.2);
+    }
 
     .card i {
-      font-size: 2rem;
+      font-size: 2.5rem;
       color: var(--primary-600);
     }
 
@@ -327,27 +378,29 @@
     .card:nth-child(6) i { color: #ef4444; }
 
     .card h3 {
-      font-size: 1.4rem;
+      font-size: 1.5rem;
       margin-bottom: 1rem;
-      font-weight: 600;
+      font-weight: 700;
       color: var(--gray-900);
     }
 
     .card p {
       color: var(--gray-600);
-      font-size: 1rem;
-      line-height: 1.6;
+      font-size: 1.1rem;
+      line-height: 1.7;
     }
 
-    /* About Section */
+    /* Enhanced About Section */
     .about-section {
-      background: linear-gradient(135deg, var(--blue-50) 0%, #ffffff 100%);
-      border-radius: 24px;
-      margin: 4rem 0;
-      padding: 4rem 3rem;
+      background: linear-gradient(135deg, var(--blue-50) 0%, rgba(255, 255, 255, 0.8) 100%);
+      backdrop-filter: blur(20px);
+      border-radius: 32px;
+      margin: 6rem 0;
+      padding: 5rem 4rem;
       text-align: center;
       position: relative;
       overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
     .about-section::before {
@@ -357,158 +410,276 @@
       left: -50%;
       width: 200%;
       height: 200%;
-      background: radial-gradient(circle, rgba(37, 99, 235, 0.03) 0%, transparent 70%);
-      pointer-events: none;
+      background: radial-gradient(circle, rgba(37, 99, 235, 0.05) 0%, transparent 70%);
+      animation: rotate 20s linear infinite;
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
     }
 
     .about-section h2 {
-      font-size: 2.2rem;
-      margin-bottom: 1.5rem;
+      font-size: 2.5rem;
+      margin-bottom: 2rem;
       color: var(--gray-900);
       position: relative;
       z-index: 1;
+      font-weight: 800;
     }
 
     .about-section p {
-      font-size: 1.1rem;
-      max-width: 700px;
+      font-size: 1.2rem;
+      max-width: 800px;
       margin: 0 auto;
       color: var(--gray-600);
-      line-height: 1.7;
+      line-height: 1.8;
       position: relative;
       z-index: 1;
     }
 
-    /* Footer */
-    footer {
-      background: linear-gradient(135deg, var(--slate-800) 0%, var(--gray-900) 100%);
-      color: var(--slate-400);
+    /* Enhanced Contact Section */
+    .contato-section {
+      background: linear-gradient(135deg, var(--gray-100) 0%, white 100%);
+      padding: 6rem 2rem;
       text-align: center;
-      padding: 3rem 2rem 2rem;
-      margin-top: 4rem;
+      border-radius: 32px;
+      margin: 4rem 0;
       position: relative;
+      overflow: hidden;
     }
 
-    footer::before {
+    .contato-section::before {
       content: '';
       position: absolute;
       top: 0;
       left: 0;
       right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.3), transparent);
+      bottom: 0;
+      background: linear-gradient(45deg, rgba(37, 99, 235, 0.02) 0%, rgba(147, 51, 234, 0.02) 100%);
     }
 
-    footer p {
-      margin-bottom: 1rem;
-      font-size: 0.95rem;
+    .contato-section h2 {
+      font-size: 2.5rem;
+      margin-bottom: 1.5rem;
+      font-weight: 800;
+      color: var(--gray-900);
+      position: relative;
+      z-index: 1;
     }
 
-    footer a {
-      color: #60a5fa;
+    .contato-section p {
+      max-width: 700px;
+      margin: 0 auto 3rem;
+      color: var(--gray-600);
+      font-size: 1.2rem;
+      line-height: 1.7;
+      position: relative;
+      z-index: 1;
+    }
+
+    .contato-buttons {
+      display: flex;
+      gap: 1.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
+    }
+
+    .contato-buttons button {
+      padding: 1rem 2rem;
+      border-radius: 16px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-feedback { 
+      background: linear-gradient(135deg, var(--gray-700), var(--gray-800)); 
+      color: white; 
+    }
+    .btn-feedback:hover { 
+      background: linear-gradient(135deg, var(--gray-800), var(--gray-900)); 
+      transform: translateY(-3px);
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-contato { 
+      background: linear-gradient(135deg, var(--purple-600), var(--purple-700)); 
+      color: white; 
+    }
+    .btn-contato:hover { 
+      background: linear-gradient(135deg, var(--purple-700), #6d28d9); 
+      transform: translateY(-3px);
+      box-shadow: 0 12px 35px rgba(147, 51, 234, 0.3);
+    }
+
+    /* Enhanced Modal */
+    .modal-bg {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(8px);
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      animation: modalFadeIn 0.3s ease;
+    }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal {
+      background: white;
+      padding: 3rem 2.5rem;
+      border-radius: 24px;
+      max-width: 550px;
+      width: 90%;
+      position: relative;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      animation: modalSlideIn 0.3s ease;
+    }
+
+    @keyframes modalSlideIn {
+      from { 
+        opacity: 0;
+        transform: translateY(-50px) scale(0.95);
+      }
+      to { 
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .modal h3 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      color: var(--gray-900);
+      text-align: center;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1.5rem;
+      font-size: 1.8rem;
+      cursor: pointer;
+      color: var(--gray-400);
+      transition: all 0.2s ease;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+
+    .modal-close:hover {
+      color: var(--gray-600);
+      background: var(--gray-100);
+    }
+
+    .modal form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .modal input, .modal select, .modal textarea {
+      width: 100%;
+      padding: 1rem;
+      border: 2px solid var(--gray-200);
+      border-radius: 12px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      font-family: inherit;
+    }
+
+    .modal input:focus, .modal select:focus, .modal textarea:focus {
+      outline: none;
+      border-color: var(--primary-600);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .modal label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--gray-700);
+    }
+
+    .modal button[type="submit"] {
+      background: linear-gradient(135deg, var(--primary-600), var(--primary-700));
+      color: white;
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 1rem;
+    }
+
+    .modal button[type="submit"]:hover {
+      background: linear-gradient(135deg, var(--primary-700), var(--primary-800));
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
+    }
+
+    /* Contact Modal Specific Styles */
+    .contact-info {
+      background: linear-gradient(135deg, var(--blue-50), var(--purple-50));
+      padding: 2rem;
+      border-radius: 16px;
+      margin: 1rem 0;
+    }
+
+    .contact-info p {
+      margin: 1rem 0;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .contact-info i {
+      font-size: 1.3rem;
+      color: var(--primary-600);
+      width: 30px;
+    }
+
+    .contact-info a {
+      color: var(--primary-600);
       text-decoration: none;
-      margin: 0 0.75rem;
+      font-weight: 600;
       transition: color 0.2s ease;
     }
 
-    footer a:hover {
-      color: #3b82f6;
+    .contact-info a:hover {
+      color: var(--primary-700);
       text-decoration: underline;
     }
 
-    /* Responsive Design */
-    @media (max-width: 768px) {
-      nav {
-        flex-direction: column;
-        gap: 1rem;
-        padding: 1.5rem;
-      }
-
-      nav .links {
-        gap: 0.25rem;
-      }
-
-      nav .links a {
-        padding: 0.5rem 1rem;
-        font-size: 0.9rem;
-      }
-
-      .hero {
-        padding: 4rem 1.5rem 3rem;
-      }
-
-      .hero h1 {
-        font-size: 2.5rem;
-      }
-
-      .hero p {
-        font-size: 1.1rem;
-      }
-
-      .cta-buttons {
-        flex-direction: column;
-        align-items: center;
-      }
-
-      .cta-buttons a {
-        width: 100%;
-        max-width: 300px;
-        justify-content: center;
-      }
-
-      section.content {
-        padding: 4rem 1.5rem;
-      }
-
-      .section-title {
-        font-size: 2rem;
-      }
-
-      .grid {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-      }
-
-      .card {
-        padding: 2rem 1.5rem;
-      }
-
-      .about-section {
-        padding: 3rem 2rem;
-        margin: 2rem 0;
-      }
-    }
-
-    /* Animations */
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .card {
-      animation: fadeInUp 0.6s ease forwards;
-    }
-
-    .card:nth-child(1) { animation-delay: 0.1s; }
-    .card:nth-child(2) { animation-delay: 0.2s; }
-    .card:nth-child(3) { animation-delay: 0.3s; }
-    .card:nth-child(4) { animation-delay: 0.4s; }
-    .card:nth-child(5) { animation-delay: 0.5s; }
-    .card:nth-child(6) { animation-delay: 0.6s; }
-
-    /* CTA Sections */
+    /* Enhanced CTA Section */
     .cta-section {
-      background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 100%);
-      border-radius: 20px;
-      padding: 3rem 2rem;
+      background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 50%, var(--purple-600) 100%);
+      border-radius: 32px;
+      padding: 4rem 3rem;
       text-align: center;
-      margin: 4rem 0;
+      margin: 6rem 0;
       color: white;
       position: relative;
       overflow: hidden;
@@ -521,151 +692,451 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
-      pointer-events: none;
+      background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.15) 0%, transparent 50%);
+      animation: pulse 4s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
     }
 
     .cta-section h3 {
-      font-size: 1.8rem;
-      margin-bottom: 1rem;
-      font-weight: 700;
+      font-size: 2.2rem;
+      margin-bottom: 1.5rem;
+      font-weight: 800;
       position: relative;
       z-index: 1;
     }
 
     .cta-section p {
-      font-size: 1.1rem;
-      margin-bottom: 2rem;
+      font-size: 1.2rem;
+      margin-bottom: 2.5rem;
       opacity: 0.95;
-      max-width: 500px;
+      max-width: 600px;
       margin-left: auto;
       margin-right: auto;
       position: relative;
       z-index: 1;
+      line-height: 1.6;
     }
 
     .cta-section .btn-white {
       background: white;
       color: var(--primary-700);
-      padding: 1rem 2.5rem;
-      border-radius: 12px;
+      padding: 1.25rem 3rem;
+      border-radius: 16px;
       text-decoration: none;
-      font-weight: 600;
+      font-weight: 700;
+      font-size: 1.1rem;
       display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.75rem;
       transition: all 0.3s ease;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
       position: relative;
       z-index: 1;
     }
 
     .cta-section .btn-white:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
     }
 
+    /* Enhanced Floating CTA */
     .floating-cta {
       position: fixed;
       bottom: 30px;
       right: 30px;
       background: linear-gradient(135deg, var(--primary-600), var(--primary-700));
       color: white;
-      padding: 1rem 1.5rem;
+      padding: 1.25rem 2rem;
       border-radius: 50px;
       text-decoration: none;
-      font-weight: 600;
-      box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
+      font-weight: 700;
+      box-shadow: 0 12px 40px rgba(37, 99, 235, 0.4);
       transition: all 0.3s ease;
       z-index: 1000;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      animation: pulse 2s infinite;
+      gap: 0.75rem;
+      animation: floatingPulse 3s infinite;
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 255, 255, 0.1);
     }
 
     .floating-cta:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 12px 35px rgba(37, 99, 235, 0.4);
+      transform: translateY(-5px) scale(1.05);
+      box-shadow: 0 20px 60px rgba(37, 99, 235, 0.5);
     }
 
-    @keyframes pulse {
-      0%, 100% { box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3); }
-      50% { box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5); }
+    @keyframes floatingPulse {
+      0%, 100% { 
+        box-shadow: 0 12px 40px rgba(37, 99, 235, 0.4);
+        transform: translateY(0);
+      }
+      50% { 
+        box-shadow: 0 15px 50px rgba(37, 99, 235, 0.6);
+        transform: translateY(-2px);
+      }
+    }
+
+    /* Enhanced Footer */
+    footer {
+      background: linear-gradient(135deg, var(--slate-800) 0%, var(--gray-900) 100%);
+      color: var(--slate-400);
+      text-align: center;
+      padding: 4rem 2rem 3rem;
+      margin-top: 6rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    footer::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.5), rgba(147, 51, 234, 0.5), transparent);
+    }
+
+    footer::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at 50% 0%, rgba(37, 99, 235, 0.05) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    footer p {
+      margin-bottom: 1.5rem;
+      font-size: 1rem;
+      position: relative;
+      z-index: 1;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.6;
+    }
+
+    footer div {
+      position: relative;
+      z-index: 1;
+    }
+
+    footer a {
+      color: #60a5fa;
+      text-decoration: none;
+      margin: 0 1rem;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+    }
+
+    footer a:hover {
+      color: #3b82f6;
+      background: rgba(96, 165, 250, 0.1);
+      text-decoration: none;
+    }
+
+    /* Animations and Transitions */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .card {
+      animation: fadeInUp 0.8s ease forwards;
+      opacity: 0;
+    }
+
+    .card:nth-child(1) { animation-delay: 0.1s; }
+    .card:nth-child(2) { animation-delay: 0.2s; }
+    .card:nth-child(3) { animation-delay: 0.3s; }
+    .card:nth-child(4) { animation-delay: 0.4s; }
+    .card:nth-child(5) { animation-delay: 0.5s; }
+    .card:nth-child(6) { animation-delay: 0.6s; }
+
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+      .grid {
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 2rem;
+      }
+      
+      .hero h1 {
+        font-size: 3.5rem;
+      }
+      
+      section.content {
+        padding: 6rem 2rem;
+      }
     }
 
     @media (max-width: 768px) {
+      nav {
+        flex-direction: column;
+        gap: 1.5rem;
+        padding: 2rem 1.5rem;
+      }
+
+      nav .links {
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      nav .links a {
+        padding: 0.75rem 1.25rem;
+        font-size: 0.95rem;
+      }
+
+      .hero {
+        padding: 6rem 1.5rem 5rem;
+      }
+
+      .hero h1 {
+        font-size: 2.8rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .hero p {
+        font-size: 1.2rem;
+        margin-bottom: 2.5rem;
+      }
+
+      .cta-buttons {
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .cta-buttons a {
+        width: 100%;
+        max-width: 320px;
+        justify-content: center;
+        padding: 1.25rem 2rem;
+      }
+
+      section.content {
+        padding: 5rem 1.5rem;
+      }
+
+      .section-title {
+        font-size: 2.2rem;
+      }
+
+      .section-subtitle {
+        font-size: 1.1rem;
+        margin-bottom: 3rem;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+
+      .card {
+        padding: 2.5rem 2rem;
+        text-align: center;
+      }
+
+      .card-icon {
+        margin: 0 auto 1.5rem;
+      }
+
+      .about-section {
+        padding: 4rem 2rem;
+        margin: 4rem 0;
+      }
+
+      .about-section h2 {
+        font-size: 2rem;
+      }
+
+      .about-section p {
+        font-size: 1.1rem;
+      }
+
+      .contato-section {
+        padding: 4rem 1.5rem;
+      }
+
+      .contato-section h2 {
+        font-size: 2rem;
+      }
+
+      .contato-buttons {
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .contato-buttons button {
+        width: 100%;
+        max-width: 280px;
+        justify-content: center;
+      }
+
+      .cta-section {
+        padding: 3rem 2rem;
+        margin: 4rem 0;
+      }
+
+      .cta-section h3 {
+        font-size: 1.8rem;
+      }
+
+      .cta-section p {
+        font-size: 1.1rem;
+      }
+
       .floating-cta {
         bottom: 20px;
         right: 20px;
-        padding: 0.8rem 1.2rem;
+        padding: 1rem 1.5rem;
         font-size: 0.9rem;
+        gap: 0.5rem;
       }
-      
-      .cta-section {
-        padding: 2.5rem 1.5rem;
-        margin: 3rem 0;
+
+      .modal {
+        margin: 1rem;
+        padding: 2.5rem 2rem;
+        max-width: none;
+        width: calc(100% - 2rem);
       }
-      
-      .cta-section h3 {
+
+      .modal h3 {
         font-size: 1.5rem;
       }
+
+      .contact-info {
+        padding: 1.5rem;
+      }
+
+      .contact-info p {
+        font-size: 1rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+      }
+
+      footer {
+        padding: 3rem 1.5rem 2rem;
+      }
+
+      footer a {
+        display: inline-block;
+        margin: 0.25rem 0.5rem;
+      }
     }
-    body {
-      font-family: 'Inter', sans-serif;
+
+    @media (max-width: 480px) {
+      .hero h1 {
+        font-size: 2.2rem;
+      }
+
+      .hero p {
+        font-size: 1.1rem;
+      }
+
+      .section-title {
+        font-size: 1.8rem;
+      }
+
+      .card {
+        padding: 2rem 1.5rem;
+      }
+
+      .card-icon {
+        width: 70px;
+        height: 70px;
+      }
+
+      .card i {
+        font-size: 2rem;
+      }
+
+      .card h3 {
+        font-size: 1.3rem;
+      }
+
+      .contato-section h2,
+      .about-section h2 {
+        font-size: 1.8rem;
+      }
+
+      .cta-section h3 {
+        font-size: 1.6rem;
+      }
     }
-    .contato-section {
-      background: #f3f4f6;
-      padding: 4rem 2rem;
-      text-align: center;
+
+    /* Accessibility improvements */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
     }
-    .contato-section h2 {
-      font-size: 2rem;
-      margin-bottom: 1rem;
+
+    /* Focus styles for accessibility */
+    nav .links a:focus,
+    .cta-buttons a:focus,
+    .contato-buttons button:focus,
+    .floating-cta:focus {
+      outline: 3px solid rgba(59, 130, 246, 0.5);
+      outline-offset: 2px;
     }
-    .contato-section p {
-      max-width: 600px;
-      margin: 0 auto 2rem;
-      color: #4b5563;
+
+    /* High contrast mode support */
+    @media (prefers-contrast: high) {
+      .card {
+        border: 2px solid var(--gray-400);
+      }
+      
+      .hero::before,
+      .hero::after {
+        display: none;
+      }
     }
-    .contato-buttons button {
-      margin: 0.5rem;
-      padding: 0.75rem 1.5rem;
-      border-radius: 8px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      border: none;
-      transition: background 0.3s;
-    }
-    .btn-feedback { background: #4b5563; color: white; }
-    .btn-feedback:hover { background: #374151; }
-    .btn-contato { background: #9333ea; color: white; }
-    .btn-contato:hover { background: #7e22ce; }
-    .modal-bg {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.5);
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-    .modal {
-      background: white;
-      padding: 2rem;
-      border-radius: 8px;
-      max-width: 500px;
-      width: 90%;
-      position: relative;
-    }
-    .modal-close {
-      position: absolute;
-      top: 10px;
-      right: 15px;
-      font-size: 1.5rem;
-      cursor: pointer;
-      color: #6b7280;
+
+    /* Print styles */
+    @media print {
+      .floating-cta,
+      .modal-bg,
+      nav .links,
+      .cta-buttons,
+      .contato-buttons {
+        display: none !important;
+      }
+      
+      * {
+        box-shadow: none !important;
+        text-shadow: none !important;
+      }
+      
+      .hero {
+        background: white !important;
+        color: black !important;
+      }
+      
+      .card {
+        border: 1px solid #000 !important;
+        break-inside: avoid;
+      }
     }
   </style>
 </head>
@@ -685,7 +1156,7 @@
   <section class="hero">
     <div class="hero-content">
       <h1>Gestão Profissional de Avaliações Escolares</h1>
-      <p>Organize suas feiras científicas e mostras pedagógicas com tecnologia de ponta, transparência e máxima eficiência. Desenvolvido especialmente para instituições de ensino públicas e privadas.</p>
+      <p>Transforme suas feiras científicas e mostras pedagógicas com tecnologia de ponta, transparência total e máxima eficiência. A solução completa desenvolvida especialmente para instituições de ensino públicas e privadas.</p>
       <div class="cta-buttons">
         <a href="/solicitar-acesso" class="btn-primary">
           <i class="fas fa-rocket"></i> Solicitar Acesso
@@ -698,8 +1169,8 @@
   </section>
 
   <section class="content">
-    <h2 class="section-title">Funcionalidades que facilitam sua rotina</h2>
-    <p class="section-subtitle">Descubra como o Sistema Avalia pode transformar a gestão de eventos educacionais na sua instituição</p>
+    <h2 class="section-title">Funcionalidades que revolucionam sua rotina</h2>
+    <p class="section-subtitle">Descubra como o Sistema Avalia pode transformar completamente a gestão de eventos educacionais na sua instituição com tecnologia de última geração</p>
     
     <div class="grid">
       <div class="card">
@@ -707,15 +1178,15 @@
           <i class="fas fa-school"></i>
         </div>
         <h3>Gestão Escolar Completa</h3>
-        <p>Cadastro intuitivo de escolas, turmas, categorias, projetos e avaliadores com fluxo otimizado e interface moderna.</p>
+        <p>Cadastro intuitivo e inteligente de escolas, turmas, categorias, projetos e avaliadores com fluxo otimizado, interface moderna e experiência excepcional para todos os usuários.</p>
       </div>
       
       <div class="card">
         <div class="card-icon">
-          <i class="fas fa-user-lock"></i>
+          <i class="fas fa-shield-alt"></i>
         </div>
-        <h3>Segurança Avançada</h3>
-        <p>Sistema de PIN com criptografia de ponta para avaliadores, eliminando a necessidade de senhas complexas.</p>
+        <h3>Segurança de Nível Empresarial</h3>
+        <p>Sistema avançado de PIN para avaliadores, eliminando completamente a necessidade de senhas complexas e garantindo máxima proteção dos dados.</p>
       </div>
       
       <div class="card">
@@ -723,38 +1194,38 @@
           <i class="fas fa-trophy"></i>
         </div>
         <h3>Rankings Inteligentes</h3>
-        <p>Classificações automáticas e personalizáveis por turma e categoria com critérios flexíveis e justos.</p>
+        <p>Classificações automáticas e altamente personalizáveis por categoria com critérios flexíveis, algoritmos justos e transparência total no processo avaliativo.</p>
       </div>
       
       <div class="card">
         <div class="card-icon">
-          <i class="fas fa-file-alt"></i>
+          <i class="fas fa-chart-line"></i>
         </div>
         <h3>Relatórios Profissionais</h3>
-        <p>Documentos em PDF com design profissional, prontos para apresentação e arquivo institucional.</p>
+        <p>Documentos em PDF com design moderno e dados precisos, prontos para apresentação institucional, arquivo permanente e prestação de contas com qualidade excepcional.</p>
       </div>
       
       <div class="card">
         <div class="card-icon">
-          <i class="fas fa-cloud"></i>
+          <i class="fas fa-cloud-upload-alt"></i>
         </div>
-        <h3>Plataforma Online</h3>
-        <p>Acesso universal via navegador, sem instalações. Interface responsiva e experiência otimizada.</p>
+        <h3>Plataforma 100% Online</h3>
+        <p>Acesso universal via qualquer navegador, sem instalações complexas. Interface responsiva e experiência otimizada para desktop, tablet e smartphone.</p>
       </div>
       
       <div class="card">
         <div class="card-icon">
-          <i class="fas fa-lightbulb"></i>
+          <i class="fas fa-expand-arrows-alt"></i>
         </div>
-        <h3>Escalabilidade Total</h3>
-        <p>Perfeito para instituições de qualquer porte, com suporte a múltiplas feiras e eventos simultâneos.</p>
+        <h3>Escalabilidade Ilimitada</h3>
+        <p>Solução perfeita para instituições de qualquer porte, desde escolas pequenas até grandes redes de ensino, com suporte simultâneo a múltiplas feiras e eventos educacionais.</p>
       </div>
     </div>
 
     <!-- CTA Intermediário -->
     <div class="cta-section">
-      <h3>Pronto para transformar suas avaliações?</h3>
-      <p>Junte-se às instituições que já descobriram a eficiência do Sistema Avalia</p>
+      <h3>Pronto para revolucionar suas avaliações?</h3>
+      <p>Junte-se às novas escolas e instituições que já descobriram a eficiência e transparência do Sistema Avalia</p>
       <a href="/solicitar-acesso" class="btn-white">
         <i class="fas fa-rocket"></i> Solicitar Acesso Gratuito
       </a>
@@ -763,100 +1234,252 @@
 
   <section class="content">
     <div class="about-section">
-      <h2>Tecnologia pensada para a educação</h2>
-      <p>O Sistema Avalia foi meticulosamente desenvolvido por educadores experientes para atender às necessidades reais de coordenações pedagógicas, professores e avaliadores em eventos escolares. Nossa plataforma combina simplicidade operacional com robustez técnica, oferecendo uma solução completa e confiável para sua instituição.</p>
+      <h2>Tecnologia de ponta pensada para a educação</h2>
+      <p>O Sistema Avalia foi meticulosamente desenvolvido por educadores experientes e especialistas em tecnologia para atender às necessidades reais de coordenações pedagógicas, professores e avaliadores em eventos escolares. Nossa plataforma combina simplicidade operacional com robustez técnica enterprise, oferecendo uma solução completa, confiável e escalável para sua instituição educacional.</p>
       
       <!-- CTA Final -->
-      <div style="margin-top: 3rem;">
-        <a href="/solicitar-acesso" class="btn-primary" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 1rem 2rem; border-radius: 12px; text-decoration: none; font-weight: 600;">
+      <div style="margin-top: 4rem;">
+        <a href="/solicitar-acesso" class="btn-primary" style="display: inline-flex; align-items: center; gap: 0.75rem; padding: 1.25rem 2.5rem; border-radius: 16px; text-decoration: none; font-weight: 700; font-size: 1.1rem; box-shadow: 0 10px 40px rgba(37, 99, 235, 0.3);">
           <i class="fas fa-paper-plane"></i> Começar Agora
         </a>
       </div>
     </div>
   </section>
 
+  <section class="contato-section">
+    <h2>Suporte Especializado do Sistema</h2>
+    <p>Encontrou algum problema, tem dúvidas sobre funcionalidades ou possui sugestões valiosas para aprimorar a plataforma? Entre em contato direto com nossa equipe de suporte especializada.</p>
+    <div class="contato-buttons">
+      <button class="btn-feedback" id="abrirModalFeedback">
+        <i class="fas fa-comment-dots"></i> Enviar Sugestão
+      </button>
+      <button class="btn-contato" id="abrirModalContato">
+        <i class="fas fa-headset"></i> Suporte Técnico
+      </button>
+    </div>
+  </section>
+
+  <!-- Modal Feedback Melhorado -->
+  <div id="modalFeedback" class="modal-bg">
+    <div class="modal">
+      <span class="modal-close" id="fecharModalFeedback">&times;</span>
+      <h3><i class="fas fa-comment-dots" style="color: var(--primary-600); margin-right: 0.5rem;"></i>Enviar Sugestão</h3>
+      <form action="/feedback" method="POST">
+        <input type="hidden" name="tipo" value="Index">
+
+        <div>
+          <label for="categoria">Categoria da Mensagem</label>
+          <select name="categoria" id="categoria" required>
+            <option value="">Selecione uma categoria</option>
+            <option value="Sugestão">💡 Sugestão de Melhoria</option>
+            <option value="Crítica">🔍 Crítica Construtiva</option>
+            <option value="Erro">🐛 Relatório de Erro</option>
+            <option value="Elogio">⭐ Elogio</option>
+            <option value="Dúvida">❓ Dúvida Técnica</option>
+            <option value="Outro">📝 Outro Assunto</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="nome">Seu Nome (Opcional)</label>
+          <input type="text" name="nome" id="nome" placeholder="Digite seu nome completo">
+        </div>
+
+        <div>
+          <label for="email">Seu Email (Opcional)</label>
+          <input type="email" name="email" id="email" placeholder="seu.email@exemplo.com">
+        </div>
+
+        <div>
+          <label for="mensagem">Sua Mensagem *</label>
+          <textarea name="mensagem" id="mensagem" rows="5" required placeholder="Descreva detalhadamente sua sugestão, crítica ou dúvida. Quanto mais informações, melhor poderemos ajudar!"></textarea>
+        </div>
+        
+        <button type="submit">
+          <i class="fas fa-paper-plane"></i> Enviar Mensagem
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Contato Melhorado -->
+  <div id="modalContato" class="modal-bg">
+    <div class="modal">
+      <span class="modal-close" id="fecharModalContato">&times;</span>
+      <h3><i class="fas fa-headset" style="color: var(--purple-600); margin-right: 0.5rem;"></i>Contato com Suporte</h3>
+      
+      <div class="contact-info">
+        <p>
+          <i class="fas fa-envelope"></i>
+          <span>
+            <strong>Email:</strong><br>
+            <a href="mailto:docsrosas@gmail.com">docsrosas@gmail.com</a>
+          </span>
+        </p>
+        
+        <p>
+          <i class="fab fa-whatsapp"></i>
+          <span>
+            <strong>WhatsApp:</strong><br>
+            <a href="https://wa.me/5551981439666?text=Olá! Preciso de ajuda com o Sistema Avalia." target="_blank">
+              +55 (51) 98143-9666
+            </a>
+          </span>
+        </p>
+        
+        <p>
+          <i class="fas fa-clock"></i>
+          <span>
+            <strong>Horário de Atendimento:</strong><br>
+            Segunda a Sexta: 8h às 18h<br>
+            <small style="color: var(--gray-500);">Respondemos em até 24 horas</small>
+          </span>
+        </p>
+        
+        <p>
+          <i class="fas fa-user-tie"></i>
+          <span>
+            <strong>Desenvolvedor:</strong><br>
+            Prof. Marlo Rosa<br>
+            <small style="color: var(--gray-500);">Especialista em Tecnologia Educacional</small>
+          </span>
+        </p>
+      </div>
+
+      <div style="text-align: center; margin-top: 2rem;">
+        <a href="https://wa.me/5551981439666?text=Olá! Preciso de ajuda com o Sistema Avalia." target="_blank" 
+           style="display: inline-flex; align-items: center; gap: 0.75rem; background: linear-gradient(135deg, #25d366, #22c55e); color: white; padding: 1rem 2rem; border-radius: 12px; text-decoration: none; font-weight: 600; transition: all 0.3s ease;">
+          <i class="fab fa-whatsapp"></i> Conversar no WhatsApp
+        </a>
+      </div>
+    </div>
+  </div>
+
   <!-- Floating CTA Button -->
   <a href="/solicitar-acesso" class="floating-cta">
     <i class="fas fa-plus"></i> Acesso
   </a>
- <section class="contato-section">
-    <h2>Fale com o Suporte do Sistema</h2>
-    <p>Encontrou algum problema ou tem sugestões para melhorar a plataforma? Entre em contato diretamente com o responsável pelo Sistema Avalia.</p>
-    <div class="contato-buttons">
-      <button class="btn-feedback" id="abrirModalFeedback"><i class="fas fa-comment-dots"></i> Enviar Sugestão</button>
-      <button class="btn-contato" id="abrirModalContato"><i class="fas fa-phone"></i> Entrar em Contato</button>
-    </div>
-  </section>
-
-  <!-- Modal Feedback -->
- <div id="modalFeedback" class="modal-bg">
-  <div class="modal">
-    <span class="modal-close" id="fecharModalFeedback">&times;</span>
-    <h3>Enviar Sugestão</h3>
-    <form action="/feedback" method="POST">
-      <input type="hidden" name="tipo" value="Index">
-
-      <p>
-        <label for="categoria" style="display: block; font-weight: 500; margin-bottom: 0.3rem;">Categoria</label>
-        <select name="categoria" required style="width: 100%; padding: 0.5rem; margin-bottom: 1rem;">
-          <option value="">Selecione</option>
-          <option value="Sugestão">Sugestão</option>
-          <option value="Crítica">Crítica</option>
-          <option value="Erro">Erro</option>
-          <option value="Elogio">Elogio</option>
-          <option value="Outro">Outro</option>
-        </select>
-      </p>
-
-      <p><input type="text" name="nome" placeholder="Seu nome (opcional)" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;"></p>
-      <p><input type="email" name="email" placeholder="Seu email (opcional)" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;"></p>
-      <p><textarea name="mensagem" rows="4" required placeholder="Digite sua mensagem..." style="width: 100%; padding: 0.5rem;"></textarea></p>
-      
-      <p><button type="submit" class="btn-feedback">Enviar</button></p>
-    </form>
-  </div>
-</div>
-
-  <!-- Modal Contato -->
-  <div id="modalContato" class="modal-bg">
-    <div class="modal">
-      <span class="modal-close" id="fecharModalContato">&times;</span>
-      <h3>Contato com Super Admin</h3>
-      <p><strong>Email:</strong> <a href="mailto:docsrosas@gmail.com">docsrosas@gmail.com</a></p>
-      <p><strong>WhatsApp:</strong> <a href="https://wa.me/5551981439666" target="_blank">Clique aqui para conversar</a></p>
-      <p>Horário de Atendimento: Seg a Sex, das 8h às 18h</p>
-    </div>
-  </div>
 
   <script>
-    document.getElementById('abrirModalFeedback').onclick = () => {
-      document.getElementById('modalFeedback').style.display = 'flex';
-    };
-    document.getElementById('fecharModalFeedback').onclick = () => {
-      document.getElementById('modalFeedback').style.display = 'none';
-    };
-    document.getElementById('abrirModalContato').onclick = () => {
-      document.getElementById('modalContato').style.display = 'flex';
-    };
-    document.getElementById('fecharModalContato').onclick = () => {
-      document.getElementById('modalContato').style.display = 'none';
-    };
+    // Modal functionality with enhanced animations
+    function openModal(modalId) {
+      const modal = document.getElementById(modalId);
+      modal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+      
+      // Focus trap for accessibility
+      const focusableElements = modal.querySelectorAll('button, input, select, textarea, a[href]');
+      if (focusableElements.length > 0) {
+        focusableElements[0].focus();
+      }
+    }
+
+    function closeModal(modalId) {
+      const modal = document.getElementById(modalId);
+      modal.style.display = 'none';
+      document.body.style.overflow = 'auto';
+    }
+
+    // Event listeners
+    document.getElementById('abrirModalFeedback').onclick = () => openModal('modalFeedback');
+    document.getElementById('fecharModalFeedback').onclick = () => closeModal('modalFeedback');
+    document.getElementById('abrirModalContato').onclick = () => openModal('modalContato');
+    document.getElementById('fecharModalContato').onclick = () => closeModal('modalContato');
+
+    // Close modal when clicking outside
     window.onclick = function(e) {
       if (e.target.classList.contains('modal-bg')) {
         e.target.style.display = 'none';
+        document.body.style.overflow = 'auto';
       }
     }
+
+    // Close modal with ESC key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        const openModals = document.querySelectorAll('.modal-bg[style*="flex"]');
+        openModals.forEach(modal => {
+          modal.style.display = 'none';
+          document.body.style.overflow = 'auto';
+        });
+      }
+    });
+
+    // Smooth scrolling for internal links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+
+    // Enhanced form validation
+    const feedbackForm = document.querySelector('#modalFeedback form');
+    if (feedbackForm) {
+      feedbackForm.addEventListener('submit', function(e) {
+        const categoria = this.querySelector('[name="categoria"]').value;
+        const mensagem = this.querySelector('[name="mensagem"]').value;
+        
+        if (!categoria || !mensagem.trim()) {
+          e.preventDefault();
+          alert('Por favor, preencha todos os campos obrigatórios.');
+          return;
+        }
+        
+        if (mensagem.trim().length < 10) {
+          e.preventDefault();
+          alert('Por favor, forneça uma mensagem mais detalhada (mínimo 10 caracteres).');
+          return;
+        }
+      });
+    }
+
+    // Intersection Observer for animations
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, observerOptions);
+
+    // Observe cards for animation
+    document.querySelectorAll('.card').forEach(card => {
+      observer.observe(card);
+    });
+
+    // Add loading states for better UX
+    document.querySelectorAll('form').forEach(form => {
+      form.addEventListener('submit', function(e) {
+        const submitBtn = this.querySelector('button[type="submit"]');
+        if (submitBtn) {
+          submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+          submitBtn.disabled = true;
+        }
+      });
+    });
   </script>
 
-  <!-- Rodapé existente -->
   <footer>
-    <p>&copy; 2025 Sistema Avalia - Desenvolvido com excelência e responsabilidade educacional por Marlo Rosa</p>
+    <p>&copy; 2025 Sistema Avalia - Desenvolvido com excelência e responsabilidade educacional por Prof. Marlo Rosa. Transformando a educação através da tecnologia.</p>
     <div>
-      <a href="/politica-privacidade">Política de Privacidade</a>
+      <a href="/politica-privacidade"><i class="fas fa-shield-alt"></i> Política de Privacidade</a>
       •
-      <a href="/termos-de-uso">Termos de Uso</a>
+      <a href="/termos-de-uso"><i class="fas fa-file-contract"></i> Termos de Uso</a>
       •
-      <a href="/superadmin/login">Super Admin</a>
+      <a href="/superadmin/login"><i class="fas fa-crown"></i> Super Admin</a>
     </div>
   </footer>
 </body>
