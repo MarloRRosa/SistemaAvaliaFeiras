@@ -12,256 +12,184 @@
     }
 
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      padding: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
+      background-color: #f8f9fa;
+      color: #202124;
+      line-height: 1.5;
+      font-size: 14px;
     }
 
     .container {
-      width: 100%;
-      max-width: 600px;
+      max-width: 768px;
+      margin: 40px auto;
       background: white;
-      border-radius: 20px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      box-shadow: 0 1px 3px 0 rgba(60, 64, 67, 0.3);
       overflow: hidden;
-      position: relative;
-      animation: slideUp 0.6s ease-out;
-    }
-
-    @keyframes slideUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
     }
 
     .header {
-      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-      padding: 40px 30px;
-      text-align: center;
-      position: relative;
-    }
-
-    .header::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+      background: #673ab7;
+      padding: 24px 24px 12px 24px;
+      border-radius: 8px 8px 0 0;
     }
 
     .header h1 {
       color: white;
-      font-size: 2rem;
-      font-weight: 600;
-      margin-bottom: 10px;
-      position: relative;
-      z-index: 1;
+      font-size: 32px;
+      font-weight: 400;
+      margin-bottom: 8px;
+      line-height: 1.2;
     }
 
-    .header p {
+    .header .subtitle {
       color: rgba(255, 255, 255, 0.9);
-      font-size: 1rem;
-      position: relative;
-      z-index: 1;
+      font-size: 14px;
+      margin-bottom: 16px;
     }
 
     .header h2 {
       color: white;
-      font-size: 2.5rem;
-      font-weight: 700;
-      margin: 15px 0 10px 0;
-      position: relative;
-      z-index: 1;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-    }
-
-    .header .escola-info {
-      color: rgba(255, 255, 255, 0.95);
-      font-size: 1.1rem;
-      font-weight: 600;
+      font-size: 24px;
+      font-weight: 400;
       margin-bottom: 8px;
-      position: relative;
-      z-index: 1;
     }
 
-    .header .data-info {
-      color: rgba(255, 255, 255, 0.9);
-      font-size: 0.95rem;
-      position: relative;
-      z-index: 1;
+    .header .info {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 14px;
+      margin-bottom: 4px;
     }
 
     .form-container {
-      padding: 40px 30px;
+      padding: 24px;
     }
 
     .message {
-      background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
-      color: white;
-      padding: 15px 20px;
-      border-radius: 10px;
-      margin-bottom: 30px;
-      text-align: center;
-      font-weight: 500;
-      animation: fadeIn 0.5s ease-out;
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+      border-radius: 4px;
+      padding: 12px 16px;
+      margin-bottom: 24px;
+      font-size: 14px;
     }
 
     .message.error {
-      background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+      background: #f8d7da;
+      color: #721c24;
+      border-color: #f5c6cb;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
+    .form-section {
+      margin-bottom: 32px;
     }
 
     .form-group {
-      margin-bottom: 25px;
-      animation: fadeInUp 0.6s ease-out forwards;
-      opacity: 0;
-      position: relative;
-    }
-
-    .form-group:nth-child(1) { animation-delay: 0.1s; }
-    .form-group:nth-child(2) { animation-delay: 0.2s; }
-    .form-group:nth-child(3) { animation-delay: 0.3s; }
-    .form-group:nth-child(4) { animation-delay: 0.4s; }
-    .form-group:nth-child(5) { animation-delay: 0.5s; }
-    .form-group:nth-child(6) { animation-delay: 0.6s; }
-    .form-group:nth-child(7) { animation-delay: 0.7s; }
-    .form-group:nth-child(8) { animation-delay: 0.8s; }
-
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      margin-bottom: 24px;
     }
 
     .form-group label {
       display: block;
+      font-size: 14px;
+      font-weight: 400;
+      color: #202124;
       margin-bottom: 8px;
-      color: #333;
-      font-weight: 500;
-      font-size: 0.95rem;
     }
 
-    .text-red-500 {
-      color: #e74c3c;
-      margin-left: 3px;
+    .required {
+      color: #d93025;
     }
 
     .form-control {
       width: 100%;
-      padding: 15px 20px;
-      border: 2px solid #e1e8ed;
-      border-radius: 12px;
-      font-size: 1rem;
-      transition: all 0.3s ease;
-      background: #fafbfc;
+      padding: 12px 16px;
+      border: 1px solid #dadce0;
+      border-radius: 4px;
+      font-size: 16px;
+      font-family: inherit;
+      background: white;
+      transition: border-color 0.2s ease;
     }
 
     .form-control:focus {
       outline: none;
-      border-color: #4facfe;
-      background: white;
-      box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
-      transform: translateY(-2px);
+      border-color: #1a73e8;
+      box-shadow: 0 0 0 1px #1a73e8;
     }
 
-    .form-control:hover {
-      border-color: #c8d6e5;
+    .form-control:hover:not(:focus) {
+      border-color: #5f6368;
     }
 
     select.form-control {
       cursor: pointer;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+      background-position: right 12px center;
+      background-repeat: no-repeat;
+      background-size: 16px;
+      padding-right: 40px;
+      appearance: none;
     }
 
     .no-extras {
       text-align: center;
-      color: #8b9dc3;
+      color: #5f6368;
       font-style: italic;
-      padding: 20px;
+      padding: 40px 20px;
       background: #f8f9fa;
-      border-radius: 12px;
-      border: 2px dashed #dee2e6;
-      animation: fadeIn 0.5s ease-out;
+      border-radius: 4px;
+      border: 1px dashed #dadce0;
     }
 
     .submit-container {
-      margin-top: 30px;
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid #e8eaed;
     }
 
     .submit-btn {
-      width: 100%;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: #1a73e8;
       color: white;
       border: none;
-      padding: 18px 30px;
-      border-radius: 12px;
-      font-size: 1.1rem;
-      font-weight: 600;
+      padding: 12px 24px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 500;
       cursor: pointer;
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .submit-btn::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-      transition: left 0.5s;
-    }
-
-    .submit-btn:hover::before {
-      left: 100%;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .submit-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+      background: #1557b0;
+      box-shadow: 0 1px 3px 0 rgba(60, 64, 67, 0.3);
     }
 
     .submit-btn:active {
-      transform: translateY(-1px);
+      background: #1241a3;
     }
 
     .submit-btn:disabled {
-      opacity: 0.6;
+      background: #dadce0;
+      color: #5f6368;
       cursor: not-allowed;
-      transform: none;
     }
 
-    /* Loader do botão */
     .btn-loader {
       display: none;
-      width: 20px;
-      height: 20px;
+      width: 16px;
+      height: 16px;
       border: 2px solid transparent;
-      border-top: 2px solid white;
+      border-top: 2px solid currentColor;
       border-radius: 50%;
       animation: spin 1s linear infinite;
-      margin-right: 10px;
+    }
+
+    .btn-loader.show {
+      display: block;
     }
 
     @keyframes spin {
@@ -269,137 +197,88 @@
       100% { transform: rotate(360deg); }
     }
 
-    /* Indicadores de validação */
-    .form-control:invalid:not(:placeholder-shown) {
-      border-color: #e74c3c;
-      background-color: #fdf2f2;
+    .char-counter {
+      font-size: 12px;
+      color: #5f6368;
+      text-align: right;
+      margin-top: 4px;
     }
 
-    .form-control:valid:not(:placeholder-shown) {
-      border-color: #27ae60;
-      background-color: #f2fdf5;
-    }
-
-    /* Ícones de validação */
-    .form-group::after {
-      content: '';
-      position: absolute;
-      right: 15px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 16px;
-      height: 16px;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    .form-group.valid::after {
-      content: '✓';
-      color: #27ae60;
-      opacity: 1;
-      font-weight: bold;
-    }
-
-    .form-group.invalid::after {
-      content: '✗';
-      color: #e74c3c;
-      opacity: 1;
-      font-weight: bold;
-    }
-
-    /* Mensagens de erro */
     .error-message {
-      color: #e74c3c;
-      font-size: 0.85rem;
-      margin-top: 5px;
+      color: #d93025;
+      font-size: 12px;
+      margin-top: 4px;
       display: none;
     }
 
-    /* Contador de caracteres */
-    .char-counter {
-      font-size: 0.8rem;
-      color: #8b9dc3;
-      text-align: right;
-      margin-top: 5px;
+    .form-control.error {
+      border-color: #d93025;
+    }
+
+    .form-control.error:focus {
+      border-color: #d93025;
+      box-shadow: 0 0 0 1px #d93025;
+    }
+
+    .success-animation {
+      display: none;
+      text-align: center;
+      padding: 48px 24px;
+    }
+
+    .success-icon {
+      width: 64px;
+      height: 64px;
+      background: #34a853;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      color: white;
+      font-size: 24px;
+    }
+
+    .success-animation h3 {
+      font-size: 20px;
+      font-weight: 400;
+      margin-bottom: 8px;
+      color: #202124;
+    }
+
+    .success-animation p {
+      color: #5f6368;
+      font-size: 14px;
     }
 
     /* Responsividade */
     @media (max-width: 768px) {
-      body {
-        padding: 10px;
-      }
-
       .container {
-        border-radius: 15px;
+        margin: 16px;
+        border-radius: 0;
+        box-shadow: none;
+        border: 1px solid #dadce0;
       }
 
       .header {
-        padding: 30px 20px;
+        padding: 20px 16px 12px 16px;
+        border-radius: 0;
       }
 
       .header h1 {
-        font-size: 1.7rem;
+        font-size: 24px;
       }
 
       .header h2 {
-        font-size: 2rem;
+        font-size: 20px;
       }
 
       .form-container {
-        padding: 30px 20px;
+        padding: 16px;
       }
 
       .form-control {
-        padding: 12px 15px;
-      }
-
-      .submit-btn {
-        padding: 15px 25px;
-        font-size: 1rem;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .header h1 {
-        font-size: 1.5rem;
-      }
-
-      .header h2 {
-        font-size: 1.8rem;
-      }
-
-      .header p {
-        font-size: 0.9rem;
-      }
-
-      .form-container {
-        padding: 25px 15px;
-      }
-    }
-
-    /* Animação de sucesso */
-    .success-animation {
-      display: none;
-      text-align: center;
-      padding: 40px;
-    }
-
-    .success-icon {
-      font-size: 4rem;
-      color: #27ae60;
-      margin-bottom: 20px;
-      animation: bounce 0.6s ease-out;
-    }
-
-    @keyframes bounce {
-      0%, 20%, 50%, 80%, 100% {
-        transform: translateY(0);
-      }
-      40% {
-        transform: translateY(-10px);
-      }
-      60% {
-        transform: translateY(-5px);
+        font-size: 16px; /* Evita zoom no iOS */
       }
     }
 
@@ -415,16 +294,25 @@
       white-space: nowrap;
       border: 0;
     }
+
+    /* Estados de validação mais sutis */
+    .form-control:valid:not(:placeholder-shown) {
+      border-color: #34a853;
+    }
+
+    .form-control:invalid:not(:placeholder-shown) {
+      border-color: #d93025;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
       <h1>Pré-Cadastro de Avaliador</h1>
-      <p>Preencha os dados abaixo para se cadastrar como avaliador</p>
+      <p class="subtitle">Preencha os dados abaixo para se cadastrar como avaliador</p>
       <h2><%= feira.nome %></h2>
-      <p class="escola-info">Escola: <%= escola?.nome || 'Não informada' %></p>
-      <p class="data-info"><%= formatarData(feira.inicioFeira) %> à <%= formatarData(feira.fimFeira) %></p>
+      <p class="info">Escola: <%= escola?.nome || 'Não informada' %></p>
+      <p class="info"><%= formatarData(feira.inicioFeira) %> à <%= formatarData(feira.fimFeira) %></p>
     </div>
 
     <div class="form-container">
@@ -435,72 +323,76 @@
       <% } %>
 
       <form id="preCadastroForm" action="/pre-cadastro/<%= feiraId %>" method="POST">
-        <!-- Campos fixos obrigatórios -->
-        <div class="form-group">
-          <label for="nome">Nome <span class="text-red-500">*</span></label>
-          <input type="text" id="nome" name="nome" required class="form-control" maxlength="100">
-          <div class="error-message">Nome é obrigatório</div>
-          <div class="char-counter"><span id="nomeCounter">0</span>/100</div>
-        </div>
+        <div class="form-section">
+          <div class="form-group">
+            <label for="nome">Nome <span class="required">*</span></label>
+            <input type="text" id="nome" name="nome" required class="form-control" maxlength="100" autocomplete="name">
+            <div class="error-message">Nome é obrigatório</div>
+            <div class="char-counter"><span id="nomeCounter">0</span>/100</div>
+          </div>
 
-        <div class="form-group">
-          <label for="email">Email <span class="text-red-500">*</span></label>
-          <input type="email" id="email" name="email" required class="form-control" maxlength="100">
-          <div class="error-message">Email válido é obrigatório</div>
-          <div class="char-counter"><span id="emailCounter">0</span>/100</div>
-        </div>
+          <div class="form-group">
+            <label for="email">Email <span class="required">*</span></label>
+            <input type="email" id="email" name="email" required class="form-control" maxlength="100" autocomplete="email">
+            <div class="error-message">Email válido é obrigatório</div>
+            <div class="char-counter"><span id="emailCounter">0</span>/100</div>
+          </div>
 
-        <div class="form-group">
-          <label for="telefone">Telefone</label>
-          <input type="tel" id="telefone" name="telefone" class="form-control" maxlength="15" placeholder="(00) 00000-0000">
-          <div class="char-counter"><span id="telefoneCounter">0</span>/15</div>
+          <div class="form-group">
+            <label for="telefone">Telefone</label>
+            <input type="tel" id="telefone" name="telefone" class="form-control" maxlength="15" placeholder="(00) 00000-0000" autocomplete="tel">
+            <div class="char-counter"><span id="telefoneCounter">0</span>/15</div>
+          </div>
         </div>
 
         <!-- Campos extras configuráveis -->
         <% if (camposExtras && camposExtras.length > 0) { %>
-          <% camposExtras.forEach(campo => { %>
-            <div class="form-group">
-              <label for="extra_<%= campo.label %>">
-                <%= campo.label %>
-                <% if (campo.obrigatorio) { %><span class="text-red-500">*</span><% } %>
-              </label>
+          <div class="form-section">
+            <% camposExtras.forEach(campo => { %>
+              <div class="form-group">
+                <label for="extra_<%= campo.label %>">
+                  <%= campo.label %>
+                  <% if (campo.obrigatorio) { %><span class="required">*</span><% } %>
+                </label>
 
-              <% if (campo.tipo === 'seleção' && campo.opcoes) {
-                   const opcoes = campo.opcoes.split(',').map(op => op.trim());
-              %>
-                <select id="extra_<%= campo.label %>" name="extras[<%= campo.label %>]"
-                  class="form-control"
-                  <%= campo.obrigatorio ? 'required' : '' %>>
-                  <option value="">Selecione...</option>
-                  <% opcoes.forEach(op => { %>
-                    <option value="<%= op %>"><%= op %></option>
-                  <% }) %>
-                </select>
-              <% } else if (campo.tipo === 'número') { %>
-                <input type="number"
-                       id="extra_<%= campo.label %>"
-                       name="extras[<%= campo.label %>]"
-                       <%= campo.obrigatorio ? 'required' : '' %>
-                       class="form-control">
-              <% } else { %>
-                <input type="text"
-                       id="extra_<%= campo.label %>"
-                       name="extras[<%= campo.label %>]"
-                       <%= campo.obrigatorio ? 'required' : '' %>
-                       class="form-control">
-              <% } %>
-              <div class="error-message"><%= campo.label %> é obrigatório</div>
-            </div>
-          <% }) %>
+                <% if (campo.tipo === 'seleção' && campo.opcoes) {
+                     const opcoes = campo.opcoes.split(',').map(op => op.trim());
+                %>
+                  <select id="extra_<%= campo.label %>" name="extras[<%= campo.label %>]"
+                    class="form-control"
+                    <%= campo.obrigatorio ? 'required' : '' %>>
+                    <option value="">Selecione uma opção</option>
+                    <% opcoes.forEach(op => { %>
+                      <option value="<%= op %>"><%= op %></option>
+                    <% }) %>
+                  </select>
+                <% } else if (campo.tipo === 'número') { %>
+                  <input type="number"
+                         id="extra_<%= campo.label %>"
+                         name="extras[<%= campo.label %>]"
+                         <%= campo.obrigatorio ? 'required' : '' %>
+                         class="form-control">
+                <% } else { %>
+                  <input type="text"
+                         id="extra_<%= campo.label %>"
+                         name="extras[<%= campo.label %>]"
+                         <%= campo.obrigatorio ? 'required' : '' %>
+                         class="form-control">
+                <% } %>
+                <div class="error-message"><%= campo.label %> é obrigatório</div>
+              </div>
+            <% }) %>
+          </div>
         <% } else { %>
-          <p class="no-extras">Nenhum campo extra configurado.</p>
+          <div class="form-section">
+            <p class="no-extras">Nenhum campo extra configurado para este formulário.</p>
+          </div>
         <% } %>
 
-        <!-- Botão de Enviar -->
         <div class="submit-container">
           <button type="submit" class="submit-btn" id="submitBtn">
             <span class="btn-loader"></span>
-            <span class="btn-text">Enviar Pré-Cadastro</span>
+            <span class="btn-text">Enviar</span>
           </button>
         </div>
       </form>
@@ -520,7 +412,6 @@
       const submitBtn = document.getElementById('submitBtn');
       const btnLoader = document.querySelector('.btn-loader');
       const btnText = document.querySelector('.btn-text');
-      const successAnimation = document.getElementById('successAnimation');
 
       // Formatação automática para telefone
       const telefoneInput = document.getElementById('telefone');
@@ -552,7 +443,7 @@
       formInputs.forEach(input => {
         input.addEventListener('blur', validateField);
         input.addEventListener('input', function() {
-          if (this.classList.contains('invalid')) {
+          if (this.classList.contains('error')) {
             validateField.call(this);
           }
         });
@@ -562,17 +453,14 @@
         const formGroup = this.closest('.form-group');
         const errorMessage = formGroup.querySelector('.error-message');
         
-        if (this.validity.valid && this.value.trim() !== '') {
-          formGroup.classList.remove('invalid');
-          formGroup.classList.add('valid');
+        if (this.validity.valid && (this.value.trim() !== '' || !this.required)) {
+          this.classList.remove('error');
           if (errorMessage) errorMessage.style.display = 'none';
         } else if (this.required && this.value.trim() === '') {
-          formGroup.classList.remove('valid');
-          formGroup.classList.add('invalid');
+          this.classList.add('error');
           if (errorMessage) errorMessage.style.display = 'block';
         } else if (!this.validity.valid) {
-          formGroup.classList.remove('valid');
-          formGroup.classList.add('invalid');
+          this.classList.add('error');
           if (errorMessage) errorMessage.style.display = 'block';
         }
       }
@@ -596,19 +484,16 @@
 
         // Mostrar loading
         submitBtn.disabled = true;
-        btnLoader.style.display = 'inline-block';
+        btnLoader.classList.add('show');
         btnText.textContent = 'Enviando...';
-
-        // Permitir envio normal do formulário
       });
 
       function showMessage(message, type = 'error') {
-        // Criar mensagem temporária se não existir mensagem do servidor
-        if (!messageContainer || messageContainer.style.display === 'none') {
+        const existingMessage = document.querySelector('.message');
+        if (!existingMessage) {
           const tempMessage = document.createElement('div');
           tempMessage.className = `message ${type}`;
           tempMessage.textContent = message;
-          tempMessage.style.marginBottom = '20px';
           form.parentNode.insertBefore(tempMessage, form);
           
           setTimeout(() => {
@@ -617,26 +502,20 @@
         }
       }
 
-      // Melhorias de acessibilidade
-      formInputs.forEach(input => {
+      // Navegação por teclado
+      formInputs.forEach((input, index) => {
         input.addEventListener('keydown', function(e) {
           if (e.key === 'Enter' && this.tagName !== 'TEXTAREA') {
             e.preventDefault();
-            const nextInput = getNextInput(this);
+            const nextInput = formInputs[index + 1];
             if (nextInput) {
               nextInput.focus();
             } else {
-              form.querySelector('button[type="submit"]').focus();
+              submitBtn.focus();
             }
           }
         });
       });
-
-      function getNextInput(currentInput) {
-        const inputs = Array.from(form.querySelectorAll('input, select, textarea'));
-        const currentIndex = inputs.indexOf(currentInput);
-        return inputs[currentIndex + 1];
-      }
     });
   </script>
 </body>
