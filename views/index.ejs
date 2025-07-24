@@ -500,6 +500,116 @@
     .card:nth-child(4) { animation-delay: 0.4s; }
     .card:nth-child(5) { animation-delay: 0.5s; }
     .card:nth-child(6) { animation-delay: 0.6s; }
+
+    /* CTA Sections */
+    .cta-section {
+      background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 100%);
+      border-radius: 20px;
+      padding: 3rem 2rem;
+      text-align: center;
+      margin: 4rem 0;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .cta-section h3 {
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+      font-weight: 700;
+      position: relative;
+      z-index: 1;
+    }
+
+    .cta-section p {
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+      opacity: 0.95;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .cta-section .btn-white {
+      background: white;
+      color: var(--primary-700);
+      padding: 1rem 2.5rem;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      position: relative;
+      z-index: 1;
+    }
+
+    .cta-section .btn-white:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .floating-cta {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: linear-gradient(135deg, var(--primary-600), var(--primary-700));
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: 600;
+      box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
+      transition: all 0.3s ease;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      animation: pulse 2s infinite;
+    }
+
+    .floating-cta:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 35px rgba(37, 99, 235, 0.4);
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3); }
+      50% { box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5); }
+    }
+
+    @media (max-width: 768px) {
+      .floating-cta {
+        bottom: 20px;
+        right: 20px;
+        padding: 0.8rem 1.2rem;
+        font-size: 0.9rem;
+      }
+      
+      .cta-section {
+        padding: 2.5rem 1.5rem;
+        margin: 3rem 0;
+      }
+      
+      .cta-section h3 {
+        font-size: 1.5rem;
+      }
+    }
   </style>
 </head>
 <body>
@@ -583,14 +693,35 @@
         <p>Perfeito para instituições de qualquer porte, com suporte a múltiplas feiras e eventos simultâneos.</p>
       </div>
     </div>
+
+    <!-- CTA Intermediário -->
+    <div class="cta-section">
+      <h3>Pronto para transformar suas avaliações?</h3>
+      <p>Junte-se às instituições que já descobriram a eficiência do Sistema Avalia</p>
+      <a href="/solicitar-acesso" class="btn-white">
+        <i class="fas fa-rocket"></i> Solicitar Acesso Gratuito
+      </a>
+    </div>
   </section>
 
   <section class="content">
     <div class="about-section">
       <h2>Tecnologia pensada para a educação</h2>
       <p>O Sistema Avalia foi meticulosamente desenvolvido por educadores experientes para atender às necessidades reais de coordenações pedagógicas, professores e avaliadores em eventos escolares. Nossa plataforma combina simplicidade operacional com robustez técnica, oferecendo uma solução completa e confiável para sua instituição.</p>
+      
+      <!-- CTA Final -->
+      <div style="margin-top: 3rem;">
+        <a href="/solicitar-acesso" class="btn-primary" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 1rem 2rem; border-radius: 12px; text-decoration: none; font-weight: 600;">
+          <i class="fas fa-paper-plane"></i> Começar Agora
+        </a>
+      </div>
     </div>
   </section>
+
+  <!-- Floating CTA Button -->
+  <a href="/solicitar-acesso" class="floating-cta">
+    <i class="fas fa-plus"></i> Acesso
+  </a>
 
   <footer>
     <p>&copy; 2025 Sistema Avalia - Desenvolvido com excelência e responsabilidade educacional por Marlo Rosa</p>
