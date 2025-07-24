@@ -1,0 +1,8 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /avaliador/
+Disallow: /superadmin/
+Disallow: /suporte/
+Allow: /
+
+Sitemap: https://sistema-avalia.onrender.com/sitemap.xml
