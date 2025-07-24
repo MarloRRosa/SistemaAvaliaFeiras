@@ -789,19 +789,33 @@
   </section>
 
   <!-- Modal Feedback -->
-  <div id="modalFeedback" class="modal-bg">
-    <div class="modal">
-      <span class="modal-close" id="fecharModalFeedback">&times;</span>
-      <h3>Enviar Sugestão</h3>
-      <form action="/feedback" method="POST">
-        <input type="hidden" name="tipo" value="Index">
-        <p><input type="text" name="nome" placeholder="Seu nome (opcional)" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;"></p>
-        <p><input type="email" name="email" placeholder="Seu email (opcional)" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;"></p>
-        <p><textarea name="mensagem" rows="4" required placeholder="Digite sua mensagem..." style="width: 100%; padding: 0.5rem;"></textarea></p>
-        <p><button type="submit" class="btn-feedback">Enviar</button></p>
-      </form>
-    </div>
+ <div id="modalFeedback" class="modal-bg">
+  <div class="modal">
+    <span class="modal-close" id="fecharModalFeedback">&times;</span>
+    <h3>Enviar Sugestão</h3>
+    <form action="/feedback" method="POST">
+      <input type="hidden" name="tipo" value="Index">
+
+      <p>
+        <label for="categoria" style="display: block; font-weight: 500; margin-bottom: 0.3rem;">Categoria</label>
+        <select name="categoria" required style="width: 100%; padding: 0.5rem; margin-bottom: 1rem;">
+          <option value="">Selecione</option>
+          <option value="Sugestão">Sugestão</option>
+          <option value="Crítica">Crítica</option>
+          <option value="Erro">Erro</option>
+          <option value="Elogio">Elogio</option>
+          <option value="Outro">Outro</option>
+        </select>
+      </p>
+
+      <p><input type="text" name="nome" placeholder="Seu nome (opcional)" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;"></p>
+      <p><input type="email" name="email" placeholder="Seu email (opcional)" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;"></p>
+      <p><textarea name="mensagem" rows="4" required placeholder="Digite sua mensagem..." style="width: 100%; padding: 0.5rem;"></textarea></p>
+      
+      <p><button type="submit" class="btn-feedback">Enviar</button></p>
+    </form>
   </div>
+</div>
 
   <!-- Modal Contato -->
   <div id="modalContato" class="modal-bg">

@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const FeedbackSchema = new mongoose.Schema({
   tipo: {
     type: String,
-    enum: ['Avaliador', 'ADM', 'SuperADM', 'Outro'],
+    enum: ['Avaliador', 'ADM', 'SuperADM', 'Index', 'Outro'],
     required: true,
   },
   categoria: {
