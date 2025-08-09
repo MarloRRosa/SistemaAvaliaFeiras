@@ -617,7 +617,6 @@
     <span>Editar</span>
 </button>
 
-
                                         <button type="button" class="tooltip btn-reenviar-avaliador btn-hover-effect text-white font-semibold py-1.5 px-3 rounded-md text-sm shadow-sm" 
         style="background-color: #ea580c; border: none;" 
         onmouseover="this.style.backgroundColor='#c2410c'" 
@@ -810,6 +809,7 @@
         document.querySelectorAll('.btn-editar-avaliador').forEach(button => {
             button.addEventListener('click', (event) => {
                 const button = event.currentTarget;
+                const btn = event.currentTarget;
                 tituloAvaliador.textContent = 'Editar Avaliador';
                 formAvaliador.action = `/admin/avaliadores/${button.dataset.id}?_method=PUT`;
                 avaliadorId.value = button.dataset.id;
@@ -1753,7 +1753,7 @@ document.querySelectorAll('.btn-editar-projeto').forEach(button => {
                 modalAvaliador.classList.add('hidden');
             });
 
-            document.querySelectorAll('.btn-editar-avaliador').forEach(button => {
+         document.querySelectorAll('.btn-editar-avaliador').forEach(button => {
                 button.addEventListener('click', (event) => {
                     const btn = event.currentTarget;
                     tituloAvaliador.textContent = 'Editar Avaliador';
