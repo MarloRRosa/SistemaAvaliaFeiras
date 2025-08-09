@@ -2165,6 +2165,78 @@ router.get('/resumo-avaliadores/pdf', verificarAdminEscola, async (req, res) => 
     }
 });
 
+// Relatório Resumo avaliadores por projetos
+
+router.get('/resumo-projetos/pdf', verificarAdminEscola, async (req, res) => {
+    try {
+        const escolaId = req.session.adminEscola.escolaId;
+
+        // Feira ativa
+        const feiraAtual = await Feira.findOne({ status: 'ativa', escolaId });
+        if (!feiraAtual) {
+            req.flash('error_msg', 'Nenhuma feira ativa para esta escola para gerar o relatório de resumo de projetos.');
+            if (!res.headersSent) {
+                return res.redirect('/admin/dashboard?tab=relatorios');
+            }
+        }
+
+        // Buscar todos os projetos da feira
+        const projetos = await Projeto.find({ feira: feiraAtual._id, escolaId }).lean();
+        // Buscar todos os avaliadores dessa feira
+        const avaliadores = await Avaliador.find({ feira: feiraAtual._id, escolaId }).lean();
+        // Buscar avaliações
+        const avaliacoes = await Avaliacao.find({ feira: feiraAtual._id, escolaId }).lean();
+
+        const resumoProjetos = await Promise.all(projetos.map(async projeto => {
+            // Filtrar avaliadores que têm esse projeto atribuído
+            const avaliadoresDoProjeto = avaliadores.filter(av =>
+                av.projetosAtribuidos?.some(pId => String(pId) === String(projeto._id))
+            );
+
+            const avaliadoresDetalhes = avaliadoresDoProjeto.map(av => {
+                // Encontrar a avaliação feita por este avaliador neste projeto
+                const avaliacao = avaliacoes.find(a =>
+                    String(a.projeto) === String(projeto._id) &&
+                    String(a.avaliador) === String(av._id)
+                );
+
+                let status = 'Pendente';
+                if (avaliacao && (avaliacao.finalizadaPorAvaliador || (avaliacao.notas || avaliacao.itens).length > 0)) {
+                    status = '✅ Avaliado';
+                }
+
+                return {
+                    nome: av.nome,
+                    email: av.email,
+                    status
+                };
+            });
+
+            return {
+                titulo: projeto.titulo,
+                avaliadores: avaliadoresDetalhes
+            };
+        }));
+
+        const escola = await Escola.findById(escolaId).lean() || { nome: "Nome da Escola" };
+
+        await generatePdfReport(req, res, 'pdf-resumo-projetos', {
+            titulo: 'Resumo de Projetos',
+            nomeFeira: feiraAtual.nome,
+            projetos: resumoProjetos,
+            escola: escola
+        }, `resumo-projetos_${feiraAtual.nome}`);
+
+    } catch (error) {
+        console.error('Erro ao gerar PDF de resumo de projetos:', error);
+        if (!res.headersSent) {
+            req.flash('error_msg', 'Erro ao gerar PDF de resumo de projetos. Detalhes: ' + error.message);
+            res.redirect('/admin/dashboard?tab=relatorios');
+        }
+    }
+});
+
+
 // ROTA: Relatório Consolidado da Feira
 router.get('/relatorio-consolidado/pdf', verificarAdminEscola, async (req, res) => {
     try {

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title><%= titulo %></title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      font-size: 11px;
+      margin: 25px;
+      color: #333;
+    }
+
+    h1 {
+      font-size: 20px;
+      color: #0056b3;
+      text-align: center;
+      margin-bottom: 25px;
+      border-bottom: 2px solid #0056b3;
+      padding-bottom: 10px;
+    }
+
+    .projeto-section {
+      margin-bottom: 30px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.05);
+      page-break-inside: avoid;
+    }
+
+    .projeto-header {
+      font-size: 16px;
+      color: #007bff;
+      margin-top: 0;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .projeto-info {
+      margin-top: -5px;
+      margin-bottom: 15px;
+      line-height: 1.6;
+    }
+
+    .projeto-info strong {
+      color: #000;
+    }
+
+    .avaliadores-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    .avaliadores-table th,
+    .avaliadores-table td {
+      border: 1px solid #e0e0e0;
+      padding: 8px 10px;
+      text-align: left;
+    }
+
+    .avaliadores-table thead th {
+      background-color: #e6f2ff;
+      color: #0056b3;
+      font-weight: bold;
+      font-size: 12px;
+    }
+
+    .avaliadores-table tbody tr:nth-child(even) {
+      background-color: #f6f6f6;
+    }
+
+    .avaliadores-table td:nth-child(1) {
+        width: 50%;
+    }
+
+    .avaliadores-table td:nth-child(2) {
+        width: 30%;
+    }
+
+    .avaliadores-table td:nth-child(3) {
+        width: 20%;
+        white-space: nowrap;
+    }
+
+    .no-avaliadores {
+      font-style: italic;
+      color: #777;
+      margin-top: 10px;
+      text-align: center;
+      padding: 10px;
+      background-color: #eee;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <h1><%= titulo %></h1>
+
+  <% projetos.forEach(p => { %>
+    <div class="projeto-section">
+      <h2 class="projeto-header">
+        <%= p.titulo %>
+        <span class="avaliador-status">
+          Total Avaliadores: <strong><%= p.avaliadores.length %></strong>
+        </span>
+      </h2>
+      <div class="projeto-info">
+        <p>Categoria: <strong><%= p.categoria?.nome || '—' %></strong></p>
+        <p>Turma: <strong><%= p.turma || '—' %></strong></p>
+      </div>
+
+      <% if (p.avaliadores.length > 0) { %>
+        <table class="avaliadores-table">
+          <thead>
+            <tr>
+              <th>Nome do Avaliador</th>
+              <th>Email</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% p.avaliadores.forEach(av => { %>
+              <tr>
+                <td><%= av.nome %></td>
+                <td><%= av.email %></td>
+                <td><%= av.ativo ? 'Ativo' : 'Inativo' %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      <% } else { %>
+        <p class="no-avaliadores"><em>Nenhum avaliador atribuído.</em></p>
+      <% } %>
+    </div>
+  <% }) %>
+</body>
+</html>
