@@ -109,10 +109,6 @@
           Total Avaliadores: <strong><%= p.avaliadores.length %></strong>
         </span>
       </h2>
-      <div class="projeto-info">
-        <p>Categoria: <strong><%= p.categoria?.nome || '—' %></strong></p>
-        <p>Turma: <strong><%= p.turma || '—' %></strong></p>
-      </div>
 
       <% if (p.avaliadores.length > 0) { %>
         <table class="avaliadores-table">
@@ -120,7 +116,6 @@
             <tr>
               <th>Nome do Avaliador</th>
               <th>Email</th>
-              <th>Status</th>
             </tr>
           </thead>
           <tbody>
@@ -128,7 +123,6 @@
               <tr>
                 <td><%= av.nome %></td>
                 <td><%= av.email %></td>
-                <td><%= av.ativo ? 'Ativo' : 'Inativo' %></td>
               </tr>
             <% }) %>
           </tbody>
