@@ -809,7 +809,6 @@
         document.querySelectorAll('.btn-editar-avaliador').forEach(button => {
             button.addEventListener('click', (event) => {
                 const button = event.currentTarget;
-                const btn = event.currentTarget;
                 tituloAvaliador.textContent = 'Editar Avaliador';
                 formAvaliador.action = `/admin/avaliadores/${button.dataset.id}?_method=PUT`;
                 avaliadorId.value = button.dataset.id;
@@ -1753,7 +1752,7 @@ document.querySelectorAll('.btn-editar-projeto').forEach(button => {
                 modalAvaliador.classList.add('hidden');
             });
 
-         document.querySelectorAll('.btn-editar-avaliador').forEach(button => {
+        /* document.querySelectorAll('.btn-editar-avaliador').forEach(button => {
                 button.addEventListener('click', (event) => {
                     const btn = event.currentTarget;
                     tituloAvaliador.textContent = 'Editar Avaliador';
@@ -1784,7 +1783,7 @@ if (qrCodeUrl) {
 }
 
                 });
-            });
+            });*/
 
              // Script para alternar entre subtabs
   document.querySelectorAll('.subtab-btn').forEach(btn => {
