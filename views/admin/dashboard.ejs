@@ -1752,38 +1752,37 @@ document.querySelectorAll('.btn-editar-projeto').forEach(button => {
                 modalAvaliador.classList.add('hidden');
             });
 
-        /* document.querySelectorAll('.btn-editar-avaliador').forEach(button => {
-                button.addEventListener('click', (event) => {
-                    const btn = event.currentTarget;
-                    tituloAvaliador.textContent = 'Editar Avaliador';
-                    formAvaliador.action = `/admin/avaliadores/${event.target.dataset.id}?_method=PUT`;
-                    avaliadorId.value = event.target.dataset.id;
-                    inputNomeAvaliador.value = event.target.dataset.nome;
-                    inputEmailAvaliador.value = event.target.dataset.email;
-                    inputAtivoAvaliador.checked = event.target.dataset.ativo === 'true';
-                    avaliadorPinDisplay.textContent = event.target.dataset.pin;
-                    pinDisplayDiv.classList.remove('hidden'); 
+         document.querySelectorAll('.btn-editar-avaliador').forEach(button => {
+    button.addEventListener('click', (event) => {
+        const btn = event.currentTarget; // garante que é o botão, não o ícone/span
+        tituloAvaliador.textContent = 'Editar Avaliador';
+        formAvaliador.action = `/admin/avaliadores/${btn.dataset.id}?_method=PUT`;
+        avaliadorId.value = btn.dataset.id;
+        inputNomeAvaliador.value = btn.dataset.nome || '';
+        inputEmailAvaliador.value = btn.dataset.email || '';
+        inputAtivoAvaliador.checked = btn.dataset.ativo === 'true';
+        avaliadorPinDisplay.textContent = btn.dataset.pin || '';
+        pinDisplayDiv.classList.remove('hidden');
 
-                    // Marcar checkboxes de projetos
-                    const projetosIds = event.target.dataset.projetos ? event.target.dataset.projetos.split(',') : [];
-                    projetosAvaliadorCheckboxesDiv.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                        checkbox.checked = projetosIds.includes(checkbox.value);
-                    });
+        // Marcar checkboxes de projetos
+        const projetosIds = btn.dataset.projetos ? btn.dataset.projetos.split(',') : [];
+        projetosAvaliadorCheckboxesDiv.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.checked = projetosIds.includes(checkbox.value);
+        });
 
-                    modalAvaliador.classList.remove('hidden');
-                    modalAvaliador.classList.add('flex');
+        modalAvaliador.classList.remove('hidden');
+        modalAvaliador.classList.add('flex');
 
-                    // Exibir o QR Code se existir
-const qrCodeUrl = event.target.dataset.qrcode || '';
-if (qrCodeUrl) {
-    document.getElementById('qrCodeImage').src = qrCodeUrl;
-    document.getElementById('qrCodePreview').classList.remove('hidden');
-} else {
-    document.getElementById('qrCodePreview').classList.add('hidden');
-}
-
-                });
-            });*/
+        // Exibir o QR Code se existir
+        const qrCodeUrl = btn.dataset.qrcode || '';
+        if (qrCodeUrl) {
+            document.getElementById('qrCodeImage').src = qrCodeUrl;
+            document.getElementById('qrCodePreview').classList.remove('hidden');
+        } else {
+            document.getElementById('qrCodePreview').classList.add('hidden');
+        }
+    });
+});
 
              // Script para alternar entre subtabs
   document.querySelectorAll('.subtab-btn').forEach(btn => {
