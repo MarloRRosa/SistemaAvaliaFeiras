@@ -962,11 +962,29 @@
 </a>
 
 <a href="/admin/resumo-projetos/pdf" target="_blank" 
-   class="block p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out text-center">
+   class="relative block p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out text-center border border-pink-300">
+    
+    <!-- Badge de novidade com animação de piscar -->
+    <span class="absolute top-2 right-2 bg-pink-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow animate-blink">
+        Novo
+    </span>
+
     <i class="fas fa-user-check text-pink-600 text-4xl mb-3"></i>
     <h4 class="text-lg font-semibold text-gray-800">Avaliadores por Projeto</h4>
     <p class="text-sm text-gray-600">Verifica quantos avaliadores cada projeto possui.</p>
 </a>
+
+<style>
+@keyframes blink {
+  0%, 50%, 100% { opacity: 1; }
+  25%, 75% { opacity: 0; }
+}
+
+.animate-blink {
+  animation: blink 1.2s infinite;
+}
+</style>
+
 
     </div>
 </div>
