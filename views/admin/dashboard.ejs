@@ -979,7 +979,7 @@
                                             data-pin="<%= avaliador.pin || '' %>"
                                             data-ativo="<%= avaliador.ativo ? 'true' : 'false' %>"
                                             data-projetos="<%= (avaliador.projetosAtribuidos && avaliador.projetosAtribuidos.length) ? avaliador.projetosAtribuidos.map(p => p._id.toString()).join(',') : '' %>"
-                                            data-qrcode="<%= avaliador.qrcode || '' %>">
+                                            data-qrcode="<%= avaliador.qrcode || '' %>" title="Clique para editar">
                                         <i class="fas fa-edit"></i>
                                     </button>
 
@@ -990,7 +990,7 @@
                                             data-tooltip="Reenviar"
                                             data-id="<%= avaliador._id %>"
                                             data-nome="<%= avaliador.nome %>"
-                                            data-email="<%= avaliador.email %>">
+                                            data-email="<%= avaliador.email %>" title="Reenviar e-mail">
                                         <i class="fas fa-paper-plane"></i>
                                     </button>
 
@@ -1001,7 +1001,7 @@
                                           onsubmit="return confirm('Tem certeza que deseja deletar este avaliador?');">
                                         <button type="submit" 
                                                 class="tooltip btn-hover-effect bg-red-600 hover:bg-red-700 text-white font-semibold py-1.5 px-3 rounded-md text-sm shadow-sm" 
-                                                data-tooltip="Excluir">
+                                                data-tooltip="Excluir" title="Excluir">
                                             <i class="fas fa-trash-alt"></i>
                                         </button>
                                     </form>
