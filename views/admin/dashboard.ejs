@@ -541,118 +541,133 @@
         </div>
 
         <!-- Conteúdo: Avaliadores Cadastrados -->
-        <div id="sub-avaliadores-cadastrados" class="subtab-content block">
-            <div class="table-responsive">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
-                        <tr>
-                            <th class="py-4 px-6 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Nome</th>
-                            <th class="py-4 px-6 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Email</th>
-                            <th class="py-4 px-6 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">PIN</th>
-                            <th class="py-4 px-6 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Status</th>
-                            <th class="py-4 px-6 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Projetos Atribuídos</th>
-                            <th class="py-4 px-6 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Ações</th>
-                            <th class="py-4 px-6 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">QR Code</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        <% avaliadores.forEach(avaliador => { %>
-                            <tr class="table-row-hover">
-                                <td class="py-4 px-6">
-                                    <div class="flex items-center">
-                                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                                            <span class="text-blue-600 font-semibold text-sm">
-                                                <%= avaliador.nome.charAt(0).toUpperCase() %><%= avaliador.nome.split(' ')[1] ? avaliador.nome.split(' ')[1].charAt(0).toUpperCase() : '' %>
-                                            </span>
-                                        </div>
-                                        <div>
-                                            <div class="font-semibold text-blue-600 hover:underline cursor-pointer"
-     onclick="abrirModalEdicaoAvaliador('<%= avaliador._id %>')"
-     title="Clique para editar">
-  <%= avaliador.nome %>
-</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="py-4 px-6">
-                                    <div class="text-gray-900"><%= avaliador.email %></div>
-                                </td>
-                                <td class="py-4 px-6">
-                                    <span class="font-mono text-sm bg-gray-100 px-3 py-1 rounded-lg"><%= avaliador.pin %></span>
-                                </td>
-                                <td class="py-4 px-6">
-                                    <span class="status-indicator <%= avaliador.ativo ? 'status-active' : 'status-inactive' %> px-3 py-1 rounded-full text-xs font-semibold
-                                      <%= avaliador.ativo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
-                                      <%= avaliador.ativo ? 'Ativo' : 'Inativo' %>
+<div id="sub-avaliadores-cadastrados" class="subtab-content block">
+    <div class="table-responsive">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
+                <tr>
+                    <!-- Checkbox Selecionar Todos -->
+                    <th class="py-4 px-6 text-center">
+                        <input type="checkbox" id="selecionarTodosAvaliadores" class="form-checkbox h-4 w-4 text-blue-600">
+                    </th>
+                    <th class="py-4 px-6 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Nome</th>
+                    <th class="py-4 px-6 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Email</th>
+                    <th class="py-4 px-6 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">PIN</th>
+                    <th class="py-4 px-6 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Status</th>
+                    <th class="py-4 px-6 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Projetos Atribuídos</th>
+                    <th class="py-4 px-6 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Ações</th>
+                    <th class="py-4 px-6 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">QR Code</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                <% avaliadores.forEach(avaliador => { %>
+                    <tr class="table-row-hover">
+                        <!-- Checkbox individual -->
+                        <td class="py-4 px-6 text-center">
+                            <input type="checkbox" class="checkbox-avaliador form-checkbox h-4 w-4 text-blue-600"
+                                   value="<%= avaliador._id %>">
+                        </td>
+
+                        <td class="py-4 px-6">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                    <span class="text-blue-600 font-semibold text-sm">
+                                        <%= avaliador.nome.charAt(0).toUpperCase() %><%= avaliador.nome.split(' ')[1] ? avaliador.nome.split(' ')[1].charAt(0).toUpperCase() : '' %>
                                     </span>
-                                </td>
-                                <td class="py-4 px-6">
-                                    <div class="flex flex-wrap gap-1">
-                                        <% if (avaliador.projetosAtribuidos && avaliador.projetosAtribuidos.length > 0) { %>
-                                            <% avaliador.projetosAtribuidos.forEach(projeto => { %>
-                                                <span class="badge-animate inline-block bg-indigo-100 text-indigo-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">
-                                                    <%= projeto.titulo %>
-                                                </span>
-                                            <% }) %>
-                                        <% } else { %>
-                                            <span class="text-gray-500 text-sm italic">Nenhum projeto</span>
-                                        <% } %>
+                                </div>
+                                <div>
+                                    <div class="font-semibold text-blue-600 hover:underline cursor-pointer"
+                                        onclick="abrirModalEdicaoAvaliador('<%= avaliador._id %>')"
+                                        title="Clique para editar">
+                                        <%= avaliador.nome %>
                                     </div>
-                                </td>
-                                <td class="py-4 px-6 whitespace-nowrap">
-                                    <div class="flex flex-wrap gap-2">
-                                        <button 
-    class="tooltip btn-editar-avaliador btn-hover-effect bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1.5 px-3 rounded-md text-sm shadow-sm" 
-    data-tooltip="Editar avaliador"
-    data-id="<%= avaliador._id || '' %>"
-    data-nome="<%= avaliador.nome || '' %>"
-    data-email="<%= avaliador.email || '' %>"
-    data-pin="<%= avaliador.pin || '' %>"
-    data-ativo="<%= avaliador.ativo ? 'true' : 'false' %>"
-    data-projetos="<%= (avaliador.projetosAtribuidos && avaliador.projetosAtribuidos.length) 
-        ? avaliador.projetosAtribuidos.map(p => p._id.toString()).join(',') 
-        : '' %>"
-    data-qrcode="<%= avaliador.qrcode || '' %>">
-    <i class="fas fa-edit mr-1"></i>
-    <span>Editar</span>
-</button>
+                                </div>
+                            </div>
+                        </td>
 
-                                        <button type="button" class="tooltip btn-reenviar-avaliador btn-hover-effect text-white font-semibold py-1.5 px-3 rounded-md text-sm shadow-sm" 
-        style="background-color: #ea580c; border: none;" 
-        onmouseover="this.style.backgroundColor='#c2410c'" 
-        onmouseout="this.style.backgroundColor='#ea580c'"
-        data-tooltip="Reenviar acesso"
-        data-id="<%= avaliador._id %>"
-        data-nome="<%= avaliador.nome %>"
-        data-email="<%= avaliador.email %>">
-    <i class="fas fa-paper-plane mr-1"></i>Reenviar
-</button>
+                        <td class="py-4 px-6">
+                            <div class="text-gray-900"><%= avaliador.email %></div>
+                        </td>
+                        <td class="py-4 px-6">
+                            <span class="font-mono text-sm bg-gray-100 px-3 py-1 rounded-lg"><%= avaliador.pin %></span>
+                        </td>
+                        <td class="py-4 px-6">
+                            <span class="status-indicator <%= avaliador.ativo ? 'status-active' : 'status-inactive' %> px-3 py-1 rounded-full text-xs font-semibold
+                                <%= avaliador.ativo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
+                                <%= avaliador.ativo ? 'Ativo' : 'Inativo' %>
+                            </span>
+                        </td>
+                        <td class="py-4 px-6">
+                            <div class="flex flex-wrap gap-1">
+                                <% if (avaliador.projetosAtribuidos && avaliador.projetosAtribuidos.length > 0) { %>
+                                    <% avaliador.projetosAtribuidos.forEach(projeto => { %>
+                                        <span class="badge-animate inline-block bg-indigo-100 text-indigo-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">
+                                            <%= projeto.titulo %>
+                                        </span>
+                                    <% }) %>
+                                <% } else { %>
+                                    <span class="text-gray-500 text-sm italic">Nenhum projeto</span>
+                                <% } %>
+                            </div>
+                        </td>
+                        <td class="py-4 px-6 whitespace-nowrap">
+                            <div class="flex flex-wrap gap-2">
+                                <!-- Botão Editar -->
+                                <button 
+                                    class="tooltip btn-editar-avaliador btn-hover-effect bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1.5 px-3 rounded-md text-sm shadow-sm" 
+                                    data-tooltip="Editar avaliador"
+                                    data-id="<%= avaliador._id || '' %>"
+                                    data-nome="<%= avaliador.nome || '' %>"
+                                    data-email="<%= avaliador.email || '' %>"
+                                    data-pin="<%= avaliador.pin || '' %>"
+                                    data-ativo="<%= avaliador.ativo ? 'true' : 'false' %>"
+                                    data-projetos="<%= (avaliador.projetosAtribuidos && avaliador.projetosAtribuidos.length) 
+                                        ? avaliador.projetosAtribuidos.map(p => p._id.toString()).join(',') 
+                                        : '' %>"
+                                    data-qrcode="<%= avaliador.qrcode || '' %>">
+                                    <i class="fas fa-edit mr-1"></i>
+                                    <span>Editar</span>
+                                </button>
 
-                                        <form action="/admin/avaliadores/<%= avaliador._id %>/excluir" method="POST" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar este avaliador?');">
-                                            <button type="submit" class="tooltip btn-hover-effect bg-red-600 hover:bg-red-700 text-white font-semibold py-1.5 px-3 rounded-md text-sm shadow-sm" 
-        data-tooltip="Excluir avaliador">
-    <i class="fas fa-trash-alt mr-1"></i>Excluir
-</button>
-                                        </form>
+                                <!-- Botão Reenviar -->
+                                <button type="button" class="tooltip btn-reenviar-avaliador btn-hover-effect text-white font-semibold py-1.5 px-3 rounded-md text-sm shadow-sm" 
+                                    style="background-color: #ea580c; border: none;" 
+                                    onmouseover="this.style.backgroundColor='#c2410c'" 
+                                    onmouseout="this.style.backgroundColor='#ea580c'"
+                                    data-tooltip="Reenviar acesso"
+                                    data-id="<%= avaliador._id %>"
+                                    data-nome="<%= avaliador.nome %>"
+                                    data-email="<%= avaliador.email %>">
+                                    <i class="fas fa-paper-plane mr-1"></i>Reenviar
+                                </button>
+
+                                <!-- Botão Excluir -->
+                                <form action="/admin/avaliadores/<%= avaliador._id %>/excluir" method="POST" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar este avaliador?');">
+                                    <button type="submit" class="tooltip btn-hover-effect bg-red-600 hover:bg-red-700 text-white font-semibold py-1.5 px-3 rounded-md text-sm shadow-sm" 
+                                        data-tooltip="Excluir avaliador">
+                                        <i class="fas fa-trash-alt mr-1"></i>Excluir
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                        <td class="py-4 px-6 text-center">
+                            <div class="flex justify-center">
+                                <% if (avaliador.qrcode) { %>
+                                    <img src="<%= avaliador.qrcode %>" alt="QR Code" class="h-12 w-12 rounded-lg shadow-sm border border-gray-200">
+                                <% } else { %>
+                                    <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300">
+                                        <i class="fas fa-qrcode text-gray-400"></i>
                                     </div>
-                                </td>
-                                <td class="py-4 px-6 text-center">
-                                    <div class="flex justify-center">
-                                        <% if (avaliador.qrcode) { %>
-                                            <img src="<%= avaliador.qrcode %>" alt="QR Code" class="h-12 w-12 rounded-lg shadow-sm border border-gray-200">
-                                        <% } else { %>
-                                            <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300">
-                                                <i class="fas fa-qrcode text-gray-400"></i>
-                                            </div>
-                                        <% } %>
-                                    </div>
-                                </td>
-                            </tr>
-                        <% }) %>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+                                <% } %>
+                            </div>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
 
         <!-- Conteúdo: Pré-Cadastros -->
         <div id="sub-pre-cadastros" class="subtab-content hidden">
@@ -665,44 +680,46 @@
 
         <!-- Modal melhorado -->
         <div id="modalReenviarAvaliador" class="fixed inset-0 modal-backdrop flex items-center justify-center z-50 hidden">
-            <div class="modal-content bg-white p-6 rounded-xl w-full max-w-md shadow-2xl border border-gray-200 mx-4">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-xl font-bold text-gray-800">Reenviar Acesso ao Avaliador</h3>
-                    <button onclick="fecharModalReenviarAvaliador()" class="text-gray-400 hover:text-gray-600 transition-colors">
-                        <i class="fas fa-times text-lg"></i>
-                    </button>
-                </div>
-                
-                <form id="formReenviarAvaliador" method="POST">
-                    <input type="hidden" name="mensagemPersonalizada" id="mensagemPersonalizada">
-                    
-                    <div class="mb-6">
-                        <label class="block text-sm font-semibold mb-2 text-gray-700">Mensagem Personalizada</label>
-                        <textarea id="campoMensagemAvaliador" 
-                                  class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none" 
-                                  rows="4" 
-                                  placeholder="Digite uma mensagem personalizada para o avaliador..."></textarea>
-                        <div class="text-xs text-gray-500 mt-1">Esta mensagem será incluída no email de acesso</div>
-                    </div>
-                    
-                    <div class="flex justify-end gap-3">
-                        <button type="button" 
-                                onclick="fecharModalReenviarAvaliador()" 
-                                class="px-4 py-2 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors font-medium">
-                            Cancelar
-                        </button>
-                       <button type="submit" 
-        class="text-white px-6 py-2 rounded-lg font-semibold shadow-sm"
-        style="background: linear-gradient(to right, #ea580c, #c2410c);"
-        onmouseover="this.style.background='linear-gradient(to right, #c2410c, #9a3412)'"
-        onmouseout="this.style.background='linear-gradient(to right, #ea580c, #c2410c)'">
-    <i class="fas fa-paper-plane mr-2"></i>Enviar
-</button>
-                    </div>
-                </form>
-            </div>
+    <div class="modal-content bg-white p-6 rounded-xl w-full max-w-md shadow-2xl border border-gray-200 mx-4">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-bold text-gray-800" id="tituloModalReenviar">Reenviar Acesso ao Avaliador</h3>
+            <button onclick="fecharModalReenviarAvaliador()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                <i class="fas fa-times text-lg"></i>
+            </button>
         </div>
+        
+        <form id="formReenviarAvaliador" method="POST">
+            <!-- Campo para mensagem -->
+            <input type="hidden" name="mensagemPersonalizada" id="mensagemPersonalizada">
+            <!-- Novo campo para IDs múltiplos -->
+            <input type="hidden" name="idsSelecionados" id="idsSelecionados">
+
+            <div class="mb-6">
+                <label class="block text-sm font-semibold mb-2 text-gray-700">Mensagem Personalizada</label>
+                <textarea id="campoMensagemAvaliador" 
+                          class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none" 
+                          rows="4" 
+                          placeholder="Digite uma mensagem personalizada para o avaliador..."></textarea>
+                <div class="text-xs text-gray-500 mt-1">Esta mensagem será incluída no email de acesso</div>
+            </div>
+            
+            <div class="flex justify-end gap-3">
+                <button type="button" 
+                        onclick="fecharModalReenviarAvaliador()" 
+                        class="px-4 py-2 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors font-medium">
+                    Cancelar
+                </button>
+                <button type="submit" 
+                        class="text-white px-6 py-2 rounded-lg font-semibold shadow-sm"
+                        style="background: linear-gradient(to right, #ea580c, #c2410c);"
+                        onmouseover="this.style.background='linear-gradient(to right, #c2410c, #9a3412)'"
+                        onmouseout="this.style.background='linear-gradient(to right, #ea580c, #c2410c)'">
+                    <i class="fas fa-paper-plane mr-2"></i>Enviar
+                </button>
+            </div>
+        </form>
     </div>
+</div>
 
     <script>
     // Funcionalidades JavaScript
@@ -837,29 +854,62 @@
         });
     }
 
-    function fecharModalReenviarAvaliador() {
-        document.getElementById('modalReenviarAvaliador').classList.add('hidden');
+    // Fechar modal
+function fecharModalReenviarAvaliador() {
+    document.getElementById('modalReenviarAvaliador').classList.add('hidden');
+}
+
+// Reenvio individual (mantém o que você já tinha)
+document.querySelectorAll('.btn-reenviar-avaliador').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const modal = document.getElementById('modalReenviarAvaliador');
+        const form = document.getElementById('formReenviarAvaliador');
+        form.action = `/admin/avaliadores/${this.dataset.id}/reenviar`;
+        document.getElementById('idsSelecionados')?.remove(); // remove campo extra se existir
+        modal.classList.remove('hidden');
+        document.getElementById('campoMensagemAvaliador').focus();
+    });
+});
+
+// Reenvio múltiplo
+document.getElementById('btnReenviarSelecionados')?.addEventListener('click', function() {
+    const selecionados = [...document.querySelectorAll('.checkbox-avaliador:checked')].map(cb => cb.value);
+
+    if (selecionados.length === 0) {
+        alert('Selecione pelo menos um avaliador para reenviar.');
+        return;
     }
 
-    document.querySelectorAll('.btn-reenviar-avaliador').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const modal = document.getElementById('modalReenviarAvaliador');
-            const form = document.getElementById('formReenviarAvaliador');
-            form.action = `/admin/avaliadores/${this.dataset.id}/reenviar`;
-            modal.classList.remove('hidden');
-            document.getElementById('campoMensagemAvaliador').focus();
-        });
-    });
+    const modal = document.getElementById('modalReenviarAvaliador');
+    const form = document.getElementById('formReenviarAvaliador');
 
-    document.getElementById('formReenviarAvaliador').addEventListener('submit', function(e) {
-        const mensagem = document.getElementById('campoMensagemAvaliador').value;
-        document.getElementById('mensagemPersonalizada').value = mensagem;
-    });
+    // Adiciona campo oculto com todos IDs
+    let hiddenInput = document.getElementById('idsSelecionados');
+    if (!hiddenInput) {
+        hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'idsSelecionados';
+        hiddenInput.id = 'idsSelecionados';
+        form.appendChild(hiddenInput);
+    }
+    hiddenInput.value = selecionados.join(',');
 
-     function abrirModalEdicaoAvaliador(id) {
-    const btn = document.querySelector(`.btn-editar-avaliador[data-id="${id}"]`);
-    if (btn) btn.click(); 
-  }
+    form.action = `/admin/avaliadores/reenviar-multiplos`;
+    modal.classList.remove('hidden');
+    document.getElementById('campoMensagemAvaliador').focus();
+});
+
+// Captura mensagem personalizada
+document.getElementById('formReenviarAvaliador').addEventListener('submit', function(e) {
+    const mensagem = document.getElementById('campoMensagemAvaliador').value;
+    document.getElementById('mensagemPersonalizada').value = mensagem;
+});
+
+// Selecionar todos
+document.getElementById('selecionarTodosAvaliadores')?.addEventListener('change', function() {
+    document.querySelectorAll('.checkbox-avaliador').forEach(cb => cb.checked = this.checked);
+});
+
 </script>
 
 <!-- FIM ABA: AVALIADORES -->
