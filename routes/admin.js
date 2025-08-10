@@ -1421,6 +1421,61 @@ router.post('/avaliadores/:id/reenviar-email', verificarAdminEscola, async (req,
   res.redirect('/admin/dashboard?tab=avaliadores');
 });
 
+router.post('/avaliadores/reenviar-multiplos', verificarAdminEscola, async (req, res) => {
+  const { idsSelecionados, mensagemPersonalizada } = req.body;
+  const escolaId = req.session.adminEscola.escolaId;
+
+  if (!idsSelecionados) {
+    req.flash('error_msg', 'Nenhum avaliador selecionado.');
+    return res.redirect('/admin/dashboard?tab=avaliadores');
+  }
+
+  try {
+    const idsArray = idsSelecionados.split(',').map(id => id.trim());
+
+    // Busca todos os avaliadores da escola que tenham os IDs selecionados
+    const avaliadores = await Avaliador.find({ _id: { $in: idsArray }, escolaId });
+
+    if (avaliadores.length === 0) {
+      req.flash('error_msg', 'Nenhum avaliador encontrado para os IDs selecionados.');
+      return res.redirect('/admin/dashboard?tab=avaliadores');
+    }
+
+    const transporter = nodemailer.createTransport({
+      service: 'SendGrid',
+      auth: {
+        user: 'apikey',
+        pass: process.env.SENDGRID_API_KEY
+      }
+    });
+
+    for (const avaliador of avaliadores) {
+      const url = `${process.env.APP_URL || 'http://localhost:3000'}/avaliador/acesso-direto/${avaliador.pin}`;
+      await transporter.sendMail({
+        from: 'AvaliaFeiras <docsrosas@gmail.com>',
+        to: avaliador.email,
+        subject: 'Acesso ao AvaliaFeiras',
+        html: `
+          <p>Olá ${avaliador.nome},</p>
+          <p>${mensagemPersonalizada || 'Aqui estão seus dados de acesso ao AvaliaFeiras:'}</p>
+          <p><strong>PIN:</strong> ${avaliador.pin}</p>
+          <p><a href="${url}">${url}</a></p>
+          <p>Atenciosamente,</p>
+          <p>Equipe AvaliaFeiras</p>
+        `
+      });
+    }
+
+    req.flash('success_msg', `${avaliadores.length} e-mail(s) reenviado(s) com sucesso.`);
+  } catch (err) {
+    console.error('Erro ao reenviar e-mails múltiplos:', err);
+    req.flash('error_msg', 'Erro ao reenviar e-mails. Detalhes: ' + err.message);
+  }
+
+  res.redirect('/admin/dashboard?tab=avaliadores');
+});
+
+
 // ===========================================
 // ROTAS CRUD - FEIRAS
 // ===========================================
