@@ -545,15 +545,16 @@
         
         <!-- Botão para reenviar múltiplos -->
 <!-- Botão para reenviar múltiplos -->
-<div class="flex justify-between items-center mb-3">
-    <div>
-        <input type="checkbox" id="selecionarTodosAvaliadores" class="form-checkbox h-4 w-4 text-blue-600 mr-2">
-        <label for="selecionarTodosAvaliadores" class="text-sm text-gray-700">Selecionar Todos</label>
+ <div class="flex justify-between items-center mb-4">
+        <div class="flex items-center">
+            <input type="checkbox" id="selecionarTodosAvaliadores" class="form-checkbox h-4 w-4 text-blue-600 mr-2">
+            <label for="selecionarTodosAvaliadores" class="text-sm text-gray-700">Selecionar Todos</label>
+        </div>
+        <button id="btnReenviarSelecionados" 
+            class="bg-green-600 hover:bg-green-700 text-white font-semibold py-1.5 px-3 rounded-md text-sm shadow-sm flex items-center">
+            <i class="fas fa-paper-plane mr-1"></i> Reenviar Selecionados
+        </button>
     </div>
-    <button id="btnReenviarSelecionados" 
-        class="bg-green-600 hover:bg-green-700 text-white font-semibold py-1.5 px-3 rounded-md text-sm shadow-sm flex items-center">
-        <i class="fas fa-paper-plane mr-1"></i> Reenviar Selecionados
-</button>
 
         <div class="table-responsive">
             <table class="min-w-full divide-y divide-gray-200">
