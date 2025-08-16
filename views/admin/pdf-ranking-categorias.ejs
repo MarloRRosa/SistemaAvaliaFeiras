@@ -71,9 +71,10 @@
   </style>
 </head>
 <body>
-  <h1><%= titulo %></h1>
+  <h1><%= titulo %> - <%= nomeFeira %></h1>
+  <h3 style="text-align:center; margin-bottom:20px;"><%= escola.nome %></h3>
 
-  <% Object.keys(relatorioFinalPorProjeto).forEach(categoria => { %>
+  <% Object.keys(rankingPorCategoria).forEach(categoria => { %>
     <div class="categoria-section">
       <h2 class="categoria-header"><%= categoria %></h2>
       <table class="ranking-table">
@@ -81,24 +82,16 @@
           <tr>
             <th>Posição</th>
             <th>Projeto</th>
-            <% criteriosOficiais.forEach(c => { %>
-              <th><%= c.nome %></th>
-            <% }) %>
-            <th>Média Geral</th>
+            <th>Média Final</th>
             <th>Nº Avaliações</th>
           </tr>
         </thead>
         <tbody>
-          <% relatorioFinalPorProjeto[categoria].forEach((proj, index) => { %>
+          <% rankingPorCategoria[categoria].forEach((proj, index) => { %>
             <tr>
               <td><%= index + 1 %>º</td>
               <td><%= proj.titulo %></td>
-              <% criteriosOficiais.forEach(c => { %>
-                <td>
-                  <%= proj.mediasCriterios[c._id.toString()] !== 'N/A' ? proj.mediasCriterios[c._id.toString()] : 'N/A' %>
-                </td>
-              <% }) %>
-              <td><%= proj.mediaGeral %></td>
+              <td><%= proj.notaFinal %></td>
               <td><%= proj.numAvaliacoes %></td>
             </tr>
           <% }) %>
