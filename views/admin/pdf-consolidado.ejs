@@ -84,6 +84,11 @@
             color: #0056b3;
         }
 
+        .posicao {
+            font-weight: bold;
+            color: #d9534f; /* vermelho elegante para destacar posição */
+        }
+
         /* Estilo para "Nenhum projeto avaliado" */
         .no-data-message {
             text-align: center;
@@ -98,7 +103,7 @@
     </style>
 </head>
 <body>
-    <h1>Relatório Consolidado<%= nomeFeira %></h1>
+    <h1>Relatório Consolidado <%= nomeFeira %></h1>
 
     <%
       const sortedCategories = Object.keys(relatorioFinalPorProjeto).sort();
@@ -111,7 +116,8 @@
                 <table class="projetos-table">
                     <thead>
                         <tr>
-                            <th style="width: 30%;">PROJETO</th>
+                            <th class="text-center" style="width: 6%;">POSIÇÃO</th>
+                            <th style="width: 28%;">PROJETO</th>
                             <th class="text-center" style="width: 8%;">Nº AVALIAÇÕES</th>
                             <% criteriosOficiais.forEach(criterio => { %>
                                 <th class="text-center"><%= criterio.nome.toUpperCase() %></th>
@@ -122,9 +128,10 @@
                     <tbody>
                         <% 
                             if (relatorioFinalPorProjeto.hasOwnProperty(categoria)) {
-                                relatorioFinalPorProjeto[categoria].forEach(projeto => { 
+                                relatorioFinalPorProjeto[categoria].forEach((projeto, index) => { 
                         %>
                             <tr>
+                                <td class="text-center posicao"><%= (index + 1) %>º</td>
                                 <td><%= projeto.titulo %></td>
                                 <td class="text-center"><%= projeto.numAvaliacoes %></td>
                                 <% criteriosOficiais.forEach(criterio => { %>
