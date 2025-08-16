@@ -524,6 +524,14 @@
             padding: 2px 6px;
         }
     }
+
+    @keyframes blink {
+  50% { opacity: 0; }
+}
+.blink {
+  animation: blink 1s infinite;
+}
+
 </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -1334,11 +1342,19 @@ document.getElementById('selecionarTodosAvaliadores')?.addEventListener('change'
             <h4 class="text-lg font-semibold text-gray-800">Relatório Consolidado</h4>
             <p class="text-sm text-gray-600">Gera um relatório detalhado de projetos e avaliações.</p>
         </a>
-        <a href="/admin/avaliacoes/pdf" target="_blank" class="block p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out text-center">
-            <i class="fas fa-file-alt text-blue-600 text-4xl mb-3"></i>
-            <h4 class="text-lg font-semibold text-gray-800">Avaliações Completas</h4>
-            <p class="text-sm text-gray-600">Gera um PDF com detalhes de todas as avaliações.</p>
-        </a>
+        <a href="/admin/avaliacoes/pdf" target="_blank" 
+   class="relative block p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out text-center">
+
+    <!-- Selo de Novidade -->
+    <span class="absolute top-2 right-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">
+        Novidade
+    </span>
+
+    <i class="fas fa-file-alt text-blue-600 text-4xl mb-3"></i>
+    <h4 class="text-lg font-semibold text-gray-800">Relatório com Feedback</h4>
+    <p class="text-sm text-gray-600">Gera um PDF com detalhes de todas as avaliações e Feedback.</p>
+</a>
+
         <a href="/admin/projetos-sem-avaliacao/pdf" target="_blank" class="block p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out text-center">
             <i class="fas fa-exclamation-triangle text-orange-600 text-4xl mb-3"></i>
             <h4 class="text-lg font-semibold text-gray-800">Projetos Sem Avaliação</h4>
