@@ -2,151 +2,155 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title><%= titulo %></title>
+  <title>Relatório de Avaliações</title>
   <style>
-    /* Estilos Gerais do Corpo e Fonte */
     body {
-      font-family: 'Arial', sans-serif;
-      font-size: 11px; /* Tamanho de fonte um pouco menor para PDFs */
-      margin: 25px; /* Margens maiores para o PDF, para cabeçalho/rodapé do Puppeteer */
+      font-family: Arial, sans-serif;
+      margin: 20px;
       color: #333;
     }
 
-    /* Estilos do Cabeçalho Principal */
-    h1 {
-      font-size: 20px;
-      color: #0056b3; /* Um tom de azul para o título principal */
-      text-align: center;
-      margin-bottom: 25px;
-      border-bottom: 2px solid #0056b3;
-      padding-bottom: 10px;
+    h1, h2, h3 {
+      color: #222;
     }
 
-    /* Estilos das Seções de Avaliação */
+    .projeto-section {
+      page-break-before: always; /* cada projeto inicia em nova página */
+      margin-bottom: 40px;
+    }
+
+    .avaliacao-header {
+      background: #f0f0f0;
+      padding: 12px;
+      border-radius: 5px;
+      margin-bottom: 15px;
+      font-size: 18px;
+    }
+
     .avaliacao-section {
-      margin-bottom: 30px; /* Espaço maior entre os blocos de avaliações */
+      margin-bottom: 30px;
       padding: 15px;
       border: 1px solid #ddd;
       border-radius: 5px;
       background-color: #f9f9f9;
-      box-shadow: 2px 2px 5px rgba(0,0,0,0.05); /* Sutil sombra para destacar */
-      page-break-inside: avoid; /* Evita quebra de página dentro de uma avaliação */
-    }
-
-    .avaliacao-header {
-      font-size: 16px;
-      color: #007bff; /* Azul para o cabeçalho da avaliação */
-      margin-bottom: 10px;
-      border-bottom: 1px dashed #cce5ff;
-      padding-bottom: 5px;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.05);
+      page-break-inside: avoid; /* evita quebrar avaliação no meio */
     }
 
     .avaliacao-details p {
-      margin-bottom: 5px;
-      line-height: 1.4;
+      margin: 4px 0;
     }
 
-    .avaliacao-details strong {
-      color: #0056b3;
-    }
-
-    /* Estilos da Tabela de Critérios */
     .criterios-table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 10px;
     }
 
-    .criterios-table th, .criterios-table td {
-      border: 1px solid #eee;
+    .criterios-table th,
+    .criterios-table td {
+      border: 1px solid #ccc;
       padding: 8px;
-      text-align: left;
     }
 
     .criterios-table th {
-      background-color: #e9ecef;
-      color: #495057;
-      font-weight: bold;
+      background: #eee;
+      text-align: left;
     }
 
-    .criterios-table td.text-center {
+    .text-center {
       text-align: center;
     }
 
-    /* Estilos de Status */
     .status-finalizada {
-      color: #28a745; /* Verde para finalizada */
-      font-weight: bold;
+      color: green;
     }
 
     .status-pendente {
-      color: #dc3545; /* Vermelho para pendente */
-      font-weight: bold;
+      color: red;
     }
 
-    /* Mensagem de "Nenhum dado" */
-    .no-data-message {
-      text-align: center;
-      margin-top: 50px;
-      color: #666;
-      font-style: italic;
-      padding: 20px;
-      background-color: #f2f2f2;
-      border-radius: 5px;
-      border: 1px solid #ddd;
+    @media print {
+      body {
+        margin: 10mm;
+      }
+      .projeto-section {
+        page-break-before: always;
+      }
+      .avaliacao-section {
+        page-break-inside: avoid;
+      }
     }
   </style>
 </head>
 <body>
-  <h1><%= titulo %> da Feira: <%= nomeFeira %></h1>
+  <h1>Relatório de Avaliações</h1>
 
-  <% if (avaliacoes && avaliacoes.length > 0) { %>
-    <% avaliacoes.forEach(avaliacao => { %>
-      <div class="avaliacao-section">
-        <h2 class="avaliacao-header">
-          Projeto: <%= avaliacao.projeto && avaliacao.projeto.titulo ? avaliacao.projeto.titulo : 'Projeto Removido' %> 
-(<%= avaliacao.projeto && avaliacao.projeto.categoria && avaliacao.projeto.categoria.nome ? avaliacao.projeto.categoria.nome : 'Sem Categoria' %>)
-        </h2>
-        <div class="avaliacao-details">
-          <p>Avaliador: <strong>
-  <%= avaliacao.avaliador && avaliacao.avaliador.nome ? avaliacao.avaliador.nome : 'Avaliador Removido' %> 
-  (<%= avaliacao.avaliador && avaliacao.avaliador.email ? avaliacao.avaliador.email : '-' %>)
-</strong></p>
-          <p>Data da Avaliação: <strong><%= formatarData(avaliacao.createdAt) %></strong></p>
-          <p>Status: <strong class="<%= avaliacao.finalizadaPorAvaliador ? 'status-finalizada' : 'status-pendente' %>">
-            <%= avaliacao.finalizadaPorAvaliador ? 'Finalizada' : 'Em Andamento' %>
-          </strong></p>
-          <% if (avaliacao.comentarioGeral && avaliacao.comentarioGeral.trim() !== '') { %>
-            <p>Comentário Geral: <em><%= avaliacao.comentarioGeral %></em></p>
+  <% 
+    const avaliacoesPorProjeto = {};
+    avaliacoes.forEach(av => {
+      const projetoId = av.projeto ? av.projeto._id : 'semProjeto';
+      if (!avaliacoesPorProjeto[projetoId]) {
+        avaliacoesPorProjeto[projetoId] = {
+          projeto: av.projeto,
+          avaliacoes: []
+        };
+      }
+      avaliacoesPorProjeto[projetoId].avaliacoes.push(av);
+    });
+  %>
+
+  <% Object.keys(avaliacoesPorProjeto).forEach(projetoId => { 
+      const projetoData = avaliacoesPorProjeto[projetoId];
+  %>
+    <div class="projeto-section">
+      <h2 class="avaliacao-header">
+        Projeto: <%= projetoData.projeto && projetoData.projeto.titulo ? projetoData.projeto.titulo : 'Projeto Removido' %> 
+        (<%= projetoData.projeto && projetoData.projeto.categoria ? projetoData.projeto.categoria.nome : 'Sem Categoria' %>)
+      </h2>
+
+      <% projetoData.avaliacoes.forEach(avaliacao => { %>
+        <div class="avaliacao-section">
+          <div class="avaliacao-details">
+            <p>Avaliador: <strong>
+              <%= avaliacao.avaliador && avaliacao.avaliador.nome ? avaliacao.avaliador.nome : 'Avaliador Removido' %>
+              (<%= avaliacao.avaliador && avaliacao.avaliador.email ? avaliacao.avaliador.email : '-' %>)
+            </strong></p>
+            <p>Data da Avaliação: <strong><%= formatarData(avaliacao.createdAt) %></strong></p>
+            <p>Status: <strong class="<%= avaliacao.finalizadaPorAvaliador ? 'status-finalizada' : 'status-pendente' %>">
+              <%= avaliacao.finalizadaPorAvaliador ? 'Finalizada' : 'Em Andamento' %>
+            </strong></p>
+            <% if (avaliacao.comentarioGeral && avaliacao.comentarioGeral.trim() !== '') { %>
+              <p>Comentário Geral: <em><%= avaliacao.comentarioGeral %></em></p>
+            <% } %>
+          </div>
+
+          <% if (avaliacao.notasComNomesDeCriterio && avaliacao.notasComNomesDeCriterio.length > 0) { %>
+            <table class="criterios-table">
+              <thead>
+                <tr>
+                  <th>Critério</th>
+                  <th class="text-center">Nota</th>
+                  <th>Observações</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% avaliacao.notasComNomesDeCriterio.forEach(nota => { %>
+                  <tr>
+                    <td><%= nota.criterioNome %></td>
+                    <td class="text-center"><%= nota.valor %></td>
+                    <td><%= nota.observacao || 'Nenhuma' %></td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          <% } else { %>
+            <p>Nenhuma nota de critério registrada para esta avaliação.</p>
           <% } %>
         </div>
+      <% }) %>
+    </div>
+  <% }) %>
 
-        <% if (avaliacao.notasComNomesDeCriterio && avaliacao.notasComNomesDeCriterio.length > 0) { %>
-          <table class="criterios-table">
-            <thead>
-              <tr>
-                <th>Critério</th>
-                <th class="text-center">Nota</th>
-                <th>Observações</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% avaliacao.notasComNomesDeCriterio.forEach(nota => { %>
-                <tr>
-                  <td><%= nota.criterioNome %></td>
-                  <td class="text-center"><%= nota.valor %></td>
-                  <td><%= nota.observacao || 'Nenhuma' %></td>
-                </tr>
-              <% }) %>
-            </tbody>
-          </table>
-        <% } else { %>
-          <p>Nenhuma nota de critério registrada para esta avaliação.</p>
-        <% } %>
-      </div>
-    <% }) %>
-  <% } else { %>
-    <p class="no-data-message">Nenhuma avaliação encontrada para a feira atual.</p>
-  <% } %>
 </body>
 </html>
