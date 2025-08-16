@@ -4,99 +4,76 @@
   <meta charset="UTF-8">
   <title><%= titulo %></title>
   <style>
-    /* Estilos Gerais do Corpo e Fonte */
     body {
       font-family: 'Arial', sans-serif;
-      font-size: 11px; /* Tamanho de fonte um pouco menor para PDFs */
-      margin: 25px; /* Margens maiores para o PDF */
+      font-size: 11px;
+      margin: 25px;
       color: #333;
     }
 
-    /* Estilos do Cabeçalho Principal */
     h1 {
       font-size: 20px;
-      color: #0056b3; /* Um tom de azul para o título principal */
+      color: #0056b3;
       text-align: center;
       margin-bottom: 25px;
       border-bottom: 2px solid #0056b3;
       padding-bottom: 10px;
     }
 
-    /* Estilos das Seções de Categoria */
     .categoria-section {
-      margin-bottom: 30px; /* Espaço maior entre os blocos de categorias */
+      margin-bottom: 30px;
       padding: 15px;
       border: 1px solid #ddd;
       border-radius: 5px;
       background-color: #f9f9f9;
-      box-shadow: 2px 2px 5px rgba(0,0,0,0.05); /* Sutil sombra para destacar */
-      page-break-inside: avoid; /* Evita quebra de página dentro de uma categoria */
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.05);
+      page-break-inside: avoid;
     }
 
     .categoria-header {
       font-size: 16px;
-      color: #007bff; /* Azul um pouco mais claro para o nome da categoria */
+      color: #007bff;
       margin-top: 0;
       margin-bottom: 15px;
-      border-bottom: 1px solid #e0e0e0; /* Linha sutil sob o nome da categoria */
+      border-bottom: 1px solid #e0e0e0;
       padding-bottom: 5px;
     }
 
-    /* Estilos da Tabela de Ranking */
     .ranking-table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 15px;
+      font-size: 10px;
     }
 
     .ranking-table th,
     .ranking-table td {
       border: 1px solid #e0e0e0;
-      padding: 8px 10px;
-      text-align: left; /* Padrão de alinhamento */
+      padding: 6px 8px;
+      text-align: center;
     }
 
     .ranking-table thead th {
-      background-color: #e6f2ff; /* Fundo azul claro para o cabeçalho da tabela */
+      background-color: #e6f2ff;
       color: #0056b3;
       font-weight: bold;
-      font-size: 12px;
+      font-size: 11px;
     }
 
     .ranking-table tbody tr:nth-child(even) {
-      background-color: #f6f6f6; /* Listras zebradas para facilitar a leitura */
-    }
-
-    /* Ajustes de largura e alinhamento específicos para as colunas */
-    .ranking-table th:nth-child(1),
-    .ranking-table td:nth-child(1) { /* Posição */
-        width: 10%;
-        text-align: center; /* Centraliza a posição */
-        font-weight: bold;
+      background-color: #f6f6f6;
     }
 
     .ranking-table th:nth-child(2),
-    .ranking-table td:nth-child(2) { /* Projeto */
-        width: 50%;
-    }
-
-    .ranking-table th:nth-child(3),
-    .ranking-table td:nth-child(3) { /* Média Geral */
-        width: 20%;
-        text-align: center; /* Centraliza a média */
-    }
-
-    .ranking-table th:nth-child(4),
-    .ranking-table td:nth-child(4) { /* Nº Avaliações */
-        width: 20%;
-        text-align: center; /* Centraliza o número de avaliações */
+    .ranking-table td:nth-child(2) {
+        text-align: left; /* Nome do projeto alinhado à esquerda */
     }
   </style>
 </head>
 <body>
   <h1><%= titulo %></h1>
 
-  <% Object.keys(rankingPorCategoria).forEach(categoria => { %>
+  <% Object.keys(relatorioFinalPorProjeto).forEach(categoria => { %>
     <div class="categoria-section">
       <h2 class="categoria-header"><%= categoria %></h2>
       <table class="ranking-table">
@@ -104,16 +81,24 @@
           <tr>
             <th>Posição</th>
             <th>Projeto</th>
+            <% criteriosOficiais.forEach(c => { %>
+              <th><%= c.nome %></th>
+            <% }) %>
             <th>Média Geral</th>
             <th>Nº Avaliações</th>
           </tr>
         </thead>
         <tbody>
-          <% rankingPorCategoria[categoria].forEach((proj, index) => { %>
+          <% relatorioFinalPorProjeto[categoria].forEach((proj, index) => { %>
             <tr>
               <td><%= index + 1 %>º</td>
               <td><%= proj.titulo %></td>
-              <td><%= proj.notaFinal && proj.notaFinal !== 'N/A' ? proj.notaFinal: 'N/A' %></td>
+              <% criteriosOficiais.forEach(c => { %>
+                <td>
+                  <%= proj.mediasCriterios[c._id.toString()] !== 'N/A' ? proj.mediasCriterios[c._id.toString()] : 'N/A' %>
+                </td>
+              <% }) %>
+              <td><%= proj.mediaGeral %></td>
               <td><%= proj.numAvaliacoes %></td>
             </tr>
           <% }) %>

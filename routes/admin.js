@@ -2374,7 +2374,7 @@ router.get('/relatorio-consolidado/pdf', verificarAdminEscola, async (req, res) 
                     else if (!isNaN(nB)) return 1;
                 }
 
-                return 0; // completamente empatado
+                return 0; 
             });
         });
 
