@@ -8,70 +8,114 @@
         body {
             font-family: 'Arial', sans-serif;
             font-size: 11px; /* Tamanho de fonte um pouco menor para PDFs */
-            margin: 25px; /* Margens maiores para o PDF, para cabeçalho/rodapé do Puppeteer */
+            margin: 20px; /* Margens otimizadas */
             color: #333;
+            line-height: 1.3;
         }
 
         /* Estilos do Cabeçalho Principal */
         h1 {
-            font-size: 20px;
+            font-size: 18px;
             color: #0056b3; /* Um tom de azul para o título principal */
             text-align: center;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             border-bottom: 2px solid #0056b3;
-            padding-bottom: 10px;
+            padding-bottom: 8px;
         }
 
         /* Estilos das Seções de Categoria */
         .categoria-section {
-            margin-bottom: 30px; /* Espaço maior entre os blocos de categorias */
-            padding: 15px;
+            margin-bottom: 25px; /* Espaço entre os blocos de categorias */
+            padding: 12px;
             border: 1px solid #ddd;
             border-radius: 5px;
             background-color: #f9f9f9;
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.05); /* Sutil sombra para destacar */
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.05); /* Sutil sombra para destacar */
             page-break-inside: avoid; /* Evita quebra de página dentro de uma categoria */
         }
 
         .categoria-header {
-            font-size: 16px;
+            font-size: 14px;
             color: #007bff; /* Azul um pouco mais claro para o nome da categoria */
             margin-top: 0;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             border-bottom: 1px solid #e0e0e0; /* Linha sutil sob o nome da categoria */
             padding-bottom: 5px;
+            font-weight: bold;
         }
 
         /* Estilos da Tabela de Projetos */
         .projetos-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 15px;
-            table-layout: auto; /* Permite ajuste automático das colunas */
+            margin-top: 10px;
+            table-layout: fixed; /* Layout fixo para controle melhor das colunas */
+            font-size: 9px; /* Fonte menor para a tabela toda */
         }
 
         .projetos-table th,
         .projetos-table td {
             border: 1px solid #e0e0e0;
-            padding: 4px 6px; /* Padding ainda menor para caber mais colunas */
+            padding: 6px 4px; /* Padding otimizado */
             text-align: left;
+            vertical-align: top;
+            word-wrap: break-word; /* Quebra palavras longas */
+            overflow-wrap: break-word;
         }
 
         .projetos-table thead th {
             background-color: #e6f2ff; /* Fundo azul claro para o cabeçalho da tabela */
             color: #0056b3;
             font-weight: bold;
-            font-size: 9px; /* Fonte menor para cabeçalhos de critério */
+            font-size: 8px; /* Fonte menor para cabeçalhos */
             text-transform: uppercase;
-            vertical-align: top; /* Alinha texto do cabeçalho no topo, se quebrar */
+            text-align: center;
+            line-height: 1.1;
+            padding: 4px 2px;
         }
 
         .projetos-table tbody tr:nth-child(even) {
-            background-color: #f6f6f6; /* Listras zebradas para facilitar a leitura */
+            background-color: #f8f8f8; /* Listras zebradas para facilitar a leitura */
         }
         
-        .projetos-table td {
-            font-size: 9px; /* Fonte ainda menor para células da tabela */
+        .projetos-table tbody tr:hover {
+            background-color: #f0f8ff; /* Destaque ao passar o mouse */
+        }
+
+        /* Larguras específicas das colunas */
+        .projetos-table th:nth-child(1), /* POSIÇÃO */
+        .projetos-table td:nth-child(1) {
+            width: 8%;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .projetos-table th:nth-child(2), /* PROJETO */
+        .projetos-table td:nth-child(2) {
+            width: 35%;
+            text-align: left;
+            font-weight: 500;
+        }
+
+        .projetos-table th:nth-child(3), /* Nº AVALIAÇÕES */
+        .projetos-table td:nth-child(3) {
+            width: 10%;
+            text-align: center;
+        }
+
+        /* Colunas de critérios - dividindo o espaço restante igualmente */
+        .projetos-table th:nth-child(n+4):not(:last-child),
+        .projetos-table td:nth-child(n+4):not(:last-child) {
+            width: 9%;
+            text-align: center;
+        }
+
+        .projetos-table th:last-child, /* MÉDIA GERAL */
+        .projetos-table td:last-child {
+            width: 10%;
+            text-align: center;
+            font-weight: bold;
+            background-color: #fff3cd !important;
         }
 
         /* Alinhamentos específicos */
@@ -82,23 +126,62 @@
         .media-geral {
             font-weight: bold;
             color: #0056b3;
+            font-size: 10px;
         }
 
         .posicao {
             font-weight: bold;
             color: #d9534f; /* vermelho elegante para destacar posição */
+            font-size: 10px;
         }
 
         /* Estilo para "Nenhum projeto avaliado" */
         .no-data-message {
             text-align: center;
-            margin-top: 50px;
+            margin-top: 40px;
             color: #666;
             font-style: italic;
             padding: 20px;
             background-color: #f2f2f2;
             border-radius: 5px;
             border: 1px solid #ddd;
+            font-size: 12px;
+        }
+
+        /* Melhorias para impressão/PDF */
+        @media print {
+            body {
+                margin: 15px;
+            }
+            
+            .categoria-section {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+            
+            .projetos-table {
+                font-size: 8px;
+            }
+            
+            .projetos-table th {
+                font-size: 7px;
+            }
+        }
+
+        /* Responsividade para telas menores */
+        @media screen and (max-width: 1200px) {
+            .projetos-table {
+                font-size: 8px;
+            }
+            
+            .projetos-table th {
+                font-size: 7px;
+                padding: 3px 2px;
+            }
+            
+            .projetos-table td {
+                padding: 4px 2px;
+            }
         }
     </style>
 </head>
@@ -116,13 +199,13 @@
                 <table class="projetos-table">
                     <thead>
                         <tr>
-                            <th class="text-center" style="width: 6%;">POSIÇÃO</th>
-                            <th style="width: 28%;">PROJETO</th>
-                            <th class="text-center" style="width: 8%;">Nº AVALIAÇÕES</th>
+                            <th class="text-center">POSIÇÃO</th>
+                            <th>PROJETO</th>
+                            <th class="text-center">Nº AVAL.</th>
                             <% criteriosOficiais.forEach(criterio => { %>
                                 <th class="text-center"><%= criterio.nome.toUpperCase() %></th>
                             <% }) %>
-                            <th class="text-center" style="width: 12%;">MÉDIA GERAL</th>
+                            <th class="text-center">MÉDIA GERAL</th>
                         </tr>
                     </thead>
                     <tbody>
