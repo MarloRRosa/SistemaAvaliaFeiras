@@ -2089,15 +2089,22 @@ router.get('/ranking-categorias/pdf', verificarAdminEscola, async (req, res) => 
         const feiraAtual = await Feira.findOne({ status: 'ativa', escolaId: escolaId });
         if (!feiraAtual) {
             req.flash('error_msg', 'Nenhuma feira ativa para esta escola para gerar o ranking por categoria.');
-            if (!res.headersSent) { return res.redirect('/admin/dashboard?tab=relatorios'); }
+            if (!res.headersSent) { 
+                return res.redirect('/admin/dashboard?tab=relatorios'); 
+            }
         }
 
         const projetos = await Projeto.find({ feira: feiraAtual._id, escolaId: escolaId })
             .populate('categoria')
             .populate('criterios')
             .lean();
+
         const avaliacoes = await Avaliacao.find({ feira: feiraAtual._id, escolaId: escolaId }).lean();
-        const categorias = await Categoria.find({ feira: feiraAtual._id, escolaId: escolaId }).lean();
+
+        // 🔑 Ordenar categorias pela ordem definida pelo admin
+        const categorias = await Categoria.find({ feira: feiraAtual._id, escolaId: escolaId })
+            .sort({ ordem: 1 })
+            .lean();
 
         const rankingPorCategoria = {};
         for (const projeto of projetos) {
@@ -2110,7 +2117,13 @@ router.get('/ranking-categorias/pdf', verificarAdminEscola, async (req, res) => 
                 for (const criterioProjeto of projeto.criterios) {
                     const avaliacoesDoCriterio = avaliacoesDoProjeto.flatMap(avaliacao => {
                         const notasArray = avaliacao.notas || avaliacao.itens;
-                        return (notasArray && Array.isArray(notasArray)) ? notasArray.filter(item => String(item.criterio) === String(criterioProjeto._id) && item.nota !== undefined && item.nota !== null) : [];
+                        return (notasArray && Array.isArray(notasArray))
+                            ? notasArray.filter(item =>
+                                String(item.criterio) === String(criterioProjeto._id) &&
+                                item.nota !== undefined &&
+                                item.nota !== null
+                              )
+                            : [];
                     });
 
                     if (avaliacoesDoCriterio.length > 0) {
@@ -2121,10 +2134,14 @@ router.get('/ranking-categorias/pdf', verificarAdminEscola, async (req, res) => 
                     }
                 }
             }
-            projeto.notaFinal = totalPeso > 0 ? parseFloat(totalNotaPonderada / totalPeso).toFixed(2) : 'N/A';
+
+            projeto.notaFinal = totalPeso > 0
+                ? parseFloat(totalNotaPonderada / totalPeso).toFixed(2)
+                : 'N/A';
             projeto.numAvaliacoes = numAvaliacoes;
         }
 
+        // Montar ranking respeitando a ordem dos projetos dentro de cada categoria
         categorias.forEach(cat => {
             rankingPorCategoria[cat.nome] = projetos
                 .filter(p => p.categoria && String(p.categoria._id) === String(cat._id))
@@ -2134,18 +2151,25 @@ router.get('/ranking-categorias/pdf', verificarAdminEscola, async (req, res) => 
                     if (isNaN(notaA) && isNaN(notaB)) return 0;
                     if (isNaN(notaA)) return 1;
                     if (isNaN(notaB)) return -1;
-                    return notaB - notaA;
+                    return notaB - notaA; // ordem decrescente por nota
                 });
         });
 
         const escola = await Escola.findById(escolaId).lean() || { nome: "Nome da Escola" };
 
-        await generatePdfReport(req, res, 'pdf-ranking-categorias', {
-            titulo: 'Ranking por Categoria',
-            nomeFeira: feiraAtual.nome,
-            rankingPorCategoria: rankingPorCategoria,
-            escola: escola
-        }, `ranking-categorias_${feiraAtual.nome}`);
+        await generatePdfReport(
+            req,
+            res,
+            'pdf-ranking-categorias',
+            {
+                titulo: 'Ranking por Categoria',
+                nomeFeira: feiraAtual.nome,
+                categorias, // 🔑 passar array já ordenado para o EJS
+                rankingPorCategoria,
+                escola
+            },
+            `ranking-categorias_${feiraAtual.nome}`
+        );
 
     } catch (error) {
         console.error('Erro ao gerar PDF de ranking por categoria:', error);
@@ -2155,6 +2179,7 @@ router.get('/ranking-categorias/pdf', verificarAdminEscola, async (req, res) => 
         }
     }
 });
+
 
 // Rota para PDF de Resumo de Avaliadores
 router.get('/resumo-avaliadores/pdf', verificarAdminEscola, async (req, res) => {
