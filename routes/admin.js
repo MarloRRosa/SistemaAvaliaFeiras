@@ -17,6 +17,7 @@ const ConfiguracaoFormularioPreCadastro = require('../models/ConfiguracaoFormula
 
 const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
+const sendEmail = require('../utils/emailSender');
 const crypto = require('crypto');
 const puppeteer = require('puppeteer');
 const chromium = require('@sparticuz/chromium');
@@ -92,45 +93,31 @@ function formatarDataParaInput(dateString) {
 
 // Função para enviar e-mail de redefinição de PIN para avaliador
 async function sendResetPinEmail(avaliador) {
-    const nodemailer = require('nodemailer');
+  const html = `
+    <p>Olá, ${avaliador.nome},</p>
+    <p>Seu PIN de acesso ao sistema AvaliaFeiras foi redefinido.</p>
+    <p>Seu novo PIN é: <strong>${avaliador.pin}</strong></p>
+    <p>Por favor, utilize este PIN para acessar sua conta de avaliador.</p>
+    <p>Se você não solicitou esta redefinição, por favor, ignore este e-mail.</p>
+    <br>
+    <p>Atenciosamente,</p>
+    <p>Equipe AvaliaFeiras</p>
+  `;
 
-const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,
-    port: process.env.EMAIL_PORT,
-    secure: process.env.EMAIL_SECURE === 'true',
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    },
-    tls: {
-        rejectUnauthorized: false
-    }
-});
+  try {
+    await sendEmail({
+      to: avaliador.email,
+      subject: 'Redefinição de PIN do Avaliador - AvaliaFeiras',
+      html,
+      from: process.env.EMAIL_FROM, // se seu emailSender já define "from", pode remover esta linha
+    });
 
-    const mailOptions = {
-        from: `"AvaliaFeiras" <${process.env.EMAIL_USER}>`,
-        to: avaliador.email,
-        subject: 'Redefinição de PIN do Avaliador - AvaliaFeiras',
-        html: `
-            <p>Olá, ${avaliador.nome},</p>
-            <p>Seu PIN de acesso ao sistema AvaliaFeiras foi redefinido.</p>
-            <p>Seu novo PIN é: <strong>${avaliador.pin}</strong></p>
-            <p>Por favor, utilize este PIN para acessar sua conta de avaliador.</p>
-            <p>Se você não solicitou esta redefinição, por favor, ignore este e-mail.</p>
-            <br>
-            <p>Atenciosamente,</p>
-            <p>Equipe AvaliaFeiras</p>
-        `
-    };
-
-    try {
-        await transporter.sendMail(mailOptions);
-        console.log(`Email de redefinição de PIN enviado para ${avaliador.email}`);
-        return true;
-    } catch (error) {
-        console.error(`Erro ao enviar email de redefinição de PIN para ${avaliador.email}:`, error);
-        return false;
-    }
+    console.log(`Email de redefinição de PIN enviado para ${avaliador.email}`);
+    return true;
+  } catch (error) {
+    console.error(`Erro ao enviar email de redefinição de PIN para ${avaliador.email}:`, error);
+    return false;
+  }
 }
 
 // ===========================================
@@ -294,171 +281,153 @@ router.post('/logout', verificarAdminEscola, (req, res, next) => {
 });
 
 // ===================================
+// ===================================
 // ROTAS DE RECUPERAÇÃO DE SENHA
 // ===================================
 
 // Rota GET para exibir o formulário de solicitação de recuperação de senha
 router.get('/recuperar-senha', (req, res) => {
-    res.render('admin/recuperar-senha', {
-        titulo: 'Recuperar Senha',
-        layout: 'layouts/public',
-        error_msg: req.flash('error_msg'),
-        success_msg: req.flash('success_msg')
-    });
+  res.render('admin/recuperar-senha', {
+    titulo: 'Recuperar Senha',
+    layout: 'layouts/public',
+    error_msg: req.flash('error_msg'),
+    success_msg: req.flash('success_msg')
+  });
 });
 
 // Rota POST para processar a solicitação de recuperação de senha (envia o e-mail)
 router.post('/recuperar-senha', async (req, res) => {
-    const { email } = req.body;
+  const { email } = req.body;
 
+  try {
     if (!email) {
-        req.flash('error_msg', 'Por favor, informe seu e-mail.');
-        return res.redirect('/admin/recuperar-senha');
+      req.flash('error_msg', 'Informe seu e-mail.');
+      return res.redirect('/admin/recuperar-senha');
     }
 
-    try {
-        // Encontra o admin, mas não precisamos popular a escola aqui para a recuperação de senha
-        const admin = await Admin.findOne({ email: email });
-
-        if (!admin) {
-            // Mensagem genérica para segurança: não revela se o e-mail existe
-            req.flash('success_msg', 'Se o e-mail informado estiver cadastrado, um link de redefinição será enviado.');
-            return res.redirect('/admin/recuperar-senha');
-        }
-
-        const token = crypto.randomBytes(20).toString('hex');
-
-        admin.resetPasswordToken = token;
-        admin.resetPasswordExpires = Date.now() + 3600000; // 1 hora
-        await admin.save();
-
-        const resetURL = `${process.env.APP_URL || 'http://localhost:3000'}/admin/resetar-senha/${token}`;
-
-        const transporter = nodemailer.createTransport({
-            host: process.env.EMAIL_HOST,
-            port: process.env.EMAIL_PORT,
-            secure: process.env.EMAIL_SECURE === 'true',
-            auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS
-            },
-            tls: {
-                rejectUnauthorized: false
-            }
-        });
-
-        const mailOptions = {
-            from: `"AvaliaFeiras" <${process.env.EMAIL_USER}>`,
-            to: admin.email,
-            subject: 'Redefinição de Senha - Sistema AvaliaFeiras',
-            html: `
-                <p>Olá,</p>
-                <p>Você solicitou a redefinição da sua senha no Sistema AvaliaFeiras.</p>
-                <p>Por favor, clique no link abaixo para redefinir sua senha:</p>
-                <p><a href="${resetURL}">${resetURL}</a></p>
-                <p>Este link é válido por 1 hora. Se você não solicitou esta redefinição, por favor, ignore este e-mail.</p>
-                <p>Atenciosamente,<br>Equipe AvaliaFeiras</p>
-            `
-        };
-
-        await transporter.sendMail(mailOptions);
-        console.log(`E-mail de redefinição enviado para: ${admin.email}`);
-        req.flash('success_msg', 'Um link de redefinição de senha foi enviado para seu e-mail.');
-        res.redirect('/admin/recuperar-senha');
-
-    } catch (err) {
-        console.error('Erro na solicitação de recuperação de senha:', err);
-        req.flash('error_msg', 'Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente.');
-        res.redirect('/admin/recuperar-senha');
+    const admin = await Admin.findOne({ email: email.trim() });
+    if (!admin) {
+      req.flash('error_msg', 'E-mail não encontrado.');
+      return res.redirect('/admin/recuperar-senha');
     }
+
+    // Gera token e salva no admin
+    const token = crypto.randomBytes(20).toString('hex');
+    admin.resetPasswordToken = token;
+    admin.resetPasswordExpires = Date.now() + 3600000; // 1 hora
+    await admin.save();
+
+    const baseUrl = process.env.APP_URL || 'http://localhost:3000';
+    const resetURL = `${baseUrl}/admin/resetar-senha/${token}`;
+
+    // Envia email (usa seu utils/emailSender)
+    await sendEmail({
+      to: admin.email,
+      subject: 'Redefinição de Senha - Sistema AvaliaFeiras',
+      html: `
+        <p>Olá,</p>
+        <p>Você solicitou a redefinição da sua senha no Sistema AvaliaFeiras.</p>
+        <p>Clique no link abaixo para redefinir sua senha:</p>
+        <p><a href="${resetURL}">${resetURL}</a></p>
+        <p>Este link é válido por 1 hora. Se você não solicitou esta redefinição, ignore este e-mail.</p>
+        <p>Atenciosamente,<br>Equipe AvaliaFeiras</p>
+      `,
+      from: process.env.EMAIL_FROM,
+    });
+
+    req.flash('success_msg', 'Um link de redefinição de senha foi enviado para seu e-mail.');
+    return res.redirect('/admin/recuperar-senha');
+
+  } catch (err) {
+    console.error('Erro na solicitação de recuperação de senha:', err);
+    req.flash('error_msg', 'Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente.');
+    return res.redirect('/admin/recuperar-senha');
+  }
 });
 
 // Rota GET para exibir o formulário de redefinição de senha (com token)
 router.get('/resetar-senha/:token', async (req, res) => {
-    try {
-        const admin = await Admin.findOne({
-            resetPasswordToken: req.params.token,
-            resetPasswordExpires: { $gt: Date.now() }
-        });
+  try {
+    const admin = await Admin.findOne({
+      resetPasswordToken: req.params.token,
+      resetPasswordExpires: { $gt: Date.now() }
+    });
 
-        if (!admin) {
-            req.flash('error_msg', 'Token de redefinição de senha inválido ou expirado.');
-            return res.redirect('/admin/recuperar-senha');
-        }
-
-        res.render('admin/resetar-senha', {
-            titulo: 'Redefinir Senha',
-            token: req.params.token,
-            layout: 'layouts/public',
-            error_msg: req.flash('error_msg'),
-            success_msg: req.flash('success_msg')
-        });
-
-    } catch (err) {
-        console.error('Erro ao carregar página de redefinição:', err);
-        req.flash('error_msg', 'Ocorreu um erro ao carregar a página de redefinição. Por favor, tente novamente.');
-        res.redirect('/admin/recuperar-senha');
+    if (!admin) {
+      req.flash('error_msg', 'Token de redefinição de senha inválido ou expirado.');
+      return res.redirect('/admin/recuperar-senha');
     }
+
+    res.render('admin/resetar-senha', {
+      titulo: 'Redefinir Senha',
+      token: req.params.token,
+      layout: 'layouts/public',
+      error_msg: req.flash('error_msg'),
+      success_msg: req.flash('success_msg')
+    });
+
+  } catch (err) {
+    console.error('Erro ao carregar página de redefinição:', err);
+    req.flash('error_msg', 'Ocorreu um erro ao carregar a página de redefinição. Por favor, tente novamente.');
+    return res.redirect('/admin/recuperar-senha');
+  }
 });
 
 // Rota POST para processar a nova senha
 router.post('/resetar-senha/:token', async (req, res) => {
-    const { token } = req.params;
-    const { senha, confirmarSenha } = req.body;
+  const { token } = req.params;
+  const { senha, confirmarSenha } = req.body;
 
-    let errors = [];
-    if (senha !== confirmarSenha) {
-        errors.push({ msg: 'As senhas não coincidem.' });
+  const errors = [];
+  if (!senha || !confirmarSenha) errors.push('Preencha todos os campos.');
+  if (senha !== confirmarSenha) errors.push('As senhas não coincidem.');
+  if (senha && senha.length < 6) errors.push('A senha deve ter pelo menos 6 caracteres.');
+
+  if (errors.length > 0) {
+    req.flash('error_msg', errors.join(' '));
+    return res.render('admin/resetar-senha', {
+      titulo: 'Redefinir Senha',
+      token,
+      layout: 'layouts/public',
+      error_msg: req.flash('error_msg'),
+      success_msg: req.flash('success_msg')
+    });
+  }
+
+  try {
+    const admin = await Admin.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() }
+    });
+
+    if (!admin) {
+      req.flash('error_msg', 'Token de redefinição de senha inválido ou expirado.');
+      return res.redirect('/admin/recuperar-senha');
     }
-    if (senha.length < 6) {
-        errors.push({ msg: 'A senha deve ter pelo menos 6 caracteres.' });
-    }
 
-    if (errors.length > 0) {
-        req.flash('error_msg', errors.map(e => e.msg).join(' '));
-        return res.render('admin/resetar-senha', {
-            titulo: 'Redefinir Senha',
-            token: token,
-            layout: 'layouts/public',
-            error_msg: req.flash('error_msg')
-        });
-    }
+    const salt = await bcrypt.genSalt(10);
+    admin.senha = await bcrypt.hash(senha, salt);
 
-    try {
-        const admin = await Admin.findOne({
-            resetPasswordToken: token,
-            resetPasswordExpires: { $gt: Date.now() }
-        });
+    admin.resetPasswordToken = undefined;
+    admin.resetPasswordExpires = undefined;
 
-        if (!admin) {
-            req.flash('error_msg', 'Token de redefinição de senha inválido ou expirado.');
-            return res.redirect('/admin/recuperar-senha');
-        }
+    await admin.save();
 
-        const salt = await bcrypt.genSalt(10);
-        admin.senha = await bcrypt.hash(senha, salt);
+    req.flash('success_msg', 'Sua senha foi redefinida com sucesso. Faça login com sua nova senha.');
+    return res.redirect('/admin/login');
 
-        admin.resetPasswordToken = undefined;
-        admin.resetPasswordExpires = undefined;
-
-        await admin.save();
-
-        req.flash('success_msg', 'Sua senha foi redefinida com sucesso. Faça login com sua nova senha.');
-        res.redirect('/admin/login');
-
-    }
-    catch (err) {
-        console.error('Erro na redefinição de senha:', err);
-        req.flash('error_msg', 'Ocorreu um erro ao redefinir sua senha. Por favor, tente novamente.');
-        res.render('admin/resetar-senha', {
-            titulo: 'Redefinir Senha',
-            token: token,
-            layout: 'layouts/public',
-            error_msg: req.flash('error_msg')
-        });
-    }
+  } catch (err) {
+    console.error('Erro na redefinição de senha:', err);
+    req.flash('error_msg', 'Ocorreu um erro ao redefinir sua senha. Por favor, tente novamente.');
+    return res.render('admin/resetar-senha', {
+      titulo: 'Redefinir Senha',
+      token,
+      layout: 'layouts/public',
+      error_msg: req.flash('error_msg'),
+      success_msg: req.flash('success_msg')
+    });
+  }
 });
-
 
 // ===========================================
 // ROTAS DE RELATÓRIOS (PDF) - COM PUPPETEER
@@ -991,58 +960,6 @@ router.delete('/projetos/:id', verificarAdminEscola, async (req, res) => {
 // Adicionar Avaliador (POST)
 
 // Aprovar pré-cadastro de avaliador
-router.get('/admin/dashboard', async (req, res) => {
-  try {
-    const adminEscolaId = req.session.adminEscola.escolaId;
-
-    // Busca todas as feiras dessa escola
-    const feiras = await Feira.find({ escolaId: adminEscolaId }).lean();
-
-    // Define a feira atual (pode usar req.query.feiraId se tiver seleção dinâmica)
-    let feiraAtual = await Feira.findOne({ escolaId: adminEscolaId, status: 'ativa' }).lean();
-    if (!feiraAtual) {
-      feiraAtual = feiras[0]; // fallback: pega a primeira feira se não tiver ativa
-    }
-
-    // Exemplo de outros dados
-    const projetos = await Projeto.find({ feiraId: feiraAtual._id }).lean();
-    const avaliadores = await Avaliador.find({ feira: feiraAtual._id })
-    .populate('projetosAtribuidos', 'titulo')
-    .lean();
-    const avaliacoes = await Avaliacao.find({ feiraId: feiraAtual._id }).lean();
-
-    // 🔑 Consulta dos PRÉ-CADASTROS PENDENTES só da feira atual
-    const preCadastros = await PreCadastroAvaliador.find({
-      feiraId: feiraAtual._id,
-      status: 'pendente'
-    }).lean();
-
-    // Exemplo de contagem se usar em cards
-    const totalProjetos = projetos.length;
-    const totalAvaliadores = avaliadores.length;
-
-    res.render('admin/dashboard', {
-      titulo: 'Dashboard Admin',
-      layout: false,
-      usuarioLogado: req.session.adminEscola,
-      feiras,
-      feiraAtual,
-      projetos,
-      avaliadores,
-      avaliacoes,
-      preCadastros,
-      totalProjetos,
-      totalAvaliadores,
-      camposExtras: []
-    });
-
-  } catch (err) {
-    console.error(err);
-    res.send('Erro ao carregar dashboard.');
-  }
-});
-
-
 router.post('/avaliadores', verificarAdminEscola, async (req, res) => {
   const { nome, email, projetosAtribuidos } = req.body;
   const escolaId = req.session.adminEscola.escolaId;
@@ -1292,14 +1209,26 @@ router.get('/pre-cadastros', verificarAdminEscola, async (req, res) => {
 //Visualizar e editar um pré-cadastro
 router.get('/pre-cadastros/:id', verificarAdminEscola, async (req, res) => {
   try {
-    const pre = await PreCadastroAvaliador.findById(req.params.id);
-    const feira = await Feira.findById(pre.feiraId);
-    const projetos = await Projeto.find({ feiraId: feira._id });
+    const escolaId = req.session.adminEscola.escolaId;
 
+    const pre = await PreCadastroAvaliador.findById(req.params.id).lean();
     if (!pre) {
       req.flash('error_msg', 'Pré-cadastro não encontrado.');
       return res.redirect('/admin/pre-cadastros');
     }
+
+    // Garante que a feira existe e pertence à escola do admin
+    const feira = await Feira.findOne({ _id: pre.feiraId, escolaId }).lean();
+    if (!feira) {
+      req.flash('error_msg', 'Feira não encontrada ou não pertence à sua escola.');
+      return res.redirect('/admin/pre-cadastros');
+    }
+
+    // Corrigido: no Projeto o campo é "feira", não "feiraId"
+    const projetos = await Projeto.find({
+      feira: feira._id,
+      escolaId
+    }).lean();
 
     res.render('admin/pre-cadastros/editar', {
       layout: false,
@@ -1309,7 +1238,7 @@ router.get('/pre-cadastros/:id', verificarAdminEscola, async (req, res) => {
       feira
     });
   } catch (err) {
-    console.error(err);
+    console.error('Erro ao carregar pré-cadastro:', err);
     req.flash('error_msg', 'Erro ao carregar pré-cadastro.');
     res.redirect('/admin/pre-cadastros');
   }
@@ -1390,27 +1319,19 @@ router.post('/avaliadores/:id/reenviar-email', verificarAdminEscola, async (req,
 
     const url = `${process.env.APP_URL || 'http://localhost:3000'}/avaliador/acesso-direto/${avaliador.pin}`;
 
-    const transporter = nodemailer.createTransport({
-      service: 'SendGrid',
-      auth: {
-        user: 'apikey',
-        pass: process.env.SENDGRID_API_KEY
-      }
-    });
-
-    await transporter.sendMail({
-      from: 'AvaliaFeiras <docsrosas@gmail.com>',
-      to: avaliador.email,
-      subject: 'Acesso ao AvaliaFeiras',
-      html: `
-        <p>Olá ${avaliador.nome},</p>
-        <p>${mensagemPersonalizada || 'Aqui estão seus dados de acesso ao AvaliaFeiras:'}</p>
-        <p><strong>PIN:</strong> ${avaliador.pin}</p>
-        <p><a href="${url}">${url}</a></p>
-        <p>Atenciosamente,</p>
-        <p>Equipe AvaliaFeiras</p>
-      `
-    });
+  await sendEmail({
+  to: avaliador.email,
+  subject: 'Acesso ao AvaliaFeiras',
+  html: `
+    <p>Olá ${avaliador.nome},</p>
+    <p>${mensagemPersonalizada || 'Aqui estão seus dados de acesso ao AvaliaFeiras:'}</p>
+    <p><strong>PIN:</strong> ${avaliador.pin}</p>
+    <p><a href="${url}">${url}</a></p>
+    <p>Atenciosamente,</p>
+    <p>Equipe AvaliaFeiras</p>
+  `,
+  from: process.env.EMAIL_FROM,
+});
 
     req.flash('success_msg', `E-mail reenviado para ${avaliador.nome} com sucesso.`);
   } catch (err) {
@@ -1450,21 +1371,22 @@ router.post('/avaliadores/reenviar-multiplos', verificarAdminEscola, async (req,
     });
 
     for (const avaliador of avaliadores) {
-      const url = `${process.env.APP_URL || 'http://localhost:3000'}/avaliador/acesso-direto/${avaliador.pin}`;
-      await transporter.sendMail({
-        from: 'AvaliaFeiras <docsrosas@gmail.com>',
-        to: avaliador.email,
-        subject: 'Acesso ao AvaliaFeiras',
-        html: `
-          <p>Olá ${avaliador.nome},</p>
-          <p>${mensagemPersonalizada || 'Aqui estão seus dados de acesso ao AvaliaFeiras:'}</p>
-          <p><strong>PIN:</strong> ${avaliador.pin}</p>
-          <p><a href="${url}">${url}</a></p>
-          <p>Atenciosamente,</p>
-          <p>Equipe AvaliaFeiras</p>
-        `
-      });
-    }
+  const url = `${process.env.APP_URL || 'http://localhost:3000'}/avaliador/acesso-direto/${avaliador.pin}`;
+
+  await sendEmail({
+    to: avaliador.email,
+    subject: 'Acesso ao AvaliaFeiras',
+    html: `
+      <p>Olá ${avaliador.nome},</p>
+      <p>${mensagemPersonalizada || 'Aqui estão seus dados de acesso ao AvaliaFeiras:'}</p>
+      <p><strong>PIN:</strong> ${avaliador.pin}</p>
+      <p><a href="${url}">${url}</a></p>
+      <p>Atenciosamente,</p>
+      <p>Equipe AvaliaFeiras</p>
+    `,
+    from: process.env.EMAIL_FROM,
+  });
+}
 
     req.flash('success_msg', `${avaliadores.length} e-mail(s) reenviado(s) com sucesso.`);
   } catch (err) {
