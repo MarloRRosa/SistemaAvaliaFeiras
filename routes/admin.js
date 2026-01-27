@@ -17,7 +17,7 @@ const ConfiguracaoFormularioPreCadastro = require('../models/ConfiguracaoFormula
 
 const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
-const sendEmail = require('../utils/emailSender');
+const { sendEmail } = require('../utils/emailSender');
 const crypto = require('crypto');
 const puppeteer = require('puppeteer');
 const chromium = require('@sparticuz/chromium');
@@ -1005,7 +1005,7 @@ novoAvaliador.qrcode = qrCodeBase64;
     });
 
     await transporter.sendMail({
-      from: 'AvaliaFeiras <docsrosas@gmail.com>', 
+      from: process.env.EMAIL_FROM, 
       to: email,
       subject: 'Bem-vindo ao AvaliaFeiras',
       html: `
