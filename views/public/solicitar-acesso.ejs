@@ -67,24 +67,45 @@
         <textarea id="mensagem" name="mensagem" rows="4" placeholder="Compartilhe qualquer outra informação relevante." class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500"><%= mensagem || '' %></textarea>
       </div>
 
-      <div class="bg-gray-50 border border-gray-300 p-4 rounded-lg text-sm text-gray-700 mt-6">
-        <h4 class="text-base font-semibold text-gray-800 mb-2">Aceite dos Termos</h4>
-        <div class="h-40 overflow-y-scroll p-3 border rounded bg-white mb-4 text-justify">
-          <p class="mb-2">Ao solicitar acesso ao sistema <strong>AvaliaFeiras</strong>, o(a) responsável declara estar ciente de que:</p>
-          <ul class="list-disc pl-5 mb-3 space-y-2">
-            <li>As informações fornecidas são verdadeiras e de responsabilidade da escola.</li>
-            <li>O sistema será utilizado apenas para fins educacionais e institucionais.</li>
-            <li>Os dados informados serão utilizados exclusivamente para contato e gestão da feira.</li>
-            <li>O uso indevido da plataforma poderá acarretar na suspensão do acesso.</li>
-            <li>Este aceite poderá ser registrado com data, horário e endereço IP para fins legais.</li>
-          </ul>
-          <p>Recomendamos a leitura completa dos <a href="/termos-de-uso" target="_blank" class="text-blue-600 underline hover:text-blue-800">Termos de Uso</a> e da <a href="/politica-privacidade" target="_blank" class="text-blue-600 underline hover:text-blue-800">Política de Privacidade</a>.</p>
-        </div>
-        <label class="inline-flex items-start gap-2">
-          <input type="checkbox" id="aceiteTermo" name="aceiteTermo" class="form-checkbox h-4 w-4 text-blue-600">
-          <span>Declaro que li e aceito os termos acima.</span>
-        </label>
-      </div>
+   <div class="bg-gray-50 border border-gray-300 p-4 rounded-lg text-sm text-gray-700 mt-6">
+  <h4 class="text-base font-semibold text-gray-800 mb-2">Aceite dos Termos</h4>
+
+  <div class="h-40 overflow-y-scroll p-3 border rounded bg-white mb-4 text-justify">
+    <p class="mb-2">
+      Ao solicitar acesso ao sistema <strong>Sistema Avalia</strong>, o(a) responsável declara que:
+    </p>
+
+    <ul class="list-disc pl-5 mb-3 space-y-2">
+      <li>Possui poderes de representação da instituição cadastrada.</li>
+      <li>As informações fornecidas são verdadeiras, completas e de responsabilidade exclusiva da instituição.</li>
+      <li>O sistema será utilizado exclusivamente para fins educacionais e institucionais legítimos.</li>
+      <li>Possui autorização legal para inserir dados de alunos e terceiros, quando aplicável.</li>
+      <li>Os dados informados serão utilizados para fins de contato, análise da solicitação e gestão da plataforma.</li>
+      <li>O uso indevido da plataforma poderá resultar na suspensão ou cancelamento do acesso.</li>
+      <li>Este aceite poderá ser registrado com data, horário, endereço IP e demais informações técnicas para fins de comprovação legal.</li>
+    </ul>
+
+    <p>
+      Recomenda-se a leitura integral dos 
+      <a href="/termos-de-uso" target="_blank" class="text-blue-600 underline hover:text-blue-800">
+        Termos de Uso
+      </a> 
+      e da 
+      <a href="/politica-privacidade" target="_blank" class="text-blue-600 underline hover:text-blue-800">
+        Política de Privacidade
+      </a>.
+    </p>
+  </div>
+
+  <label class="inline-flex items-start gap-2">
+    <input type="checkbox" id="aceiteTermo" name="aceiteTermo" required
+      class="form-checkbox h-4 w-4 text-blue-600">
+    <span>
+      Declaro que li, compreendi e concordo com os Termos de Uso e Política de Privacidade.
+    </span>
+  </label>
+</div>
+
 
       <p class="text-xs text-gray-500">O IP e data do aceite serão registrados automaticamente.</p>
 
