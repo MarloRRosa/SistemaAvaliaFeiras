@@ -979,35 +979,34 @@ router.post('/avaliadores', verificarAdminEscola, async (req, res) => {
 
     const pin = generatePIN();
 
+    const projetos = Array.isArray(projetosAtribuidos)
+      ? projetosAtribuidos.filter(Boolean)
+      : projetosAtribuidos
+        ? [projetosAtribuidos]
+        : [];
+
     const novoAvaliador = new Avaliador({
       nome,
       email,
       pin,
       escolaId,
       feira: feira._id,
-      projetosAtribuidos: Array.isArray(projetosAtribuidos)
-        ? projetosAtribuidos
-        : (projetosAtribuidos ? [projetosAtribuidos] : [])
+      projetosAtribuidos: projetos
     });
 
-    const url = `${process.env.APP_URL || 'http://localhost:3000'}/avaliador/acesso-direto/${pin}`;
+    const baseUrl = process.env.APP_URL || 'http://localhost:3000';
+    const url = `${baseUrl}/avaliador/acesso-direto/${pin}`;
     const qrCodeBase64 = await QRCode.toDataURL(url);
     novoAvaliador.qrcode = qrCodeBase64;
 
     await novoAvaliador.save();
 
-    const transporter = nodemailer.createTransport({
-      service: 'SendGrid',
-      auth: {
-        user: 'apikey',
-        pass: process.env.SENDGRID_API_KEY
-      }
-    });
+    const fromAddress = process.env.EMAIL_FROM || process.env.EMAIL_SENDER_ADDRESS;
 
-    await transporter.sendMail({
-      from: process.env.EMAIL_FROM,
+    await sendEmail({
       to: email,
       subject: 'Bem-vindo ao AvaliaFeiras',
+      from: fromAddress,
       html: `
         <p>Olá ${nome},</p>
         <p>Você foi cadastrado como avaliador no sistema AvaliaFeiras.</p>
@@ -1021,12 +1020,12 @@ router.post('/avaliadores', verificarAdminEscola, async (req, res) => {
     });
 
     req.flash('success_msg', 'Avaliador cadastrado e e-mail enviado com sucesso.');
-    return res.redirect('/admin/dashboard?tab=avaliadores');
   } catch (err) {
     console.error('Erro ao cadastrar avaliador:', err);
     req.flash('error_msg', 'Erro ao cadastrar avaliador. Detalhes: ' + err.message);
-    return res.redirect('/admin/dashboard?tab=avaliadores');
   }
+
+  res.redirect('/admin/dashboard?tab=avaliadores');
 });
 
 router.put('/avaliadores/:id', verificarAdminEscola, async (req, res) => {
@@ -1041,14 +1040,18 @@ router.put('/avaliadores/:id', verificarAdminEscola, async (req, res) => {
   }
 
   try {
+    const projetos = Array.isArray(projetosAtribuidos)
+      ? projetosAtribuidos.filter(Boolean)
+      : projetosAtribuidos
+        ? [projetosAtribuidos]
+        : [];
+
     const avaliadorAtualizado = await Avaliador.findOneAndUpdate(
       { _id: id, escolaId },
       {
         nome,
         email,
-        projetosAtribuidos: Array.isArray(projetosAtribuidos)
-          ? projetosAtribuidos
-          : (projetosAtribuidos ? [projetosAtribuidos] : []),
+        projetosAtribuidos: projetos,
         ativo
       },
       { new: true }
@@ -1059,13 +1062,12 @@ router.put('/avaliadores/:id', verificarAdminEscola, async (req, res) => {
     } else {
       req.flash('success_msg', 'Avaliador atualizado com sucesso.');
     }
-
-    return res.redirect('/admin/dashboard?tab=avaliadores');
   } catch (err) {
     console.error('Erro ao atualizar avaliador:', err);
     req.flash('error_msg', 'Erro ao atualizar avaliador. Detalhes: ' + err.message);
-    return res.redirect('/admin/dashboard?tab=avaliadores');
   }
+
+  res.redirect('/admin/dashboard?tab=avaliadores');
 });
 
 router.post('/avaliadores/reset-pin/:id', verificarAdminEscola, async (req, res) => {
@@ -1087,6 +1089,12 @@ router.post('/avaliadores/reset-pin/:id', verificarAdminEscola, async (req, res)
     const newPin = generateUniquePin();
     avaliador.pin = newPin;
     avaliador.ativo = true;
+
+    const baseUrl = process.env.APP_URL || 'http://localhost:3000';
+    const url = `${baseUrl}/avaliador/acesso-direto/${newPin}`;
+    const qrcode = await QRCode.toDataURL(url);
+    avaliador.qrcode = qrcode;
+
     await avaliador.save();
 
     const emailSent = await sendResetPinEmail(avaliador);
@@ -1097,11 +1105,11 @@ router.post('/avaliadores/reset-pin/:id', verificarAdminEscola, async (req, res)
       req.flash('error_msg', `PIN do avaliador ${avaliador.nome} redefinido, mas falha ao enviar e-mail.`);
     }
 
-    return res.redirect('/admin/dashboard?tab=avaliadores');
+    res.redirect('/admin/dashboard?tab=avaliadores');
   } catch (err) {
     console.error('Erro ao redefinir PIN do avaliador:', err);
     req.flash('error_msg', 'Erro ao redefinir PIN do avaliador. Detalhes: ' + err.message);
-    return res.redirect('/admin/dashboard?tab=avaliadores');
+    res.redirect('/admin/dashboard?tab=avaliadores');
   }
 });
 
@@ -1116,19 +1124,17 @@ router.post('/avaliadores/:id/excluir', verificarAdminEscola, async (req, res) =
 
   try {
     const resultado = await Avaliador.deleteOne({ _id: id, escolaId });
-
     if (resultado.deletedCount === 0) {
       req.flash('error_msg', 'Avaliador não encontrado ou não pertence à sua escola.');
     } else {
       req.flash('success_msg', 'Avaliador excluído com sucesso.');
     }
-
-    return res.redirect('/admin/dashboard?tab=avaliadores');
   } catch (err) {
     console.error('Erro ao excluir avaliador:', err);
     req.flash('error_msg', 'Erro ao excluir avaliador. Detalhes: ' + err.message);
-    return res.redirect('/admin/dashboard?tab=avaliadores');
   }
+
+  res.redirect('/admin/dashboard?tab=avaliadores');
 });
 
 router.get('/formulario-pre-cadastro/configurar', verificarAdminEscola, async (req, res) => {
@@ -1165,7 +1171,7 @@ router.post('/formulario-pre-cadastro/configurar', verificarAdminEscola, async (
       opcoes: campo.opcoes?.trim() || ''
     }))
     .filter(campo => {
-      const label = (campo.label || '').toLowerCase();
+      const label = campo.label.toLowerCase();
       return label !== 'nome' && label !== 'email';
     });
 
@@ -1176,7 +1182,7 @@ router.post('/formulario-pre-cadastro/configurar', verificarAdminEscola, async (
   );
 
   req.flash('success_msg', 'Configuração salva com sucesso!');
-  return res.redirect('/admin/dashboard?tab=avaliadores');
+  res.redirect('/admin/dashboard?tab=avaliadores');
 });
 
 router.get('/pre-cadastros', verificarAdminEscola, async (req, res) => {
@@ -1188,7 +1194,7 @@ router.get('/pre-cadastros', verificarAdminEscola, async (req, res) => {
 
     const preCadastros = await PreCadastroAvaliador.find({ feiraId: { $in: feiraIds } });
 
-    return res.render('admin/pre-cadastros/lista', {
+    res.render('admin/pre-cadastros/lista', {
       layout: false,
       titulo: 'Pré-Cadastros de Avaliadores',
       preCadastros
@@ -1196,7 +1202,7 @@ router.get('/pre-cadastros', verificarAdminEscola, async (req, res) => {
   } catch (err) {
     console.error(err);
     req.flash('error_msg', 'Erro ao carregar pré-cadastros.');
-    return res.redirect('/admin/dashboard');
+    res.redirect('/admin/dashboard');
   }
 });
 
@@ -1221,7 +1227,7 @@ router.get('/pre-cadastros/:id', verificarAdminEscola, async (req, res) => {
       escolaId
     }).lean();
 
-    return res.render('admin/pre-cadastros/editar', {
+    res.render('admin/pre-cadastros/editar', {
       layout: false,
       titulo: 'Aprovar Pré-Cadastro',
       pre,
@@ -1231,12 +1237,14 @@ router.get('/pre-cadastros/:id', verificarAdminEscola, async (req, res) => {
   } catch (err) {
     console.error('Erro ao carregar pré-cadastro:', err);
     req.flash('error_msg', 'Erro ao carregar pré-cadastro.');
-    return res.redirect('/admin/pre-cadastros');
+    res.redirect('/admin/pre-cadastros');
   }
 });
 
 router.post('/pre-cadastros/:id/aprovar', verificarAdminEscola, async (req, res) => {
   try {
+    console.log('BODY RECEBIDO:', req.body);
+
     const { id } = req.params;
     const { nome, email, telefone } = req.body;
     const escolaId = req.session.adminEscola.escolaId;
@@ -1260,13 +1268,14 @@ router.post('/pre-cadastros/:id/aprovar', verificarAdminEscola, async (req, res)
     }
 
     const pin = generatePIN();
-    const url = `${process.env.APP_URL || 'http://localhost:3000'}/avaliador/acesso-direto/${pin}`;
+    const baseUrl = process.env.APP_URL || 'http://localhost:3000';
+    const url = `${baseUrl}/avaliador/acesso-direto/${pin}`;
     const qrcode = await QRCode.toDataURL(url);
 
     const novo = new Avaliador({
-      nome: (nome || '').trim(),
-      email: (email || '').trim(),
-      telefone: (telefone || '').trim(),
+      nome: nome.trim(),
+      email: email.trim(),
+      telefone: telefone?.trim() || '',
       escolaId,
       feira: feira._id,
       pin,
@@ -1281,11 +1290,11 @@ router.post('/pre-cadastros/:id/aprovar', verificarAdminEscola, async (req, res)
     await PreCadastroAvaliador.findByIdAndDelete(pre._id);
 
     req.flash('success_msg', 'Avaliador aprovado com sucesso.');
-    return res.redirect('/admin/dashboard?tab=avaliadores');
+    res.redirect('/admin/dashboard?tab=avaliadores');
   } catch (err) {
     console.error('Erro ao aprovar pré-cadastro:', err);
     req.flash('error_msg', 'Erro ao aprovar pré-cadastro. Detalhes: ' + err.message);
-    return res.redirect('/admin/pre-cadastros');
+    res.redirect('/admin/pre-cadastros');
   }
 });
 
@@ -1301,11 +1310,14 @@ router.post('/avaliadores/:id/reenviar-email', verificarAdminEscola, async (req,
       return res.redirect('/admin/dashboard?tab=avaliadores');
     }
 
-    const url = `${process.env.APP_URL || 'http://localhost:3000'}/avaliador/acesso-direto/${avaliador.pin}`;
+    const baseUrl = process.env.APP_URL || 'http://localhost:3000';
+    const url = `${baseUrl}/avaliador/acesso-direto/${avaliador.pin}`;
+    const fromAddress = process.env.EMAIL_FROM || process.env.EMAIL_SENDER_ADDRESS;
 
     await sendEmail({
       to: avaliador.email,
       subject: 'Acesso ao AvaliaFeiras',
+      from: fromAddress,
       html: `
         <p>Olá ${avaliador.nome},</p>
         <p>${mensagemPersonalizada || 'Aqui estão seus dados de acesso ao AvaliaFeiras:'}</p>
@@ -1313,17 +1325,16 @@ router.post('/avaliadores/:id/reenviar-email', verificarAdminEscola, async (req,
         <p><a href="${url}">${url}</a></p>
         <p>Atenciosamente,</p>
         <p>Equipe AvaliaFeiras</p>
-      `,
-      from: process.env.EMAIL_FROM
+      `
     });
 
     req.flash('success_msg', `E-mail reenviado para ${avaliador.nome} com sucesso.`);
-    return res.redirect('/admin/dashboard?tab=avaliadores');
   } catch (err) {
     console.error('Erro ao reenviar e-mail:', err);
     req.flash('error_msg', 'Erro ao reenviar e-mail. Detalhes: ' + err.message);
-    return res.redirect('/admin/dashboard?tab=avaliadores');
   }
+
+  res.redirect('/admin/dashboard?tab=avaliadores');
 });
 
 router.post('/avaliadores/reenviar-multiplos', verificarAdminEscola, async (req, res) => {
@@ -1345,12 +1356,16 @@ router.post('/avaliadores/reenviar-multiplos', verificarAdminEscola, async (req,
       return res.redirect('/admin/dashboard?tab=avaliadores');
     }
 
+    const baseUrl = process.env.APP_URL || 'http://localhost:3000';
+    const fromAddress = process.env.EMAIL_FROM || process.env.EMAIL_SENDER_ADDRESS;
+
     for (const avaliador of avaliadores) {
-      const url = `${process.env.APP_URL || 'http://localhost:3000'}/avaliador/acesso-direto/${avaliador.pin}`;
+      const url = `${baseUrl}/avaliador/acesso-direto/${avaliador.pin}`;
 
       await sendEmail({
         to: avaliador.email,
         subject: 'Acesso ao AvaliaFeiras',
+        from: fromAddress,
         html: `
           <p>Olá ${avaliador.nome},</p>
           <p>${mensagemPersonalizada || 'Aqui estão seus dados de acesso ao AvaliaFeiras:'}</p>
@@ -1358,20 +1373,18 @@ router.post('/avaliadores/reenviar-multiplos', verificarAdminEscola, async (req,
           <p><a href="${url}">${url}</a></p>
           <p>Atenciosamente,</p>
           <p>Equipe AvaliaFeiras</p>
-        `,
-        from: process.env.EMAIL_FROM
+        `
       });
     }
 
     req.flash('success_msg', `${avaliadores.length} e-mail(s) reenviado(s) com sucesso.`);
-    return res.redirect('/admin/dashboard?tab=avaliadores');
   } catch (err) {
     console.error('Erro ao reenviar e-mails múltiplos:', err);
     req.flash('error_msg', 'Erro ao reenviar e-mails. Detalhes: ' + err.message);
-    return res.redirect('/admin/dashboard?tab=avaliadores');
   }
-});
 
+  res.redirect('/admin/dashboard?tab=avaliadores');
+});
 
 
 // ===========================================
