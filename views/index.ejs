@@ -1472,15 +1472,34 @@
     });
   </script>
 
-  <footer>
-    <p>&copy; 2025 Sistema Avalia - Desenvolvido com excelência e responsabilidade educacional por Prof. Marlo Rosa. Transformando a educação através da tecnologia.</p>
-    <div>
-      <a href="/politica-privacidade"><i class="fas fa-shield-alt"></i> Política de Privacidade</a>
-      •
-      <a href="/termos-de-uso"><i class="fas fa-file-contract"></i> Termos de Uso</a>
-      •
-      <a href="/superadmin/login"><i class="fas fa-crown"></i> Super Admin</a>
-    </div>
-  </footer>
+ <footer class="py-6 border-t text-center text-muted-foreground">
+  <p>
+    &copy; <span id="year"></span> Sistema Avalia. 
+    Um produto da 
+    <a href="https://rosatech.com.br" target="_blank" rel="noopener noreferrer">
+      Rosatech
+    </a>. 
+    Transformando a educação através da tecnologia.
+  </p>
+
+  <div class="mt-3">
+    <a href="/politica-privacidade">
+      <i class="fas fa-shield-alt"></i> Política de Privacidade
+    </a>
+    •
+    <a href="/termos-de-uso">
+      <i class="fas fa-file-contract"></i> Termos de Uso
+    </a>
+    •
+    <a href="/superadmin/login">
+      <i class="fas fa-crown"></i> Super Admin
+    </a>
+  </div>
+</footer>
+
+<script>
+  document.getElementById("year").textContent = new Date().getFullYear();
+</script>
+
 </body>
 </html>
