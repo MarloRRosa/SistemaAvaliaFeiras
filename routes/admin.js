@@ -11,7 +11,7 @@ const Criterio = require('../models/Criterio');
 const Avaliador = require('../models/Avaliador');
 const Avaliacao = require('../models/Avaliacao');
 const Admin = require('../models/Admin');
-const generatePIN = () => Math.floor(1000 + Math.random() * 9000).toString();
+const PIN_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
 const PreCadastroAvaliador = require('../models/PreCadastroAvaliador');
 const ConfiguracaoFormularioPreCadastro = require('../models/ConfiguracaoFormularioPreCadastro');
 
@@ -55,6 +55,26 @@ if (!Feira || typeof Feira.findOne !== 'function' ||
     console.error('ERRO CRÍTICO: Um ou mais modelos Mongoose não foram carregados corretamente. Verifique os caminhos de importação e a exportação dos modelos.');
     // Isso pode causar um erro de inicialização ou impedir o servidor de subir corretamente.
     // Dependendo da criticidade, você pode querer encerrar o processo: process.exit(1);
+}
+function generatePin(length = 6) {
+  let out = '';
+  for (let i = 0; i < length; i++) {
+    out += PIN_ALPHABET.charAt(Math.floor(Math.random() * PIN_ALPHABET.length));
+  }
+  return out;
+}
+
+// Gera PIN único no banco (collection Avaliador)
+async function generateUniquePin(length = 6, maxAttempts = 20) {
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const pin = generatePin(length);
+
+    // confere se já existe
+    const exists = await Avaliador.exists({ pin });
+    if (!exists) return pin;
+  }
+
+  throw new Error('Não foi possível gerar um PIN único. Tente novamente.');
 }
 function getCloudinaryPublicId(url) {
   if (!url) return null;
@@ -971,13 +991,13 @@ router.post('/avaliadores', verificarAdminEscola, async (req, res) => {
       return res.redirect('/admin/dashboard?tab=avaliadores');
     }
 
-    const emailExistente = await Avaliador.findOne({ email, escolaId });
+    const emailExistente = await Avaliador.findOne({ email, escolaId, feira: feira._id });
     if (emailExistente) {
       req.flash('error_msg', 'Já existe um avaliador com este e-mail cadastrado para sua escola.');
       return res.redirect('/admin/dashboard?tab=avaliadores');
     }
 
-    const pin = generatePIN();
+    const pin = await generateUniquePin(6);
 
     const projetos = Array.isArray(projetosAtribuidos)
       ? projetosAtribuidos.filter(Boolean)
@@ -1267,7 +1287,7 @@ router.post('/pre-cadastros/:id/aprovar', verificarAdminEscola, async (req, res)
       return res.redirect('/admin/pre-cadastros');
     }
 
-    const pin = generatePIN();
+    const pin = await generateUniquePin(6);
     const baseUrl = process.env.APP_URL || 'http://localhost:3000';
     const url = `${baseUrl}/avaliador/acesso-direto/${pin}`;
     const qrcode = await QRCode.toDataURL(url);
