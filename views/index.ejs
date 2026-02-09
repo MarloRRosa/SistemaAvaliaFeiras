@@ -24,6 +24,77 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
   <style>
+/* Rosatech pill - estilo “lovable” */
+.rt-pill{
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 1400;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 8px 10px 8px 12px;
+  border-radius: 999px;
+
+  background: rgba(15, 23, 42, 0.78); /* dark glass */
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+.rt-pill__link{
+  color: rgba(255,255,255,0.88);
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.rt-pill__brand{
+  color: #22d3ee; /* “ciano” estilo do print */
+  font-weight: 700;
+}
+
+.rt-pill__close{
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.85);
+  cursor: pointer;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: transform .15s ease, background .15s ease, border-color .15s ease;
+}
+
+.rt-pill__close:hover{
+  transform: translateY(-1px);
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.18);
+}
+
+/* Mobile: ainda menor */
+@media (max-width: 480px){
+  .rt-pill{
+    right: 12px;
+    bottom: 12px;
+    padding: 7px 9px 7px 10px;
+  }
+  .rt-pill__link{ font-size: 11px; }
+  .rt-pill__close{ width: 20px; height: 20px; }
+}
+
+
+
     * {
       margin: 0;
       padding: 0;
@@ -1415,5 +1486,42 @@
       });
     });
   </script>
+<script>
+  // Rosatech pill: fechar e memorizar
+  (function () {
+    const pill = document.getElementById("rosatechPill");
+    if (!pill) return;
+
+    const key = "rosatech_pill_closed";
+
+    // se já fechou antes, não mostra
+    if (localStorage.getItem(key) === "1") {
+      pill.style.display = "none";
+      return;
+    }
+
+    const closeBtn = pill.querySelector(".rt-pill__close");
+    if (closeBtn) {
+      closeBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        pill.style.display = "none";
+        localStorage.setItem(key, "1");
+      });
+    }
+  })();
+</script>
+
+<!-- Rosatech pill (estilo do print, canto inferior direito) -->
+<div id="rosatechPill" class="rt-pill" role="complementary" aria-label="Produto rosatech">
+  <a class="rt-pill__link" href="https://rosatech.com.br" target="_blank" rel="noopener noreferrer">
+    Produto da <span class="rt-pill__brand">rosatech</span>
+  </a>
+
+  <button class="rt-pill__close" type="button" aria-label="Fechar" title="Fechar">
+    &times;
+  </button>
+</div>
+
 </body>
 </html>
