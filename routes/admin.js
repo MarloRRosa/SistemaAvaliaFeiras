@@ -90,17 +90,6 @@ function getCloudinaryPublicId(url) {
 // FUNÇÕES AUXILIARES
 // ===========================================
 
-// Função para gerar PIN alfanumérico único
-function generateUniquePin(length = 6) {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let result = '';
-    const charactersLength = characters.length;
-    for (let i = 0; i < length; i++) {
-        result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    }
-    return result;
-}
-
 // Função para formatar data para input HTML (YYYY-MM-DD)
 function formatarDataParaInput(dateString) {
     if (!dateString) return '';
@@ -1106,7 +1095,7 @@ router.post('/avaliadores/reset-pin/:id', verificarAdminEscola, async (req, res)
       return res.redirect('/admin/dashboard?tab=avaliadores');
     }
 
-    const newPin = generateUniquePin();
+    const newPin = await generateUniquePin(6);
     avaliador.pin = newPin;
     avaliador.ativo = true;
 
