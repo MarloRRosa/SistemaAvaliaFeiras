@@ -11,6 +11,18 @@
   <div class="container mx-auto p-4 mt-8">
     <h1 class="text-3xl font-bold mb-6 text-center">Dashboard do Avaliador</h1>
 
+<div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 text-center">
+  <p class="text-lg font-semibold text-blue-800">
+    <%= escola && escola.nome ? escola.nome : 'Escola não identificada' %>
+  </p>
+  <p class="text-gray-700 mt-1">
+    Feira:
+    <strong>
+      <%= feira && feira.nome ? feira.nome : 'Feira não identificada' %>
+    </strong>
+  </p>
+</div>
+
     <h2 class="text-xl font-semibold mb-4">Bem-vindo(a), <%= avaliador.nome %>!</h2>
     <p class="mb-6 text-gray-700">Aqui estão os projetos que você precisa avaliar.</p>
 
