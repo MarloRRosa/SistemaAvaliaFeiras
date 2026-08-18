@@ -5299,11 +5299,10 @@ router.post('/escola/atualizar', verificarAdminEscola, upload.single('logo'), as
       endereco
     };
 
-    // Se enviou imagem, converte para base64
-    if (req.file) {
-      const logoBase64 = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
-      updateData.logo = logoBase64;
-    }
+    // Se enviou uma nova logo, salva a URL gerada pelo Cloudinary
+if (req.file && req.file.path) {
+  updateData.logo = req.file.path;
+}
 
     await Escola.findByIdAndUpdate(escolaId, updateData);
 
