@@ -77,21 +77,27 @@
     }
 
     /* Ajuste de largura das colunas */
-    .projetos-table th:nth-child(1),
-    .projetos-table td:nth-child(1) { /* Coluna Título do Projeto */
-        width: 40%; /* Reduzido levemente para dar mais espaço */
-    }
+   .projetos-table th:nth-child(1),
+.projetos-table td:nth-child(1) {
+    width: 30%;
+}
 
-    .projetos-table th:nth-child(2),
-    .projetos-table td:nth-child(2) { /* Coluna Turma */
-        width: 15%;
-        text-align: center;
-    }
+.projetos-table th:nth-child(2),
+.projetos-table td:nth-child(2) {
+    width: 12%;
+    text-align: center;
+}
 
-    .projetos-table th:nth-child(3),
-    .projetos-table td:nth-child(3) { /* Coluna Avaliadores Designados */
-        width: 45%; /* Aumentado para dar mais espaço aos nomes longos */
-    }
+.projetos-table th:nth-child(3),
+.projetos-table td:nth-child(3) {
+    width: 23%;
+    text-align: center;
+}
+
+.projetos-table th:nth-child(4),
+.projetos-table td:nth-child(4) {
+    width: 35%;
+}
 
     /* Estilo para "Nenhum projeto sem avaliação" */
     .no-data-message {
@@ -113,23 +119,60 @@
 
   <% if (projetosNaoAvaliados.length > 0) { %>
     <table class="projetos-table">
-      <thead>
-        <tr>
-          <th>Título do Projeto</th>
-          <th>Turma</th>
-          <th>Avaliadores Designados</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% projetosNaoAvaliados.forEach(p => { %>
-          <tr>
-            <td><%= p.titulo %></td>
-            <td><%= p.turma %></td>
-            <td><%= p.avaliadoresDesignados %></td>
-          </tr>
-        <% }) %>
-      </tbody>
-    </table>
+  <thead>
+    <tr>
+      <th>Projeto</th>
+      <th>Turma</th>
+      <th>Situação</th>
+      <th>Avaliadores Pendentes</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% projetosNaoAvaliados.forEach(p => { %>
+
+      <tr>
+
+        <td>
+          <strong><%= p.titulo %></strong>
+
+          <br>
+
+          <small>
+            Critérios do projeto:
+            <%= p.totalCriterios || 0 %>
+          </small>
+        </td>
+
+        <td>
+          <%= p.turma || 'N/A' %>
+        </td>
+
+        <td>
+          <strong>
+            <%= p.avaliacoesCompletas || 0 %>
+            /
+            <%= p.totalAvaliadores || 0 %>
+          </strong>
+          avaliações completas
+
+          <br>
+
+          <small>
+            Pendentes:
+            <%= p.avaliacoesPendentes || 0 %>
+          </small>
+        </td>
+
+        <td>
+          <%= p.avaliadoresPendentes || 'Nenhum' %>
+        </td>
+
+      </tr>
+
+    <% }) %>
+  </tbody>
+</table>
   <% } else { %>
     <p class="no-data-message">Nenhum projeto sem avaliação encontrado para esta feira.</p>
   <% } %>
