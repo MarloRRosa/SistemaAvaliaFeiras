@@ -70,55 +70,108 @@
       <% Object.keys(relatorioFinalPorProjeto).sort().forEach(categoria => { %>
         <h3 class="text-xl font-bold text-gray-800 mt-8 mb-4 border-b-2 pb-2 border-blue-200"><%= categoria %></h3>
         <div class="overflow-x-auto">
-          <table class="min-w-full bg-white shadow-sm rounded-lg">
-            <thead>
-              <tr>
-                <th class="py-3 px-4 uppercase font-semibold text-sm text-gray-600">Projeto</th>
-                <th class="py-3 px-4 uppercase font-semibold text-sm text-gray-600 text-center">Nº Avaliações</th>
-                <% criteriosOficiais.forEach(criterio => { %>
-                  <th class="py-3 px-4 uppercase font-semibold text-sm text-gray-600 text-center"><%= criterio.nome %></th>
+  <table class="min-w-full bg-white shadow-sm rounded-lg">
+    <thead>
+      <tr>
+        <th class="py-3 px-4 uppercase font-semibold text-sm text-gray-600">
+          Projeto
+        </th>
+        <th class="py-3 px-4 uppercase font-semibold text-sm text-gray-600 text-center">
+          Nº Avaliações
+        </th>
+        <th class="py-3 px-4 uppercase font-semibold text-sm text-gray-600">
+          Critérios do Projeto
+        </th>
+        <th class="py-3 px-4 uppercase font-semibold text-sm text-gray-600 text-center">
+          Média Geral
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <% relatorioFinalPorProjeto[categoria].forEach(projeto => { %>
+        <tr class="hover:bg-gray-50">
+
+<!-- PROJETO -->
+          <td class="py-3 px-4 text-gray-700 font-medium">
+            <%= projeto.titulo %>
+          </td>
+<!-- Nº AVALIAÇÕES -->
+          <td class="py-3 px-4 text-gray-700 text-center">
+            <%= projeto.numAvaliacoes %>
+          </td>
+
+<!-- CRITÉRIOS ESPECÍFICOS DO PROJETO -->
+          <td class="py-3 px-4 text-gray-700">
+            <%
+              const criteriosProjeto =
+                Array.isArray(projeto.criterios)
+                  ? projeto.criterios
+                  : [];
+            %>
+            <% if (criteriosProjeto.length > 0) { %>
+              <div class="space-y-2">
+                <% criteriosProjeto.forEach(criterio => {
+                    const criterioId =
+                      String(
+                        criterio._id ||
+                        criterio
+                      );
+                    const media =
+                      projeto.mediasCriterios
+                        ? projeto.mediasCriterios[criterioId]
+                        : null;
+                %>
+                  <div class="flex justify-between gap-4 border-b border-gray-100 pb-1">
+                    <span class="font-medium">
+                      <%= criterio.nome || 'Critério' %>
+                    </span>
+                    <span class="font-bold text-blue-700 whitespace-nowrap">
+                      <%= (
+                        media !== undefined &&
+                        media !== null &&
+                        media !== '' &&
+                        media !== '-' &&
+                        media !== 'N/A'
+                      )
+                        ? media
+                        : 'N/A'
+                      %>
+                    </span>
+                  </div>
                 <% }) %>
-                <th class="py-3 px-4 uppercase font-semibold text-sm text-gray-600 text-center">Média Geral</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% relatorioFinalPorProjeto[categoria].forEach(projeto => { %>
-                <tr class="hover:bg-gray-50">
-                  <td class="py-3 px-4 text-gray-700"><%= projeto.titulo %></td>
-                  <td class="py-3 px-4 text-gray-700 text-center"><%= projeto.numAvaliacoes %></td>
-                  <% criteriosOficiais.forEach(criterio => { %>
-                    <td class="py-3 px-4 text-gray-700 text-center">
-                      <%= projeto.mediasCriterios[criterio._id.toString()] %>
-                    </td>
-                  <% }) %>
-                  <td class="py-3 px-4 text-gray-800 font-bold text-center">
-                    <%= projeto.mediaGeral %>
-                  </td>
-                </tr>
-              <% }) %>
-            </tbody>
-          </table>
-        </div>
+              </div>
+            <% } else { %>
+              <span class="text-gray-400 italic">
+                Nenhum critério configurado
+              </span>
+            <% } %>
+          </td>
+<!-- MÉDIA GERAL -->
+          <td class="py-3 px-4 text-gray-800 font-bold text-center">
+            <%= projeto.mediaGeral %>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
       <% }) %>
     <% } else { %>
       <p class="text-center text-gray-600 py-8">Nenhum projeto avaliado nesta feira ainda.</p>
     <% } %>
   </div>
-
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       const reportForm = document.getElementById('reportForm');
       const tipoRelatorioSelect = document.getElementById('tipoRelatorio');
 
-      // Inicializa a ação do formulário com base na seleção padrão (se houver)
+// Inicializa a ação do formulário com base na seleção padrão (se houver)
       if (tipoRelatorioSelect.value) {
         reportForm.action = tipoRelatorioSelect.value;
       }
-
       tipoRelatorioSelect.addEventListener('change', function() {
         reportForm.action = this.value;
       });
-
       reportForm.addEventListener('submit', function(event) {
         if (!tipoRelatorioSelect.value) {
           event.preventDefault(); // Impede o envio se nenhuma opção for selecionada
