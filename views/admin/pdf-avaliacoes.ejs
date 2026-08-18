@@ -117,9 +117,17 @@
               (<%= avaliacao.avaliador && avaliacao.avaliador.email ? avaliacao.avaliador.email : '-' %>)
             </strong></p>
             <p>Data da Avaliação: <strong><%= formatarData(avaliacao.createdAt) %></strong></p>
-            <p>Status: <strong class="<%= avaliacao.finalizadaPorAvaliador ? 'status-finalizada' : 'status-pendente' %>">
-              <%= avaliacao.finalizadaPorAvaliador ? 'Finalizada' : 'Em Andamento' %>
-            </strong></p>
+           <p>
+  Status:
+
+  <strong class="<%= avaliacao.statusAvaliacao === '✅ Avaliado'
+      ? 'status-finalizada'
+      : 'status-pendente' %>">
+
+    <%= avaliacao.statusAvaliacao || 'Pendente' %>
+
+  </strong>
+</p>
             <% if (avaliacao.comentarioGeral && avaliacao.comentarioGeral.trim() !== '') { %>
               <p>Comentário Geral: <em><%= avaliacao.comentarioGeral %></em></p>
             <% } %>
