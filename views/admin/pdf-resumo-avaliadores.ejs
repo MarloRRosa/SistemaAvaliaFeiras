@@ -112,6 +112,10 @@
     /* Estilos para os ícones de status */
     .status-avaliado { color: #28a745; font-weight: bold; } /* Verde para avaliado */
     .status-pendente { color: #dc3545; font-weight: bold; } /* Vermelho para pendente */
+.status-em-avaliacao {
+  color: #f59e0b;
+  font-weight: bold;
+}
   </style>
 </head>
 <body>
@@ -126,10 +130,10 @@
       <div class="avaliador-details">
         <p>PIN: <strong><%= av.pinAtivo || 'N/A' %></strong></p>
         <p>
-          Projetos Atribuídos: <strong><%= av.totalAtribuidos %></strong> |
-          Avaliados: <strong><%= av.totalAvaliados %></strong> |
-          Pendentes: <strong><%= av.totalAtribuidos - av.totalAvaliados %></strong>
-        </p>
+  Projetos Atribuídos: <strong><%= av.totalAtribuidos %></strong> |
+  Avaliados: <strong><%= av.totalAvaliados %></strong> |
+  Pendentes: <strong><%= av.totalPendentes %></strong>
+</p>
       </div>
 
       <% if (av.projetos.length > 0) { %>
@@ -145,9 +149,19 @@
               <tr>
                 <td><%= p.titulo %></td>
                 <td>
-                  <span class="<%= p.status.includes('Avaliado') ? 'status-avaliado' : 'status-pendente' %>">
-                    <%= p.status %>
-                  </span>
+                 <%
+  let classeStatus = 'status-pendente';
+
+  if (p.status === '✅ Avaliado') {
+    classeStatus = 'status-avaliado';
+  } else if (p.status === '🟠 Em avaliação') {
+    classeStatus = 'status-em-avaliacao';
+  }
+%>
+
+<span class="<%= classeStatus %>">
+  <%= p.status %>
+</span>
                 </td>
               </tr>
             <% }) %>
