@@ -714,70 +714,339 @@ router.get('/dashboard', verificarAdminEscola, async (req, res) => {
             }
         }
 
-        // Preparar relatorioFinalPorProjeto para o novo Dashboard Geral
-        const relatorioFinalPorProjeto = {};
-        for (const projeto of projetosFetched) {
-            const categoriaNome = projeto.categoria ? projeto.categoria.nome : 'Sem Categoria';
-            if (!relatorioFinalPorProjeto[categoriaNome]) {
-                relatorioFinalPorProjeto[categoriaNome] = [];
-            }
-            // Preencher mediasCriterios para cada projeto para a tabela
-            const mediasCriteriosProjeto = {};
-            const avaliacoesDoProjetoParaCriterios = avaliacoesFetched.filter(a => a.projeto && String(a.projeto) === String(projeto._id));
-            
-            for (const criterioOficial of criteriosOficiais) {
-                const notasDoCriterioParaEsteProjeto = avaliacoesDoProjetoParaCriterios.flatMap(avaliacao => {
-                    const notasArray = avaliacao.notas || avaliacao.itens;
-                    return (notasArray && Array.isArray(notasArray)) ? notasArray.filter(item =>
-                        String(item.criterio) === String(criterioOficial._id) &&
-                        item.nota !== undefined && item.nota !== null
-                    ) : [];
-                });
-                if (notasDoCriterioParaEsteProjeto.length > 0) {
-                    const sumNotas = notasDoCriterioParaEsteProjeto.reduce((acc, curr) => acc + parseFloat(curr.nota), 0);
-                    mediasCriteriosProjeto[String(criterioOficial._id)] = parseFloat(sumNotas / notasDoCriterioParaEsteProjeto.length).toFixed(2);
-                } else {
-                    mediasCriteriosProjeto[String(criterioOficial._id)] = 'N/A';
+       // ============================================================
+// PREPARAR RELATÓRIO FINAL POR PROJETO - DASHBOARD GERAL
+// ============================================================
+//
+// Regra:
+// - usar somente projeto.criterios;
+// - ignorar critérios antigos/indevidos das avaliações;
+// - calcular média de cada critério entre os avaliadores;
+// - manter a nota final já calculada no projeto;
+// - desempatar somente por critérios pertencentes aos projetos.
+// ============================================================
+
+const relatorioFinalPorProjeto = {};
+
+for (const projeto of projetosFetched) {
+
+    const categoriaNome =
+        projeto.categoria
+            ? projeto.categoria.nome
+            : 'Sem Categoria';
+
+    if (!relatorioFinalPorProjeto[categoriaNome]) {
+        relatorioFinalPorProjeto[categoriaNome] = [];
+    }
+
+
+    // --------------------------------------------------------
+    // CRITÉRIOS DO PRÓPRIO PROJETO
+    // --------------------------------------------------------
+
+    const criteriosDoProjeto =
+        Array.isArray(projeto.criterios)
+            ? projeto.criterios
+            : [];
+
+
+    const idsCriteriosProjeto =
+        new Set(
+            criteriosDoProjeto.map(criterio =>
+                String(criterio._id || criterio)
+            )
+        );
+
+
+    // --------------------------------------------------------
+    // AVALIAÇÕES DESTE PROJETO
+    // --------------------------------------------------------
+
+    const avaliacoesDoProjeto =
+        avaliacoesFetched.filter(avaliacao =>
+            avaliacao.projeto &&
+            String(avaliacao.projeto) === String(projeto._id)
+        );
+
+
+    // --------------------------------------------------------
+    // MÉDIA DE CADA CRITÉRIO DO PROJETO
+    // --------------------------------------------------------
+
+    const mediasCriteriosProjeto = {};
+
+
+    for (const criterio of criteriosDoProjeto) {
+
+        const criterioId =
+            String(criterio._id || criterio);
+
+
+        const notas = [];
+
+
+        for (const avaliacao of avaliacoesDoProjeto) {
+
+            const itens =
+                Array.isArray(avaliacao.itens)
+                    ? avaliacao.itens
+                    : [];
+
+
+            for (const item of itens) {
+
+                if (
+                    !item.criterio ||
+                    String(item.criterio) !== criterioId
+                ) {
+                    continue;
+                }
+
+
+                const nota = Number(item.nota);
+
+
+                if (
+                    item.nota !== undefined &&
+                    item.nota !== null &&
+                    item.nota !== '' &&
+                    !Number.isNaN(nota) &&
+                    nota >= 5 &&
+                    nota <= 10
+                ) {
+                    notas.push(nota);
                 }
             }
-
-
-            relatorioFinalPorProjeto[categoriaNome].push({
-                titulo: projeto.titulo,
-                numAvaliacoes: projeto.avaliacoesFeitas,
-                mediasCriterios: mediasCriteriosProjeto, // Agora preenchido
-                mediaGeral: projeto.notaFinal
-            });
         }
 
-        // Ordenar projetos dentro de cada categoria por média geral (notaFinal)
-        for (const categoria in relatorioFinalPorProjeto) {
-            relatorioFinalPorProjeto[categoria].sort((a, b) => {
-    const notaA = parseFloat(a.mediaGeral);
-    const notaB = parseFloat(b.mediaGeral);
-    if (isNaN(notaA) && isNaN(notaB)) return 0;
-    if (isNaN(notaA)) return 1;
-    if (isNaN(notaB)) return -1;
-    
-    // 1. Primeiro, comparar a média geral (notaFinal)
-    if (notaB !== notaA) return notaB - notaA;
 
-    // 2. Se empatar, comparar pela ordem dos critérios de desempate
-    for (const criterio of criteriosOficiais
-        .filter(c => c.ordemDesempate > 0)
-        .sort((x, y) => x.ordemDesempate - y.ordemDesempate)) {
+        if (notas.length > 0) {
 
-        const notaCriterioA = parseFloat(a.mediasCriterios[criterio._id.toString()]);
-        const notaCriterioB = parseFloat(b.mediasCriterios[criterio._id.toString()]);
+            const soma =
+                notas.reduce(
+                    (acc, nota) =>
+                        acc + nota,
+                    0
+                );
 
-        if (!isNaN(notaCriterioA) && !isNaN(notaCriterioB) && notaCriterioA !== notaCriterioB) {
-            return notaCriterioB - notaCriterioA;
+
+            const media =
+                soma / notas.length;
+
+
+            mediasCriteriosProjeto[
+                criterioId
+            ] = media.toFixed(2);
+
+        } else {
+
+            mediasCriteriosProjeto[
+                criterioId
+            ] = 'N/A';
         }
     }
-    return 0;
-});
 
+
+    // --------------------------------------------------------
+    // INSERIR PROJETO NA CATEGORIA
+    // --------------------------------------------------------
+
+    relatorioFinalPorProjeto[
+        categoriaNome
+    ].push({
+
+        _id:
+            projeto._id,
+
+        titulo:
+            projeto.titulo,
+
+        categoria:
+            projeto.categoria,
+
+        criterios:
+            criteriosDoProjeto,
+
+        criteriosIds:
+            Array.from(
+                idsCriteriosProjeto
+            ),
+
+        numAvaliacoes:
+            projeto.avaliacoesFeitas,
+
+        totalAvaliadores:
+            projeto.totalAvaliadores,
+
+        statusAvaliacao:
+            projeto.statusAvaliacao,
+
+        mediasCriterios:
+            mediasCriteriosProjeto,
+
+        mediaGeral:
+            projeto.notaFinal,
+
+        notaFinal:
+            projeto.notaFinal
+    });
+}
+
+
+// ============================================================
+// ORDENAR PROJETOS DENTRO DE CADA CATEGORIA
+// ============================================================
+//
+// 1. Maior nota final.
+// 2. Em empate, critérios definidos por ordemDesempate.
+// 3. Um critério somente desempata se pertencer aos DOIS
+//    projetos comparados.
+// ============================================================
+
+for (const categoria in relatorioFinalPorProjeto) {
+
+    relatorioFinalPorProjeto[
+        categoria
+    ].sort((a, b) => {
+
+        // ----------------------------------------------------
+        // 1. NOTA FINAL
+        // ----------------------------------------------------
+
+        const notaA =
+            parseFloat(a.mediaGeral);
+
+        const notaB =
+            parseFloat(b.mediaGeral);
+
+
+        if (
+            isNaN(notaA) &&
+            isNaN(notaB)
+        ) {
+            return 0;
         }
+
+
+        if (isNaN(notaA)) {
+            return 1;
+        }
+
+
+        if (isNaN(notaB)) {
+            return -1;
+        }
+
+
+        if (notaB !== notaA) {
+            return notaB - notaA;
+        }
+
+
+        // ----------------------------------------------------
+        // 2. CRITÉRIOS DE DESEMPATE
+        // ----------------------------------------------------
+
+        const idsA =
+            new Set(
+                Array.isArray(a.criterios)
+                    ? a.criterios.map(
+                        criterio =>
+                            String(
+                                criterio._id ||
+                                criterio
+                            )
+                    )
+                    : []
+            );
+
+
+        const idsB =
+            new Set(
+                Array.isArray(b.criterios)
+                    ? b.criterios.map(
+                        criterio =>
+                            String(
+                                criterio._id ||
+                                criterio
+                            )
+                    )
+                    : []
+            );
+
+
+        const criteriosDesempate =
+            criteriosOficiais
+                .filter(
+                    criterio =>
+                        Number(
+                            criterio.ordemDesempate
+                        ) > 0
+                )
+                .sort(
+                    (x, y) =>
+                        Number(
+                            x.ordemDesempate
+                        ) -
+                        Number(
+                            y.ordemDesempate
+                        )
+                );
+
+
+        for (
+            const criterio
+            of criteriosDesempate
+        ) {
+
+            const criterioId =
+                String(criterio._id);
+
+
+            // Só compara se o critério pertence
+            // aos dois projetos.
+            if (
+                !idsA.has(criterioId) ||
+                !idsB.has(criterioId)
+            ) {
+                continue;
+            }
+
+
+            const notaCriterioA =
+                parseFloat(
+                    a.mediasCriterios[
+                        criterioId
+                    ]
+                );
+
+
+            const notaCriterioB =
+                parseFloat(
+                    b.mediasCriterios[
+                        criterioId
+                    ]
+                );
+
+
+            if (
+                !isNaN(notaCriterioA) &&
+                !isNaN(notaCriterioB) &&
+                notaCriterioA !==
+                    notaCriterioB
+            ) {
+
+                return (
+                    notaCriterioB -
+                    notaCriterioA
+                );
+            }
+        }
+
+
+        return 0;
+    });
+}
         // --- FIM: PREPARAÇÃO DE DADOS PARA O DASHBOARD GERAL ---
 
         const activeTab = req.query.tab || 'dashboard-geral';
@@ -1814,70 +2083,454 @@ router.delete('/criterios/:id/excluir', verificarAdminEscola, async (req, res) =
 router.get('/resultados-finais/pdf', verificarAdminEscola, async (req, res) => {
     try {
         const escolaId = req.session.adminEscola.escolaId;
-        const feiraAtual = await Feira.findOne({ status: 'ativa', escolaId: escolaId });
+
+        const feiraAtual = await Feira.findOne({
+            status: 'ativa',
+            escolaId
+        });
+
         if (!feiraAtual) {
-            req.flash('error_msg', 'Nenhuma feira ativa para esta escola para gerar o relatório de resultados finais.');
-            if (!res.headersSent) { return res.redirect('/admin/dashboard?tab=relatorios'); }
+            req.flash(
+                'error_msg',
+                'Nenhuma feira ativa para esta escola para gerar o relatório de resultados finais.'
+            );
+
+            if (!res.headersSent) {
+                return res.redirect(
+                    '/admin/dashboard?tab=relatorios'
+                );
+            }
         }
 
-        const projetos = await Projeto.find({ feira: feiraAtual._id, escolaId: escolaId })
+
+        // =====================================================
+        // BUSCAR PROJETOS COM CRITÉRIOS
+        // =====================================================
+
+        const projetos = await Projeto.find({
+            feira: feiraAtual._id,
+            escolaId
+        })
             .populate('categoria')
             .populate('criterios')
             .lean();
-        const avaliacoes = await Avaliacao.find({ feira: feiraAtual._id, escolaId: escolaId }).lean();
+
+
+        const avaliacoes = await Avaliacao.find({
+            feira: feiraAtual._id,
+            escolaId
+        }).lean();
+
+
+        // =====================================================
+        // CALCULAR RESULTADO DE CADA PROJETO
+        // =====================================================
 
         for (const projeto of projetos) {
+
+            const avaliacoesDoProjeto =
+                avaliacoes.filter(avaliacao =>
+                    avaliacao.projeto &&
+                    String(avaliacao.projeto) ===
+                    String(projeto._id)
+                );
+
+
+            const criteriosDoProjeto =
+                Array.isArray(projeto.criterios)
+                    ? projeto.criterios
+                    : [];
+
+
+            const mediasCriterios = {};
+
             let totalNotaPonderada = 0;
             let totalPeso = 0;
-            let criteriosAvaliadosCount = new Set();
-            if (projeto.criterios && Array.isArray(projeto.criterios)) {
-                for (const criterioProjeto of projeto.criterios) {
-                    const avaliacoesDoCriterio = avaliacoes.flatMap(avaliacao => {
-                        const notasArray = avaliacao.notas || avaliacao.itens;
-                        return (notasArray && Array.isArray(notasArray)) ? notasArray.filter(nota =>
-                            String(nota.criterio) === String(criterioProjeto._id) &&
-                            avaliacao.projeto && String(avaliacao.projeto) === String(projeto._id) &&
-                            nota.nota !== undefined && nota.nota !== null
-                        ) : [];
-                    });
 
-                    if (avaliacoesDoCriterio.length > 0) {
-                        const sumNotasCriterio = avaliacoesDoCriterio.reduce((acc, curr) => acc + parseFloat(curr.nota), 0);
-                        const mediaCriterio = sumNotasCriterio / avaliacoesDoCriterio.length;
-                        totalNotaPonderada += mediaCriterio * criterioProjeto.peso;
-                        totalPeso += criterioProjeto.peso;
-                        criteriosAvaliadosCount.add(String(criterioProjeto._id));
+            const criteriosAvaliadosCount =
+                new Set();
+
+
+            // -------------------------------------------------
+            // SOMENTE CRITÉRIOS DO PROJETO
+            // -------------------------------------------------
+
+            for (const criterio of criteriosDoProjeto) {
+
+                const criterioId =
+                    String(criterio._id);
+
+
+                const notas = [];
+
+
+                for (const avaliacao of avaliacoesDoProjeto) {
+
+                    const itens =
+                        Array.isArray(avaliacao.itens)
+                            ? avaliacao.itens
+                            : [];
+
+
+                    for (const item of itens) {
+
+                        if (
+                            !item.criterio ||
+                            String(item.criterio) !== criterioId
+                        ) {
+                            continue;
+                        }
+
+
+                        const nota =
+                            Number(item.nota);
+
+
+                        if (
+                            item.nota !== undefined &&
+                            item.nota !== null &&
+                            item.nota !== '' &&
+                            !Number.isNaN(nota) &&
+                            nota >= 5 &&
+                            nota <= 10
+                        ) {
+                            notas.push(nota);
+                        }
                     }
                 }
+
+
+                if (notas.length > 0) {
+
+                    const soma =
+                        notas.reduce(
+                            (acc, nota) =>
+                                acc + nota,
+                            0
+                        );
+
+
+                    const media =
+                        soma / notas.length;
+
+
+                    mediasCriterios[
+                        criterioId
+                    ] = media;
+
+
+                    const peso =
+                        Number(criterio.peso) || 1;
+
+
+                    totalNotaPonderada +=
+                        media * peso;
+
+
+                    totalPeso += peso;
+
+
+                    criteriosAvaliadosCount.add(
+                        criterioId
+                    );
+
+                } else {
+
+                    mediasCriterios[
+                        criterioId
+                    ] = null;
+                }
             }
-            projeto.notaFinal = totalPeso > 0 ? parseFloat(totalNotaPonderada / totalPeso).toFixed(2) : 'N/A';
-            projeto.criteriosAvaliadosCount = criteriosAvaliadosCount.size;
-            projeto.totalCriterios = projeto.criterios ? projeto.criterios.length : 0;
+
+
+            // -------------------------------------------------
+            // NOTA FINAL
+            // -------------------------------------------------
+
+            const notaFinal =
+                totalPeso > 0
+                    ? totalNotaPonderada / totalPeso
+                    : null;
+
+
+            projeto.notaFinal =
+                notaFinal !== null
+                    ? notaFinal.toFixed(2)
+                    : 'N/A';
+
+
+            projeto.mediasCriterios =
+                mediasCriterios;
+
+
+            projeto.criteriosAvaliadosCount =
+                criteriosAvaliadosCount.size;
+
+
+            projeto.totalCriterios =
+                criteriosDoProjeto.length;
+
+
+            projeto.numAvaliacoes =
+                avaliacoesDoProjeto.length;
         }
 
-        const projetosOrdenados = projetos.sort((a, b) => {
-            const notaA = parseFloat(a.notaFinal);
-            const notaB = parseFloat(b.notaFinal);
-            if (isNaN(notaA) && isNaN(notaB)) return 0;
-            if (isNaN(notaA)) return 1;
-            if (isNaN(notaB)) return -1;
-            return notaB - notaA;
-        });
 
-        const escola = await Escola.findById(escolaId).lean() || { nome: "Nome da Escola", diretor: "Diretor da Escola" };
+        // =====================================================
+        // ORDENAR RESULTADOS
+        // =====================================================
+        //
+        // 1. Maior nota final
+        // 2. Critérios de desempate
+        //
+        // Critério de desempate só é usado quando pertence
+        // aos dois projetos comparados.
+        // =====================================================
 
-        await generatePdfReport(req, res, 'pdf-resultados', {
-            titulo: 'Resultados Finais',
-            nomeFeira: feiraAtual.nome,
-            projetos: projetosOrdenados,
-            escola: escola
-        }, `resultados-finais_${feiraAtual.nome}`);
+        const projetosOrdenados =
+            projetos.sort((a, b) => {
+
+                // ---------------------------------------------
+                // 1. NOTA FINAL
+                // ---------------------------------------------
+
+                const notaA =
+                    parseFloat(
+                        a.notaFinal
+                    );
+
+                const notaB =
+                    parseFloat(
+                        b.notaFinal
+                    );
+
+
+                if (
+                    isNaN(notaA) &&
+                    isNaN(notaB)
+                ) {
+                    return 0;
+                }
+
+
+                if (isNaN(notaA)) {
+                    return 1;
+                }
+
+
+                if (isNaN(notaB)) {
+                    return -1;
+                }
+
+
+                if (notaB !== notaA) {
+                    return notaB - notaA;
+                }
+
+
+                // ---------------------------------------------
+                // 2. DESEMPATE
+                // ---------------------------------------------
+
+                const criteriosA =
+                    Array.isArray(a.criterios)
+                        ? a.criterios
+                        : [];
+
+
+                const criteriosB =
+                    Array.isArray(b.criterios)
+                        ? b.criterios
+                        : [];
+
+
+                const idsA =
+                    new Set(
+                        criteriosA.map(
+                            criterio =>
+                                String(
+                                    criterio._id
+                                )
+                        )
+                    );
+
+
+                const idsB =
+                    new Set(
+                        criteriosB.map(
+                            criterio =>
+                                String(
+                                    criterio._id
+                                )
+                        )
+                    );
+
+
+                const criteriosDesempate =
+                    criteriosA
+                        .filter(criterio =>
+                            Number(
+                                criterio.ordemDesempate
+                            ) > 0 &&
+                            idsB.has(
+                                String(
+                                    criterio._id
+                                )
+                            )
+                        )
+                        .sort(
+                            (x, y) =>
+                                Number(
+                                    x.ordemDesempate
+                                ) -
+                                Number(
+                                    y.ordemDesempate
+                                )
+                        );
+
+
+                for (
+                    const criterio
+                    of criteriosDesempate
+                ) {
+
+                    const criterioId =
+                        String(
+                            criterio._id
+                        );
+
+
+                    if (
+                        !idsA.has(criterioId) ||
+                        !idsB.has(criterioId)
+                    ) {
+                        continue;
+                    }
+
+
+                    const mediaA =
+                        Number(
+                            a.mediasCriterios?.[
+                                criterioId
+                            ]
+                        );
+
+
+                    const mediaB =
+                        Number(
+                            b.mediasCriterios?.[
+                                criterioId
+                            ]
+                        );
+
+
+                    const temMediaA =
+                        Number.isFinite(
+                            mediaA
+                        );
+
+
+                    const temMediaB =
+                        Number.isFinite(
+                            mediaB
+                        );
+
+
+                    if (
+                        temMediaA &&
+                        temMediaB &&
+                        mediaA !== mediaB
+                    ) {
+
+                        return (
+                            mediaB -
+                            mediaA
+                        );
+                    }
+
+
+                    if (
+                        temMediaA &&
+                        !temMediaB
+                    ) {
+                        return -1;
+                    }
+
+
+                    if (
+                        !temMediaA &&
+                        temMediaB
+                    ) {
+                        return 1;
+                    }
+                }
+
+
+                return 0;
+            });
+
+
+        // =====================================================
+        // ESCOLA
+        // =====================================================
+
+        const escola =
+            await Escola.findById(
+                escolaId
+            ).lean() || {
+
+                nome:
+                    'Nome da Escola',
+
+                diretor:
+                    'Diretor da Escola'
+            };
+
+
+        // =====================================================
+        // GERAR PDF
+        // =====================================================
+
+        await generatePdfReport(
+            req,
+            res,
+            'pdf-resultados',
+            {
+                titulo:
+                    'Resultados Finais',
+
+                nomeFeira:
+                    feiraAtual.nome,
+
+                projetos:
+                    projetosOrdenados,
+
+                escola
+            },
+            `resultados-finais_${feiraAtual.nome}`
+        );
+
 
     } catch (error) {
-        console.error('Erro ao gerar PDF de resultados finais:', error);
+
+        console.error(
+            'Erro ao gerar PDF de resultados finais:',
+            error
+        );
+
+
         if (!res.headersSent) {
-            req.flash('error_msg', 'Erro ao gerar PDF de resultados finais. Detalhes: ' + error.message);
-            res.redirect('/admin/dashboard?tab=relatorios');
+
+            req.flash(
+                'error_msg',
+                'Erro ao gerar PDF de resultados finais. Detalhes: ' +
+                error.message
+            );
+
+
+            return res.redirect(
+                '/admin/dashboard?tab=relatorios'
+            );
         }
     }
 });
@@ -1887,65 +2540,399 @@ router.get('/resultados-finais/pdf', verificarAdminEscola, async (req, res) => {
 router.get('/avaliacoes/pdf', verificarAdminEscola, async (req, res) => {
     try {
         const escolaId = req.session.adminEscola.escolaId;
-        const feiraAtual = await Feira.findOne({ status: 'ativa', escolaId: escolaId });
+
+        const feiraAtual = await Feira.findOne({
+            status: 'ativa',
+            escolaId
+        });
+
         if (!feiraAtual) {
-            req.flash('error_msg', 'Nenhuma feira ativa para esta escola para gerar o relatório de avaliações.');
-            if (!res.headersSent) return res.redirect('/admin/dashboard?tab=relatorios');
+            req.flash(
+                'error_msg',
+                'Nenhuma feira ativa para esta escola para gerar o relatório de avaliações.'
+            );
+
+            if (!res.headersSent) {
+                return res.redirect(
+                    '/admin/dashboard?tab=relatorios'
+                );
+            }
         }
 
-        const avaliacoes = await Avaliacao.find({ feira: feiraAtual._id, escolaId: escolaId })
+
+        // =====================================================
+        // BUSCAR AVALIAÇÕES
+        //
+        // Importante:
+        // além da categoria, precisamos popular os critérios
+        // específicos de cada projeto.
+        // =====================================================
+
+        const avaliacoes = await Avaliacao.find({
+            feira: feiraAtual._id,
+            escolaId
+        })
             .populate('avaliador')
-            .populate({ path: 'projeto', populate: { path: 'categoria' } })
+            .populate({
+                path: 'projeto',
+                populate: [
+                    {
+                        path: 'categoria'
+                    },
+                    {
+                        path: 'criterios'
+                    }
+                ]
+            })
             .lean();
 
-        // Puxar critérios ordenados por ordemDesempate
-        const criteriosOrdenados = await Criterio.find({ feira: feiraAtual._id, escolaId: escolaId })
-            .sort({ ordemDesempate: 1, nome: 1 })
-            .lean();
 
-        const criteriosMap = {};
-        criteriosOrdenados.forEach(c => {
-            criteriosMap[c._id.toString()] = {
-                nome: c.nome,
-                ordemDesempate: c.ordemDesempate || 999
-            };
-        });
+        // =====================================================
+        // PREPARAR AVALIAÇÕES PARA O RELATÓRIO
+        // =====================================================
 
-        const avaliacoesParaRelatorio = avaliacoes.map(avaliacao => {
-            const notasArray = avaliacao.notas || avaliacao.itens;
-            const notasComNomesDeCriterio = (notasArray || [])
-                .map(item => {
-                    const cInfo = criteriosMap[String(item.criterio)] || { nome: 'Critério Desconhecido', ordemDesempate: 999 };
-                    return {
-                        criterioNome: cInfo.nome,
-                        valor: parseFloat(item.nota),
-                        observacao: item.comentario || '',
-                        ordemDesempate: cInfo.ordemDesempate
-                    };
-                })
-                .sort((a, b) => a.ordemDesempate - b.ordemDesempate || a.criterioNome.localeCompare(b.criterioNome));
+        const avaliacoesParaRelatorio = [];
 
-            return {
+
+        for (const avaliacao of avaliacoes) {
+
+            const projeto =
+                avaliacao.projeto;
+
+
+            // Se o projeto foi removido, mantemos uma proteção
+            // para não quebrar a geração do relatório.
+            if (!projeto) {
+
+                avaliacoesParaRelatorio.push({
+                    ...avaliacao,
+
+                    projeto: {
+                        titulo:
+                            'Projeto removido',
+
+                        categoria:
+                            null,
+
+                        criterios:
+                            []
+                    },
+
+                    avaliador:
+                        avaliacao.avaliador || {
+                            nome:
+                                'Avaliador Removido',
+
+                            email:
+                                '-'
+                        },
+
+                    notasComNomesDeCriterio:
+                        [],
+
+                    statusAvaliacao:
+                        'Projeto removido',
+
+                    criteriosRespondidos:
+                        0,
+
+                    totalCriterios:
+                        0
+                });
+
+                continue;
+            }
+
+
+            // =================================================
+            // CRITÉRIOS DO PRÓPRIO PROJETO
+            // =================================================
+
+            const criteriosProjeto =
+                Array.isArray(projeto.criterios)
+                    ? projeto.criterios
+                    : [];
+
+
+            const criteriosMap = {};
+
+
+            criteriosProjeto.forEach(criterio => {
+
+                const criterioId =
+                    String(
+                        criterio._id ||
+                        criterio
+                    );
+
+
+                criteriosMap[
+                    criterioId
+                ] = {
+
+                    nome:
+                        criterio.nome ||
+                        'Critério',
+
+                    ordemDesempate:
+                        Number(
+                            criterio.ordemDesempate
+                        ) > 0
+                            ? Number(
+                                criterio.ordemDesempate
+                            )
+                            : 999,
+
+                    peso:
+                        Number(
+                            criterio.peso
+                        ) || 1
+                };
+            });
+
+
+            // =================================================
+            // FILTRAR SOMENTE ITENS VÁLIDOS E PERTENCENTES
+            // AO PROJETO
+            // =================================================
+
+            const itens =
+                Array.isArray(avaliacao.itens)
+                    ? avaliacao.itens
+                    : [];
+
+
+            const notasComNomesDeCriterio =
+                itens
+                    .filter(item => {
+
+                        if (!item.criterio) {
+                            return false;
+                        }
+
+
+                        const criterioId =
+                            String(
+                                item.criterio
+                            );
+
+
+                        // Critério precisa pertencer ao projeto
+                        if (
+                            !criteriosMap[
+                                criterioId
+                            ]
+                        ) {
+                            return false;
+                        }
+
+
+                        const nota =
+                            Number(
+                                item.nota
+                            );
+
+
+                        return (
+                            item.nota !== undefined &&
+                            item.nota !== null &&
+                            item.nota !== '' &&
+                            !Number.isNaN(nota) &&
+                            nota >= 5 &&
+                            nota <= 10
+                        );
+                    })
+                    .map(item => {
+
+                        const criterioId =
+                            String(
+                                item.criterio
+                            );
+
+
+                        const cInfo =
+                            criteriosMap[
+                                criterioId
+                            ];
+
+
+                        return {
+
+                            criterioId,
+
+                            criterioNome:
+                                cInfo.nome,
+
+                            valor:
+                                Number(
+                                    item.nota
+                                ),
+
+                            observacao:
+                                item.comentario ||
+                                '',
+
+                            ordemDesempate:
+                                cInfo.ordemDesempate,
+
+                            peso:
+                                cInfo.peso
+                        };
+                    })
+                    .sort(
+                        (a, b) => {
+
+                            if (
+                                a.ordemDesempate !==
+                                b.ordemDesempate
+                            ) {
+                                return (
+                                    a.ordemDesempate -
+                                    b.ordemDesempate
+                                );
+                            }
+
+
+                            return (
+                                a.criterioNome ||
+                                ''
+                            ).localeCompare(
+                                b.criterioNome ||
+                                ''
+                            );
+                        }
+                    );
+
+
+            // =================================================
+            // STATUS DA AVALIAÇÃO
+            // =================================================
+
+            const criteriosRespondidos =
+                new Set(
+                    notasComNomesDeCriterio.map(
+                        item =>
+                            String(
+                                item.criterioId
+                            )
+                    )
+                );
+
+
+            const totalCriterios =
+                criteriosProjeto.length;
+
+
+            let statusAvaliacao =
+                'Pendente';
+
+
+            if (
+                totalCriterios > 0 &&
+                criteriosRespondidos.size ===
+                    totalCriterios
+            ) {
+
+                statusAvaliacao =
+                    '✅ Avaliado';
+
+            } else if (
+                criteriosRespondidos.size > 0
+            ) {
+
+                statusAvaliacao =
+                    '🟠 Em avaliação';
+            }
+
+
+            // =================================================
+            // ADICIONAR AO RELATÓRIO
+            // =================================================
+
+            avaliacoesParaRelatorio.push({
+
                 ...avaliacao,
-                avaliador: avaliacao.avaliador || { nome: 'Avaliador Removido', email: '-' },
-                notasComNomesDeCriterio
+
+                projeto,
+
+                avaliador:
+                    avaliacao.avaliador || {
+                        nome:
+                            'Avaliador Removido',
+
+                        email:
+                            '-'
+                    },
+
+                notasComNomesDeCriterio,
+
+                statusAvaliacao,
+
+                criteriosRespondidos:
+                    criteriosRespondidos.size,
+
+                totalCriterios
+            });
+        }
+
+
+        // =====================================================
+        // ESCOLA
+        // =====================================================
+
+        const escola =
+            await Escola.findById(
+                escolaId
+            ).lean() || {
+                nome:
+                    'Nome da Escola'
             };
-        });
 
-        const escola = await Escola.findById(escolaId).lean() || { nome: "Nome da Escola" };
 
-        await generatePdfReport(req, res, 'pdf-avaliacoes', {
-            titulo: 'Avaliações Completas',
-            nomeFeira: feiraAtual.nome,
-            avaliacoes: avaliacoesParaRelatorio,
-            escola: escola
-        }, `avaliacoes_${feiraAtual.nome}`);
+        // =====================================================
+        // GERAR PDF
+        // =====================================================
+
+        await generatePdfReport(
+            req,
+            res,
+            'pdf-avaliacoes',
+            {
+                titulo:
+                    'Avaliações Completas',
+
+                nomeFeira:
+                    feiraAtual.nome,
+
+                avaliacoes:
+                    avaliacoesParaRelatorio,
+
+                escola
+            },
+            `avaliacoes_${feiraAtual.nome}`
+        );
+
 
     } catch (error) {
-        console.error('Erro ao gerar PDF de avaliações:', error);
+
+        console.error(
+            'Erro ao gerar PDF de avaliações:',
+            error
+        );
+
+
         if (!res.headersSent) {
-            req.flash('error_msg', 'Erro ao gerar PDF de avaliações. Detalhes: ' + error.message);
-            res.redirect('/admin/dashboard?tab=relatorios');
+
+            req.flash(
+                'error_msg',
+                'Erro ao gerar PDF de avaliações. Detalhes: ' +
+                error.message
+            );
+
+
+            return res.redirect(
+                '/admin/dashboard?tab=relatorios'
+            );
         }
     }
 });
@@ -1955,49 +2942,333 @@ router.get('/avaliacoes/pdf', verificarAdminEscola, async (req, res) => {
 router.get('/projetos-sem-avaliacao/pdf', verificarAdminEscola, async (req, res) => {
     try {
         const escolaId = req.session.adminEscola.escolaId;
-        const feiraAtual = await Feira.findOne({ status: 'ativa', escolaId: escolaId });
+
+        const feiraAtual = await Feira.findOne({
+            status: 'ativa',
+            escolaId
+        });
+
         if (!feiraAtual) {
-            req.flash('error_msg', 'Nenhuma feira ativa para esta escola para gerar o relatório de projetos sem avaliação.');
-            if (!res.headersSent) { return res.redirect('/admin/dashboard?tab=relatorios'); }
+            req.flash(
+                'error_msg',
+                'Nenhuma feira ativa para esta escola para gerar o relatório de projetos sem avaliação.'
+            );
+
+            if (!res.headersSent) {
+                return res.redirect(
+                    '/admin/dashboard?tab=relatorios'
+                );
+            }
         }
 
-        const projetos = await Projeto.find({ feira: feiraAtual._id, escolaId: escolaId }).lean();
-        const avaliacoes = await Avaliacao.find({ feira: feiraAtual._id, escolaId: escolaId }).lean();
-        const avaliadores = await Avaliador.find({ feira: feiraAtual._id, escolaId: escolaId }).lean();
+
+        // =====================================================
+        // BUSCAR PROJETOS COM SEUS CRITÉRIOS
+        // =====================================================
+
+        const projetos = await Projeto.find({
+            feira: feiraAtual._id,
+            escolaId
+        })
+            .populate('criterios')
+            .lean();
+
+
+        const avaliacoes = await Avaliacao.find({
+            feira: feiraAtual._id,
+            escolaId
+        }).lean();
+
+
+        const avaliadores = await Avaliador.find({
+            feira: feiraAtual._id,
+            escolaId
+        }).lean();
+
+
+        // =====================================================
+        // MONTAR RELATÓRIO
+        // =====================================================
 
         const projetosSemAvaliacao = [];
+
+
         for (const projeto of projetos) {
-            const numAvaliadoresAtribuidos = avaliadores.filter(av => av.projetosAtribuidos && av.projetosAtribuidos.some(pa => String(pa) === String(projeto._id))).length;
-            const avaliacoesDoProjeto = avaliacoes.filter(a => a.projeto && String(a.projeto) === String(projeto._id));
-            if (avaliacoesDoProjeto.length === 0 || avaliacoesDoProjeto.length < numAvaliadoresAtribuidos) {
-                const assignedEvaluators = avaliadores
-                    .filter(av => av.projetosAtribuidos && av.projetosAtribuidos.some(pa => String(pa) === String(projeto._id)))
-                    .map(av => av.nome)
-                    .join(', ');
+
+            // -------------------------------------------------
+            // CRITÉRIOS DESTE PROJETO
+            // -------------------------------------------------
+
+            const criteriosProjeto =
+                Array.isArray(projeto.criterios)
+                    ? projeto.criterios
+                    : [];
+
+
+            const idsCriteriosProjeto =
+                new Set(
+                    criteriosProjeto.map(
+                        criterio =>
+                            String(
+                                criterio._id ||
+                                criterio
+                            )
+                    )
+                );
+
+
+            // -------------------------------------------------
+            // AVALIADORES ATRIBUÍDOS
+            // -------------------------------------------------
+
+            const avaliadoresDoProjeto =
+                avaliadores.filter(avaliador => {
+
+                    if (
+                        !Array.isArray(
+                            avaliador.projetosAtribuidos
+                        )
+                    ) {
+                        return false;
+                    }
+
+
+                    return avaliador.projetosAtribuidos.some(
+                        projetoId =>
+                            String(projetoId) ===
+                            String(projeto._id)
+                    );
+                });
+
+
+            const numAvaliadoresAtribuidos =
+                avaliadoresDoProjeto.length;
+
+
+            // -------------------------------------------------
+            // CONTAR AVALIAÇÕES COMPLETAS
+            // -------------------------------------------------
+
+            let avaliacoesCompletas = 0;
+
+            const avaliadoresConcluidos = [];
+
+            const avaliadoresPendentes = [];
+
+
+            for (
+                const avaliador
+                of avaliadoresDoProjeto
+            ) {
+
+                const avaliacao =
+                    avaliacoes.find(a =>
+                        String(a.projeto) ===
+                            String(projeto._id) &&
+                        String(a.avaliador) ===
+                            String(avaliador._id)
+                    );
+
+
+                const criteriosRespondidos =
+                    new Set();
+
+
+                if (
+                    avaliacao &&
+                    Array.isArray(avaliacao.itens)
+                ) {
+
+                    for (
+                        const item
+                        of avaliacao.itens
+                    ) {
+
+                        if (!item.criterio) {
+                            continue;
+                        }
+
+
+                        const criterioId =
+                            String(
+                                item.criterio
+                            );
+
+
+                        // Ignora critérios antigos ou
+                        // que não pertencem ao projeto.
+                        if (
+                            !idsCriteriosProjeto.has(
+                                criterioId
+                            )
+                        ) {
+                            continue;
+                        }
+
+
+                        const nota =
+                            Number(item.nota);
+
+
+                        if (
+                            item.nota !== undefined &&
+                            item.nota !== null &&
+                            item.nota !== '' &&
+                            !Number.isNaN(nota) &&
+                            nota >= 5 &&
+                            nota <= 10
+                        ) {
+
+                            criteriosRespondidos.add(
+                                criterioId
+                            );
+                        }
+                    }
+                }
+
+
+                const avaliacaoCompleta =
+                    idsCriteriosProjeto.size > 0 &&
+                    criteriosRespondidos.size ===
+                        idsCriteriosProjeto.size;
+
+
+                if (avaliacaoCompleta) {
+
+                    avaliacoesCompletas++;
+
+                    avaliadoresConcluidos.push(
+                        avaliador.nome
+                    );
+
+                } else {
+
+                    avaliadoresPendentes.push(
+                        avaliador.nome
+                    );
+                }
+            }
+
+
+            // =================================================
+            // PROJETO AINDA NÃO ESTÁ TOTALMENTE AVALIADO
+            // =================================================
+
+            const projetoIncompleto =
+                numAvaliadoresAtribuidos === 0 ||
+                avaliacoesCompletas <
+                    numAvaliadoresAtribuidos;
+
+
+            if (projetoIncompleto) {
+
                 projetosSemAvaliacao.push({
-                    titulo: projeto.titulo,
-                    turma: projeto.turma,
-                    totalAvaliadores: numAvaliadoresAtribuidos,
-                    avaliacoesRecebidas: avaliacoesDoProjeto.length,
-                    avaliadoresDesignados: assignedEvaluators || 'Nenhum avaliador atribuído'
+
+                    titulo:
+                        projeto.titulo,
+
+                    turma:
+                        projeto.turma,
+
+                    totalCriterios:
+                        idsCriteriosProjeto.size,
+
+                    totalAvaliadores:
+                        numAvaliadoresAtribuidos,
+
+                    avaliacoesRecebidas:
+                        avaliacoesCompletas,
+
+                    avaliacoesCompletas,
+
+                    avaliacoesPendentes:
+                        Math.max(
+                            numAvaliadoresAtribuidos -
+                            avaliacoesCompletas,
+                            0
+                        ),
+
+                    avaliadoresDesignados:
+                        avaliadoresDoProjeto.length > 0
+                            ? avaliadoresDoProjeto
+                                .map(a => a.nome)
+                                .join(', ')
+                            : 'Nenhum avaliador atribuído',
+
+                    avaliadoresConcluidos:
+                        avaliadoresConcluidos.length > 0
+                            ? avaliadoresConcluidos.join(', ')
+                            : 'Nenhum',
+
+                    avaliadoresPendentes:
+                        avaliadoresPendentes.length > 0
+                            ? avaliadoresPendentes.join(', ')
+                            : (
+                                numAvaliadoresAtribuidos === 0
+                                    ? 'Nenhum avaliador atribuído'
+                                    : 'Nenhum'
+                            )
                 });
             }
         }
 
-        const escola = await Escola.findById(escolaId).lean() || { nome: "Nome da Escola" };
 
-        await generatePdfReport(req, res, 'pdf-projetos-sem-avaliacao', {
-            titulo: 'Projetos Sem Avaliação',
-            nomeFeira: feiraAtual.nome,
-            projetosNaoAvaliados: projetosSemAvaliacao,
-            escola: escola
-        }, `projetos-sem-avaliacao_${feiraAtual.nome}`);
+        // =====================================================
+        // ESCOLA
+        // =====================================================
+
+        const escola =
+            await Escola.findById(
+                escolaId
+            ).lean() || {
+                nome: 'Nome da Escola'
+            };
+
+
+        // =====================================================
+        // GERAR PDF
+        // =====================================================
+
+        await generatePdfReport(
+            req,
+            res,
+            'pdf-projetos-sem-avaliacao',
+            {
+                titulo:
+                    'Projetos Sem Avaliação',
+
+                nomeFeira:
+                    feiraAtual.nome,
+
+                projetosNaoAvaliados:
+                    projetosSemAvaliacao,
+
+                escola
+            },
+            `projetos-sem-avaliacao_${feiraAtual.nome}`
+        );
+
 
     } catch (error) {
-        console.error('Erro ao gerar PDF de projetos sem avaliação:', error);
+
+        console.error(
+            'Erro ao gerar PDF de projetos sem avaliação:',
+            error
+        );
+
+
         if (!res.headersSent) {
-            req.flash('error_msg', 'Erro ao gerar PDF de projetos sem avaliação. Detalhes: ' + error.message);
-            res.redirect('/admin/dashboard?tab=relatorios');
+
+            req.flash(
+                'error_msg',
+                'Erro ao gerar PDF de projetos sem avaliação. Detalhes: ' +
+                error.message
+            );
+
+
+            return res.redirect(
+                '/admin/dashboard?tab=relatorios'
+            );
         }
     }
 });
@@ -2006,96 +3277,465 @@ router.get('/projetos-sem-avaliacao/pdf', verificarAdminEscola, async (req, res)
 router.get('/ranking-categorias/pdf', verificarAdminEscola, async (req, res) => {
     try {
         const escolaId = req.session.adminEscola.escolaId;
-        const feiraAtual = await Feira.findOne({ status: 'ativa', escolaId: escolaId });
+
+        const feiraAtual = await Feira.findOne({
+            status: 'ativa',
+            escolaId
+        });
+
         if (!feiraAtual) {
-            req.flash('error_msg', 'Nenhuma feira ativa para esta escola para gerar o ranking por categoria.');
-            if (!res.headersSent) { 
-                return res.redirect('/admin/dashboard?tab=relatorios'); 
+            req.flash(
+                'error_msg',
+                'Nenhuma feira ativa para esta escola para gerar o ranking por categoria.'
+            );
+
+            if (!res.headersSent) {
+                return res.redirect(
+                    '/admin/dashboard?tab=relatorios'
+                );
             }
         }
 
-        const projetos = await Projeto.find({ feira: feiraAtual._id, escolaId: escolaId })
+
+        // =====================================================
+        // BUSCAR PROJETOS COM SEUS CRITÉRIOS
+        // =====================================================
+
+        const projetos = await Projeto.find({
+            feira: feiraAtual._id,
+            escolaId
+        })
             .populate('categoria')
             .populate('criterios')
             .lean();
 
-        const avaliacoes = await Avaliacao.find({ feira: feiraAtual._id, escolaId: escolaId }).lean();
 
-        // 🔑 Ordenar categorias pela ordem definida pelo admin
-        const categorias = await Categoria.find({ feira: feiraAtual._id, escolaId: escolaId })
+        const avaliacoes = await Avaliacao.find({
+            feira: feiraAtual._id,
+            escolaId
+        }).lean();
+
+
+        // Categorias na ordem definida pelo admin
+        const categorias = await Categoria.find({
+            feira: feiraAtual._id,
+            escolaId
+        })
             .sort({ ordem: 1 })
             .lean();
 
-        const rankingPorCategoria = {};
+
+        // =====================================================
+        // CALCULAR RESULTADO DE CADA PROJETO
+        // =====================================================
+
         for (const projeto of projetos) {
+
+            const avaliacoesDoProjeto =
+                avaliacoes.filter(avaliacao =>
+                    avaliacao.projeto &&
+                    String(avaliacao.projeto) ===
+                    String(projeto._id)
+                );
+
+
+            const criteriosDoProjeto =
+                Array.isArray(projeto.criterios)
+                    ? projeto.criterios
+                    : [];
+
+
+            const mediasCriterios = {};
+
             let totalNotaPonderada = 0;
             let totalPeso = 0;
-            const avaliacoesDoProjeto = avaliacoes.filter(a => a.projeto && String(a.projeto) === String(projeto._id));
-            const numAvaliacoes = avaliacoesDoProjeto.length;
 
-            if (projeto.criterios && Array.isArray(projeto.criterios)) {
-                for (const criterioProjeto of projeto.criterios) {
-                    const avaliacoesDoCriterio = avaliacoesDoProjeto.flatMap(avaliacao => {
-                        const notasArray = avaliacao.notas || avaliacao.itens;
-                        return (notasArray && Array.isArray(notasArray))
-                            ? notasArray.filter(item =>
-                                String(item.criterio) === String(criterioProjeto._id) &&
-                                item.nota !== undefined &&
-                                item.nota !== null
-                              )
+
+            // -------------------------------------------------
+            // SOMENTE OS CRITÉRIOS DO PROJETO
+            // -------------------------------------------------
+
+            for (const criterio of criteriosDoProjeto) {
+
+                const criterioId =
+                    String(criterio._id);
+
+
+                const notas = [];
+
+
+                for (const avaliacao of avaliacoesDoProjeto) {
+
+                    const itens =
+                        Array.isArray(avaliacao.itens)
+                            ? avaliacao.itens
                             : [];
-                    });
 
-                    if (avaliacoesDoCriterio.length > 0) {
-                        const sumNotasCriterio = avaliacoesDoCriterio.reduce((acc, curr) => acc + parseFloat(curr.nota), 0);
-                        const mediaCriterio = sumNotasCriterio / avaliacoesDoCriterio.length;
-                        totalNotaPonderada += mediaCriterio * criterioProjeto.peso;
-                        totalPeso += criterioProjeto.peso;
+
+                    for (const item of itens) {
+
+                        if (
+                            !item.criterio ||
+                            String(item.criterio) !== criterioId
+                        ) {
+                            continue;
+                        }
+
+
+                        const nota = Number(item.nota);
+
+
+                        if (
+                            item.nota !== undefined &&
+                            item.nota !== null &&
+                            item.nota !== '' &&
+                            !Number.isNaN(nota) &&
+                            nota >= 5 &&
+                            nota <= 10
+                        ) {
+                            notas.push(nota);
+                        }
                     }
+                }
+
+
+                if (notas.length > 0) {
+
+                    const soma =
+                        notas.reduce(
+                            (acc, nota) =>
+                                acc + nota,
+                            0
+                        );
+
+
+                    const media =
+                        soma / notas.length;
+
+
+                    mediasCriterios[
+                        criterioId
+                    ] = media;
+
+
+                    const peso =
+                        Number(criterio.peso) || 1;
+
+
+                    totalNotaPonderada +=
+                        media * peso;
+
+
+                    totalPeso += peso;
+
+                } else {
+
+                    mediasCriterios[
+                        criterioId
+                    ] = null;
                 }
             }
 
-            projeto.notaFinal = totalPeso > 0
-                ? parseFloat(totalNotaPonderada / totalPeso).toFixed(2)
-                : 'N/A';
-            projeto.numAvaliacoes = numAvaliacoes;
+
+            // -------------------------------------------------
+            // NOTA FINAL
+            // -------------------------------------------------
+
+            const notaFinal =
+                totalPeso > 0
+                    ? totalNotaPonderada / totalPeso
+                    : null;
+
+
+            projeto.notaFinal =
+                notaFinal !== null
+                    ? notaFinal.toFixed(2)
+                    : 'N/A';
+
+
+            projeto.mediasCriterios =
+                mediasCriterios;
+
+
+            projeto.numAvaliacoes =
+                avaliacoesDoProjeto.length;
         }
 
-        // Montar ranking respeitando a ordem dos projetos dentro de cada categoria
+
+        // =====================================================
+        // MONTAR RANKING POR CATEGORIA
+        // =====================================================
+
+        const rankingPorCategoria = {};
+
+
         categorias.forEach(cat => {
-            rankingPorCategoria[cat.nome] = projetos
-                .filter(p => p.categoria && String(p.categoria._id) === String(cat._id))
-                .sort((a, b) => {
-                    const notaA = parseFloat(a.notaFinal);
-                    const notaB = parseFloat(b.notaFinal);
-                    if (isNaN(notaA) && isNaN(notaB)) return 0;
-                    if (isNaN(notaA)) return 1;
-                    if (isNaN(notaB)) return -1;
-                    return notaB - notaA; // ordem decrescente por nota
-                });
+
+            rankingPorCategoria[cat.nome] =
+                projetos
+                    .filter(projeto =>
+                        projeto.categoria &&
+                        String(
+                            projeto.categoria._id
+                        ) ===
+                        String(cat._id)
+                    )
+                    .sort((a, b) => {
+
+                        // =====================================
+                        // 1. NOTA FINAL
+                        // =====================================
+
+                        const notaA =
+                            parseFloat(
+                                a.notaFinal
+                            );
+
+                        const notaB =
+                            parseFloat(
+                                b.notaFinal
+                            );
+
+
+                        if (
+                            isNaN(notaA) &&
+                            isNaN(notaB)
+                        ) {
+                            return 0;
+                        }
+
+
+                        if (isNaN(notaA)) {
+                            return 1;
+                        }
+
+
+                        if (isNaN(notaB)) {
+                            return -1;
+                        }
+
+
+                        if (notaB !== notaA) {
+                            return notaB - notaA;
+                        }
+
+
+                        // =====================================
+                        // 2. DESEMPATE
+                        // =====================================
+                        //
+                        // Só utilizamos critérios:
+                        //
+                        // - com ordemDesempate > 0;
+                        // - pertencentes aos DOIS projetos.
+                        // =====================================
+
+                        const criteriosA =
+                            Array.isArray(a.criterios)
+                                ? a.criterios
+                                : [];
+
+
+                        const criteriosB =
+                            Array.isArray(b.criterios)
+                                ? b.criterios
+                                : [];
+
+
+                        const idsA =
+                            new Set(
+                                criteriosA.map(
+                                    criterio =>
+                                        String(
+                                            criterio._id
+                                        )
+                                )
+                            );
+
+
+                        const idsB =
+                            new Set(
+                                criteriosB.map(
+                                    criterio =>
+                                        String(
+                                            criterio._id
+                                        )
+                                )
+                            );
+
+
+                        /*
+                         * Pegamos os critérios de desempate
+                         * existentes nos próprios projetos.
+                         */
+                        const criteriosDesempate =
+                            criteriosA
+                                .filter(criterio =>
+                                    Number(
+                                        criterio.ordemDesempate
+                                    ) > 0 &&
+                                    idsB.has(
+                                        String(
+                                            criterio._id
+                                        )
+                                    )
+                                )
+                                .sort(
+                                    (x, y) =>
+                                        Number(
+                                            x.ordemDesempate
+                                        ) -
+                                        Number(
+                                            y.ordemDesempate
+                                        )
+                                );
+
+
+                        for (
+                            const criterio
+                            of criteriosDesempate
+                        ) {
+
+                            const criterioId =
+                                String(
+                                    criterio._id
+                                );
+
+
+                            // Garantia extra
+                            if (
+                                !idsA.has(
+                                    criterioId
+                                ) ||
+                                !idsB.has(
+                                    criterioId
+                                )
+                            ) {
+                                continue;
+                            }
+
+
+                            const mediaA =
+                                Number(
+                                    a.mediasCriterios?.[
+                                        criterioId
+                                    ]
+                                );
+
+
+                            const mediaB =
+                                Number(
+                                    b.mediasCriterios?.[
+                                        criterioId
+                                    ]
+                                );
+
+
+                            const temMediaA =
+                                Number.isFinite(
+                                    mediaA
+                                );
+
+
+                            const temMediaB =
+                                Number.isFinite(
+                                    mediaB
+                                );
+
+
+                            if (
+                                temMediaA &&
+                                temMediaB &&
+                                mediaA !== mediaB
+                            ) {
+
+                                return (
+                                    mediaB -
+                                    mediaA
+                                );
+                            }
+
+
+                            if (
+                                temMediaA &&
+                                !temMediaB
+                            ) {
+                                return -1;
+                            }
+
+
+                            if (
+                                !temMediaA &&
+                                temMediaB
+                            ) {
+                                return 1;
+                            }
+                        }
+
+
+                        // Persistindo o empate
+                        return 0;
+                    });
         });
 
-        const escola = await Escola.findById(escolaId).lean() || { nome: "Nome da Escola" };
+
+        // =====================================================
+        // ESCOLA
+        // =====================================================
+
+        const escola =
+            await Escola.findById(
+                escolaId
+            ).lean() || {
+                nome: 'Nome da Escola'
+            };
+
+
+        // =====================================================
+        // GERAR PDF
+        // =====================================================
 
         await generatePdfReport(
             req,
             res,
             'pdf-ranking-categorias',
             {
-                titulo: 'Ranking por Categoria',
-                nomeFeira: feiraAtual.nome,
-                categorias, // 🔑 passar array já ordenado para o EJS
+                titulo:
+                    'Ranking por Categoria',
+
+                nomeFeira:
+                    feiraAtual.nome,
+
+                categorias,
+
                 rankingPorCategoria,
+
                 escola
             },
             `ranking-categorias_${feiraAtual.nome}`
         );
 
+
     } catch (error) {
-        console.error('Erro ao gerar PDF de ranking por categoria:', error);
+
+        console.error(
+            'Erro ao gerar PDF de ranking por categoria:',
+            error
+        );
+
+
         if (!res.headersSent) {
-            req.flash('error_msg', 'Erro ao gerar PDF de ranking por categoria. Detalhes: ' + error.message);
-            res.redirect('/admin/dashboard?tab=relatorios');
+
+            req.flash(
+                'error_msg',
+                'Erro ao gerar PDF de ranking por categoria. Detalhes: ' +
+                error.message
+            );
+
+
+            return res.redirect(
+                '/admin/dashboard?tab=relatorios'
+            );
         }
     }
 });
@@ -2105,133 +3745,697 @@ router.get('/ranking-categorias/pdf', verificarAdminEscola, async (req, res) => 
 router.get('/resumo-avaliadores/pdf', verificarAdminEscola, async (req, res) => {
     try {
         const escolaId = req.session.adminEscola.escolaId;
-        const feiraAtual = await Feira.findOne({ status: 'ativa', escolaId: escolaId });
+
+        const feiraAtual = await Feira.findOne({
+            status: 'ativa',
+            escolaId
+        });
+
         if (!feiraAtual) {
-            req.flash('error_msg', 'Nenhuma feira ativa para esta escola para gerar o relatório de resumo de avaliadores.');
-            if (!res.headersSent) { return res.redirect('/admin/dashboard?tab=relatorios'); }
+            req.flash(
+                'error_msg',
+                'Nenhuma feira ativa para esta escola para gerar o relatório de resumo de avaliadores.'
+            );
+
+            if (!res.headersSent) {
+                return res.redirect(
+                    '/admin/dashboard?tab=relatorios'
+                );
+            }
         }
 
-        const avaliadores = await Avaliador.find({ feira: feiraAtual._id, escolaId: escolaId }).populate('projetosAtribuidos').lean();
-        const avaliacoes = await Avaliacao.find({ feira: feiraAtual._id, escolaId: escolaId }).lean();
-        const criterios = await Criterio.find({ feira: feiraAtual._id, escolaId: escolaId }).lean();
 
-        const resumoAvaliadores = await Promise.all(avaliadores.map(async av => {
-            const avaliacoesDoAvaliador = avaliacoes.filter(a => String(a.avaliador) === String(av._id));
-            
-            let totalAtribuidos = av.projetosAtribuidos ? av.projetosAtribuidos.length : 0;
-            let totalAvaliados = 0;
-            let projetosAvaliadosDetalhes = [];
+        // =====================================================
+        // BUSCAR AVALIADORES COM PROJETOS ATRIBUÍDOS
+        // =====================================================
 
-            if (av.projetosAtribuidos && Array.isArray(av.projetosAtribuidos)) {
-                for (const projetoAtribuido of av.projetosAtribuidos) {
-                    const avaliacaoDoProjeto = avaliacoesDoAvaliador.find(a => String(a.projeto) === String(projetoAtribuido._id));
-                    let statusProjeto = 'Pendente';
-                    if (avaliacaoDoProjeto && (avaliacaoDoProjeto.finalizadaPorAvaliador || (avaliacaoDoProjeto.notas || avaliacaoDoProjeto.itens).length > 0)) {
-                        totalAvaliados++;
-                        statusProjeto = '✅ Avaliado';
-                    }
-                    const projetoObj = await Projeto.findById(projetoAtribuido._id).lean();
-                    if (projetoObj) {
-                        projetosAvaliadosDetalhes.push({ titulo: projetoObj.titulo, status: statusProjeto });
-                    }
+        const avaliadores = await Avaliador.find({
+            feira: feiraAtual._id,
+            escolaId
+        })
+            .populate({
+                path: 'projetosAtribuidos',
+                populate: {
+                    path: 'criterios'
                 }
-            }
-            return {
-                nome: av.nome,
-                email: av.email,
-                pinAtivo: av.pin, 
-                ativo: av.ativo,
-                totalAtribuidos: totalAtribuidos,
-                totalAvaliados: totalAvaliados,
-                projetos: projetosAvaliadosDetalhes 
+            })
+            .lean();
+
+
+        const avaliacoes = await Avaliacao.find({
+            feira: feiraAtual._id,
+            escolaId
+        }).lean();
+
+
+        // =====================================================
+        // MONTAR RESUMO
+        // =====================================================
+
+        const resumoAvaliadores =
+            avaliadores.map(avaliador => {
+
+                const projetosAtribuidos =
+                    Array.isArray(
+                        avaliador.projetosAtribuidos
+                    )
+                        ? avaliador.projetosAtribuidos
+                        : [];
+
+
+                const totalAtribuidos =
+                    projetosAtribuidos.length;
+
+
+                let totalAvaliados = 0;
+
+                const projetosAvaliadosDetalhes = [];
+
+
+                // -------------------------------------------------
+                // ANALISAR CADA PROJETO ATRIBUÍDO
+                // -------------------------------------------------
+
+                for (
+                    const projeto
+                    of projetosAtribuidos
+                ) {
+
+                    const avaliacao =
+                        avaliacoes.find(a =>
+                            String(a.avaliador) ===
+                                String(avaliador._id) &&
+                            String(a.projeto) ===
+                                String(projeto._id)
+                        );
+
+
+                    // ---------------------------------------------
+                    // CRITÉRIOS DO PRÓPRIO PROJETO
+                    // ---------------------------------------------
+
+                    const criteriosProjeto =
+                        Array.isArray(
+                            projeto.criterios
+                        )
+                            ? projeto.criterios
+                            : [];
+
+
+                    const idsCriteriosProjeto =
+                        new Set(
+                            criteriosProjeto.map(
+                                criterio =>
+                                    String(
+                                        criterio._id ||
+                                        criterio
+                                    )
+                            )
+                        );
+
+
+                    // ---------------------------------------------
+                    // CRITÉRIOS RESPONDIDOS COM NOTA VÁLIDA
+                    // ---------------------------------------------
+
+                    const criteriosRespondidos =
+                        new Set();
+
+
+                    if (
+                        avaliacao &&
+                        Array.isArray(
+                            avaliacao.itens
+                        )
+                    ) {
+
+                        for (
+                            const item
+                            of avaliacao.itens
+                        ) {
+
+                            if (!item.criterio) {
+                                continue;
+                            }
+
+
+                            const criterioId =
+                                String(
+                                    item.criterio
+                                );
+
+
+                            // Ignora critérios antigos que não
+                            // pertencem ao projeto.
+                            if (
+                                !idsCriteriosProjeto.has(
+                                    criterioId
+                                )
+                            ) {
+                                continue;
+                            }
+
+
+                            const nota =
+                                Number(item.nota);
+
+
+                            if (
+                                item.nota !== undefined &&
+                                item.nota !== null &&
+                                item.nota !== '' &&
+                                !Number.isNaN(nota) &&
+                                nota >= 5 &&
+                                nota <= 10
+                            ) {
+
+                                criteriosRespondidos.add(
+                                    criterioId
+                                );
+                            }
+                        }
+                    }
+
+
+                    // ---------------------------------------------
+                    // STATUS
+                    // ---------------------------------------------
+
+                    let statusProjeto =
+                        'Pendente';
+
+
+                    const avaliacaoCompleta =
+                        idsCriteriosProjeto.size > 0 &&
+                        criteriosRespondidos.size ===
+                            idsCriteriosProjeto.size;
+
+
+                    if (avaliacaoCompleta) {
+
+                        totalAvaliados++;
+
+                        statusProjeto =
+                            '✅ Avaliado';
+
+                    } else if (
+                        criteriosRespondidos.size > 0
+                    ) {
+
+                        statusProjeto =
+                            '🟠 Em avaliação';
+                    }
+
+
+                    projetosAvaliadosDetalhes.push({
+                        titulo:
+                            projeto.titulo,
+
+                        status:
+                            statusProjeto,
+
+                        totalCriterios:
+                            idsCriteriosProjeto.size,
+
+                        criteriosRespondidos:
+                            criteriosRespondidos.size
+                    });
+                }
+
+
+                // =================================================
+                // RETORNO DO AVALIADOR
+                // =================================================
+
+                return {
+                    nome:
+                        avaliador.nome,
+
+                    email:
+                        avaliador.email,
+
+                    pinAtivo:
+                        avaliador.pin,
+
+                    ativo:
+                        avaliador.ativo,
+
+                    totalAtribuidos,
+
+                    totalAvaliados,
+
+                    totalPendentes:
+                        totalAtribuidos -
+                        totalAvaliados,
+
+                    projetos:
+                        projetosAvaliadosDetalhes
+                };
+            });
+
+
+        // =====================================================
+        // ESCOLA
+        // =====================================================
+
+        const escola =
+            await Escola.findById(
+                escolaId
+            ).lean() || {
+                nome: 'Nome da Escola'
             };
-        }));
 
-        const escola = await Escola.findById(escolaId).lean() || { nome: "Nome da Escola" };
 
-        await generatePdfReport(req, res, 'pdf-resumo-avaliadores', {
-            titulo: 'Resumo de Avaliadores',
-            nomeFeira: feiraAtual.nome,
-            avaliadores: resumoAvaliadores,
-            escola: escola
-        }, `resumo-avaliadores_${feiraAtual.nome}`);
+        // =====================================================
+        // GERAR PDF
+        // =====================================================
+
+        await generatePdfReport(
+            req,
+            res,
+            'pdf-resumo-avaliadores',
+            {
+                titulo:
+                    'Resumo de Avaliadores',
+
+                nomeFeira:
+                    feiraAtual.nome,
+
+                avaliadores:
+                    resumoAvaliadores,
+
+                escola
+            },
+            `resumo-avaliadores_${feiraAtual.nome}`
+        );
+
 
     } catch (error) {
-        console.error('Erro ao gerar PDF de resumo de avaliadores:', error);
+
+        console.error(
+            'Erro ao gerar PDF de resumo de avaliadores:',
+            error
+        );
         if (!res.headersSent) {
-            req.flash('error_msg', 'Erro ao gerar PDF de resumo de avaliadores. Detalhes: ' + error.message);
-            res.redirect('/admin/dashboard?tab=relatorios');
+
+            req.flash(
+                'error_msg',
+                'Erro ao gerar PDF de resumo de avaliadores. Detalhes: ' +
+                error.message
+            );
+           return res.redirect(
+                '/admin/dashboard?tab=relatorios'
+            );
         }
     }
 });
 
 // Relatório Resumo avaliadores por projetos
-
 router.get('/resumo-projetos/pdf', verificarAdminEscola, async (req, res) => {
     try {
         const escolaId = req.session.adminEscola.escolaId;
 
-        // Feira ativa
-        const feiraAtual = await Feira.findOne({ status: 'ativa', escolaId });
+        // =====================================================
+        // FEIRA ATIVA
+        // =====================================================
+
+        const feiraAtual = await Feira.findOne({
+            status: 'ativa',
+            escolaId
+        });
+
         if (!feiraAtual) {
-            req.flash('error_msg', 'Nenhuma feira ativa para esta escola para gerar o relatório de resumo de projetos.');
+            req.flash(
+                'error_msg',
+                'Nenhuma feira ativa para esta escola para gerar o relatório de resumo de projetos.'
+            );
+
             if (!res.headersSent) {
-                return res.redirect('/admin/dashboard?tab=relatorios');
+                return res.redirect(
+                    '/admin/dashboard?tab=relatorios'
+                );
             }
         }
 
-        // Buscar todos os projetos da feira
-        const projetos = await Projeto.find({ feira: feiraAtual._id, escolaId }).lean();
-        // Buscar todos os avaliadores dessa feira
-        const avaliadores = await Avaliador.find({ feira: feiraAtual._id, escolaId }).lean();
-        // Buscar avaliações
-        const avaliacoes = await Avaliacao.find({ feira: feiraAtual._id, escolaId }).lean();
 
-        const resumoProjetos = await Promise.all(projetos.map(async projeto => {
-            // Filtrar avaliadores que têm esse projeto atribuído
-            const avaliadoresDoProjeto = avaliadores.filter(av =>
-                av.projetosAtribuidos?.some(pId => String(pId) === String(projeto._id))
-            );
+        // =====================================================
+        // BUSCAR PROJETOS
+        //
+        // Precisamos dos critérios de cada projeto para saber
+        // corretamente se cada avaliador concluiu a avaliação.
+        // =====================================================
 
-            const avaliadoresDetalhes = avaliadoresDoProjeto.map(av => {
-                // Encontrar a avaliação feita por este avaliador neste projeto
-                const avaliacao = avaliacoes.find(a =>
-                    String(a.projeto) === String(projeto._id) &&
-                    String(a.avaliador) === String(av._id)
+        const projetos = await Projeto.find({
+            feira: feiraAtual._id,
+            escolaId
+        })
+            .populate('criterios')
+            .lean();
+
+
+        // =====================================================
+        // BUSCAR AVALIADORES
+        // =====================================================
+
+        const avaliadores = await Avaliador.find({
+            feira: feiraAtual._id,
+            escolaId
+        }).lean();
+
+
+        // =====================================================
+        // BUSCAR AVALIAÇÕES
+        // =====================================================
+
+        const avaliacoes = await Avaliacao.find({
+            feira: feiraAtual._id,
+            escolaId
+        }).lean();
+
+
+        // =====================================================
+        // MONTAR RESUMO POR PROJETO
+        // =====================================================
+
+        const resumoProjetos = projetos.map(projeto => {
+
+            // -------------------------------------------------
+            // CRITÉRIOS DESTE PROJETO
+            // -------------------------------------------------
+
+            const criteriosProjeto =
+                Array.isArray(projeto.criterios)
+                    ? projeto.criterios
+                    : [];
+
+
+            const idsCriteriosProjeto =
+                new Set(
+                    criteriosProjeto.map(criterio =>
+                        String(
+                            criterio._id ||
+                            criterio
+                        )
+                    )
                 );
 
-                let status = 'Pendente';
-                if (avaliacao && (avaliacao.finalizadaPorAvaliador || (avaliacao.notas || avaliacao.itens).length > 0)) {
-                    status = '✅ Avaliado';
-                }
 
-                return {
-                    nome: av.nome,
-                    email: av.email,
-                    status
-                };
-            });
+            // -------------------------------------------------
+            // AVALIADORES ATRIBUÍDOS AO PROJETO
+            // -------------------------------------------------
+
+            const avaliadoresDoProjeto =
+                avaliadores.filter(avaliador => {
+
+                    if (
+                        !Array.isArray(
+                            avaliador.projetosAtribuidos
+                        )
+                    ) {
+                        return false;
+                    }
+
+
+                    return avaliador.projetosAtribuidos.some(
+                        projetoId =>
+                            String(projetoId) ===
+                            String(projeto._id)
+                    );
+                });
+
+
+            // -------------------------------------------------
+            // DETALHES DE CADA AVALIADOR
+            // -------------------------------------------------
+
+            const avaliadoresDetalhes =
+                avaliadoresDoProjeto.map(avaliador => {
+
+                    const avaliacao =
+                        avaliacoes.find(a =>
+                            String(a.projeto) ===
+                                String(projeto._id) &&
+                            String(a.avaliador) ===
+                                String(avaliador._id)
+                        );
+
+
+                    // -----------------------------------------
+                    // CRITÉRIOS RESPONDIDOS
+                    // -----------------------------------------
+
+                    const criteriosRespondidos =
+                        new Set();
+
+
+                    if (
+                        avaliacao &&
+                        Array.isArray(
+                            avaliacao.itens
+                        )
+                    ) {
+
+                        for (
+                            const item
+                            of avaliacao.itens
+                        ) {
+
+                            if (!item.criterio) {
+                                continue;
+                            }
+
+
+                            const criterioId =
+                                String(
+                                    item.criterio
+                                );
+
+
+                            // Ignorar critérios que não pertencem
+                            // ao projeto.
+                            if (
+                                !idsCriteriosProjeto.has(
+                                    criterioId
+                                )
+                            ) {
+                                continue;
+                            }
+
+
+                            const nota =
+                                Number(item.nota);
+
+
+                            if (
+                                item.nota !== undefined &&
+                                item.nota !== null &&
+                                item.nota !== '' &&
+                                !Number.isNaN(nota) &&
+                                nota >= 5 &&
+                                nota <= 10
+                            ) {
+
+                                criteriosRespondidos.add(
+                                    criterioId
+                                );
+                            }
+                        }
+                    }
+
+
+                    // -----------------------------------------
+                    // STATUS
+                    // -----------------------------------------
+
+                    let status =
+                        'Pendente';
+
+
+                    const avaliacaoCompleta =
+                        idsCriteriosProjeto.size > 0 &&
+                        criteriosRespondidos.size ===
+                            idsCriteriosProjeto.size;
+
+
+                    if (avaliacaoCompleta) {
+
+                        status =
+                            '✅ Avaliado';
+
+                    } else if (
+                        criteriosRespondidos.size > 0
+                    ) {
+
+                        status =
+                            '🟠 Em avaliação';
+                    }
+
+
+                    return {
+
+                        nome:
+                            avaliador.nome,
+
+                        email:
+                            avaliador.email,
+
+                        status,
+
+                        criteriosRespondidos:
+                            criteriosRespondidos.size,
+
+                        totalCriterios:
+                            idsCriteriosProjeto.size
+                    };
+                });
+
+
+            // =================================================
+            // STATUS GERAL DO PROJETO
+            // =================================================
+
+            const totalAvaliadores =
+                avaliadoresDetalhes.length;
+
+
+            const totalAvaliados =
+                avaliadoresDetalhes.filter(
+                    avaliador =>
+                        avaliador.status ===
+                        '✅ Avaliado'
+                ).length;
+
+
+            const totalEmAvaliacao =
+                avaliadoresDetalhes.filter(
+                    avaliador =>
+                        avaliador.status ===
+                        '🟠 Em avaliação'
+                ).length;
+
+
+            const totalPendentes =
+                avaliadoresDetalhes.filter(
+                    avaliador =>
+                        avaliador.status ===
+                        'Pendente'
+                ).length;
+
+
+            let statusProjeto =
+                'Não Avaliado';
+
+
+            if (totalAvaliadores === 0) {
+
+                statusProjeto =
+                    'Sem avaliadores';
+
+            } else if (
+                totalAvaliados ===
+                totalAvaliadores
+            ) {
+
+                statusProjeto =
+                    '✅ Avaliado';
+
+            } else if (
+                totalAvaliados > 0 ||
+                totalEmAvaliacao > 0
+            ) {
+
+                statusProjeto =
+                    '🟠 Em avaliação';
+            }
+
+
+            // =================================================
+            // RETORNO DO PROJETO
+            // =================================================
 
             return {
-                titulo: projeto.titulo,
-                avaliadores: avaliadoresDetalhes
+
+                titulo:
+                    projeto.titulo,
+
+                turma:
+                    projeto.turma,
+
+                totalCriterios:
+                    idsCriteriosProjeto.size,
+
+                totalAvaliadores,
+
+                totalAvaliados,
+
+                totalEmAvaliacao,
+
+                totalPendentes,
+
+                statusProjeto,
+
+                avaliadores:
+                    avaliadoresDetalhes
             };
-        }));
+        });
 
-        const escola = await Escola.findById(escolaId).lean() || { nome: "Nome da Escola" };
 
-        await generatePdfReport(req, res, 'pdf-resumo-projetos', {
-            titulo: 'Resumo de Projetos',
-            nomeFeira: feiraAtual.nome,
-            projetos: resumoProjetos,
-            escola: escola
-        }, `resumo-projetos_${feiraAtual.nome}`);
+        // =====================================================
+        // ESCOLA
+        // =====================================================
+
+        const escola =
+            await Escola.findById(
+                escolaId
+            ).lean() || {
+                nome: 'Nome da Escola'
+            };
+
+
+        // =====================================================
+        // GERAR PDF
+        // =====================================================
+
+        await generatePdfReport(
+            req,
+            res,
+            'pdf-resumo-projetos',
+            {
+                titulo:
+                    'Resumo de Projetos',
+
+                nomeFeira:
+                    feiraAtual.nome,
+
+                projetos:
+                    resumoProjetos,
+
+                escola
+            },
+            `resumo-projetos_${feiraAtual.nome}`
+        );
+
 
     } catch (error) {
-        console.error('Erro ao gerar PDF de resumo de projetos:', error);
+
+        console.error(
+            'Erro ao gerar PDF de resumo de projetos:',
+            error
+        );
+
+
         if (!res.headersSent) {
-            req.flash('error_msg', 'Erro ao gerar PDF de resumo de projetos. Detalhes: ' + error.message);
-            res.redirect('/admin/dashboard?tab=relatorios');
+
+            req.flash(
+                'error_msg',
+                'Erro ao gerar PDF de resumo de projetos. Detalhes: ' +
+                error.message
+            );
+
+
+            return res.redirect(
+                '/admin/dashboard?tab=relatorios'
+            );
         }
     }
 });
@@ -2241,107 +4445,572 @@ router.get('/resumo-projetos/pdf', verificarAdminEscola, async (req, res) => {
 router.get('/relatorio-consolidado/pdf', verificarAdminEscola, async (req, res) => {
     try {
         const escolaId = req.session.adminEscola.escolaId;
-        const feiraAtual = await Feira.findOne({ status: 'ativa', escolaId });
+
+        const feiraAtual = await Feira.findOne({
+            status: 'ativa',
+            escolaId
+        });
 
         if (!feiraAtual) {
-            req.flash('error_msg', 'Nenhuma feira ativa encontrada.');
-            return res.redirect('/admin/dashboard?tab=relatorios');
+            req.flash(
+                'error_msg',
+                'Nenhuma feira ativa encontrada.'
+            );
+
+            return res.redirect(
+                '/admin/dashboard?tab=relatorios'
+            );
         }
 
-        const [projetos, avaliacoes, categorias, criteriosOficiais] = await Promise.all([
-            Projeto.find({ feira: feiraAtual._id, escolaId }).populate('categoria').lean(),
-            Avaliacao.find({ feira: feiraAtual._id, escolaId }).lean(),
-            Categoria.find({ feira: feiraAtual._id, escolaId }).lean(),
-            Criterio.find({ feira: feiraAtual._id, escolaId }).sort({ ordemDesempate: 1, nome: 1 }).lean()
+
+        // =====================================================
+        // BUSCAR DADOS
+        // =====================================================
+        //
+        // IMPORTANTE:
+        // projeto.criterios precisa estar populado porque:
+        //
+        // - cada projeto possui seus próprios critérios;
+        // - precisamos do peso;
+        // - precisamos da ordemDesempate.
+        // =====================================================
+
+        const [
+            projetos,
+            avaliacoes,
+            categorias,
+            criteriosOficiais
+        ] = await Promise.all([
+
+            Projeto.find({
+                feira: feiraAtual._id,
+                escolaId
+            })
+                .populate('categoria')
+                .populate('criterios')
+                .lean(),
+
+            Avaliacao.find({
+                feira: feiraAtual._id,
+                escolaId
+            }).lean(),
+
+            Categoria.find({
+                feira: feiraAtual._id,
+                escolaId
+            }).lean(),
+
+            // Mantemos essa consulta porque a VIEW do relatório
+            // pode utilizar criteriosOficiais para cabeçalhos.
+            Criterio.find({
+                feira: feiraAtual._id,
+                escolaId
+            })
+                .sort({
+                    ordemDesempate: 1,
+                    nome: 1
+                })
+                .lean()
         ]);
+
+
+        // =====================================================
+        // MONTAR RESULTADO POR CATEGORIA
+        // =====================================================
 
         const relatorioFinalPorProjeto = {};
 
-        for (const projeto of projetos) {
-            const avaliacoesDoProjeto = avaliacoes.filter(a => String(a.projeto) === String(projeto._id));
-            const numAvaliacoes = avaliacoesDoProjeto.length;
-            const mediasCriterios = {};
-            let totalPeso = 0;
-            let totalNotaPonderada = 0;
 
-            for (const criterio of criteriosOficiais) {
-                const notasCriterio = avaliacoesDoProjeto.flatMap(avaliacao =>
-                    (avaliacao.itens || []).filter(item =>
-                        String(item.criterio) === String(criterio._id) &&
-                        item.nota !== undefined && item.nota !== null
+        for (const projeto of projetos) {
+
+            // -------------------------------------------------
+            // Avaliações exclusivamente deste projeto
+            // -------------------------------------------------
+
+            const avaliacoesDoProjeto =
+                avaliacoes.filter(
+                    avaliacao =>
+                        avaliacao.projeto &&
+                        String(avaliacao.projeto) ===
+                        String(projeto._id)
+                );
+
+
+            const numAvaliacoes =
+                avaliacoesDoProjeto.length;
+
+
+            // =================================================
+            // CRITÉRIOS DO PRÓPRIO PROJETO
+            // =================================================
+
+            const criteriosDoProjeto =
+                Array.isArray(projeto.criterios)
+                    ? projeto.criterios
+                    : [];
+
+
+            const criteriosDoProjetoIds =
+                new Set(
+                    criteriosDoProjeto.map(
+                        criterio =>
+                            String(
+                                criterio._id ||
+                                criterio
+                            )
                     )
                 );
 
-                if (notasCriterio.length > 0) {
-                    const soma = notasCriterio.reduce((acc, cur) => acc + parseFloat(cur.nota), 0);
-                    const media = soma / notasCriterio.length;
-                    mediasCriterios[criterio._id.toString()] = media.toFixed(2);
 
-                    totalNotaPonderada += media * criterio.peso;
-                    totalPeso += criterio.peso;
+            // =================================================
+            // MÉDIAS DOS CRITÉRIOS
+            // =================================================
+
+            const mediasCriterios = {};
+
+            let totalPeso = 0;
+            let totalNotaPonderada = 0;
+
+
+            // -------------------------------------------------
+            // IMPORTANTE:
+            //
+            // Antes:
+            //
+            // for (const criterio of criteriosOficiais)
+            //
+            // Agora:
+            //
+            // for (const criterio of criteriosDoProjeto)
+            //
+            // -------------------------------------------------
+
+            for (
+                const criterio
+                of criteriosDoProjeto
+            ) {
+
+                const criterioId =
+                    String(criterio._id);
+
+
+                // ---------------------------------------------
+                // Obter notas válidas deste critério
+                // somente neste projeto
+                // ---------------------------------------------
+
+                const notasCriterio = [];
+
+
+                for (
+                    const avaliacao
+                    of avaliacoesDoProjeto
+                ) {
+
+                    const itens =
+                        Array.isArray(avaliacao.itens)
+                            ? avaliacao.itens
+                            : [];
+
+
+                    for (const item of itens) {
+
+                        if (
+                            !item.criterio ||
+                            String(item.criterio) !==
+                                criterioId
+                        ) {
+                            continue;
+                        }
+
+
+                        const nota =
+                            Number(item.nota);
+
+
+                        if (
+                            item.nota !== undefined &&
+                            item.nota !== null &&
+                            item.nota !== '' &&
+                            !Number.isNaN(nota) &&
+                            nota >= 5 &&
+                            nota <= 10
+                        ) {
+
+                            notasCriterio.push(
+                                nota
+                            );
+                        }
+                    }
+                }
+
+
+                // ---------------------------------------------
+                // Calcular média do critério
+                // ---------------------------------------------
+
+                if (
+                    notasCriterio.length > 0
+                ) {
+
+                    const soma =
+                        notasCriterio.reduce(
+                            (acc, nota) =>
+                                acc + nota,
+                            0
+                        );
+
+
+                    const media =
+                        soma /
+                        notasCriterio.length;
+
+
+                    mediasCriterios[
+                        criterioId
+                    ] =
+                        media.toFixed(2);
+
+
+                    const peso =
+                        Number(criterio.peso) || 1;
+
+
+                    totalNotaPonderada +=
+                        media * peso;
+
+
+                    totalPeso += peso;
+
                 } else {
-                    mediasCriterios[criterio._id.toString()] = '-';
+
+                    mediasCriterios[
+                        criterioId
+                    ] = '-';
                 }
             }
 
-            const mediaGeral = totalPeso > 0 ? (totalNotaPonderada / totalPeso).toFixed(2) : '-';
 
-            const categoriaNome = projeto.categoria?.nome || 'Sem Categoria';
-            if (!relatorioFinalPorProjeto[categoriaNome]) {
-                relatorioFinalPorProjeto[categoriaNome] = [];
+            // =================================================
+            // NOTA FINAL PONDERADA
+            // =================================================
+
+            const mediaGeral =
+                totalPeso > 0
+
+                    ? (
+                        totalNotaPonderada /
+                        totalPeso
+                    ).toFixed(2)
+
+                    : '-';
+
+
+            // =================================================
+            // CATEGORIA
+            // =================================================
+
+            const categoriaNome =
+                projeto.categoria?.nome ||
+                'Sem Categoria';
+
+
+            if (
+                !relatorioFinalPorProjeto[
+                    categoriaNome
+                ]
+            ) {
+
+                relatorioFinalPorProjeto[
+                    categoriaNome
+                ] = [];
             }
 
-            relatorioFinalPorProjeto[categoriaNome].push({
+
+            // =================================================
+            // ADICIONAR PROJETO
+            // =================================================
+
+            relatorioFinalPorProjeto[
+                categoriaNome
+            ].push({
+
                 ...projeto,
+
                 numAvaliacoes,
+
                 mediaGeral,
-                mediasCriterios
+
+                mediasCriterios,
+
+                // Mantemos explicitamente os critérios
+                // deste projeto para o desempate e para a view.
+                criterios:
+                    criteriosDoProjeto,
+
+                criteriosIds:
+                    Array.from(
+                        criteriosDoProjetoIds
+                    )
             });
         }
 
-        // Classificar por categoria com desempate usando ordem dos critérios
-        Object.keys(relatorioFinalPorProjeto).forEach(categoria => {
-            relatorioFinalPorProjeto[categoria].sort((a, b) => {
-                const notaA = parseFloat(a.mediaGeral);
-                const notaB = parseFloat(b.mediaGeral);
 
-                if (!isNaN(notaA) && !isNaN(notaB)) {
-                    if (notaB !== notaA) return notaB - notaA;
-                } else if (!isNaN(notaA)) return -1;
-                else if (!isNaN(notaB)) return 1;
+        // =====================================================
+        // CLASSIFICAÇÃO / RANKING
+        // =====================================================
+        //
+        // 1º maior nota geral
+        //
+        // Em empate:
+        // critérios com ordemDesempate > 0.
+        //
+        // IMPORTANTE:
+        // Um critério somente participa do desempate entre
+        // dois projetos quando pertence aos DOIS projetos.
+        // =====================================================
 
-                // Desempate por critérios definidos
-                for (const criterio of criteriosOficiais) {
-                    const nA = parseFloat(a.mediasCriterios[criterio._id.toString()]);
-                    const nB = parseFloat(b.mediasCriterios[criterio._id.toString()]);
-                    if (!isNaN(nA) && !isNaN(nB) && nB !== nA) return nB - nA;
-                    else if (!isNaN(nA)) return -1;
-                    else if (!isNaN(nB)) return 1;
-                }
+        Object
+            .keys(relatorioFinalPorProjeto)
+            .forEach(categoria => {
 
-                return 0; 
+                relatorioFinalPorProjeto[
+                    categoria
+                ].sort((a, b) => {
+
+
+                    // =========================================
+                    // 1. NOTA FINAL
+                    // =========================================
+
+                    const notaA =
+                        parseFloat(
+                            a.mediaGeral
+                        );
+
+                    const notaB =
+                        parseFloat(
+                            b.mediaGeral
+                        );
+
+
+                    if (
+                        !isNaN(notaA) &&
+                        !isNaN(notaB)
+                    ) {
+
+                        if (notaB !== notaA) {
+                            return notaB - notaA;
+                        }
+
+                    } else if (
+                        !isNaN(notaA)
+                    ) {
+
+                        return -1;
+
+                    } else if (
+                        !isNaN(notaB)
+                    ) {
+
+                        return 1;
+                    }
+
+
+                    // =========================================
+                    // 2. CRITÉRIOS DE DESEMPATE
+                    // =========================================
+
+                    const criteriosA =
+                        Array.isArray(a.criterios)
+                            ? a.criterios
+                            : [];
+
+                    const criteriosB =
+                        Array.isArray(b.criterios)
+                            ? b.criterios
+                            : [];
+
+
+                    const idsA =
+                        new Set(
+                            criteriosA.map(
+                                criterio =>
+                                    String(
+                                        criterio._id ||
+                                        criterio
+                                    )
+                            )
+                        );
+
+
+                    const idsB =
+                        new Set(
+                            criteriosB.map(
+                                criterio =>
+                                    String(
+                                        criterio._id ||
+                                        criterio
+                                    )
+                            )
+                        );
+
+
+                    /*
+                     * Montamos a ordem de desempate considerando
+                     * os critérios configurados na feira, porém
+                     * abaixo somente usamos os que pertencem
+                     * AOS DOIS projetos.
+                     */
+
+                    const criteriosDesempate =
+                        criteriosOficiais
+                            .filter(
+                                criterio =>
+                                    Number(
+                                        criterio.ordemDesempate
+                                    ) > 0
+                            )
+                            .sort(
+                                (x, y) =>
+                                    Number(
+                                        x.ordemDesempate
+                                    ) -
+                                    Number(
+                                        y.ordemDesempate
+                                    )
+                            );
+
+
+                    for (
+                        const criterio
+                        of criteriosDesempate
+                    ) {
+
+                        const criterioId =
+                            String(
+                                criterio._id
+                            );
+
+
+                        // O critério só pode desempatar se
+                        // pertencer aos dois projetos.
+                        if (
+                            !idsA.has(criterioId) ||
+                            !idsB.has(criterioId)
+                        ) {
+
+                            continue;
+                        }
+
+
+                        const notaCriterioA =
+                            parseFloat(
+                                a.mediasCriterios[
+                                    criterioId
+                                ]
+                            );
+
+
+                        const notaCriterioB =
+                            parseFloat(
+                                b.mediasCriterios[
+                                    criterioId
+                                ]
+                            );
+
+
+                        if (
+                            !isNaN(notaCriterioA) &&
+                            !isNaN(notaCriterioB) &&
+                            notaCriterioA !==
+                                notaCriterioB
+                        ) {
+
+                            return (
+                                notaCriterioB -
+                                notaCriterioA
+                            );
+                        }
+                    }
+
+
+                    // Persistindo o empate,
+                    // mantém a ordem existente.
+                    return 0;
+                });
             });
-        });
 
-        const escola = await Escola.findById(escolaId).lean();
 
-        await generatePdfReport(req, res, 'pdf-consolidado', {
-            titulo: 'Relatório Consolidado de Avaliações',
-            nomeFeira: feiraAtual.nome,
-            criteriosOficiais,
-            relatorioFinalPorProjeto,
-            escola: escola || { nome: "Nome da Escola" }
-        }, `relatorio_consolidado_${feiraAtual.nome}`);
+        // =====================================================
+        // ESCOLA
+        // =====================================================
+
+        const escola =
+            await Escola.findById(
+                escolaId
+            ).lean();
+
+
+        // =====================================================
+        // GERAR PDF
+        // =====================================================
+
+        await generatePdfReport(
+            req,
+            res,
+            'pdf-consolidado',
+            {
+
+                titulo:
+                    'Relatório Consolidado de Avaliações',
+
+                nomeFeira:
+                    feiraAtual.nome,
+
+                /*
+                 * Mantido para compatibilidade com o EJS.
+                 *
+                 * NÃO significa que todos esses critérios
+                 * entram no cálculo.
+                 */
+                criteriosOficiais,
+
+                relatorioFinalPorProjeto,
+
+                escola:
+                    escola || {
+                        nome:
+                            'Nome da Escola'
+                    }
+            },
+            `relatorio_consolidado_${feiraAtual.nome}`
+        );
+
 
     } catch (err) {
-        console.error('Erro ao gerar relatório consolidado:', err);
+
+        console.error(
+            'Erro ao gerar relatório consolidado:',
+            err
+        );
+
+
         if (!res.headersSent) {
-            req.flash('error_msg', 'Erro ao gerar relatório consolidado. ' + err.message);
-            res.redirect('/admin/dashboard?tab=relatorios');
+
+            req.flash(
+                'error_msg',
+                'Erro ao gerar relatório consolidado. ' +
+                err.message
+            );
+
+
+            return res.redirect(
+                '/admin/dashboard?tab=relatorios'
+            );
         }
     }
 });
-
 
 // ===============================================
 // ROTA PARA RELATÓRIO DE AVALIAÇÃO OFFLINE
