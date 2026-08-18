@@ -92,7 +92,7 @@
 
         .projetos-table th:nth-child(2), /* PROJETO */
         .projetos-table td:nth-child(2) {
-            width: 35%;
+            width: 25%;
             text-align: left;
             font-weight: 500;
         }
@@ -103,12 +103,12 @@
             text-align: center;
         }
 
-        /* Colunas de critérios - dividindo o espaço restante igualmente */
-        .projetos-table th:nth-child(n+4):not(:last-child),
-        .projetos-table td:nth-child(n+4):not(:last-child) {
-            width: 9%;
-            text-align: center;
-        }
+        /* Coluna dos critérios específicos do projeto */
+.projetos-table th:nth-child(4),
+.projetos-table td:nth-child(4) {
+    width: 37%;
+    text-align: left;
+}
 
         .projetos-table th:last-child, /* MÉDIA GERAL */
         .projetos-table td:last-child {
@@ -197,41 +197,124 @@
             <div class="categoria-section">
                 <h2 class="categoria-header"><%= categoria %></h2>
                 <table class="projetos-table">
-                    <thead>
-                        <tr>
-                            <th class="text-center">POSIÇÃO</th>
-                            <th>PROJETO</th>
-                            <th class="text-center">Nº AVAL.</th>
-                            <% criteriosOficiais.forEach(criterio => { %>
-                                <th class="text-center"><%= criterio.nome.toUpperCase() %></th>
-                            <% }) %>
-                            <th class="text-center">MÉDIA GERAL</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% 
-                            if (relatorioFinalPorProjeto.hasOwnProperty(categoria)) {
-                                relatorioFinalPorProjeto[categoria].forEach((projeto, index) => { 
+    <thead>
+        <tr>
+            <th class="text-center">POSIÇÃO</th>
+            <th>PROJETO</th>
+            <th class="text-center">Nº AVAL.</th>
+            <th>CRITÉRIOS DO PROJETO</th>
+            <th class="text-center">MÉDIA GERAL</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <%
+            if (relatorioFinalPorProjeto.hasOwnProperty(categoria)) {
+                relatorioFinalPorProjeto[categoria].forEach((projeto, index) => {
+        %>
+
+            <tr>
+
+                <!-- POSIÇÃO -->
+                <td class="text-center posicao">
+                    <%= (index + 1) %>º
+                </td>
+
+
+                <!-- PROJETO -->
+                <td>
+                    <%= projeto.titulo %>
+                </td>
+
+
+                <!-- Nº AVALIAÇÕES -->
+                <td class="text-center">
+                    <%= projeto.numAvaliacoes %>
+                </td>
+
+
+                <!-- SOMENTE OS CRITÉRIOS DO PROJETO -->
+                <td>
+
+                    <%
+                        const criteriosProjeto =
+                            Array.isArray(projeto.criterios)
+                                ? projeto.criterios
+                                : [];
+                    %>
+
+                    <% if (criteriosProjeto.length > 0) { %>
+
+                        <% criteriosProjeto.forEach(criterio => {
+
+                            const criterioId =
+                                String(
+                                    criterio._id ||
+                                    criterio
+                                );
+
+                            const media =
+                                projeto.mediasCriterios
+                                    ? projeto.mediasCriterios[
+                                        criterioId
+                                    ]
+                                    : null;
                         %>
-                            <tr>
-                                <td class="text-center posicao"><%= (index + 1) %>º</td>
-                                <td><%= projeto.titulo %></td>
-                                <td class="text-center"><%= projeto.numAvaliacoes %></td>
-                                <% criteriosOficiais.forEach(criterio => { %>
-                                    <td class="text-center">
-                                        <%= projeto.mediasCriterios[criterio._id.toString()] %>
-                                    </td>
-                                <% }) %>
-                                <td class="text-center media-geral">
-                                    <%= projeto.mediaGeral %>
-                                </td>
-                            </tr>
-                        <% 
-                                }); // Fim do forEach de projetos
-                            } // Fim do if hasOwnProperty
-                        %>
-                    </tbody>
-                </table>
+
+                            <div style="
+                                margin-bottom: 4px;
+                                padding-bottom: 3px;
+                                border-bottom: 1px solid #eeeeee;
+                            ">
+
+                                <strong>
+                                    <%= criterio.nome || 'Critério' %>:
+                                </strong>
+
+                                <span>
+                                    <%= (
+                                        media !== undefined &&
+                                        media !== null &&
+                                        media !== '' &&
+                                        media !== '-' &&
+                                        media !== 'N/A'
+                                    )
+                                        ? media
+                                        : 'N/A'
+                                    %>
+                                </span>
+
+                            </div>
+
+                        <% }) %>
+
+                    <% } else { %>
+
+                        <span style="
+                            color: #999;
+                            font-style: italic;
+                        ">
+                            Nenhum critério configurado
+                        </span>
+
+                    <% } %>
+
+                </td>
+
+
+                <!-- MÉDIA GERAL -->
+                <td class="text-center media-geral">
+                    <%= projeto.mediaGeral %>
+                </td>
+
+            </tr>
+
+        <%
+                });
+            }
+        %>
+    </tbody>
+</table>
             </div>
         <% }) %>
     <% } else { %>
