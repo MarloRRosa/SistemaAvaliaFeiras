@@ -104,27 +104,66 @@
   <% projetos.forEach(p => { %>
     <div class="projeto-section">
       <h2 class="projeto-header">
-        <%= p.titulo %>
-        <span class="avaliador-status">
-          Total Avaliadores: <strong><%= p.avaliadores.length %></strong>
-        </span>
-      </h2>
+  <%= p.titulo %>
+
+  <span class="avaliador-status">
+    <%= p.statusProjeto || 'Não Avaliado' %>
+  </span>
+</h2>
+
+<div class="projeto-info">
+  <p>
+    Total de critérios:
+    <strong><%= p.totalCriterios || 0 %></strong>
+    |
+    Avaliadores:
+    <strong><%= p.totalAvaliadores || 0 %></strong>
+    |
+    Avaliados:
+    <strong><%= p.totalAvaliados || 0 %></strong>
+    |
+    Em avaliação:
+    <strong><%= p.totalEmAvaliacao || 0 %></strong>
+    |
+    Pendentes:
+    <strong><%= p.totalPendentes || 0 %></strong>
+  </p>
+</div>
 
       <% if (p.avaliadores.length > 0) { %>
         <table class="avaliadores-table">
           <thead>
             <tr>
-              <th>Nome do Avaliador</th>
-              <th>Email</th>
-            </tr>
+  <th>Nome do Avaliador</th>
+  <th>Email</th>
+  <th>Status</th>
+</tr>
           </thead>
           <tbody>
-            <% p.avaliadores.forEach(av => { %>
-              <tr>
-                <td><%= av.nome %></td>
-                <td><%= av.email %></td>
-              </tr>
-            <% }) %>
+           <% p.avaliadores.forEach(av => { %>
+  <tr>
+    <td><%= av.nome %></td>
+
+    <td><%= av.email %></td>
+
+    <td>
+      <strong>
+        <%= av.status || 'Pendente' %>
+      </strong>
+
+      <% if (
+          av.totalCriterios !== undefined &&
+          av.criteriosRespondidos !== undefined
+      ) { %>
+        <br>
+
+        <small>
+          <%= av.criteriosRespondidos %>/<%= av.totalCriterios %> critérios
+        </small>
+      <% } %>
+    </td>
+  </tr>
+<% }) %>
           </tbody>
         </table>
       <% } else { %>
