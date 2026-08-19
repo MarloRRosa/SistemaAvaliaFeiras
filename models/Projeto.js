@@ -12,6 +12,12 @@ const ProjetoSchema = new mongoose.Schema({
     turma: {
         type: String
     },
+    numeroEstande: {
+        type: Number,
+        required: false,
+        default: null,
+        min: 1
+    },
     alunos: [{
         type: String
     }],
