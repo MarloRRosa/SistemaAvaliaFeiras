@@ -734,7 +734,6 @@ router.get(
 // -------------------------------------------
 // EDITAR MODELO - SALVAR
 // -------------------------------------------
-
 router.post(
   '/certificados/modelos/:id/editar',
   verificarAdminEscola,
@@ -836,6 +835,234 @@ router.post(
       );
     }
   }
+);
+
+// ============================================================
+// CERTIFICADOS - UPLOAD DO FUNDO DO MODELO
+// ============================================================
+
+router.post(
+    '/certificados/modelos/:id/fundo',
+    verificarAdminEscola,
+    upload.single('fundoCertificado'),
+    async (req, res) => {
+
+        const { id } = req.params;
+
+        try {
+
+            const escolaId =
+                req.session.adminEscola.escolaId;
+
+
+            // =================================================
+            // VALIDAR ID
+            // =================================================
+
+            if (
+                !id ||
+                !mongoose.Types.ObjectId.isValid(id)
+            ) {
+
+                req.flash(
+                    'error_msg',
+                    'ID do modelo inválido.'
+                );
+
+                return res.redirect(
+                    '/admin/certificados/modelos'
+                );
+            }
+
+
+            // =================================================
+            // BUSCAR MODELO
+            // =================================================
+
+            const modelo =
+                await ModeloCertificado.findOne({
+                    _id: id,
+                    escolaId
+                });
+
+
+            if (!modelo) {
+
+                req.flash(
+                    'error_msg',
+                    'Modelo de certificado não encontrado.'
+                );
+
+                return res.redirect(
+                    '/admin/certificados/modelos'
+                );
+            }
+
+
+            // =================================================
+            // VERIFICAR SE RECEBEU IMAGEM
+            // =================================================
+
+            if (!req.file) {
+
+                req.flash(
+                    'error_msg',
+                    'Selecione uma imagem para o fundo do certificado.'
+                );
+
+                return res.redirect(
+                    `/admin/certificados/modelos/${id}/editar`
+                );
+            }
+
+
+            // =================================================
+            // PEGAR URL GERADA PELO UPLOAD
+            // =================================================
+            //
+            // Como estamos utilizando Multer + CloudinaryStorage,
+            // normalmente:
+            //
+            // req.file.path     = URL da imagem
+            // req.file.filename = public_id do Cloudinary
+            //
+            // =================================================
+
+            const novaUrl =
+                req.file.path || '';
+
+            const novoPublicId =
+                req.file.filename || '';
+
+
+            if (!novaUrl) {
+
+                req.flash(
+                    'error_msg',
+                    'Não foi possível obter a URL da imagem enviada.'
+                );
+
+                return res.redirect(
+                    `/admin/certificados/modelos/${id}/editar`
+                );
+            }
+
+
+            // =================================================
+            // GUARDAR FUNDO ANTIGO
+            // =================================================
+
+            const fundoPublicIdAntigo =
+                modelo.fundoPublicId;
+
+
+            // =================================================
+            // SALVAR NOVO FUNDO
+            // =================================================
+
+            modelo.fundoUrl =
+                novaUrl;
+
+            modelo.fundoPublicId =
+                novoPublicId;
+
+
+            // =================================================
+            // AJUSTE DA IMAGEM
+            // =================================================
+
+            const ajustesPermitidos = [
+                'cobrir',
+                'conter',
+                'esticar'
+            ];
+
+
+            if (
+                req.body.ajusteFundo &&
+                ajustesPermitidos.includes(
+                    req.body.ajusteFundo
+                )
+            ) {
+
+                modelo.ajusteFundo =
+                    req.body.ajusteFundo;
+            }
+
+
+            await modelo.save();
+
+
+            // =================================================
+            // EXCLUIR FUNDO ANTIGO DO CLOUDINARY
+            // =================================================
+            //
+            // Só tentamos excluir depois que o novo modelo
+            // foi salvo com sucesso.
+            //
+            // Se falhar, NÃO impedimos o funcionamento.
+            // =================================================
+
+            if (
+                fundoPublicIdAntigo &&
+                fundoPublicIdAntigo !==
+                    novoPublicId
+            ) {
+
+                try {
+
+                    await cloudinary.uploader.destroy(
+                        fundoPublicIdAntigo,
+                        {
+                            resource_type: 'image'
+                        }
+                    );
+
+                } catch (cloudinaryError) {
+
+                    console.error(
+                        'Erro ao excluir fundo antigo do Cloudinary:',
+                        cloudinaryError
+                    );
+                }
+            }
+
+
+            // =================================================
+            // SUCESSO
+            // =================================================
+
+            req.flash(
+                'success_msg',
+                'Fundo do certificado atualizado com sucesso!'
+            );
+
+
+            return res.redirect(
+                `/admin/certificados/modelos/${id}/editar`
+            );
+
+
+        } catch (err) {
+
+            console.error(
+                'Erro ao salvar fundo do certificado:',
+                err
+            );
+
+
+            req.flash(
+                'error_msg',
+                'Erro ao salvar o fundo do certificado. ' +
+                err.message
+            );
+
+
+            return res.redirect(
+                `/admin/certificados/modelos/${id}/editar`
+            );
+        }
+    }
 );
 // -------------------------------------------
 // EXCLUIR MODELO
