@@ -646,6 +646,197 @@ router.post(
     }
   }
 );
+
+// -------------------------------------------
+// EDITAR MODELO - TELA
+// -------------------------------------------
+
+router.get(
+  '/certificados/modelos/:id/editar',
+  verificarAdminEscola,
+  async (req, res) => {
+
+    try {
+      const escolaId = req.session.adminEscola.escolaId;
+      const { id } = req.params;
+
+      if (
+        !id ||
+        !mongoose.Types.ObjectId.isValid(id)
+      ) {
+        req.flash(
+          'error_msg',
+          'ID do modelo inválido.'
+        );
+
+        return res.redirect(
+          '/admin/certificados/modelos'
+        );
+      }
+
+      const modelo = await ModeloCertificado.findOne({
+        _id: id,
+        escolaId
+      }).lean();
+
+      if (!modelo) {
+        req.flash(
+          'error_msg',
+          'Modelo não encontrado ou não pertence à sua escola.'
+        );
+
+        return res.redirect(
+          '/admin/certificados/modelos'
+        );
+      }
+
+      const feira = await Feira.findOne({
+        _id: modelo.feira,
+        escolaId
+      }).lean();
+
+      const escola = await Escola.findById(
+        escolaId
+      ).lean();
+
+      return res.render(
+        'admin/certificados/editar-modelo',
+        {
+          titulo: 'Editar Modelo de Certificado',
+          layout: false,
+          modelo,
+          feiraAtual: feira,
+          escola,
+          success_msg: req.flash('success_msg'),
+          error_msg: req.flash('error_msg')
+        }
+      );
+
+    } catch (err) {
+      console.error(
+        'Erro ao abrir editor de certificado:',
+        err
+      );
+
+      req.flash(
+        'error_msg',
+        'Erro ao abrir o editor do certificado. ' +
+        err.message
+      );
+
+      return res.redirect(
+        '/admin/certificados/modelos'
+      );
+    }
+  }
+);
+
+// -------------------------------------------
+// EDITAR MODELO - SALVAR
+// -------------------------------------------
+
+router.post(
+  '/certificados/modelos/:id/editar',
+  verificarAdminEscola,
+  async (req, res) => {
+
+    try {
+      const escolaId = req.session.adminEscola.escolaId;
+      const { id } = req.params;
+
+      const {
+        nome,
+        tipo,
+        orientacao,
+        ativo
+      } = req.body;
+
+      if (
+        !id ||
+        !mongoose.Types.ObjectId.isValid(id)
+      ) {
+        req.flash(
+          'error_msg',
+          'ID do modelo inválido.'
+        );
+
+        return res.redirect(
+          '/admin/certificados/modelos'
+        );
+      }
+
+      const modelo = await ModeloCertificado.findOne({
+        _id: id,
+        escolaId
+      });
+
+      if (!modelo) {
+        req.flash(
+          'error_msg',
+          'Modelo não encontrado ou não pertence à sua escola.'
+        );
+
+        return res.redirect(
+          '/admin/certificados/modelos'
+        );
+      }
+
+      modelo.nome =
+        nome && nome.trim()
+          ? nome.trim()
+          : modelo.nome;
+
+      if (
+        [
+          'estudante',
+          'orientador',
+          'coorientador',
+          'avaliador',
+          'geral'
+        ].includes(tipo)
+      ) {
+        modelo.tipo = tipo;
+      }
+
+      modelo.orientacao =
+        orientacao === 'retrato'
+          ? 'retrato'
+          : 'paisagem';
+
+      modelo.ativo =
+        ativo === 'on' ||
+        ativo === 'true' ||
+        ativo === true;
+
+      await modelo.save();
+
+      req.flash(
+        'success_msg',
+        'Modelo atualizado com sucesso!'
+      );
+
+      return res.redirect(
+        `/admin/certificados/modelos/${modelo._id}/editar`
+      );
+
+    } catch (err) {
+      console.error(
+        'Erro ao atualizar modelo de certificado:',
+        err
+      );
+
+      req.flash(
+        'error_msg',
+        'Erro ao atualizar modelo. ' +
+        err.message
+      );
+
+      return res.redirect(
+        `/admin/certificados/modelos/${req.params.id}/editar`
+      );
+    }
+  }
+);
 // -------------------------------------------
 // EXCLUIR MODELO
 // -------------------------------------------
