@@ -676,69 +676,245 @@
 </div>
            
             <!-- ABA: PROJETOS -->
-            <div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200 hidden" id="projetos" role="tabpanel" aria-labelledby="projetos-tab">
-                <button id="btnAbrirModalProjeto" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg mb-6 shadow-md transition duration-300 ease-in-out">
-                    <i class="fas fa-plus-circle mr-2"></i>Adicionar Novo Projeto
-                </button>
-
-                <div class="overflow-x-auto bg-white rounded-lg shadow-md border border-gray-200">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-100">
-                            <tr>
-                                <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Título</th>
-                                <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Turma</th>
-                                <th class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            <% Object.keys(projetosPorCategoria).sort().forEach(nomeCategoria => { %>
-                                <tr class="bg-gray-50">
-                                    <td colspan="3" class="py-2 px-4 text-left font-extrabold text-lg text-blue-700">
-                                        <%= nomeCategoria %>
-                                    </td>
-                                </tr>
-                                <% projetosPorCategoria[nomeCategoria].forEach(projeto => { %>
-                                    <tr class="hover:bg-gray-100 transition duration-150 ease-in-out">
-                                        <td class="py-3 px-4 text-gray-800"><%= projeto.titulo %></td>
-                                        <td class="py-3 px-4 text-gray-800"><%= projeto.turma || 'Não informado' %></td>
-                                        <td class="py-3 px-4 whitespace-nowrap">
-                                            <button 
-  class="btn-editar-projeto bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1.5 px-3 rounded-md text-sm mr-2 shadow-sm transition duration-300 ease-in-out"
-  data-id="<%= projeto._id %>"
-  data-titulo="<%= projeto.titulo %>"
-  data-descricao="<%= projeto.descricao %>"
-  data-categoria-id="<%= projeto.categoria ? projeto.categoria._id : '' %>"
-  data-criterios="<%= projeto.criterios && projeto.criterios.length > 0 ? projeto.criterios.map(c => c._id).join(',') : '' %>"
-  data-turma="<%= projeto.turma %>"
-  data-alunos="<%= projeto.alunos.join(',') %>"
-  data-relatorio-pdf="<%= projeto.relatorioPdf || '' %>"
-  data-orientador="<%= projeto.orientador || '' %>"
-  data-coorientador="<%= projeto.coorientador || '' %>"
+<div
+  class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200 hidden"
+  id="projetos"
+  role="tabpanel"
+  aria-labelledby="projetos-tab"
 >
-  <i class="fas fa-edit mr-1"></i>Editar
-</button>
+  <button
+    id="btnAbrirModalProjeto"
+    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg mb-6 shadow-md transition duration-300 ease-in-out"
+  >
+    <i class="fas fa-plus-circle mr-2"></i>
+    Adicionar Novo Projeto
+  </button>
+  <div class="overflow-x-auto bg-white rounded-lg shadow-md border border-gray-200">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-100">
+        <tr>
+          <th
+            class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+          >
+            Estande
+          </th>
+          <th
+            class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+          >
+            Título
+          </th>
+          <th
+            class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+          >
+            Turma
+          </th>
+          <th
+            class="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+          >
+            Ações
+          </th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <%
+          const categoriasOrdenadasProjetos =
+            Object.keys(projetosPorCategoria).sort(
+              (a, b) =>
+                a.localeCompare(
+                  b,
+                  'pt-BR',
+                  { numeric: true }
+                )
+            );
+        %>
+        <% categoriasOrdenadasProjetos.forEach(nomeCategoria => { %>
 
-             
-                                            <form method="POST" action="/admin/projetos/<%= projeto._id %>?_method=DELETE" class="inline-block" onsubmit="return confirm('Tem certeza que deseja deletar este projeto?');">
-                                                <input type="hidden"  name="_method" value="DELETE">
-                                                <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-md text-sm shadow-sm transition duration-300 ease-in-out">Deletar</button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                <% }) %>
-                            <% }) %>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <!-- FIM ABA: PROJETOS -->
+          <!-- CABEÇALHO DA CATEGORIA -->
+          <tr class="bg-gray-50">
+            <td
+              colspan="4"
+              class="py-2 px-4 text-left font-extrabold text-lg text-blue-700"
+            >
+              <%= nomeCategoria %>
+            </td>
+          </tr>
+          <%
+            /*
+             * Faz uma cópia do array antes de ordenar
+             * para não alterar projetosPorCategoria original.
+             * Regra:
+             * 1) projetos com número de estande aparecem primeiro;
+             * 2) são ordenados pelo número do estande;
+             * 3) projetos sem estande aparecem depois;
+             * 4) em empate ou sem número, ordena pelo título.
+             */
+            const projetosOrdenados =
+              [...projetosPorCategoria[nomeCategoria]]
+                .sort((a, b) => {
+                  const estandeA =
+                    a.numeroEstande !== undefined &&
+                    a.numeroEstande !== null &&
+                    a.numeroEstande !== ''
+                      ? Number(a.numeroEstande)
+                      : null;
+                  const estandeB =
+                    b.numeroEstande !== undefined &&
+                    b.numeroEstande !== null &&
+                    b.numeroEstande !== ''
+                      ? Number(b.numeroEstande)
+                      : null;
+                  // Ambos possuem número de estande
+                  if (
+                    estandeA !== null &&
+                    estandeB !== null
+                  ) {
+                    if (estandeA !== estandeB) {
+                      return estandeA - estandeB;
+                    }
+                    return String(a.titulo || '')
+                      .localeCompare(
+                        String(b.titulo || ''),
+                        'pt-BR',
+                        { numeric: true }
+                      );
+                  }
+                  // Somente A possui estande
+                  if (
+                    estandeA !== null &&
+                    estandeB === null
+                  ) {
+                    return -1;
+                  }
+                  // Somente B possui estande
+                  if (
+                    estandeA === null &&
+                    estandeB !== null
+                  ) {
+                    return 1;
+                  }
+                  // Nenhum possui estande
+                  return String(a.titulo || '')
+                    .localeCompare(
+                      String(b.titulo || ''),
+                      'pt-BR',
+                      { numeric: true }
+                    );
+                });
+          %>
+          <% projetosOrdenados.forEach(projeto => { %>
+            <tr
+              class="hover:bg-gray-100 transition duration-150 ease-in-out"
+            >
+              <!-- NÚMERO DO ESTANDE -->
+              <td
+                class="py-3 px-4 text-gray-800 font-semibold whitespace-nowrap"
+              >
+                <% if (
+                  projeto.numeroEstande !== undefined &&
+                  projeto.numeroEstande !== null &&
+                  projeto.numeroEstande !== ''
+                ) { %>
+                  <span
+                    class="inline-flex items-center justify-center min-w-8 px-2 py-1 rounded-md bg-blue-100 text-blue-800 font-bold"
+                    title="Número do estande"
+                  >
+                    <%= projeto.numeroEstande %>
+                  </span>
+                <% } else { %>
+                  <span
+                    class="text-gray-400"
+                    title="Estande não informado"
+                  >
+                    -
+                  </span>
+                <% } %>
+              </td>
+
+              <!-- TÍTULO -->
+              <td class="py-3 px-4 text-gray-800">
+                <%= projeto.titulo %>
+              </td>
+              <!-- TURMA -->
+              <td class="py-3 px-4 text-gray-800">
+                <%= projeto.turma || 'Não informado' %>
+              </td>
+              <!-- AÇÕES -->
+              <td class="py-3 px-4 whitespace-nowrap">
+                <button
+                  class="btn-editar-projeto bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1.5 px-3 rounded-md text-sm mr-2 shadow-sm transition duration-300 ease-in-out"
+                  data-id="<%= projeto._id %>"
+                  data-numero-estande="<%=
+                    projeto.numeroEstande !== undefined &&
+                    projeto.numeroEstande !== null
+                      ? projeto.numeroEstande
+                      : ''
+                  %>"
+                  data-titulo="<%= projeto.titulo || '' %>"
+                  data-descricao="<%= projeto.descricao || '' %>"
+                  data-categoria-id="<%=
+                    projeto.categoria
+                      ? projeto.categoria._id
+                      : ''
+                  %>"
+                  data-criterios="<%=
+                    projeto.criterios &&
+                    projeto.criterios.length > 0
+                      ? projeto.criterios
+                          .map(c => c._id || c)
+                          .join(',')
+                      : ''
+                  %>"
+                  data-turma="<%= projeto.turma || '' %>"
+                  data-alunos="<%=
+                    Array.isArray(projeto.alunos)
+                      ? projeto.alunos.join(',')
+                      : ''
+                  %>"
+                  data-relatorio-pdf="<%=
+                    projeto.relatorioPdf || ''
+                  %>"
+                  data-orientador="<%=
+                    projeto.orientador || ''
+                  %>"
+                  data-coorientador="<%=
+                    projeto.coorientador || ''
+                  %>"
+                >
+                  <i class="fas fa-edit mr-1"></i>
+                  Editar
+                </button>
+                <form
+                  method="POST"
+                  action="/admin/projetos/<%= projeto._id %>?_method=DELETE"
+                  class="inline-block"
+                  onsubmit="return confirm('Tem certeza que deseja deletar este projeto?');"
+                >
+                  <input
+                    type="hidden"
+                    name="_method"
+                    value="DELETE"
+                  >
+                  <button
+                    type="submit"
+                    class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded-md text-sm shadow-sm transition duration-300 ease-in-out"
+                  >
+                    Deletar
+                  </button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
 
             <!-- ABA: CATEGORIAS -->
             <div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200 hidden" id="categorias" role="tabpanel" aria-labelledby="categorias-tab">
                 <button id="btnAbrirModalCategoria" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-lg mb-6 shadow-md transition duration-300 ease-in-out">
                     <i class="fas fa-plus-circle mr-2"></i>Adicionar Nova Categoria
                 </button>
-
                 <div class="overflow-x-auto bg-white rounded-lg shadow-md border border-gray-200">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-100">
@@ -1564,6 +1740,25 @@ document.getElementById('selecionarTodosAvaliadores')?.addEventListener('change'
             <% }) %>
         </select>
     </div>
+<div class="mb-4">
+    <label for="numeroEstande" class="block text-gray-700 text-sm font-bold mb-2">
+        Número do Estande (opcional):
+    </label>
+
+    <input
+        type="number"
+        id="numeroEstande"
+        name="numeroEstande"
+        min="1"
+        step="1"
+        placeholder="Ex.: 1, 2, 3..."
+        class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out"
+    >
+
+    <p class="text-xs text-gray-500 mt-1">
+        Preencha somente se esta feira utilizar numeração de estandes.
+    </p>
+</div>
 
     <div class="mb-6">
         <label class="block text-gray-700 text-sm font-bold mb-2">Critérios de Avaliação:</label>
@@ -2014,29 +2209,50 @@ document.querySelectorAll('.btn-editar-projeto').forEach(button => {
 
     tituloModalProjeto.textContent = 'Editar Projeto';
     formProjeto.action = `/admin/projetos/${btn.dataset.id}/editar`;
+
     projetoId.value = btn.dataset.id;
+
     inputTitulo.value = btn.dataset.titulo;
     inputDescricao.value = btn.dataset.descricao;
     selectCategoria.value = btn.dataset.categoriaId;
     inputTurmaProjeto.value = btn.dataset.turma;
-    inputAlunos.value = btn.dataset.alunos ? btn.dataset.alunos.split(',').join('\n') : '';
+
+    // Número do estande
+    const inputNumeroEstande = document.getElementById('numeroEstande');
+
+    if (inputNumeroEstande) {
+      inputNumeroEstande.value = btn.dataset.numeroEstande || '';
+    }
+
+    inputAlunos.value = btn.dataset.alunos
+      ? btn.dataset.alunos.split(',').join('\n')
+      : '';
 
     // Preencher orientador e coorientador
     inputOrientador.value = btn.dataset.orientador || '';
     inputCoorientador.value = btn.dataset.coorientador || '';
 
-    const criteriosIds = btn.dataset.criterios ? btn.dataset.criterios.split(',') : [];
-    criteriosProjetoCheckboxesDiv.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-      checkbox.checked = criteriosIds.includes(checkbox.value);
-    });
+    const criteriosIds = btn.dataset.criterios
+      ? btn.dataset.criterios.split(',')
+      : [];
+
+    criteriosProjetoCheckboxesDiv
+      .querySelectorAll('input[type="checkbox"]')
+      .forEach(checkbox => {
+        checkbox.checked = criteriosIds.includes(checkbox.value);
+      });
 
     // Mostrar PDF se houver
     const pdfUrl = btn.dataset.relatorioPdf;
+
     if (pdfUrl && pdfUrl !== '#') {
-      const visualizadorGoogle = `https://docs.google.com/viewer?url=${encodeURIComponent(pdfUrl)}&embedded=true`;
+      const visualizadorGoogle =
+        `https://docs.google.com/viewer?url=${encodeURIComponent(pdfUrl)}&embedded=true`;
+
       linkRelatorioPdf.href = visualizadorGoogle;
       linkRelatorioPdf.textContent = "Ver Relatório";
       pdfExistenteContainer.classList.remove('hidden');
+
     } else {
       linkRelatorioPdf.href = '#';
       linkRelatorioPdf.textContent = "";
