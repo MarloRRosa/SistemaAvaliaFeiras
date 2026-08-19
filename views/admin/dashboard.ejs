@@ -1613,8 +1613,8 @@ document.getElementById('selecionarTodosAvaliadores')?.addEventListener('change'
     <label class="block text-gray-700 text-sm font-bold mb-2">Selecione o(s) Avaliador(es):</label>
 
     <div class="mb-2">
-        <label class="inline-flex items-center">
-            <input type="checkbox" id="selecionarTodosAvaliadores" class="form-checkbox h-4 w-4 text-blue-600">
+        <label for="selecionarTodosAvaliadoresOffline" class="inline-flex items-center">
+            <input type="checkbox" id="selecionarTodosAvaliadoresOffline" class="form-checkbox h-4 w-4 text-blue-600">
             <span class="ml-2 text-sm text-gray-700">Selecionar todos os avaliadores</span>
         </label>
     </div>
@@ -2746,7 +2746,7 @@ const btnGerarRelatorioOfflineConfirm = document.getElementById('btnGerarRelator
 const selectFeiraRelatorio = document.getElementById('selectFeiraRelatorio');
 
 // NOVAS CONSTANTES para os checkboxes de avaliadores
-const selecionarTodosAvaliadoresCheckbox = document.getElementById('selecionarTodosAvaliadores');
+const selecionarTodosAvaliadoresCheckbox = document.getElementById('selecionarTodosAvaliadoresOffline');
 const avaliadoresCheckboxesDiv = document.getElementById('avaliadoresCheckboxes');
 
 // Abrir o modal
