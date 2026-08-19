@@ -296,7 +296,6 @@ router.post('/logout', verificarAdminEscola, (req, res, next) => {
 });
 
 // ===================================
-// ===================================
 // ROTAS DE RECUPERAÇÃO DE SENHA
 // ===================================
 
@@ -1064,6 +1063,510 @@ router.post(
         }
     }
 );
+
+// ============================================================
+// CERTIFICADOS - ADICIONAR ELEMENTO DE TEXTO
+// ============================================================
+
+router.post(
+    '/certificados/modelos/:id/elementos/texto',
+    verificarAdminEscola,
+    async (req, res) => {
+
+        try {
+
+            const escolaId =
+                req.session.adminEscola.escolaId;
+
+            const { id } =
+                req.params;
+
+
+            // ------------------------------------------------
+            // VALIDAR MODELO
+            // ------------------------------------------------
+
+            if (
+                !mongoose.Types.ObjectId.isValid(id)
+            ) {
+
+                return res.status(400).json({
+                    sucesso: false,
+                    mensagem:
+                        'ID do modelo inválido.'
+                });
+            }
+
+
+            const modelo =
+                await ModeloCertificado.findOne({
+                    _id: id,
+                    escolaId
+                });
+
+
+            if (!modelo) {
+
+                return res.status(404).json({
+                    sucesso: false,
+                    mensagem:
+                        'Modelo de certificado não encontrado.'
+                });
+            }
+
+
+            // ------------------------------------------------
+            // CRIAR ELEMENTO
+            // ------------------------------------------------
+
+            modelo.elementos.push({
+
+                tipo:
+                    'texto',
+
+                texto:
+                    'Digite seu texto',
+
+                x:
+                    250,
+
+                y:
+                    250,
+
+                largura:
+                    340,
+
+                altura:
+                    50,
+
+                fonte:
+                    'Arial',
+
+                tamanhoFonte:
+                    24,
+
+                negrito:
+                    false,
+
+                italico:
+                    false,
+
+                alinhamento:
+                    'center',
+
+                cor:
+                    '#000000',
+
+                ordem:
+                    modelo.elementos.length
+            });
+
+
+            await modelo.save();
+
+
+            const novoElemento =
+                modelo.elementos[
+                    modelo.elementos.length - 1
+                ];
+
+
+            return res.json({
+
+                sucesso:
+                    true,
+
+                elemento:
+                    novoElemento
+            });
+
+
+        } catch (err) {
+
+            console.error(
+                'Erro ao adicionar texto ao certificado:',
+                err
+            );
+
+
+            return res.status(500).json({
+
+                sucesso:
+                    false,
+
+                mensagem:
+                    'Erro ao adicionar texto ao certificado.'
+            });
+        }
+    }
+);
+
+// ============================================================
+// CERTIFICADOS - ATUALIZAR ELEMENTO
+// ============================================================
+
+router.post(
+    '/certificados/modelos/:id/elementos/:elementoId',
+    verificarAdminEscola,
+    async (req, res) => {
+
+        try {
+
+            const escolaId =
+                req.session.adminEscola.escolaId;
+
+            const {
+                id,
+                elementoId
+            } = req.params;
+
+
+            if (
+                !mongoose.Types.ObjectId.isValid(id) ||
+                !mongoose.Types.ObjectId.isValid(elementoId)
+            ) {
+
+                return res.status(400).json({
+                    sucesso: false,
+                    mensagem:
+                        'Identificador inválido.'
+                });
+            }
+
+
+            const modelo =
+                await ModeloCertificado.findOne({
+                    _id: id,
+                    escolaId
+                });
+
+
+            if (!modelo) {
+
+                return res.status(404).json({
+                    sucesso: false,
+                    mensagem:
+                        'Modelo não encontrado.'
+                });
+            }
+
+
+            const elemento =
+                modelo.elementos.id(
+                    elementoId
+                );
+
+
+            if (!elemento) {
+
+                return res.status(404).json({
+                    sucesso: false,
+                    mensagem:
+                        'Elemento não encontrado.'
+                });
+            }
+
+
+            // ------------------------------------------------
+            // TEXTO
+            // ------------------------------------------------
+
+            if (
+                req.body.texto !== undefined
+            ) {
+
+                elemento.texto =
+                    String(
+                        req.body.texto
+                    );
+            }
+
+
+            // ------------------------------------------------
+            // POSIÇÃO
+            // ------------------------------------------------
+
+            if (
+                req.body.x !== undefined
+            ) {
+
+                const x =
+                    Number(req.body.x);
+
+                if (!Number.isNaN(x)) {
+                    elemento.x = x;
+                }
+            }
+
+
+            if (
+                req.body.y !== undefined
+            ) {
+
+                const y =
+                    Number(req.body.y);
+
+                if (!Number.isNaN(y)) {
+                    elemento.y = y;
+                }
+            }
+
+
+            // ------------------------------------------------
+            // TAMANHO DA CAIXA
+            // ------------------------------------------------
+
+            if (
+                req.body.largura !== undefined
+            ) {
+
+                const largura =
+                    Number(
+                        req.body.largura
+                    );
+
+                if (
+                    !Number.isNaN(largura) &&
+                    largura > 0
+                ) {
+
+                    elemento.largura =
+                        largura;
+                }
+            }
+
+
+            if (
+                req.body.altura !== undefined
+            ) {
+
+                const altura =
+                    Number(
+                        req.body.altura
+                    );
+
+                if (
+                    !Number.isNaN(altura) &&
+                    altura > 0
+                ) {
+
+                    elemento.altura =
+                        altura;
+                }
+            }
+
+
+            // ------------------------------------------------
+            // FORMATAÇÃO
+            // ------------------------------------------------
+
+            if (
+                req.body.fonte !== undefined
+            ) {
+
+                elemento.fonte =
+                    String(
+                        req.body.fonte
+                    );
+            }
+
+
+            if (
+                req.body.tamanhoFonte !== undefined
+            ) {
+
+                const tamanho =
+                    Number(
+                        req.body.tamanhoFonte
+                    );
+
+                if (
+                    !Number.isNaN(tamanho) &&
+                    tamanho >= 8 &&
+                    tamanho <= 120
+                ) {
+
+                    elemento.tamanhoFonte =
+                        tamanho;
+                }
+            }
+
+
+            if (
+                req.body.cor !== undefined
+            ) {
+
+                elemento.cor =
+                    String(
+                        req.body.cor
+                    );
+            }
+
+
+            if (
+                req.body.negrito !== undefined
+            ) {
+
+                elemento.negrito =
+                    req.body.negrito === true ||
+                    req.body.negrito === 'true' ||
+                    req.body.negrito === '1';
+            }
+
+
+            if (
+                req.body.italico !== undefined
+            ) {
+
+                elemento.italico =
+                    req.body.italico === true ||
+                    req.body.italico === 'true' ||
+                    req.body.italico === '1';
+            }
+
+
+            if (
+                ['left', 'center', 'right']
+                    .includes(
+                        req.body.alinhamento
+                    )
+            ) {
+
+                elemento.alinhamento =
+                    req.body.alinhamento;
+            }
+
+
+            await modelo.save();
+
+
+            return res.json({
+
+                sucesso:
+                    true,
+
+                elemento
+            });
+
+
+        } catch (err) {
+
+            console.error(
+                'Erro ao atualizar elemento do certificado:',
+                err
+            );
+
+
+            return res.status(500).json({
+
+                sucesso:
+                    false,
+
+                mensagem:
+                    'Erro ao atualizar o elemento.'
+            });
+        }
+    }
+);
+
+// ============================================================
+// CERTIFICADOS - EXCLUIR ELEMENTO
+// ============================================================
+
+router.post(
+    '/certificados/modelos/:id/elementos/:elementoId/excluir',
+    verificarAdminEscola,
+    async (req, res) => {
+
+        try {
+
+            const escolaId =
+                req.session.adminEscola.escolaId;
+
+            const {
+                id,
+                elementoId
+            } = req.params;
+
+
+            if (
+                !mongoose.Types.ObjectId.isValid(id) ||
+                !mongoose.Types.ObjectId.isValid(elementoId)
+            ) {
+
+                return res.status(400).json({
+                    sucesso: false,
+                    mensagem:
+                        'Identificador inválido.'
+                });
+            }
+
+
+            const modelo =
+                await ModeloCertificado.findOne({
+                    _id: id,
+                    escolaId
+                });
+
+
+            if (!modelo) {
+
+                return res.status(404).json({
+                    sucesso: false,
+                    mensagem:
+                        'Modelo não encontrado.'
+                });
+            }
+
+
+            const elemento =
+                modelo.elementos.id(
+                    elementoId
+                );
+
+
+            if (!elemento) {
+
+                return res.status(404).json({
+                    sucesso: false,
+                    mensagem:
+                        'Elemento não encontrado.'
+                });
+            }
+
+
+            elemento.deleteOne();
+
+
+            await modelo.save();
+
+
+            return res.json({
+                sucesso: true
+            });
+
+
+        } catch (err) {
+
+            console.error(
+                'Erro ao excluir elemento do certificado:',
+                err
+            );
+
+
+            return res.status(500).json({
+
+                sucesso:
+                    false,
+
+                mensagem:
+                    'Erro ao excluir o elemento.'
+            });
+        }
+    }
+);
+
+
 // -------------------------------------------
 // EXCLUIR MODELO
 // -------------------------------------------
