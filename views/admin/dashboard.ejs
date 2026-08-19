@@ -1725,12 +1725,13 @@ document.getElementById('selecionarTodosAvaliadores')?.addEventListener('change'
           textos, assinaturas e campos automáticos.
         </p>
 
-        <button
-  type="button"
-  disabled
-  class="bg-gray-300 text-gray-600 font-semibold py-2.5 px-5 rounded-lg cursor-not-allowed"
-  title="Funcionalidade em construção"
+        <a
+  href="/admin/certificados/modelos<%= feiraAtual && feiraAtual._id ? '?feiraId=' + feiraAtual._id : '' %>"
+  class="inline-flex items-center justify-center bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 px-5 rounded-lg shadow-md transition duration-300 ease-in-out"
 >
+  <i class="fas fa-palette mr-2"></i>
+  Gerenciar Modelos
+</a>
 
       </div>
 
@@ -1762,12 +1763,15 @@ document.getElementById('selecionarTodosAvaliadores')?.addEventListener('change'
           estudantes, orientadores e avaliadores.
         </p>
 
-        <button
+       <button
   type="button"
   disabled
   class="bg-gray-300 text-gray-600 font-semibold py-2.5 px-5 rounded-lg cursor-not-allowed"
   title="Funcionalidade em construção"
 >
+  <i class="fas fa-lock mr-2"></i>
+  Em breve
+</button>
 
       </div>
 
@@ -1805,6 +1809,9 @@ document.getElementById('selecionarTodosAvaliadores')?.addEventListener('change'
   class="bg-gray-300 text-gray-600 font-semibold py-2.5 px-5 rounded-lg cursor-not-allowed"
   title="Funcionalidade em construção"
 >
+  <i class="fas fa-lock mr-2"></i>
+  Em breve
+</button>
 
       </div>
 
