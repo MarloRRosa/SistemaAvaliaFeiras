@@ -212,316 +212,377 @@
     }
 
     /* ========================================= */
-    /* ===== MELHORIAS ESPECÍFICAS TABELA AVALIADORES ===== */
+    /* ===== MELHORIAS ESPECÍFICAS ABA AVALIADORES ===== */
     /* ========================================= */
 
-    /* Distribuição das colunas */
-    .table-responsive table {
-        table-layout: fixed;
-        width: 100%;
+    /* Barra de filtros */
+    #avaliadores .avaliadores-filtros {
+        display: grid;
+        grid-template-columns: minmax(220px, 1fr) 180px auto;
+        gap: 12px;
+        align-items: end;
+        margin-bottom: 16px;
+        padding: 14px;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
     }
 
-    .table-responsive th:nth-child(1) { width: 60px; }   /* Checkbox */
-    .table-responsive th:nth-child(2) { width: 280px; }  /* Nome/Email */
-    .table-responsive th:nth-child(3) { width: 80px; }   /* PIN */
-    .table-responsive th:nth-child(4) { width: 90px; }   /* Status */
-    .table-responsive th:nth-child(5) { width: 300px; }  /* Projetos */
-    .table-responsive th:nth-child(6) { width: 180px; }  /* Ações */
-    .table-responsive th:nth-child(7) { width: 80px; }   /* QR Code */
+    #avaliadores .avaliadores-filtros label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #475569;
+    }
 
-    /* Cabeçalho melhorado */
-    .table-responsive thead th {
-        padding: 16px 12px;
+    #avaliadores .avaliadores-filtros input,
+    #avaliadores .avaliadores-filtros select {
+        width: 100%;
+        min-height: 40px;
+        padding: 8px 10px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        background: #fff;
+        color: #334155;
+        outline: none;
+        transition: border-color .2s ease, box-shadow .2s ease;
+    }
+
+    #avaliadores .avaliadores-filtros input:focus,
+    #avaliadores .avaliadores-filtros select:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, .12);
+    }
+
+    /* Container realmente rolável; não corta as últimas colunas */
+    #avaliadores .avaliadores-table-wrap {
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: visible;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        background: #fff;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, .05);
+        scrollbar-width: thin;
+        scrollbar-color: #94a3b8 #e2e8f0;
+    }
+
+    #avaliadores .avaliadores-table-wrap::-webkit-scrollbar {
+        height: 9px;
+    }
+
+    #avaliadores .avaliadores-table-wrap::-webkit-scrollbar-track {
+        background: #e2e8f0;
+        border-radius: 999px;
+    }
+
+    #avaliadores .avaliadores-table-wrap::-webkit-scrollbar-thumb {
+        background: #94a3b8;
+        border-radius: 999px;
+    }
+
+    #avaliadores .avaliadores-table {
+        width: 100%;
+        min-width: 900px;
+        table-layout: fixed;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    /* 6 colunas: QR Code removido da listagem; continua disponível no modal de edição */
+    #avaliadores .avaliadores-table th:nth-child(1),
+    #avaliadores .avaliadores-table td:nth-child(1) { width: 52px; }
+
+    #avaliadores .avaliadores-table th:nth-child(2),
+    #avaliadores .avaliadores-table td:nth-child(2) { width: 230px; }
+
+    #avaliadores .avaliadores-table th:nth-child(3),
+    #avaliadores .avaliadores-table td:nth-child(3) { width: 78px; }
+
+    #avaliadores .avaliadores-table th:nth-child(4),
+    #avaliadores .avaliadores-table td:nth-child(4) { width: 95px; }
+
+    #avaliadores .avaliadores-table th:nth-child(5),
+    #avaliadores .avaliadores-table td:nth-child(5) { width: auto; min-width: 250px; }
+
+    #avaliadores .avaliadores-table th:nth-child(6),
+    #avaliadores .avaliadores-table td:nth-child(6) { width: 132px; }
+
+    #avaliadores .avaliadores-table thead th {
+        padding: 13px 10px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: .04em;
+        line-height: 1.25;
+        text-transform: uppercase;
+        color: #475569;
+        background: #eef2f7;
+        border-bottom: 1px solid #dbe3ee;
+        white-space: nowrap;
+    }
+
+    #avaliadores .avaliadores-table tbody td {
+        padding: 11px 10px;
+        vertical-align: middle;
+        border-bottom: 1px solid #eef2f7;
+        font-size: 12px;
+        line-height: 1.35;
+        background: #fff;
+    }
+
+    #avaliadores .avaliadores-table tbody tr:nth-child(even) td {
+        background: #fbfdff;
+    }
+
+    #avaliadores .avaliadores-table tbody tr:hover td {
+        background: #f6f9ff;
+    }
+
+    /* Avaliador */
+    #avaliadores .avaliador-identidade {
+        display: flex;
+        align-items: center;
+        min-width: 0;
+    }
+
+    #avaliadores .avaliador-avatar {
+        width: 34px;
+        height: 34px;
+        flex: 0 0 34px;
+        margin-right: 10px;
+        border-radius: 999px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        color: #1e40af;
         font-size: 11px;
         font-weight: 700;
-        letter-spacing: 0.05em;
-        line-height: 1.4;
-        text-transform: uppercase;
-        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-        border-bottom: 2px solid #e2e8f0;
+        border: 1px solid #bfdbfe;
     }
 
-    /* Células do corpo */
-    .table-responsive tbody td {
-        padding: 12px;
-        vertical-align: top;
-        border-bottom: 1px solid #f1f5f9;
+    #avaliadores .avaliador-nome {
+        color: #1d4ed8;
         font-size: 13px;
-        line-height: 1.4;
-    }
-
-    /* Coluna Nome/Email */
-    .table-responsive tbody td:nth-child(2) {
-        padding: 16px 12px;
-    }
-
-    .table-responsive tbody td:nth-child(2) .flex {
-        align-items: flex-start;
-    }
-
-    .table-responsive tbody td:nth-child(2) .font-semibold {
-        font-size: 14px;
-        font-weight: 600;
-        line-height: 1.3;
-        color: #1e40af;
-        margin-bottom: 2px;
-        display: block;
+        font-weight: 700;
+        line-height: 1.25;
         cursor: pointer;
-        transition: color 0.2s ease;
     }
 
-    .table-responsive tbody td:nth-child(2) .font-semibold:hover {
-        color: #3b82f6;
+    #avaliadores .avaliador-nome:hover {
+        color: #2563eb;
         text-decoration: underline;
     }
 
-    .table-responsive tbody td:nth-child(2) .text-gray-900 {
-        font-size: 12px;
-        color: #6b7280;
-        line-height: 1.3;
-        word-break: break-all;
+    #avaliadores .avaliador-email {
+        margin-top: 2px;
+        color: #64748b;
+        font-size: 10px;
+        line-height: 1.2;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
-    /* PIN estilizado */
-    .table-responsive .font-mono {
-        font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
-        font-size: 13px;
-        font-weight: 600;
-        letter-spacing: 1px;
-        padding: 6px 12px;
-        background: #f1f5f9;
-        border: 1px solid #e2e8f0;
+    /* PIN */
+    #avaliadores .avaliador-pin {
+        display: inline-block;
+        min-width: 52px;
+        padding: 5px 8px;
+        border: 1px solid #dbe3ee;
         border-radius: 6px;
-        color: #374151;
+        background: #f1f5f9;
+        color: #334155;
+        font-family: 'SF Mono', Monaco, Consolas, monospace;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-align: center;
     }
 
-    /* Status melhorado */
-    .table-responsive .status-indicator {
-        font-size: 11px;
-        font-weight: 600;
-        padding: 4px 10px;
-        border-radius: 20px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+    /* Status */
+    #avaliadores .status-indicator {
         display: inline-flex;
         align-items: center;
         justify-content: center;
         min-width: 70px;
+        padding: 4px 9px;
+        border-radius: 999px;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .35px;
     }
 
-    .table-responsive .status-indicator.status-active {
-        background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+    #avaliadores .status-indicator.status-active {
+        background: #dcfce7;
         color: #166534;
         border: 1px solid #bbf7d0;
     }
 
-    .table-responsive .status-indicator.status-inactive {
-        background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%);
+    #avaliadores .status-indicator.status-inactive {
+        background: #fee2e2;
         color: #991b1b;
         border: 1px solid #fecaca;
     }
 
-    /* Projetos melhorados */
-    .table-responsive tbody td:nth-child(5) {
-        padding: 12px 8px;
+    /* Projetos: ocupam o espaço disponível, quebrando em várias linhas */
+    #avaliadores .projetos-avaliador {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        align-items: center;
     }
 
-    .table-responsive .badge-animate {
-        font-size: 10px;
-        font-weight: 500;
-        padding: 4px 8px;
-        margin: 1px;
-        border-radius: 12px;
+    #avaliadores .badge-animate {
         display: inline-block;
-        max-width: 140px;
+        max-width: 135px;
+        padding: 3px 8px;
+        border: 1px solid #c7d2fe;
+        border-radius: 999px;
+        background: #e0e7ff;
+        color: #3730a3;
+        font-size: 9px;
+        font-weight: 600;
+        line-height: 1.25;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-        line-height: 1.3;
-        background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
-        color: #3730a3;
-        border: 1px solid #c7d2fe;
-        transition: all 0.2s ease;
+        transition: all .2s ease;
     }
 
-    .table-responsive .badge-animate:hover {
-        transform: scale(1.02);
-        background: linear-gradient(135deg, #c7d2fe 0%, #a5b4fc 100%);
-        box-shadow: 0 2px 4px rgba(99, 102, 241, 0.2);
+    #avaliadores .badge-animate:hover {
+        transform: translateY(-1px);
+        background: #c7d2fe;
     }
 
-    .table-responsive .text-gray-500 {
-        font-size: 11px;
-        color: #9ca3af;
-        font-style: italic;
+    /* Ações sempre visíveis no lado direito */
+    #avaliadores .avaliador-acoes-sticky {
+        position: sticky;
+        right: 0;
+        z-index: 3;
+        box-shadow: -7px 0 10px -10px rgba(15, 23, 42, .55);
     }
 
-    /* Botões de ação melhorados */
-    .table-responsive tbody td:nth-child(6) {
-        padding: 12px 8px;
+    #avaliadores thead .avaliador-acoes-sticky {
+        z-index: 5;
+        background: #e7edf5;
     }
 
-    .table-responsive .flex.justify-center.gap-1 {
+    #avaliadores tbody tr:nth-child(odd) .avaliador-acoes-sticky {
+        background: #fff;
+    }
+
+    #avaliadores tbody tr:nth-child(even) .avaliador-acoes-sticky {
+        background: #fbfdff;
+    }
+
+    #avaliadores tbody tr:hover .avaliador-acoes-sticky {
+        background: #f6f9ff;
+    }
+
+    #avaliadores .acoes-avaliador {
         display: flex;
-        gap: 4px;
         justify-content: center;
-        flex-wrap: wrap;
         align-items: center;
+        gap: 5px;
+        flex-wrap: nowrap;
     }
 
-    .table-responsive .btn-hover-effect {
-        font-size: 11px;
-        font-weight: 500;
-        padding: 6px 10px;
-        border-radius: 6px;
-        min-width: auto;
-        white-space: nowrap;
-        transition: all 0.2s ease;
-        border: none;
-        cursor: pointer;
-        text-decoration: none;
+    #avaliadores .acoes-avaliador .btn-hover-effect {
+        width: 31px;
+        height: 31px;
+        padding: 0;
+        border-radius: 7px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
+        font-size: 11px;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
     }
 
-    .table-responsive .btn-hover-effect i {
-        font-size: 10px;
-    }
-
-    /* Cores específicas dos botões */
-    .table-responsive .bg-blue-600 {
-        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    }
-
-    .table-responsive .bg-blue-600:hover {
-        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    #avaliadores .acoes-avaliador .btn-hover-effect:hover {
         transform: translateY(-1px);
-        box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
     }
 
-    .table-responsive .btn-reenviar-avaliador {
-        background: linear-gradient(135deg, #ea580c 0%, #dc2626 100%);
-    }
-
-    .table-responsive .btn-reenviar-avaliador:hover {
-        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 8px rgba(220, 38, 38, 0.3);
-    }
-
-    .table-responsive .bg-red-600 {
-        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-    }
-
-    .table-responsive .bg-red-600:hover {
-        background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
-        transform: translateY(-1px);
-        box-shadow: 0 4px 8px rgba(185, 28, 28, 0.3);
-    }
-
-    /* QR Code */
-    .table-responsive tbody td:nth-child(7) {
-        text-align: center;
-        padding: 12px;
-    }
-
-    .table-responsive .h-12.w-12 {
-        width: 40px;
-        height: 40px;
-        border-radius: 6px;
-        border: 1px solid #e5e7eb;
-    }
-
-    /* Avatar melhorado */
-    .table-responsive .w-10.h-10 {
-        width: 36px;
-        height: 36px;
-        font-size: 12px;
-        font-weight: 600;
-        flex-shrink: 0;
-        margin-right: 12px;
-        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-        color: #1e40af;
-        border: 1px solid #bfdbfe;
-    }
-
-    /* Hover da linha melhorado */
-    .table-responsive .table-row-hover:hover {
-        background: linear-gradient(135deg, #fefefe 0%, #f8fafc 100%);
-        transform: none;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    #avaliadores .btn-reenviar-avaliador {
+        background: linear-gradient(135deg, #ea580c 0%, #dc2626 100%) !important;
     }
 
     /* Controles de seleção */
-    .table-responsive ~ div .flex.justify-between.items-center.mb-4,
-    .flex.justify-between.items-center.mb-4.p-3 {
-        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 12px 16px;
+    #avaliadores .avaliadores-selecao {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
         margin-bottom: 16px;
-    }
-
-    .flex.justify-between.items-center.mb-4 label {
-        font-size: 13px;
-        font-weight: 500;
-        color: #374151;
+        padding: 12px 14px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 9px;
     }
 
     #btnReenviarSelecionados {
-        font-size: 12px;
-        font-weight: 600;
-        padding: 8px 16px;
-        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 8px 13px;
+        border-radius: 7px;
         background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        transition: all 0.2s ease;
+        transition: all .2s ease;
     }
 
     #btnReenviarSelecionados:hover:not(:disabled) {
         background: linear-gradient(135deg, #059669 0%, #047857 100%);
         transform: translateY(-1px);
-        box-shadow: 0 4px 8px rgba(5, 150, 105, 0.3);
     }
 
-    /* ===== RESPONSIVIDADE ===== */
-    @media (max-width: 1200px) {
-        .table-responsive th:nth-child(5) { width: 250px; }
-        .table-responsive .badge-animate {
-            max-width: 100px;
-            font-size: 9px;
-        }
+    #avaliadores .avaliadores-scroll-hint {
+        display: none;
+        margin-top: 7px;
+        color: #64748b;
+        font-size: 10px;
+    }
+
+    @media (max-width: 1100px) {
+        #avaliadores .avaliadores-table { min-width: 820px; }
+        #avaliadores .avaliadores-table th:nth-child(2),
+        #avaliadores .avaliadores-table td:nth-child(2) { width: 205px; }
+        #avaliadores .avaliadores-table th:nth-child(5),
+        #avaliadores .avaliadores-table td:nth-child(5) { min-width: 220px; }
+        #avaliadores .avaliadores-scroll-hint { display: block; }
     }
 
     @media (max-width: 768px) {
-        .table-responsive {
-            font-size: 14px;
+        #avaliadores { padding: 14px !important; }
+
+        #avaliadores .avaliadores-filtros {
+            grid-template-columns: 1fr;
         }
-        
-        .btn-hover-effect {
-            padding: 8px 12px;
-            font-size: 14px;
+
+        #avaliadores .avaliadores-selecao {
+            align-items: stretch;
+            flex-direction: column;
         }
-        
-        .table-responsive thead th {
-            padding: 12px 8px;
-            font-size: 10px;
+
+        #avaliadores .avaliadores-selecao #btnReenviarSelecionados {
+            width: 100%;
+            justify-content: center;
         }
-        
-        .table-responsive tbody td {
-            padding: 10px 6px;
-            font-size: 12px;
+
+        #avaliadores .avaliadores-table {
+            min-width: 760px;
         }
-        
-        .table-responsive .btn-hover-effect {
-            font-size: 10px;
-            padding: 5px 8px;
+
+        #avaliadores .avaliadores-table thead th {
+            padding: 10px 7px;
+            font-size: 9px;
         }
-        
-        .table-responsive .badge-animate {
-            max-width: 80px;
-            font-size: 8px;
-            padding: 2px 6px;
+
+        #avaliadores .avaliadores-table tbody td {
+            padding: 9px 7px;
         }
     }
 
@@ -1056,76 +1117,116 @@
 
     <!-- Conteúdo: Avaliadores Cadastrados -->
     <div id="sub-avaliadores-cadastrados" class="subtab-content block">
-        
+
+        <!-- Busca e filtros -->
+        <div class="avaliadores-filtros">
+            <div>
+                <label for="searchInput">Buscar avaliador</label>
+                <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="Nome, e-mail ou PIN..."
+                    autocomplete="off"
+                >
+            </div>
+
+            <div>
+                <label for="statusFilter">Status</label>
+                <select id="statusFilter">
+                    <option value="">Todos</option>
+                    <option value="true">Ativos</option>
+                    <option value="false">Inativos</option>
+                </select>
+            </div>
+
+            <div>
+                <button
+                    type="button"
+                    onclick="limparFiltros()"
+                    class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-lg transition"
+                >
+                    <i class="fas fa-eraser mr-2"></i>Limpar
+                </button>
+            </div>
+        </div>
+
         <!-- Controles de seleção -->
-        <div class="flex justify-between items-center mb-4 p-3 bg-gray-50 rounded-lg border">
+        <div class="avaliadores-selecao">
             <div class="flex items-center">
-                <input type="checkbox" 
-                       id="selecionarTodosAvaliadores" 
-                       class="form-checkbox h-4 w-4 text-blue-600 mr-3"
-                       aria-label="Selecionar todos os avaliadores">
-                <label for="selecionarTodosAvaliadores" class="text-sm font-medium text-gray-700 cursor-pointer">
+                <input
+                    type="checkbox"
+                    id="selecionarTodosAvaliadores"
+                    class="form-checkbox h-4 w-4 text-blue-600 mr-3"
+                    aria-label="Selecionar todos os avaliadores"
+                >
+                <label
+                    for="selecionarTodosAvaliadores"
+                    class="text-sm font-medium text-gray-700 cursor-pointer"
+                >
                     Selecionar Todos
                 </label>
             </div>
-            <button id="btnReenviarSelecionados" 
-            class="bg-green-600 hover:bg-green-700 text-white font-semibold py-1.5 px-3 rounded-md text-sm shadow-sm flex items-center">
-            <i class="fas fa-paper-plane mr-1"></i> Reenviar Selecionados
-        </button>
+
+            <button
+                id="btnReenviarSelecionados"
+                class="bg-green-600 hover:bg-green-700 text-white font-semibold py-1.5 px-3 rounded-md text-sm shadow-sm flex items-center"
+            >
+                <i class="fas fa-paper-plane mr-1"></i>
+                Reenviar Selecionados
+            </button>
         </div>
 
-        <div class="table-responsive bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
+        <!-- Tabela -->
+        <div class="avaliadores-table-wrap">
+            <table class="avaliadores-table">
+                <thead>
                     <tr>
-                        <th class="py-4 px-6 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
-                            Sel.
-                        </th>
-                        <th class="py-4 px-6 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                            Avaliador
-                        </th>
-                        <th class="py-4 px-6 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
-                            PIN
-                        </th>
-                        <th class="py-4 px-6 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
-                            Status
-                        </th>
-                        <th class="py-4 px-6 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                            Projetos Atribuídos
-                        </th>
-                        <th class="py-4 px-6 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
-                            Ações
-                        </th>
-                        <th class="py-4 px-6 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
-                            QR Code
-                        </th>
+                        <th class="text-center">Sel.</th>
+                        <th class="text-left">Avaliador</th>
+                        <th class="text-center">PIN</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-left">Projetos Atribuídos</th>
+                        <th class="text-center avaliador-acoes-sticky">Ações</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-100">
+
+                <tbody>
                     <% avaliadores.forEach(avaliador => { %>
-                        <tr class="table-row-hover">
+                        <tr
+                            class="table-row-hover avaliador-row"
+                            data-nome="<%= (avaliador.nome || '').toLowerCase() %>"
+                            data-email="<%= (avaliador.email || '').toLowerCase() %>"
+                            data-pin="<%= avaliador.pin || '' %>"
+                            data-ativo="<%= avaliador.ativo ? 'true' : 'false' %>"
+                        >
                             <!-- Checkbox -->
-                            <td class="py-4 px-6 text-center">
-                                <input type="checkbox" 
-                                       class="checkbox-avaliador form-checkbox h-4 w-4 text-blue-600" 
-                                       value="<%= avaliador._id %>">
+                            <td class="text-center">
+                                <input
+                                    type="checkbox"
+                                    class="checkbox-avaliador form-checkbox h-4 w-4 text-blue-600"
+                                    value="<%= avaliador._id %>"
+                                >
                             </td>
 
-                            <!-- Nome e Email -->
-                            <td class="py-4 px-6">
-                                <div class="flex items-start">
-                                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
-                                        <span class="text-blue-600 font-semibold text-sm">
-                                            <%= avaliador.nome.charAt(0).toUpperCase() %><%= avaliador.nome.split(' ')[1] ? avaliador.nome.split(' ')[1].charAt(0).toUpperCase() : '' %>
-                                        </span>
+                            <!-- Nome e e-mail -->
+                            <td>
+                                <div class="avaliador-identidade">
+                                    <div class="avaliador-avatar">
+                                        <%= avaliador.nome.charAt(0).toUpperCase() %><%= avaliador.nome.split(' ')[1] ? avaliador.nome.split(' ')[1].charAt(0).toUpperCase() : '' %>
                                     </div>
+
                                     <div class="min-w-0 flex-1">
-                                        <div class="font-semibold text-blue-600 hover:underline cursor-pointer mb-1"
-                                             onclick="abrirModalEdicaoAvaliador('<%= avaliador._id %>')"
-                                             title="Clique para editar">
+                                        <div
+                                            class="avaliador-nome"
+                                            onclick="abrirModalEdicaoAvaliador('<%= avaliador._id %>')"
+                                            title="Clique para editar"
+                                        >
                                             <%= avaliador.nome %>
                                         </div>
-                                        <div class="text-gray-900 text-sm break-all">
+                                        <div
+                                            class="avaliador-email"
+                                            title="<%= avaliador.email %>"
+                                        >
                                             <%= avaliador.email %>
                                         </div>
                                     </div>
@@ -1133,92 +1234,95 @@
                             </td>
 
                             <!-- PIN -->
-                            <td class="py-4 px-6 text-center">
-                                <span class="font-mono text-sm bg-gray-100 px-3 py-1 rounded-lg">
-                                    <%= avaliador.pin %>
-                                </span>
+                            <td class="text-center">
+                                <span class="avaliador-pin"><%= avaliador.pin %></span>
                             </td>
 
                             <!-- Status -->
-                            <td class="py-4 px-6 text-center">
-                                <span class="status-indicator <%= avaliador.ativo ? 'status-active' : 'status-inactive' %> px-3 py-1 rounded-full text-xs font-semibold <%= avaliador.ativo ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600' %>">
+                            <td class="text-center">
+                                <span class="status-indicator <%= avaliador.ativo ? 'status-active' : 'status-inactive' %>">
                                     <%= avaliador.ativo ? 'Ativo' : 'Inativo' %>
                                 </span>
                             </td>
 
                             <!-- Projetos -->
-                            <td class="py-4 px-6">
-                                <div class="space-y-1">
+                            <td>
+                                <div class="projetos-avaliador">
                                     <% if (avaliador.projetosAtribuidos && avaliador.projetosAtribuidos.length > 0) { %>
-                                        <% avaliador.projetosAtribuidos.forEach((projeto, index) => { %>
-                                            <span class="badge-animate inline-block bg-indigo-100 text-indigo-800 text-xs font-semibold px-2.5 py-0.5 rounded-full mr-1 mb-1" 
-                                                  title="<%= projeto.titulo %>">
-                                                <%= projeto.titulo.length > 25 ? projeto.titulo.substring(0, 25) + '...' : projeto.titulo %>
+                                        <% avaliador.projetosAtribuidos.forEach(projeto => { %>
+                                            <span
+                                                class="badge-animate"
+                                                title="<%= projeto.titulo %>"
+                                            >
+                                                <%= projeto.titulo.length > 24 ? projeto.titulo.substring(0, 24) + '...' : projeto.titulo %>
                                             </span>
                                         <% }) %>
                                     <% } else { %>
-                                        <span class="text-gray-500 text-sm italic">Nenhum projeto atribuído</span>
+                                        <span class="text-gray-400 text-xs italic">Nenhum projeto atribuído</span>
                                     <% } %>
                                 </div>
                             </td>
 
                             <!-- Ações -->
-                            <td class="py-4 px-6">
-                                <div class="flex justify-center gap-1 flex-wrap">
-                                    <!-- Botão Editar -->
-                                    <button class="tooltip btn-editar-avaliador btn-hover-effect bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1.5 px-3 rounded-md text-sm shadow-sm" 
-                                            data-tooltip="Editar"
-                                            data-id="<%= avaliador._id || '' %>"
-                                            data-nome="<%= avaliador.nome || '' %>"
-                                            data-email="<%= avaliador.email || '' %>"
-                                            data-pin="<%= avaliador.pin || '' %>"
-                                            data-ativo="<%= avaliador.ativo ? 'true' : 'false' %>"
-                                            data-projetos="<%= (avaliador.projetosAtribuidos && avaliador.projetosAtribuidos.length) ? avaliador.projetosAtribuidos.map(p => p._id.toString()).join(',') : '' %>"
-                                            data-qrcode="<%= avaliador.qrcode || '' %>" title="Clique para editar">
+                            <td class="avaliador-acoes-sticky">
+                                <div class="acoes-avaliador">
+                                    <!-- Editar -->
+                                    <button
+                                        type="button"
+                                        class="tooltip btn-editar-avaliador btn-hover-effect bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+                                        data-tooltip="Editar"
+                                        data-id="<%= avaliador._id || '' %>"
+                                        data-nome="<%= avaliador.nome || '' %>"
+                                        data-email="<%= avaliador.email || '' %>"
+                                        data-pin="<%= avaliador.pin || '' %>"
+                                        data-ativo="<%= avaliador.ativo ? 'true' : 'false' %>"
+                                        data-projetos="<%= (avaliador.projetosAtribuidos && avaliador.projetosAtribuidos.length) ? avaliador.projetosAtribuidos.map(p => p._id.toString()).join(',') : '' %>"
+                                        data-qrcode="<%= avaliador.qrcode || '' %>"
+                                        title="Editar avaliador"
+                                    >
                                         <i class="fas fa-edit"></i>
                                     </button>
 
-                                    <!-- Botão Reenviar -->
-                                    <button type="button" 
-                                            class="tooltip btn-reenviar-avaliador btn-hover-effect text-white font-semibold py-1.5 px-3 rounded-md text-sm shadow-sm" 
-                                            style="background-color: #ea580c; border: none;" 
-                                            data-tooltip="Reenviar"
-                                            data-id="<%= avaliador._id %>"
-                                            data-nome="<%= avaliador.nome %>"
-                                            data-email="<%= avaliador.email %>" title="Reenviar e-mail">
+                                    <!-- Reenviar -->
+                                    <button
+                                        type="button"
+                                        class="tooltip btn-reenviar-avaliador btn-hover-effect text-white shadow-sm"
+                                        data-tooltip="Reenviar"
+                                        data-id="<%= avaliador._id %>"
+                                        data-nome="<%= avaliador.nome %>"
+                                        data-email="<%= avaliador.email %>"
+                                        title="Reenviar e-mail"
+                                    >
                                         <i class="fas fa-paper-plane"></i>
                                     </button>
 
-                                    <!-- Botão Excluir -->
-                                    <form action="/admin/avaliadores/<%= avaliador._id %>/excluir" 
-                                          method="POST" 
-                                          class="inline-block" 
-                                          onsubmit="return confirm('Tem certeza que deseja deletar este avaliador?');">
-                                        <button type="submit" 
-                                                class="tooltip btn-hover-effect bg-red-600 hover:bg-red-700 text-white font-semibold py-1.5 px-3 rounded-md text-sm shadow-sm" 
-                                                data-tooltip="Excluir" title="Excluir">
+                                    <!-- Excluir -->
+                                    <form
+                                        action="/admin/avaliadores/<%= avaliador._id %>/excluir"
+                                        method="POST"
+                                        class="inline-block"
+                                        onsubmit="return confirm('Tem certeza que deseja deletar este avaliador?');"
+                                    >
+                                        <button
+                                            type="submit"
+                                            class="tooltip btn-hover-effect bg-red-600 hover:bg-red-700 text-white shadow-sm"
+                                            data-tooltip="Excluir"
+                                            title="Excluir avaliador"
+                                        >
                                             <i class="fas fa-trash-alt"></i>
                                         </button>
                                     </form>
                                 </div>
                             </td>
-
-                            <!-- QR Code -->
-                            <td class="py-4 px-6 text-center">
-                                <% if (avaliador.qrcode) { %>
-                                    <img src="<%= avaliador.qrcode %>" 
-                                         alt="QR Code para <%= avaliador.nome %>" 
-                                         class="h-12 w-12 rounded-lg shadow-sm border border-gray-200 mx-auto">
-                                <% } else { %>
-                                    <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300 mx-auto">
-                                        <i class="fas fa-qrcode text-gray-400"></i>
-                                    </div>
-                                <% } %>
-                            </td>
                         </tr>
                     <% }) %>
                 </tbody>
             </table>
+        </div>
+
+        <div class="avaliadores-scroll-hint">
+            <i class="fas fa-arrows-alt-h mr-1"></i>
+            Em telas menores, deslize horizontalmente para visualizar todas as informações. As ações permanecem fixas à direita.
         </div>
     </div>
 
@@ -1317,33 +1421,36 @@
     function initializeFilters() {
         const searchInput = document.getElementById('searchInput');
         const statusFilter = document.getElementById('statusFilter');
-        const tableRows = document.querySelectorAll('tbody tr');
+        const tableRows = document.querySelectorAll('#avaliadores .avaliador-row');
+
+        if (!searchInput || !statusFilter) {
+            return;
+        }
 
         function filterTable() {
-            const searchTerm = searchInput.value.toLowerCase();
+            const searchTerm = searchInput.value.trim().toLowerCase();
             const statusValue = statusFilter.value;
 
             tableRows.forEach(row => {
-                const nome = row.querySelector('td:nth-child(1)').textContent.toLowerCase();
-                const email = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
-                const pin = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
-                const ativo = row.querySelector('td:nth-child(4) span').textContent.trim() === 'Ativo';
+                const nome = row.dataset.nome || '';
+                const email = row.dataset.email || '';
+                const pin = row.dataset.pin || '';
+                const ativo = row.dataset.ativo || '';
 
-                const matchesSearch = nome.includes(searchTerm) || 
-                                    email.includes(searchTerm) || 
-                                    pin.includes(searchTerm);
-                
-                const matchesStatus = statusValue === '' || 
-                                    (statusValue === 'true' && ativo) || 
-                                    (statusValue === 'false' && !ativo);
+                const matchesSearch =
+                    !searchTerm ||
+                    nome.includes(searchTerm) ||
+                    email.includes(searchTerm) ||
+                    pin.toLowerCase().includes(searchTerm);
 
-                if (matchesSearch && matchesStatus) {
-                    row.style.display = '';
-                    row.classList.add('animate-fade-in');
-                } else {
-                    row.style.display = 'none';
-                    row.classList.remove('animate-fade-in');
-                }
+                const matchesStatus =
+                    !statusValue ||
+                    ativo === statusValue;
+
+                row.style.display =
+                    matchesSearch && matchesStatus
+                        ? ''
+                        : 'none';
             });
         }
 
@@ -1352,13 +1459,19 @@
     }
 
     function limparFiltros() {
-        document.getElementById('searchInput').value = '';
-        document.getElementById('statusFilter').value = '';
-        
-        // Mostrar todas as linhas
-        document.querySelectorAll('tbody tr').forEach(row => {
+        const searchInput = document.getElementById('searchInput');
+        const statusFilter = document.getElementById('statusFilter');
+
+        if (searchInput) {
+            searchInput.value = '';
+        }
+
+        if (statusFilter) {
+            statusFilter.value = '';
+        }
+
+        document.querySelectorAll('#avaliadores .avaliador-row').forEach(row => {
             row.style.display = '';
-            row.classList.add('animate-fade-in');
         });
     }
 
