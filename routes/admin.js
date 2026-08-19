@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose'); // Importar mongoose para validação de ObjectId
+const archiver = require('archiver');
 
 // Importações dos modelos, garantindo que sejam carregados corretamente
 const Escola = require('../models/Escola');
@@ -1892,6 +1893,163 @@ async function generatePdfReport(req, res, templateName, data, filename) {
     }
 }
 
+// ============================================================
+// GERAR PDF EM MEMÓRIA
+// Usado para geração em lote / ZIP
+// ============================================================
+
+async function generatePdfBuffer(
+    templateName,
+    data,
+    filename
+) {
+
+    let browser = null;
+
+    try {
+
+        // =====================================================
+        // RENDERIZAR EJS
+        // =====================================================
+
+        const html = await ejs.renderFile(
+            path.join(
+                __dirname,
+                `../views/admin/${templateName}.ejs`
+            ),
+            {
+                layout: false,
+                ...data
+            }
+        );
+
+
+        // =====================================================
+        // ABRIR CHROMIUM
+        // =====================================================
+
+        browser = await puppeteer.launch({
+
+            args: [
+                ...chromium.args,
+                '--hide-scrollbars',
+                '--disable-web-security'
+            ],
+
+            defaultViewport:
+                chromium.defaultViewport,
+
+            executablePath:
+                await chromium.executablePath(),
+
+            headless:
+                chromium.headless,
+
+            ignoreHTTPSErrors:
+                true
+        });
+
+
+        const page =
+            await browser.newPage();
+
+
+        // =====================================================
+        // CARREGAR HTML
+        // =====================================================
+
+        await page.setContent(
+            html,
+            {
+                waitUntil:
+                    'networkidle0'
+            }
+        );
+
+
+        // =====================================================
+        // GERAR PDF
+        // =====================================================
+
+        const pdf = await page.pdf({
+
+            format:
+                'A4',
+
+            printBackground:
+                true,
+
+            displayHeaderFooter:
+                true,
+
+            headerTemplate:
+                `<div style="
+                    font-size:8px;
+                    width:100%;
+                    padding:0 1cm;
+                    color:#777;
+                    text-align:right;
+                ">
+                    ${String(filename)
+                        .replace(/_/g, ' ')
+                        .toUpperCase()}
+                </div>`,
+
+            footerTemplate:
+                `<div style="
+                    font-size:8px;
+                    width:100%;
+                    padding:0 1cm;
+                    color:#777;
+                    text-align:center;
+                ">
+                    Página
+                    <span class="pageNumber"></span>
+                    de
+                    <span class="totalPages"></span>
+                </div>`,
+
+            margin: {
+                top:
+                    '2cm',
+
+                right:
+                    '1cm',
+
+                bottom:
+                    '2cm',
+
+                left:
+                    '1cm'
+            }
+        });
+
+
+        return Buffer.from(pdf);
+
+
+    } finally {
+
+        if (browser) {
+
+            await browser.close();
+        }
+    }
+}
+
+// ============================================================
+// LIMPAR NOME PARA ARQUIVOS
+// ============================================================
+
+function limparNomeArquivo(texto) {
+
+    return String(texto || 'arquivo')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-zA-Z0-9_-]+/g, '_')
+        .replace(/_+/g, '_')
+        .replace(/^_|_$/g, '');
+}
 
 // ===========================================
 // ROTAS DO DASHBOARD (PROTEGIDAS)
@@ -6619,7 +6777,7 @@ router.get('/relatorio/avaliacao-offline/:feiraId/:avaliadorId', verificarAdminE
             return `${day}/${month}/${year}`;
         };
 
-        const criterios = await Criterio.find({ escolaId: adminEscolaId }).lean();
+        const criterios = await Criterio.find({ escolaId: adminEscolaId, feira: feira._id }).lean();
 
         const dataForReport = {
     titulo: `Relatório de Avaliação - ${feira.nome}`,
@@ -6657,6 +6815,761 @@ router.get('/relatorio/avaliacao-offline/:feiraId/:avaliadorId', verificarAdminE
         }
     }
 });
+// ============================================================
+// RELATÓRIO DE AVALIAÇÃO OFFLINE
+// GERAÇÃO INDIVIDUAL OU EM LOTE
+// ============================================================
+
+router.post(
+    '/relatorio/avaliacao-offline/lote',
+    verificarAdminEscola,
+    async (req, res) => {
+
+        try {
+
+            const escolaId =
+                req.session.adminEscola.escolaId;
+
+
+            const {
+                feiraId,
+                tipoRelatorioOffline
+            } = req.body;
+
+
+            // =================================================
+            // NORMALIZAR LISTA DE AVALIADORES
+            // =================================================
+
+            let avaliadoresSelecionados =
+                req.body.avaliadoresSelecionados || [];
+
+
+            if (
+                !Array.isArray(
+                    avaliadoresSelecionados
+                )
+            ) {
+
+                avaliadoresSelecionados = [
+                    avaliadoresSelecionados
+                ];
+            }
+
+
+            // =================================================
+            // VALIDAR FEIRA
+            // =================================================
+
+            if (
+                !feiraId ||
+                !mongoose.Types.ObjectId.isValid(
+                    feiraId
+                )
+            ) {
+
+                req.flash(
+                    'error_msg',
+                    'Feira inválida.'
+                );
+
+                return res.redirect(
+                    '/admin/dashboard?tab=relatorios'
+                );
+            }
+
+
+            // =================================================
+            // VALIDAR TIPO
+            // =================================================
+
+            const tiposPermitidos = [
+                'completo',
+                'capa'
+            ];
+
+
+            const tipoRelatorio =
+                tiposPermitidos.includes(
+                    tipoRelatorioOffline
+                )
+                    ? tipoRelatorioOffline
+                    : 'completo';
+
+
+            const somenteCapa =
+                tipoRelatorio === 'capa';
+
+
+            // =================================================
+            // VALIDAR IDS DOS AVALIADORES
+            // =================================================
+
+            avaliadoresSelecionados =
+                avaliadoresSelecionados.filter(
+                    id =>
+                        mongoose.Types.ObjectId
+                            .isValid(id)
+                );
+
+
+            if (
+                avaliadoresSelecionados.length === 0
+            ) {
+
+                req.flash(
+                    'error_msg',
+                    'Selecione pelo menos um avaliador.'
+                );
+
+                return res.redirect(
+                    `/admin/dashboard?tab=relatorios&feiraId=${feiraId}`
+                );
+            }
+
+
+            // =================================================
+            // BUSCAR FEIRA
+            // =================================================
+
+            const feira =
+                await Feira.findOne({
+
+                    _id:
+                        feiraId,
+
+                    escolaId
+
+                }).lean();
+
+
+            if (!feira) {
+
+                req.flash(
+                    'error_msg',
+                    'Feira não encontrada.'
+                );
+
+                return res.redirect(
+                    '/admin/dashboard?tab=relatorios'
+                );
+            }
+
+
+            // =================================================
+            // BUSCAR ESCOLA
+            // =================================================
+
+            const escola =
+                await Escola.findById(
+                    escolaId
+                ).lean();
+
+
+            // =================================================
+            // BUSCAR AVALIADORES
+            // =================================================
+
+            const avaliadores =
+                await Avaliador.find({
+
+                    _id: {
+                        $in:
+                            avaliadoresSelecionados
+                    },
+
+                    escolaId,
+
+                    feira:
+                        feira._id
+
+                }).lean();
+
+
+            if (
+                avaliadores.length === 0
+            ) {
+
+                req.flash(
+                    'error_msg',
+                    'Nenhum avaliador válido foi encontrado.'
+                );
+
+                return res.redirect(
+                    '/admin/dashboard?tab=relatorios'
+                );
+            }
+
+
+            // =================================================
+            // MANTER ORDEM DA SELEÇÃO
+            // =================================================
+
+            const mapaAvaliadores =
+                new Map(
+                    avaliadores.map(
+                        avaliador => [
+                            String(
+                                avaliador._id
+                            ),
+                            avaliador
+                        ]
+                    )
+                );
+
+
+            const avaliadoresOrdenados =
+                avaliadoresSelecionados
+                    .map(
+                        id =>
+                            mapaAvaliadores.get(
+                                String(id)
+                            )
+                    )
+                    .filter(Boolean);
+
+
+            // =================================================
+            // BUSCAR CRITÉRIOS DA FEIRA
+            // =================================================
+
+            const criterios =
+                await Criterio.find({
+
+                    escolaId,
+
+                    feira:
+                        feira._id
+
+                }).lean();
+
+
+            // =================================================
+            // FORMATADOR DE DATA
+            // =================================================
+
+            const formatarData =
+                dateString => {
+
+                    if (!dateString) {
+                        return 'N/A';
+                    }
+
+
+                    const data =
+                        new Date(
+                            dateString
+                        );
+
+
+                    if (
+                        Number.isNaN(
+                            data.getTime()
+                        )
+                    ) {
+
+                        return 'N/A';
+                    }
+
+
+                    return data
+                        .toLocaleDateString(
+                            'pt-BR'
+                        );
+                };
+
+
+            // =================================================
+            // FUNÇÃO PARA MONTAR OS DADOS DE UM AVALIADOR
+            // =================================================
+
+            async function prepararRelatorioAvaliador(
+                avaliador
+            ) {
+
+                let projetosPreparados = [];
+
+
+                // -------------------------------------------------
+                // SE FOR SOMENTE CAPA,
+                // NÃO PRECISAMOS BUSCAR OS PROJETOS
+                // -------------------------------------------------
+
+                if (!somenteCapa) {
+
+                    const idsProjetos =
+                        Array.isArray(
+                            avaliador.projetosAtribuidos
+                        )
+                            ? avaliador.projetosAtribuidos
+                            : [];
+
+
+                    const projetos =
+                        await Projeto.find({
+
+                            _id: {
+                                $in:
+                                    idsProjetos
+                            },
+
+                            feira:
+                                feira._id,
+
+                            escolaId
+
+                        })
+                            .populate(
+                                'categoria'
+                            )
+                            .populate(
+                                'escolaId'
+                            )
+                            .lean();
+
+
+                    // =============================================
+                    // PREPARAR PROJETOS
+                    // =============================================
+
+                    projetosPreparados =
+                        projetos.map(
+                            projeto => {
+
+                                const criteriosIds =
+                                    Array.isArray(
+                                        projeto.criterios
+                                    )
+                                        ? projeto.criterios
+                                        : [];
+
+
+                                const criteriosDoProjeto =
+                                    criterios.filter(
+                                        criterio =>
+                                            criteriosIds.some(
+                                                id =>
+                                                    String(id) ===
+                                                    String(
+                                                        criterio._id
+                                                    )
+                                            )
+                                    );
+
+
+                                return {
+
+                                    ...projeto,
+
+                                    criteriosAvaliacao:
+                                        criteriosDoProjeto,
+
+                                    escolaNome:
+                                        projeto.escolaId
+                                            ?.nome ||
+                                        escola?.nome ||
+                                        'N/A',
+
+                                    alunos:
+                                        Array.isArray(
+                                            projeto.alunos
+                                        ) &&
+                                        projeto.alunos.length > 0
+
+                                            ? projeto.alunos
+                                                .map(
+                                                    aluno => {
+
+                                                        if (
+                                                            typeof aluno ===
+                                                                'object' &&
+                                                            aluno !== null &&
+                                                            aluno.nome
+                                                        ) {
+
+                                                            return aluno.nome;
+                                                        }
+
+
+                                                        return String(
+                                                            aluno
+                                                        );
+                                                    }
+                                                )
+                                                .join(', ')
+
+                                            : 'N/A',
+
+                                    resumo:
+                                        projeto.descricao ||
+                                        'N/A',
+
+                                    numero:
+                                        projeto.numeroEstande ||
+                                        projeto.numero ||
+                                        'N/A',
+
+                                    area:
+                                        projeto.area ||
+                                        projeto.categoria
+                                            ?.nome ||
+                                        'N/A'
+                                };
+                            }
+                        );
+
+
+                    // =============================================
+                    // ORDENAR PROJETOS
+                    // Número de estande primeiro; depois título
+                    // =============================================
+
+                    projetosPreparados.sort(
+                        (a, b) => {
+
+                            const estandeA =
+                                a.numeroEstande !== undefined &&
+                                a.numeroEstande !== null &&
+                                a.numeroEstande !== ''
+                                    ? Number(
+                                        a.numeroEstande
+                                    )
+                                    : null;
+
+
+                            const estandeB =
+                                b.numeroEstande !== undefined &&
+                                b.numeroEstande !== null &&
+                                b.numeroEstande !== ''
+                                    ? Number(
+                                        b.numeroEstande
+                                    )
+                                    : null;
+
+
+                            if (
+                                estandeA !== null &&
+                                estandeB !== null
+                            ) {
+
+                                if (
+                                    estandeA !==
+                                    estandeB
+                                ) {
+
+                                    return (
+                                        estandeA -
+                                        estandeB
+                                    );
+                                }
+                            }
+
+
+                            if (
+                                estandeA !== null &&
+                                estandeB === null
+                            ) {
+
+                                return -1;
+                            }
+
+
+                            if (
+                                estandeA === null &&
+                                estandeB !== null
+                            ) {
+
+                                return 1;
+                            }
+
+
+                            return String(
+                                a.titulo || ''
+                            ).localeCompare(
+                                String(
+                                    b.titulo || ''
+                                ),
+                                'pt-BR',
+                                {
+                                    numeric: true
+                                }
+                            );
+                        }
+                    );
+                }
+
+
+                return {
+
+                    titulo:
+                        somenteCapa
+                            ? `Capa de Avaliação - ${feira.nome}`
+                            : `Relatório de Avaliação - ${feira.nome}`,
+
+                    feira,
+
+                    projetos:
+                        projetosPreparados,
+
+                    avaliador,
+
+                    escola,
+
+                    formatarData,
+
+                    // NOVO
+                    somenteCapa,
+
+                    tipoRelatorioOffline:
+                        tipoRelatorio
+                };
+            }
+
+
+            // =================================================
+            // APENAS UM AVALIADOR
+            // =================================================
+
+            if (
+                avaliadoresOrdenados.length === 1
+            ) {
+
+                const avaliador =
+                    avaliadoresOrdenados[0];
+
+
+                const dados =
+                    await prepararRelatorioAvaliador(
+                        avaliador
+                    );
+
+
+                const nomeAvaliador =
+                    limparNomeArquivo(
+                        avaliador.nome
+                    );
+
+
+                const prefixo =
+                    somenteCapa
+                        ? 'capa_offline'
+                        : 'avaliacao_offline';
+
+
+                const filename =
+                    `${prefixo}_${nomeAvaliador}`;
+
+
+                const pdfBuffer =
+                    await generatePdfBuffer(
+
+                        'relatorio_offline',
+
+                        dados,
+
+                        filename
+                    );
+
+
+                res.setHeader(
+                    'Content-Type',
+                    'application/pdf'
+                );
+
+
+                res.setHeader(
+                    'Content-Disposition',
+                    `attachment; filename="${filename}.pdf"`
+                );
+
+
+                return res.send(
+                    pdfBuffer
+                );
+            }
+
+
+            // =================================================
+            // VÁRIOS AVALIADORES -> ZIP
+            // =================================================
+
+            const nomeFeira =
+                limparNomeArquivo(
+                    feira.nome
+                );
+
+
+            const prefixoZip =
+                somenteCapa
+                    ? 'capas_offline'
+                    : 'relatorios_offline';
+
+
+            const nomeZip =
+                `${prefixoZip}_${nomeFeira}.zip`;
+
+
+            res.setHeader(
+                'Content-Type',
+                'application/zip'
+            );
+
+
+            res.setHeader(
+                'Content-Disposition',
+                `attachment; filename="${nomeZip}"`
+            );
+
+
+            // =================================================
+            // CRIAR ZIP
+            // =================================================
+
+            const archive =
+                archiver(
+                    'zip',
+                    {
+                        zlib: {
+                            level: 9
+                        }
+                    }
+                );
+
+
+            // Total de bytes escritos
+            archive.on(
+                'warning',
+                err => {
+
+                    if (
+                        err.code ===
+                        'ENOENT'
+                    ) {
+
+                        console.warn(
+                            'Aviso ao gerar ZIP:',
+                            err
+                        );
+
+                    } else {
+
+                        console.error(
+                            'Aviso crítico no ZIP:',
+                            err
+                        );
+                    }
+                }
+            );
+
+
+            archive.on(
+                'error',
+                err => {
+
+                    console.error(
+                        'Erro no arquivo ZIP:',
+                        err
+                    );
+
+
+                    if (!res.destroyed) {
+
+                        res.destroy(
+                            err
+                        );
+                    }
+                }
+            );
+
+
+            archive.pipe(
+                res
+            );
+
+
+            // =================================================
+            // GERAR PDF PARA CADA AVALIADOR
+            // =================================================
+
+            for (
+                const avaliador
+                of avaliadoresOrdenados
+            ) {
+
+                const dados =
+                    await prepararRelatorioAvaliador(
+                        avaliador
+                    );
+
+
+                const nomeAvaliador =
+                    limparNomeArquivo(
+                        avaliador.nome
+                    );
+
+
+                const prefixo =
+                    somenteCapa
+                        ? 'capa'
+                        : 'avaliacao_offline';
+
+
+                const filename =
+                    `${prefixo}_${nomeAvaliador}`;
+
+
+                const pdfBuffer =
+                    await generatePdfBuffer(
+
+                        'relatorio_offline',
+
+                        dados,
+
+                        filename
+                    );
+
+
+                archive.append(
+                    pdfBuffer,
+                    {
+                        name:
+                            `${filename}.pdf`
+                    }
+                );
+            }
+
+
+            // =================================================
+            // FINALIZAR ZIP
+            // =================================================
+
+            await archive.finalize();
+
+
+        } catch (err) {
+
+            console.error(
+                'Erro ao gerar relatório offline em lote:',
+                err
+            );
+
+
+            if (!res.headersSent) {
+
+                req.flash(
+                    'error_msg',
+                    'Erro ao gerar os relatórios offline. ' +
+                    err.message
+                );
+
+
+                return res.redirect(
+                    '/admin/dashboard?tab=relatorios'
+                );
+            }
+        }
+    }
+);
 
 // Gera PDF de Avaliadores com dados extras
 router.get('/pdf-avaliadores/:feiraId', verificarAdminEscola, async (req, res) => {
