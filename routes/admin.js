@@ -852,44 +852,47 @@ for (const projeto of projetosFetched) {
     // --------------------------------------------------------
 
     relatorioFinalPorProjeto[
-        categoriaNome
-    ].push({
+    categoriaNome
+].push({
 
-        _id:
-            projeto._id,
+    _id:
+        projeto._id,
 
-        titulo:
-            projeto.titulo,
+    titulo:
+        projeto.titulo,
 
-        categoria:
-            projeto.categoria,
+    numeroEstande:
+        projeto.numeroEstande ?? null,
 
-        criterios:
-            criteriosDoProjeto,
+    categoria:
+        projeto.categoria,
 
-        criteriosIds:
-            Array.from(
-                idsCriteriosProjeto
-            ),
+    criterios:
+        criteriosDoProjeto,
 
-        numAvaliacoes:
-            projeto.avaliacoesFeitas,
+    criteriosIds:
+        Array.from(
+            idsCriteriosProjeto
+        ),
 
-        totalAvaliadores:
-            projeto.totalAvaliadores,
+    numAvaliacoes:
+        projeto.avaliacoesFeitas,
 
-        statusAvaliacao:
-            projeto.statusAvaliacao,
+    totalAvaliadores:
+        projeto.totalAvaliadores,
 
-        mediasCriterios:
-            mediasCriteriosProjeto,
+    statusAvaliacao:
+        projeto.statusAvaliacao,
 
-        mediaGeral:
-            projeto.notaFinal,
+    mediasCriterios:
+        mediasCriteriosProjeto,
 
-        notaFinal:
-            projeto.notaFinal
-    });
+    mediaGeral:
+        projeto.notaFinal,
+
+    notaFinal:
+        projeto.notaFinal
+});
 }
 
 
