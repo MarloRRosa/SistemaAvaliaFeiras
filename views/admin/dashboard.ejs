@@ -1598,50 +1598,271 @@ document.getElementById('selecionarTodosAvaliadores')?.addEventListener('change'
 
     </div>
 </div>
-<div id="modalRelatorioOffline" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden flex items-center justify-center z-50">
-    <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-md mx-4 sm:mx-0">
-        <h3 class="text-lg font-semibold mb-4">Gerar Relatório de Avaliação Offline</h3>
-        <div class="mb-4">
-            <label for="selectFeiraRelatorio" class="block text-gray-700 text-sm font-bold mb-2">Selecione a Feira:</label>
-            <select id="selectFeiraRelatorio" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                <% feiras.forEach(feira => { %>
-                    <option value="<%= feira._id %>" <%= feira.status === 'ativa' ? 'selected' : '' %>><%= feira.nome %></option>
-                <% }); %>
-            </select>
-        </div>
-        <div class="mb-6">
-    <label class="block text-gray-700 text-sm font-bold mb-2">Selecione o(s) Avaliador(es):</label>
+<!-- ===================================================== -->
+<!-- MODAL: RELATÓRIO DE AVALIAÇÃO OFFLINE                -->
+<!-- ===================================================== -->
 
-    <div class="mb-2">
-        <label for="selecionarTodosAvaliadoresOffline" class="inline-flex items-center">
-            <input type="checkbox" id="selecionarTodosAvaliadoresOffline" class="form-checkbox h-4 w-4 text-blue-600">
-            <span class="ml-2 text-sm text-gray-700">Selecionar todos os avaliadores</span>
+<div
+  id="modalRelatorioOffline"
+  class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden flex items-center justify-center z-50 p-4"
+>
+
+  <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-lg">
+
+    <h3 class="text-xl font-semibold mb-5 text-gray-800">
+      <i class="fas fa-clipboard-list text-blue-600 mr-2"></i>
+      Gerar Relatório de Avaliação Offline
+    </h3>
+
+
+    <form
+      id="formRelatorioOffline"
+      action="/admin/relatorio/avaliacao-offline/lote"
+      method="POST"
+    >
+
+      <!-- ================================================= -->
+      <!-- FEIRA                                             -->
+      <!-- ================================================= -->
+
+      <div class="mb-5">
+
+        <label
+          for="selectFeiraRelatorio"
+          class="block text-gray-700 text-sm font-bold mb-2"
+        >
+          Selecione a Feira:
         </label>
-    </div>
 
-    <div id="avaliadoresCheckboxes" class="max-h-48 overflow-y-auto border border-gray-300 p-3 rounded-lg bg-gray-50 shadow-inner">
-        <% if (avaliadores && avaliadores.length > 0) { %>
+        <select
+          id="selectFeiraRelatorio"
+          name="feiraId"
+          required
+          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+
+          <% feiras.forEach(feira => { %>
+
+            <option
+              value="<%= feira._id %>"
+              <%= feira.status === 'ativa' ? 'selected' : '' %>
+            >
+              <%= feira.nome %>
+            </option>
+
+          <% }); %>
+
+        </select>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- TIPO DO RELATÓRIO                                 -->
+      <!-- ================================================= -->
+
+      <div class="mb-5">
+
+        <label class="block text-gray-700 text-sm font-bold mb-2">
+          Conteúdo do relatório:
+        </label>
+
+
+        <label
+          class="flex items-start border border-blue-200 bg-blue-50 rounded-lg p-3 mb-2 cursor-pointer"
+        >
+
+          <input
+            type="radio"
+            name="tipoRelatorioOffline"
+            value="completo"
+            checked
+            class="mt-1 mr-3"
+          >
+
+          <div>
+
+            <div class="font-semibold text-gray-800">
+              Relatório completo
+            </div>
+
+            <div class="text-xs text-gray-600 mt-1">
+              Capa com QR Code, dados do avaliador e todas as fichas
+              dos projetos atribuídos.
+            </div>
+
+          </div>
+
+        </label>
+
+
+        <label
+          class="flex items-start border border-gray-200 rounded-lg p-3 cursor-pointer"
+        >
+
+          <input
+            type="radio"
+            name="tipoRelatorioOffline"
+            value="capa"
+            class="mt-1 mr-3"
+          >
+
+          <div>
+
+            <div class="font-semibold text-gray-800">
+              Somente capa / QR Code
+            </div>
+
+            <div class="text-xs text-gray-600 mt-1">
+              Gera somente a página com nome do avaliador, PIN e QR Code.
+            </div>
+
+          </div>
+
+        </label>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- AVALIADORES                                       -->
+      <!-- ================================================= -->
+
+      <div class="mb-6">
+
+        <label class="block text-gray-700 text-sm font-bold mb-2">
+          Selecione o(s) Avaliador(es):
+        </label>
+
+
+        <div class="mb-3">
+
+          <label
+            for="selecionarTodosAvaliadoresOffline"
+            class="inline-flex items-center cursor-pointer"
+          >
+
+            <input
+              type="checkbox"
+              id="selecionarTodosAvaliadoresOffline"
+              class="form-checkbox h-4 w-4 text-blue-600"
+            >
+
+            <span class="ml-2 text-sm font-semibold text-gray-700">
+              Selecionar todos os avaliadores
+            </span>
+
+          </label>
+
+        </div>
+
+
+        <div
+          id="avaliadoresCheckboxes"
+          class="max-h-48 overflow-y-auto border border-gray-300 p-3 rounded-lg bg-gray-50 shadow-inner"
+        >
+
+          <% if (avaliadores && avaliadores.length > 0) { %>
+
             <% avaliadores.forEach(avaliador => { %>
-                <div class="flex items-center mb-2">
-                    <input type="checkbox" id="avaliador_<%= avaliador._id %>" 
-                           name="avaliadoresSelecionados" value="<%= avaliador._id %>" 
-                           class="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-                    <label for="avaliador_<%= avaliador._id %>" class="text-gray-700 text-base">
-                        <%= avaliador.nome %> (<%= avaliador.email %>)
-                    </label>
-                </div>
-            <% }); %>
-        <% } else { %>
-            <p class="text-gray-500">Nenhum avaliador disponível.</p>
-        <% } %>
-    </div>
-</div>
-        <div class="flex flex-col sm:flex-row sm:justify-end gap-2 mt-4">
-  <button id="btnGerarRelatorioOfflineConfirm" class="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">Gerar PDF</button>
-  <button type="button" onclick="fecharModalRelatorioOffline()" class="w-full sm:w-auto bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">Cancelar</button>
-</div>
 
-    </div>
+              <div class="flex items-start mb-3">
+
+                <input
+                  type="checkbox"
+                  id="avaliador_offline_<%= avaliador._id %>"
+                  name="avaliadoresSelecionados"
+                  value="<%= avaliador._id %>"
+                  class="mt-1 mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                >
+
+                <label
+                  for="avaliador_offline_<%= avaliador._id %>"
+                  class="text-gray-700 text-sm cursor-pointer"
+                >
+
+                  <span class="font-medium">
+                    <%= avaliador.nome %>
+                  </span>
+
+                  <% if (avaliador.email) { %>
+                    <span class="text-gray-500">
+                      (<%= avaliador.email %>)
+                    </span>
+                  <% } %>
+
+                </label>
+
+              </div>
+
+            <% }); %>
+
+          <% } else { %>
+
+            <p class="text-gray-500">
+              Nenhum avaliador disponível.
+            </p>
+
+          <% } %>
+
+        </div>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- SAÍDA                                             -->
+      <!-- ================================================= -->
+
+      <div class="mb-6">
+
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+
+          <div class="flex items-start">
+
+            <i class="fas fa-file-archive text-yellow-600 mt-1 mr-2"></i>
+
+            <p class="text-xs text-yellow-800">
+              Ao selecionar mais de um avaliador, será gerado um
+              arquivo ZIP contendo um PDF individual para cada avaliador.
+            </p>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- BOTÕES                                            -->
+      <!-- ================================================= -->
+
+      <div class="flex flex-col sm:flex-row sm:justify-end gap-2">
+
+        <button
+          type="button"
+          onclick="fecharModalRelatorioOffline()"
+          class="w-full sm:w-auto bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded"
+        >
+          Cancelar
+        </button>
+
+        <button
+          type="submit"
+          id="btnGerarRelatorioOfflineConfirm"
+          class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >
+          <i class="fas fa-download mr-2"></i>
+          Gerar Relatórios
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
 </div>
             <!-- FIM DA ABA DE RELATÓRIOS -->
 <!-- ===================================================== -->
@@ -2776,45 +2997,96 @@ if (selecionarTodosAvaliadoresCheckbox && avaliadoresCheckboxesDiv) {
     });
 }
 
-// Gerar relatórios (um por avaliador selecionado)
-if (btnGerarRelatorioOfflineConfirm) {
-    btnGerarRelatorioOfflineConfirm.addEventListener('click', () => {
-    const feiraId = selectFeiraRelatorio.value;
+// =====================================================
+// ENVIO DO RELATÓRIO OFFLINE EM LOTE
+// =====================================================
 
-    const avaliadoresSelecionados = [];
-    if (avaliadoresCheckboxesDiv) {
-        avaliadoresCheckboxesDiv
-            .querySelectorAll('input[type="checkbox"][name="avaliadoresSelecionados"]:checked')
-            .forEach(checkbox => {
-                avaliadoresSelecionados.push(checkbox.value);
-            });
-    }
+const formRelatorioOffline =
+    document.getElementById(
+        'formRelatorioOffline'
+    );
 
-    if (!feiraId || avaliadoresSelecionados.length === 0) {
-        alert('Por favor, selecione uma feira e pelo menos um avaliador.');
-        return;
-    }
 
-    btnGerarRelatorioOfflineConfirm.disabled = true;
+if (
+    formRelatorioOffline &&
+    btnGerarRelatorioOfflineConfirm
+) {
 
-    // Abrir cada aba de forma síncrona (dentro do clique)
-    for (let i = 0; i < avaliadoresSelecionados.length; i++) {
-        const avaliadorId = avaliadoresSelecionados[i];
-        const url = `/admin/relatorio/avaliacao-offline/${feiraId}/${avaliadorId}`;
+    formRelatorioOffline.addEventListener(
+        'submit',
+        function (event) {
 
-        const novaAba = window.open(url, '_blank');
-        if (!novaAba) {
-            console.warn(`A aba para o avaliador ${avaliadorId} foi bloqueada pelo navegador.`);
+            const feiraId =
+                selectFeiraRelatorio
+                    ? selectFeiraRelatorio.value
+                    : '';
+
+
+            const avaliadoresSelecionados =
+                avaliadoresCheckboxesDiv
+                    ? avaliadoresCheckboxesDiv
+                        .querySelectorAll(
+                            'input[name="avaliadoresSelecionados"]:checked'
+                        )
+                    : [];
+
+
+            if (!feiraId) {
+
+                event.preventDefault();
+
+                alert(
+                    'Selecione uma feira.'
+                );
+
+                return;
+            }
+
+
+            if (
+                avaliadoresSelecionados.length === 0
+            ) {
+
+                event.preventDefault();
+
+                alert(
+                    'Selecione pelo menos um avaliador.'
+                );
+
+                return;
+            }
+
+
+            // Evita cliques repetidos
+            btnGerarRelatorioOfflineConfirm
+                .disabled = true;
+
+
+            btnGerarRelatorioOfflineConfirm
+                .innerHTML =
+                '<i class="fas fa-spinner fa-spin mr-2"></i>Gerando...';
+
+
+            // O formulário segue normalmente para:
+            //
+            // POST /admin/relatorio/avaliacao-offline/lote
+            //
+            // O navegador receberá o ZIP como download.
+
+
+            setTimeout(() => {
+
+                btnGerarRelatorioOfflineConfirm
+                    .disabled = false;
+
+                btnGerarRelatorioOfflineConfirm
+                    .innerHTML =
+                    '<i class="fas fa-download mr-2"></i>Gerar Relatórios';
+
+            }, 5000);
+
         }
-    }
-
-    setTimeout(() => {
-        btnGerarRelatorioOfflineConfirm.disabled = false;
-    }, 3000);
-
-    fecharModalRelatorioOffline();
-});
-
+    );
 }
 
 function copiarLinkPreCadastro() {
