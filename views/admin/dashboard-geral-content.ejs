@@ -1,198 +1,1043 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
+
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
   <title>Dashboard da Feira</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+
+  <link
+    href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+    rel="stylesheet"
+  >
+
+
   <style>
+
     body {
-      background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+      background:
+        linear-gradient(
+          135deg,
+          #f0f4f8 0%,
+          #d9e2ec 100%
+        );
     }
-    th, td {
-      padding: 0.75rem;
-      text-align: left;
-      vertical-align: top;
-      border-bottom: 1px solid #e2e8f0;
-    }
-    th {
-      background-color: #f8fafc;
-      font-weight: 600;
-      color: #4a5568;
-    }
+
+
     table {
       width: 100%;
       border-collapse: collapse;
     }
+
+
+    th,
+    td {
+      padding: 0.75rem;
+
+      vertical-align: middle;
+
+      border-bottom:
+        1px solid #e2e8f0;
+    }
+
+
+    th {
+      background-color:
+        #f8fafc;
+
+      font-weight:
+        600;
+
+      color:
+        #4a5568;
+    }
+
+
+    /* ===================================================== */
+    /* TABELA DE RESULTADOS                                  */
+    /* ===================================================== */
+
+    .resultado-table {
+      min-width: 900px;
+
+      width: 100%;
+
+      border-collapse:
+        collapse;
+
+      background:
+        #ffffff;
+    }
+
+
+    .resultado-table th {
+      font-size:
+        11px;
+
+      text-transform:
+        uppercase;
+
+      line-height:
+        1.2;
+
+      padding:
+        12px 8px;
+
+      border:
+        1px solid #e2e8f0;
+
+      text-align:
+        center;
+
+      white-space:
+        normal;
+    }
+
+
+    .resultado-table td {
+      border:
+        1px solid #e2e8f0;
+
+      padding:
+        11px 8px;
+
+      font-size:
+        12px;
+
+      vertical-align:
+        middle;
+    }
+
+
+    .resultado-table tbody tr:nth-child(even) {
+      background-color:
+        #fafafa;
+    }
+
+
+    .resultado-table tbody tr:hover {
+      background-color:
+        #eff6ff;
+    }
+
+
+    /* PROJETO */
+
+    .col-projeto {
+      min-width:
+        220px;
+
+      text-align:
+        left !important;
+    }
+
+
+    /* NÚMERO DE AVALIAÇÕES */
+
+    .col-avaliacoes {
+      width:
+        80px;
+
+      min-width:
+        80px;
+
+      text-align:
+        center;
+    }
+
+
+    /* CRITÉRIOS */
+
+    .col-criterio {
+      min-width:
+        95px;
+
+      text-align:
+        center;
+    }
+
+
+    /* MÉDIA GERAL */
+
+    .col-media {
+      width:
+        90px;
+
+      min-width:
+        90px;
+
+      text-align:
+        center;
+
+      background-color:
+        #fff7d6 !important;
+    }
+
+
+    .media-geral {
+      font-weight:
+        700;
+
+      color:
+        #0056b3;
+
+      font-size:
+        13px;
+    }
+
+
+    .nota-criterio {
+      text-align:
+        center;
+
+      font-weight:
+        600;
+
+      color:
+        #1d4ed8;
+    }
+
+
+    .criterio-nao-utilizado {
+      text-align:
+        center;
+
+      color:
+        #c0c0c0;
+
+      font-weight:
+        600;
+    }
+
+
+    .criterio-sem-avaliacao {
+      text-align:
+        center;
+
+      color:
+        #9ca3af;
+
+      font-style:
+        italic;
+    }
+
+
+    .legenda-resultados {
+      margin-top:
+        8px;
+
+      color:
+        #6b7280;
+
+      font-size:
+        11px;
+    }
+
+
+    /* ===================================================== */
+    /* MOBILE                                                */
+    /* ===================================================== */
+
+    @media (max-width: 768px) {
+
+      body {
+        padding:
+          12px !important;
+      }
+
+
+      .resultado-table th {
+        font-size:
+          10px;
+
+        padding:
+          9px 6px;
+      }
+
+
+      .resultado-table td {
+        font-size:
+          11px;
+
+        padding:
+          9px 6px;
+      }
+
+    }
+
   </style>
+
 </head>
+
+
 <body class="min-h-screen p-8 font-sans antialiased text-gray-800">
 
-  <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-    <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
-      <h2 class="text-xl font-semibold text-indigo-600 mb-4">Projetos por Categoria</h2>
-      <ul class="space-y-2 text-gray-700 text-base">
-        <% if (Object.keys(projetosPorCategoria).length > 0) { %>
-          <% Object.keys(projetosPorCategoria).sort().forEach(categoria => { %>
-            <li class="flex justify-between items-center">
-              <span><%= categoria %></span>
-              <span class="font-medium bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm">
-                <%= projetosPorCategoria[categoria].length %>
+  <!-- ===================================================== -->
+  <!-- CARDS DE RESUMO                                       -->
+  <!-- ===================================================== -->
+
+  <div
+    class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+  >
+
+
+    <!-- =================================================== -->
+    <!-- PROJETOS POR CATEGORIA                              -->
+    <!-- =================================================== -->
+
+    <div
+      class="bg-white p-6 rounded-xl shadow-md border border-gray-200"
+    >
+
+      <h2
+        class="text-xl font-semibold text-indigo-600 mb-4 text-center"
+      >
+        Projetos por Categoria
+      </h2>
+
+
+      <ul
+        class="space-y-2 text-gray-700 text-base"
+      >
+
+        <% if (
+          projetosPorCategoria &&
+          Object.keys(projetosPorCategoria).length > 0
+        ) { %>
+
+
+          <%
+            const categoriasProjetos =
+              Object
+                .keys(projetosPorCategoria)
+                .sort((a, b) =>
+                  a.localeCompare(
+                    b,
+                    'pt-BR',
+                    {
+                      numeric: true
+                    }
+                  )
+                );
+          %>
+
+
+          <% categoriasProjetos.forEach(categoria => { %>
+
+            <li
+              class="flex justify-between items-center"
+            >
+
+              <span>
+                <%= categoria %>
               </span>
+
+
+              <span
+                class="font-medium bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm"
+              >
+
+                <%= projetosPorCategoria[categoria].length %>
+
+              </span>
+
             </li>
-          <% }) %>
+
+          <% }); %>
+
+
         <% } else { %>
-          <li>Nenhuma categoria ou projeto encontrado.</li>
+
+
+          <li>
+            Nenhuma categoria ou projeto encontrado.
+          </li>
+
+
         <% } %>
+
       </ul>
+
     </div>
 
-    <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
-      <h2 class="text-xl font-semibold text-green-600 mb-4">Avaliadores Registrados</h2>
+
+    <!-- =================================================== -->
+    <!-- AVALIADORES                                         -->
+    <!-- =================================================== -->
+
+    <div
+      class="bg-white p-6 rounded-xl shadow-md border border-gray-200"
+    >
+
+      <h2
+        class="text-xl font-semibold text-green-600 mb-4 text-center"
+      >
+        Avaliadores Registrados
+      </h2>
+
+
       <p class="text-base text-gray-700">
-        Total: <span class="font-medium text-green-700"><%= avaliadores.length %></span>
+
+        Total:
+
+        <span
+          class="font-medium text-green-700"
+        >
+          <%= avaliadores ? avaliadores.length : 0 %>
+        </span>
+
       </p>
+
+
       <p class="text-base text-gray-700">
-        Ativos: <span class="font-medium text-green-500"><%= avaliadores.filter(a => a.ativo).length %></span>
+
+        Ativos:
+
+        <span
+          class="font-medium text-green-500"
+        >
+          <%=
+            avaliadores
+              ? avaliadores.filter(a => a.ativo).length
+              : 0
+          %>
+        </span>
+
       </p>
+
+
       <p class="text-base text-gray-700">
-        Inativos: <span class="font-medium text-red-500"><%= avaliadores.filter(a => !a.ativo).length %></span>
+
+        Inativos:
+
+        <span
+          class="font-medium text-red-500"
+        >
+          <%=
+            avaliadores
+              ? avaliadores.filter(a => !a.ativo).length
+              : 0
+          %>
+        </span>
+
       </p>
+
     </div>
+
 
   </div>
 
-  <div class="max-w-6xl mx-auto mt-8 bg-white p-6 rounded-xl shadow-md border border-gray-200">
-    <h2 class="text-2xl font-semibold text-blue-600 mb-6 text-center">Resultados de Avaliação por Projeto</h2>
-    
-    <% if (Object.keys(relatorioFinalPorProjeto).length > 0) { %>
-      <% Object.keys(relatorioFinalPorProjeto).sort().forEach(categoria => { %>
-        <h3 class="text-xl font-bold text-gray-800 mt-8 mb-4 border-b-2 pb-2 border-blue-200"><%= categoria %></h3>
-        <div class="overflow-x-auto">
-  <table class="min-w-full bg-white shadow-sm rounded-lg">
-    <thead>
-      <tr>
-        <th class="py-3 px-4 uppercase font-semibold text-sm text-gray-600">
-          Projeto
-        </th>
-        <th class="py-3 px-4 uppercase font-semibold text-sm text-gray-600 text-center">
-          Nº Avaliações
-        </th>
-        <th class="py-3 px-4 uppercase font-semibold text-sm text-gray-600">
-          Critérios do Projeto
-        </th>
-        <th class="py-3 px-4 uppercase font-semibold text-sm text-gray-600 text-center">
-          Média Geral
-        </th>
-      </tr>
-    </thead>
-    <tbody>
-      <% relatorioFinalPorProjeto[categoria].forEach(projeto => { %>
-        <tr class="hover:bg-gray-50">
 
-<!-- PROJETO -->
-          <td class="py-3 px-4 text-gray-700 font-medium">
-            <%= projeto.titulo %>
-          </td>
-<!-- Nº AVALIAÇÕES -->
-          <td class="py-3 px-4 text-gray-700 text-center">
-            <%= projeto.numAvaliacoes %>
-          </td>
+  <!-- ===================================================== -->
+  <!-- RESULTADOS                                            -->
+  <!-- ===================================================== -->
 
-<!-- CRITÉRIOS ESPECÍFICOS DO PROJETO -->
-          <td class="py-3 px-4 text-gray-700">
-            <%
-              const criteriosProjeto =
-                Array.isArray(projeto.criterios)
-                  ? projeto.criterios
-                  : [];
-            %>
-            <% if (criteriosProjeto.length > 0) { %>
-              <div class="space-y-2">
-                <% criteriosProjeto.forEach(criterio => {
-                    const criterioId =
-                      String(
-                        criterio._id ||
-                        criterio
-                      );
-                    const media =
-                      projeto.mediasCriterios
-                        ? projeto.mediasCriterios[criterioId]
-                        : null;
+  <div
+    class="max-w-6xl mx-auto mt-8 bg-white p-6 rounded-xl shadow-md border border-gray-200"
+  >
+
+    <h2
+      class="text-2xl font-semibold text-blue-600 mb-6 text-center"
+    >
+      Resultados de Avaliação por Projeto
+    </h2>
+
+
+    <% if (
+      relatorioFinalPorProjeto &&
+      Object.keys(relatorioFinalPorProjeto).length > 0
+    ) { %>
+
+
+      <%
+        const categoriasResultados =
+          Object
+            .keys(relatorioFinalPorProjeto)
+            .sort((a, b) =>
+              a.localeCompare(
+                b,
+                'pt-BR',
+                {
+                  numeric: true
+                }
+              )
+            );
+      %>
+
+
+      <% categoriasResultados.forEach(categoria => { %>
+
+
+        <%
+          /* ================================================= */
+          /* PROJETOS DA CATEGORIA                             */
+          /* ================================================= */
+
+          const projetosCategoria =
+            Array.isArray(
+              relatorioFinalPorProjeto[categoria]
+            )
+              ? relatorioFinalPorProjeto[categoria]
+              : [];
+
+
+          /* ================================================= */
+          /* DESCOBRIR TODOS OS CRITÉRIOS DA CATEGORIA         */
+          /*                                                   */
+          /* Fazemos uma união dos critérios dos projetos.      */
+          /* Assim mantemos proteção caso algum projeto use     */
+          /* critérios diferentes.                              */
+          /* ================================================= */
+
+          const criteriosMap =
+            new Map();
+
+
+          projetosCategoria.forEach(projeto => {
+
+            const criteriosProjeto =
+              Array.isArray(projeto.criterios)
+                ? projeto.criterios
+                : [];
+
+
+            criteriosProjeto.forEach(criterio => {
+
+              if (!criterio) {
+                return;
+              }
+
+
+              const criterioId =
+                String(
+                  criterio._id ||
+                  criterio
+                );
+
+
+              if (
+                !criteriosMap.has(
+                  criterioId
+                )
+              ) {
+
+                criteriosMap.set(
+                  criterioId,
+                  criterio
+                );
+              }
+
+            });
+
+          });
+
+
+          /* ================================================= */
+          /* ORDENAR CRITÉRIOS                                  */
+          /* ================================================= */
+
+          const criteriosCategoria =
+            Array
+              .from(
+                criteriosMap.values()
+              )
+              .sort((a, b) => {
+
+                const ordemA =
+                  Number(
+                    a.ordemDesempate
+                  ) || 9999;
+
+
+                const ordemB =
+                  Number(
+                    b.ordemDesempate
+                  ) || 9999;
+
+
+                if (
+                  ordemA !== ordemB
+                ) {
+
+                  return (
+                    ordemA -
+                    ordemB
+                  );
+                }
+
+
+                return String(
+                  a.nome || ''
+                ).localeCompare(
+                  String(
+                    b.nome || ''
+                  ),
+                  'pt-BR'
+                );
+
+              });
+        %>
+
+
+        <!-- ================================================= -->
+        <!-- NOME DA CATEGORIA                                 -->
+        <!-- ================================================= -->
+
+        <h3
+          class="text-xl font-bold text-gray-800 mt-8 mb-4 border-b-2 pb-2 border-blue-200"
+        >
+          <%= categoria %>
+        </h3>
+
+
+        <!-- ================================================= -->
+        <!-- TABELA                                            -->
+        <!-- ================================================= -->
+
+        <div
+          class="overflow-x-auto border border-gray-200 rounded-lg"
+        >
+
+          <table
+            class="resultado-table"
+          >
+
+
+            <!-- ================================================= -->
+            <!-- CABEÇALHO                                         -->
+            <!-- ================================================= -->
+
+            <thead>
+
+              <tr>
+
+
+                <!-- PROJETO -->
+
+                <th class="col-projeto">
+
+                  Projeto
+
+                </th>
+
+
+                <!-- Nº AVALIAÇÕES -->
+
+                <th class="col-avaliacoes">
+
+                  Nº Aval.
+
+                </th>
+
+
+                <!-- CRITÉRIOS -->
+
+                <% criteriosCategoria.forEach(criterio => { %>
+
+                  <th class="col-criterio">
+
+                    <%= criterio.nome || 'Critério' %>
+
+                  </th>
+
+                <% }); %>
+
+
+                <!-- MÉDIA -->
+
+                <th class="col-media">
+
+                  Média Geral
+
+                </th>
+
+
+              </tr>
+
+            </thead>
+
+
+            <!-- ================================================= -->
+            <!-- CORPO                                             -->
+            <!-- ================================================= -->
+
+            <tbody>
+
+
+              <% projetosCategoria.forEach(projeto => { %>
+
+
+                <%
+                  /* ============================================= */
+                  /* CRITÉRIOS DESTE PROJETO                       */
+                  /* ============================================= */
+
+                  const criteriosProjeto =
+                    Array.isArray(
+                      projeto.criterios
+                    )
+                      ? projeto.criterios
+                      : [];
+
+
+                  const criteriosProjetoIds =
+                    new Set(
+                      criteriosProjeto.map(
+                        criterio =>
+                          String(
+                            criterio._id ||
+                            criterio
+                          )
+                      )
+                    );
                 %>
-                  <div class="flex justify-between gap-4 border-b border-gray-100 pb-1">
-                    <span class="font-medium">
-                      <%= criterio.nome || 'Critério' %>
-                    </span>
-                    <span class="font-bold text-blue-700 whitespace-nowrap">
-                      <%= (
+
+
+                <tr>
+
+
+                  <!-- ========================================= -->
+                  <!-- PROJETO                                   -->
+                  <!-- ========================================= -->
+
+                  <td
+                    class="col-projeto font-medium text-gray-800"
+                  >
+
+                    <%= projeto.titulo %>
+
+                  </td>
+
+
+                  <!-- ========================================= -->
+                  <!-- Nº AVALIAÇÕES                              -->
+                  <!-- ========================================= -->
+
+                  <td
+                    class="col-avaliacoes text-gray-700"
+                  >
+
+                    <%= projeto.numAvaliacoes %>
+
+                  </td>
+
+
+                  <!-- ========================================= -->
+                  <!-- CRITÉRIOS                                  -->
+                  <!-- ========================================= -->
+
+                  <% criteriosCategoria.forEach(criterio => { %>
+
+
+                    <%
+                      const criterioId =
+                        String(
+                          criterio._id ||
+                          criterio
+                        );
+
+
+                      const projetoUsaCriterio =
+                        criteriosProjetoIds.has(
+                          criterioId
+                        );
+
+
+                      const media =
+                        projeto.mediasCriterios
+                          ? projeto.mediasCriterios[
+                              criterioId
+                            ]
+                          : null;
+
+
+                      const possuiMedia =
                         media !== undefined &&
                         media !== null &&
                         media !== '' &&
                         media !== '-' &&
-                        media !== 'N/A'
-                      )
-                        ? media
-                        : 'N/A'
-                      %>
-                    </span>
-                  </div>
-                <% }) %>
-              </div>
-            <% } else { %>
-              <span class="text-gray-400 italic">
-                Nenhum critério configurado
-              </span>
-            <% } %>
-          </td>
-<!-- MÉDIA GERAL -->
-          <td class="py-3 px-4 text-gray-800 font-bold text-center">
-            <%= projeto.mediaGeral %>
-          </td>
-        </tr>
-      <% }) %>
-    </tbody>
-  </table>
-</div>
-      <% }) %>
+                        media !== 'N/A';
+                    %>
+
+
+                    <!-- ======================================= -->
+                    <!-- NÃO USA O CRITÉRIO                      -->
+                    <!-- ======================================= -->
+
+                    <% if (!projetoUsaCriterio) { %>
+
+                      <td
+                        class="col-criterio criterio-nao-utilizado"
+                        title="Este critério não pertence a este projeto"
+                      >
+
+                        —
+
+                      </td>
+
+
+                    <!-- ======================================= -->
+                    <!-- USA, MAS NÃO TEM NOTA                   -->
+                    <!-- ======================================= -->
+
+                    <% } else if (!possuiMedia) { %>
+
+                      <td
+                        class="col-criterio criterio-sem-avaliacao"
+                        title="Critério ainda sem avaliação"
+                      >
+
+                        N/A
+
+                      </td>
+
+
+                    <!-- ======================================= -->
+                    <!-- NOTA                                    -->
+                    <!-- ======================================= -->
+
+                    <% } else { %>
+
+                      <td
+                        class="col-criterio nota-criterio"
+                      >
+
+                        <%= media %>
+
+                      </td>
+
+                    <% } %>
+
+
+                  <% }); %>
+
+
+                  <!-- ========================================= -->
+                  <!-- MÉDIA GERAL                               -->
+                  <!-- ========================================= -->
+
+                  <td
+                    class="col-media media-geral"
+                  >
+
+                    <% if (
+                      projeto.mediaGeral !== undefined &&
+                      projeto.mediaGeral !== null &&
+                      projeto.mediaGeral !== '' &&
+                      projeto.mediaGeral !== '-'
+                    ) { %>
+
+                      <%= projeto.mediaGeral %>
+
+                    <% } else { %>
+
+                      -
+
+                    <% } %>
+
+                  </td>
+
+
+                </tr>
+
+
+              <% }); %>
+
+
+            </tbody>
+
+
+          </table>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- LEGENDA                                           -->
+        <!-- ================================================= -->
+
+        <div
+          class="legenda-resultados"
+        >
+
+          <span class="mr-5">
+
+            <strong>—</strong>
+            = critério não utilizado pelo projeto
+
+          </span>
+
+
+          <span>
+
+            <strong>N/A</strong>
+            = critério ainda sem avaliação
+
+          </span>
+
+        </div>
+
+
+      <% }); %>
+
+
     <% } else { %>
-      <p class="text-center text-gray-600 py-8">Nenhum projeto avaliado nesta feira ainda.</p>
+
+
+      <p
+        class="text-center text-gray-600 py-8"
+      >
+
+        Nenhum projeto avaliado nesta feira ainda.
+
+      </p>
+
+
     <% } %>
+
+
   </div>
+
+
+  <!-- ===================================================== -->
+  <!-- JAVASCRIPT                                            -->
+  <!-- ===================================================== -->
+
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const reportForm = document.getElementById('reportForm');
-      const tipoRelatorioSelect = document.getElementById('tipoRelatorio');
 
-// Inicializa a ação do formulário com base na seleção padrão (se houver)
-      if (tipoRelatorioSelect.value) {
-        reportForm.action = tipoRelatorioSelect.value;
-      }
-      tipoRelatorioSelect.addEventListener('change', function() {
-        reportForm.action = this.value;
-      });
-      reportForm.addEventListener('submit', function(event) {
-        if (!tipoRelatorioSelect.value) {
-          event.preventDefault(); // Impede o envio se nenhuma opção for selecionada
-          alert('Por favor, selecione um tipo de relatório para gerar.'); // Use um modal personalizado se preferir
+    document.addEventListener(
+      'DOMContentLoaded',
+      function () {
+
+
+        /* ================================================= */
+        /* FORMULÁRIO DE RELATÓRIO                            */
+        /*                                                   */
+        /* Protegido porque nem sempre esses elementos        */
+        /* existem nesta view.                                */
+        /* ================================================= */
+
+        const reportForm =
+          document.getElementById(
+            'reportForm'
+          );
+
+
+        const tipoRelatorioSelect =
+          document.getElementById(
+            'tipoRelatorio'
+          );
+
+
+        if (
+          reportForm &&
+          tipoRelatorioSelect
+        ) {
+
+
+          if (
+            tipoRelatorioSelect.value
+          ) {
+
+            reportForm.action =
+              tipoRelatorioSelect.value;
+          }
+
+
+          tipoRelatorioSelect.addEventListener(
+            'change',
+            function () {
+
+              reportForm.action =
+                this.value;
+
+            }
+          );
+
+
+          reportForm.addEventListener(
+            'submit',
+            function (event) {
+
+              if (
+                !tipoRelatorioSelect.value
+              ) {
+
+                event.preventDefault();
+
+
+                alert(
+                  'Por favor, selecione um tipo de relatório para gerar.'
+                );
+              }
+
+            }
+          );
+
         }
-      });
-    });
 
-    // Esta função formatarData é utilizada no EJS para exibir datas
-    // É importante que ela esteja disponível no escopo onde o EJS é renderizado
-    // (no caso, dashboard-geral-content.ejs é incluído no dashboard.ejs,
-    // então a função deve estar definida no dashboard.ejs ou de forma global acessível)
-    // Se você já tem uma função formatarDatasParaInput em dashboard.ejs, remova ou ajuste aqui.
-    function formatarData(dateString) {
-        if (!dateString) return '';
-        const date = new Date(dateString);
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${day}/${month}/${year}`; // Formato DD/MM/AAAA para exibição
+
+      }
+    );
+
+
+    /* ===================================================== */
+    /* FORMATAR DATA                                         */
+    /* ===================================================== */
+
+    function formatarData(
+      dateString
+    ) {
+
+      if (!dateString) {
+        return '';
+      }
+
+
+      const date =
+        new Date(
+          dateString
+        );
+
+
+      const year =
+        date.getFullYear();
+
+
+      const month =
+        String(
+          date.getMonth() + 1
+        ).padStart(
+          2,
+          '0'
+        );
+
+
+      const day =
+        String(
+          date.getDate()
+        ).padStart(
+          2,
+          '0'
+        );
+
+
+      return (
+        `${day}/${month}/${year}`
+      );
     }
+
   </script>
+
+
 </body>
+
 </html>
