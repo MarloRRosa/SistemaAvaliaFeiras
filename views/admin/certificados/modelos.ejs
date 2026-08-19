@@ -279,16 +279,13 @@
               <div class="flex flex-wrap gap-2">
 
                 <!-- EDITAR -->
-                <button
-                  type="button"
-                  disabled
-                  title="Editor visual será implementado no próximo passo"
-                  class="flex-1 bg-gray-300 text-gray-600 font-semibold py-2 px-3 rounded-lg cursor-not-allowed"
-                >
-                  <i class="fas fa-edit mr-1"></i>
-                  Editar
-                </button>
-
+                <a
+  href="/admin/certificados/modelos/<%= modelo._id %>/editar"
+  class="flex-1 text-center bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-3 rounded-lg transition"
+>
+  <i class="fas fa-edit mr-1"></i>
+  Editar
+</a>
 
                 <!-- PREVIEW -->
                 <button
