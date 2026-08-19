@@ -1202,6 +1202,197 @@ router.post(
 );
 
 // ============================================================
+// CERTIFICADOS - ADICIONAR CAMPO AUTOMÁTICO
+// ============================================================
+
+router.post(
+    '/certificados/modelos/:id/elementos/campo',
+    verificarAdminEscola,
+    async (req, res) => {
+
+        try {
+
+            const escolaId =
+                req.session.adminEscola.escolaId;
+
+            const { id } =
+                req.params;
+
+            const { campo } =
+                req.body;
+
+
+            // =================================================
+            // VALIDAR MODELO
+            // =================================================
+
+            if (
+                !mongoose.Types.ObjectId.isValid(id)
+            ) {
+
+                return res.status(400).json({
+                    sucesso: false,
+                    mensagem:
+                        'ID do modelo inválido.'
+                });
+            }
+
+
+            // =================================================
+            // CAMPOS AUTOMÁTICOS PERMITIDOS
+            // =================================================
+
+            const camposPermitidos = {
+
+                nomeParticipante:
+                    'NOME DO PARTICIPANTE',
+
+                nomeFeira:
+                    'NOME DA FEIRA',
+
+                nomeEscola:
+                    'NOME DA ESCOLA',
+
+                tituloProjeto:
+                    'TÍTULO DO PROJETO',
+
+                categoria:
+                    'CATEGORIA',
+
+                turma:
+                    'TURMA',
+
+                orientador:
+                    'NOME DO ORIENTADOR',
+
+                coorientador:
+                    'NOME DO COORIENTADOR',
+
+                numeroEstande:
+                    'Nº DO ESTANDE'
+            };
+
+
+            if (
+                !campo ||
+                !camposPermitidos[campo]
+            ) {
+
+                return res.status(400).json({
+                    sucesso: false,
+                    mensagem:
+                        'Campo automático inválido.'
+                });
+            }
+
+
+            // =================================================
+            // BUSCAR MODELO
+            // =================================================
+
+            const modelo =
+                await ModeloCertificado.findOne({
+                    _id: id,
+                    escolaId
+                });
+
+
+            if (!modelo) {
+
+                return res.status(404).json({
+                    sucesso: false,
+                    mensagem:
+                        'Modelo de certificado não encontrado.'
+                });
+            }
+
+
+            // =================================================
+            // CRIAR ELEMENTO
+            // =================================================
+
+            modelo.elementos.push({
+
+                tipo:
+                    'campo',
+
+                campo,
+
+                // Texto exibido apenas no editor.
+                // Na geração será substituído pelo dado real.
+                texto:
+                    camposPermitidos[campo],
+
+                x:
+                    250,
+
+                y:
+                    300,
+
+                largura:
+                    340,
+
+                altura:
+                    55,
+
+                fonte:
+                    'Arial',
+
+                tamanhoFonte:
+                    campo === 'nomeParticipante'
+                        ? 32
+                        : 24,
+
+                negrito:
+                    campo === 'nomeParticipante',
+
+                italico:
+                    false,
+
+                alinhamento:
+                    'center',
+
+                cor:
+                    '#000000',
+
+                ordem:
+                    modelo.elementos.length
+            });
+
+
+            await modelo.save();
+
+
+            const novoElemento =
+                modelo.elementos[
+                    modelo.elementos.length - 1
+                ];
+
+
+            return res.json({
+                sucesso: true,
+                elemento: novoElemento
+            });
+
+
+        } catch (err) {
+
+            console.error(
+                'Erro ao adicionar campo automático:',
+                err
+            );
+
+
+            return res.status(500).json({
+                sucesso: false,
+                mensagem:
+                    'Erro ao adicionar campo automático ao certificado.'
+            });
+        }
+    }
+);
+
+// ============================================================
 // CERTIFICADOS - ATUALIZAR ELEMENTO
 // ============================================================
 
