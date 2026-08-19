@@ -1,6 +1,12 @@
 const mongoose = require('mongoose');
 
+
+// =====================================================
+// ELEMENTOS DO CERTIFICADO
+// =====================================================
+
 const ElementoCertificadoSchema = new mongoose.Schema({
+
     tipo: {
         type: String,
         enum: [
@@ -13,26 +19,33 @@ const ElementoCertificadoSchema = new mongoose.Schema({
         required: true
     },
 
-    // Para elementos de texto normal
+
+    // Texto livre
     texto: {
         type: String,
         default: ''
     },
 
-    // Para campos automáticos, ex:
-    // nomeParticipante, nomeFeira, tituloProjeto...
+
+    // Campo automático:
+    // nomeParticipante, nomeFeira, tituloProjeto etc.
     campo: {
         type: String,
         default: ''
     },
 
-    // Para imagens/logos/assinaturas
+
+    // Imagens, logos e assinaturas
     url: {
         type: String,
         default: ''
     },
 
-    // Posição e tamanho no certificado
+
+    // =================================================
+    // POSIÇÃO
+    // =================================================
+
     x: {
         type: Number,
         default: 0
@@ -42,6 +55,11 @@ const ElementoCertificadoSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+
+
+    // =================================================
+    // TAMANHO
+    // =================================================
 
     largura: {
         type: Number,
@@ -53,7 +71,11 @@ const ElementoCertificadoSchema = new mongoose.Schema({
         default: 50
     },
 
-    // Configurações visuais
+
+    // =================================================
+    // CONFIGURAÇÃO VISUAL
+    // =================================================
+
     fonte: {
         type: String,
         default: 'Arial'
@@ -76,7 +98,11 @@ const ElementoCertificadoSchema = new mongoose.Schema({
 
     alinhamento: {
         type: String,
-        enum: ['left', 'center', 'right'],
+        enum: [
+            'left',
+            'center',
+            'right'
+        ],
         default: 'center'
     },
 
@@ -85,14 +111,21 @@ const ElementoCertificadoSchema = new mongoose.Schema({
         default: '#000000'
     },
 
+
+    // Ordem de sobreposição dos elementos
     ordem: {
         type: Number,
         default: 0
     }
+
 }, {
     _id: true
 });
 
+
+// =====================================================
+// MODELO DO CERTIFICADO
+// =====================================================
 
 const ModeloCertificadoSchema = new mongoose.Schema({
 
@@ -101,6 +134,7 @@ const ModeloCertificadoSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
+
 
     tipo: {
         type: String,
@@ -114,11 +148,13 @@ const ModeloCertificadoSchema = new mongoose.Schema({
         required: true
     },
 
+
     escolaId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Escola',
         required: true
     },
+
 
     feira: {
         type: mongoose.Schema.Types.ObjectId,
@@ -126,11 +162,20 @@ const ModeloCertificadoSchema = new mongoose.Schema({
         required: true
     },
 
+
+    // =================================================
+    // CONFIGURAÇÃO DA PÁGINA
+    // =================================================
+
     orientacao: {
         type: String,
-        enum: ['paisagem', 'retrato'],
+        enum: [
+            'paisagem',
+            'retrato'
+        ],
         default: 'paisagem'
     },
+
 
     tamanhoPagina: {
         type: String,
@@ -138,19 +183,55 @@ const ModeloCertificadoSchema = new mongoose.Schema({
         default: 'A4'
     },
 
+
+    // =================================================
+    // FUNDO DO CERTIFICADO
+    // =================================================
+
     fundoUrl: {
         type: String,
         default: ''
     },
 
+
+    // Identificador da imagem no Cloudinary.
+    // Será utilizado para substituir/remover o fundo.
+    fundoPublicId: {
+        type: String,
+        default: ''
+    },
+
+
+    // Como a imagem deve ocupar a folha
+    ajusteFundo: {
+        type: String,
+        enum: [
+            'cobrir',
+            'conter',
+            'esticar'
+        ],
+        default: 'cobrir'
+    },
+
+
+    // =================================================
+    // ELEMENTOS VISUAIS
+    // =================================================
+
     elementos: [
         ElementoCertificadoSchema
     ],
+
+
+    // =================================================
+    // STATUS
+    // =================================================
 
     ativo: {
         type: Boolean,
         default: true
     },
+
 
     dataCadastro: {
         type: Date,
