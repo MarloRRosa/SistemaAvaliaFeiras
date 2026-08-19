@@ -1108,7 +1108,17 @@ const mensagens = await Mensagem.find({ autorId: req.session.adminEscola.id })
 // Criar Projeto (POST)
 router.post('/projetos', verificarAdminEscola, upload.single('relatorioPdf'), async (req, res) => {
   try {
-    const { titulo, descricao, turma, alunos, categoria, criterios, orientador, coorientador } = req.body;
+    const {
+      titulo,
+      descricao,
+      turma,
+      alunos,
+      categoria,
+      criterios,
+      orientador,
+      coorientador,
+      numeroEstande
+        } = req.body;
     const adminEscolaId = req.session.adminEscola.escolaId;
 
     const feira = await Feira.findOne({ status: 'ativa', escolaId: adminEscolaId });
@@ -1123,15 +1133,25 @@ router.post('/projetos', verificarAdminEscola, upload.single('relatorioPdf'), as
       titulo,
       descricao,
       turma,
-      alunos: typeof alunos === 'string' ? alunos.split('\n').map(a => a.trim()).filter(Boolean) : [],
-      criterios: Array.isArray(criterios) ? criterios : (criterios ? [criterios] : []),
-      categoria,
-      escolaId: adminEscolaId,
-      feira: feira._id,
-      orientador,
-      coorientador,
-      relatorioPdf: relatorioUrl
-    });
+      numeroEstande:
+        numeroEstande !== undefined &&
+        numeroEstande !== null &&
+        String(numeroEstande).trim() !== ''
+          ? Number(numeroEstande)
+          : null,
+      alunos: typeof alunos === 'string'
+    ? alunos.split('\n').map(a => a.trim()).filter(Boolean)
+    : [],
+      criterios: Array.isArray(criterios)
+    ? criterios
+    : (criterios ? [criterios] : []),
+          categoria,
+          escolaId: adminEscolaId,
+          feira: feira._id,
+          orientador,
+          coorientador,
+          relatorioPdf: relatorioUrl
+            });
 
     await novoProjeto.save();
     req.flash('success_msg', 'Projeto criado com sucesso!');
@@ -1146,7 +1166,7 @@ router.post('/projetos', verificarAdminEscola, upload.single('relatorioPdf'), as
 // Editar Projeto (PUT)
 router.post('/projetos/:id/editar', verificarAdminEscola, upload.single('relatorioPdf'), async (req, res) => {
   const { id } = req.params;
-  const { titulo, descricao, categoria, turma, alunos, criterios, orientador, coorientador } = req.body;
+  const {   titulo,   descricao,   categoria,   turma,   alunos,   criterios,   orientador,   coorientador,   numeroEstande } = req.body;
   const adminEscolaId = req.session.adminEscola.escolaId;
 
   if (!id || !mongoose.Types.ObjectId.isValid(id)) {
@@ -1156,19 +1176,31 @@ router.post('/projetos/:id/editar', verificarAdminEscola, upload.single('relator
 
   try {
     const updateData = {
-      titulo,
-      descricao,
-      categoria,
-      turma,
-      orientador,
-      coorientador,
-      alunos: typeof alunos === 'string'
-        ? alunos.split('\n').map(a => a.trim()).filter(Boolean)
-        : Array.isArray(alunos) ? alunos : [],
-      criterios: Array.isArray(criterios)
-        ? criterios.filter(Boolean)
-        : (criterios ? [criterios].filter(Boolean) : [])
-    };
+  titulo,
+  descricao,
+  categoria,
+  turma,
+
+  numeroEstande:
+    numeroEstande !== undefined &&
+    numeroEstande !== null &&
+    String(numeroEstande).trim() !== ''
+      ? Number(numeroEstande)
+      : null,
+
+  orientador,
+  coorientador,
+
+  alunos: typeof alunos === 'string'
+    ? alunos.split('\n').map(a => a.trim()).filter(Boolean)
+    : Array.isArray(alunos)
+      ? alunos
+      : [],
+
+  criterios: Array.isArray(criterios)
+    ? criterios.filter(Boolean)
+    : (criterios ? [criterios].filter(Boolean) : [])
+};
 
     if (req.file) {
       updateData.relatorioPdf = req.file.secure_url || req.file.path || req.file.url;
