@@ -174,6 +174,12 @@
   </style>
 </head>
 <body>
+<%
+  const exibirSomenteCapa =
+    typeof somenteCapa !== 'undefined'
+      ? somenteCapa
+      : false;
+%>
   <header>
   <h1>Relatório de Avaliação</h1>
   <h2 style="font-size: 40px;"> <%= feira.nome %></h2>
@@ -202,57 +208,203 @@
     </div>
   <% } else { %>
     <% projetos.forEach((projeto, index) => { %>
-      <% if (index > 0) { %>
-        <div class="page-break"></div>
-      <% } %>
+      <% if (index > 0) { %><% if (!exibirSomenteCapa) { %>
+
+  <% if (projetos.length === 0) { %>
+
+    <div class="section">
+      <p>
+        Nenhum projeto encontrado para esta feira
+        <%= avaliador ? ' e avaliador.' : '.' %>
+      </p>
+    </div>
+
+  <% } else { %>
+
+    <% projetos.forEach((projeto, index) => { %>
+
+      <!--
+        Sempre inicia cada projeto em uma nova página.
+        Como a capa vem antes, o primeiro projeto também
+        precisa começar em outra página.
+      -->
+      <div class="page-break"></div>
+
       <div class="project-wrapper">
+
         <div class="section">
-          <h3>Projeto: <%= projeto.titulo %></h3>
+
+          <h3>
+            Projeto:
+            <%= projeto.titulo %>
+          </h3>
+
           <div class="project-details">
-            <p><strong>Escola:</strong> <%= projeto.escolaNome || 'N/A' %></p>
-            <p><strong>Alunos:</strong> <%= projeto.alunos || 'N/A' %></p>
-            <p><strong>Orientador:</strong> <%= projeto.orientador || 'N/A' %></p>
-            <p><strong>Coorientador:</strong> <%= projeto.coorientador || 'N/A' %></p>
-            <p><strong>Categoria:</strong> <%= projeto.categoria ? projeto.categoria.nome : 'N/A' %></p>
-            <p><strong>Resumo:</strong> <%= projeto.resumo || 'N/A' %></p>
+
+            <% if (
+              projeto.numeroEstande !== undefined &&
+              projeto.numeroEstande !== null &&
+              projeto.numeroEstande !== ''
+            ) { %>
+
+              <p>
+                <strong>Nº do Estande:</strong>
+                <%= projeto.numeroEstande %>
+              </p>
+
+            <% } %>
+
+            <p>
+              <strong>Escola:</strong>
+              <%= projeto.escolaNome || 'N/A' %>
+            </p>
+
+            <p>
+              <strong>Alunos:</strong>
+              <%= projeto.alunos || 'N/A' %>
+            </p>
+
+            <p>
+              <strong>Orientador:</strong>
+              <%= projeto.orientador || 'N/A' %>
+            </p>
+
+            <p>
+              <strong>Coorientador:</strong>
+              <%= projeto.coorientador || 'N/A' %>
+            </p>
+
+            <p>
+              <strong>Categoria:</strong>
+              <%= projeto.categoria
+                    ? projeto.categoria.nome
+                    : 'N/A'
+              %>
+            </p>
+
+            <p>
+              <strong>Resumo:</strong>
+              <%= projeto.resumo || 'N/A' %>
+            </p>
+
           </div>
 
-          <h4>Critérios de Avaliação:</h4>
-          <% if (projeto.criteriosAvaliacao && projeto.criteriosAvaliacao.length > 0) { %>
+
+          <h4>
+            Critérios de Avaliação:
+          </h4>
+
+
+          <% if (
+            projeto.criteriosAvaliacao &&
+            projeto.criteriosAvaliacao.length > 0
+          ) { %>
+
+
             <% projeto.criteriosAvaliacao.forEach(criterio => { %>
+
               <div class="criteria-group">
-                <div class="criteria-title"><%= criterio.nome %></div>
-                <% if (criterio.descricao) { %>
-                  <div class="criteria-description"><%= criterio.descricao %></div>
-                <% } %>
-                <% if (criterio.observacao) { %>
-                  <div class="criteria-description"><em>Obs:</em> <%= criterio.observacao %></div>
-                <% } %>
-                <div class="radio-scale">
-                  <% for (let i = 5; i <= 10; i++) { %>
-                    <label>
-                      <span><%= i %></span>
-                      <input type="radio" name="criterio_<%= criterio._id %>" value="<%= i %>" />
-                    </label>
-                  <% } %>
+
+                <div class="criteria-title">
+                  <%= criterio.nome %>
                 </div>
-                <textarea class="input-box notes-input-box"></textarea>
+
+
+                <% if (criterio.descricao) { %>
+
+                  <div class="criteria-description">
+                    <%= criterio.descricao %>
+                  </div>
+
+                <% } %>
+
+
+                <% if (criterio.observacao) { %>
+
+                  <div class="criteria-description">
+
+                    <em>Obs:</em>
+
+                    <%= criterio.observacao %>
+
+                  </div>
+
+                <% } %>
+
+
+                <div class="radio-scale">
+
+                  <% for (let i = 5; i <= 10; i++) { %>
+
+                    <label>
+
+                      <span>
+                        <%= i %>
+                      </span>
+
+                      <input
+                        type="radio"
+                        name="criterio_<%= projeto._id %>_<%= criterio._id %>"
+                        value="<%= i %>"
+                      >
+
+                    </label>
+
+                  <% } %>
+
+                </div>
+
+
+                <div
+                  class="input-box notes-input-box"
+                ></div>
+
               </div>
-            <% }) %>
+
+            <% }); %>
+
+
           <% } else { %>
-            <p>Nenhum critério de avaliação encontrado para a categoria deste projeto.</p>
+
+            <p>
+              Nenhum critério de avaliação encontrado para este projeto.
+            </p>
+
           <% } %>
 
-          <h4 style="margin-top: 20px;">Comentários Gerais do Avaliador para este Projeto:</h4>
+
+          <h4 style="margin-top: 20px;">
+            Comentários Gerais do Avaliador para este Projeto:
+          </h4>
+
           <div class="general-comments-box"></div>
+
         </div>
+
       </div>
+
     <% }); %>
+
   <% } %>
 
+
+  <!-- =================================================== -->
+  <!-- ASSINATURA                                          -->
+  <!-- =================================================== -->
+
   <div class="assinatura-area">
+
     <div class="assinatura-line"></div>
-    <p>Assinatura do Avaliador:  <strong><%= avaliador.nome %></strong></p>
+
+    <p>
+      Assinatura do Avaliador:
+      <strong>
+        <%= avaliador.nome %>
+      </strong>
+    </p>
+
   </div>
+
+<% } %>
 </body>
 </html>
