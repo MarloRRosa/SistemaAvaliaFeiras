@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title><%= titulo %></title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+  >
+
+  <style>
+    body {
+      background: #f3f4f6;
+    }
+
+    .certificado-preview-wrapper {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    .certificado-preview {
+      position: relative;
+      margin: 0 auto;
+      background-color: #ffffff;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+      border: 1px solid #d1d5db;
+      overflow: hidden;
+    }
+
+    .certificado-paisagem {
+      width: 842px;
+      height: 595px;
+    }
+
+    .certificado-retrato {
+      width: 595px;
+      height: 842px;
+    }
+
+    .preview-conteudo {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 50px;
+      text-align: center;
+    }
+
+    .preview-titulo {
+      font-size: 42px;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 35px;
+    }
+
+    .preview-texto {
+      max-width: 680px;
+      font-size: 22px;
+      line-height: 1.6;
+      color: #374151;
+    }
+
+    .preview-nome {
+      display: block;
+      font-size: 34px;
+      font-weight: 700;
+      margin: 20px 0;
+      color: #111827;
+    }
+
+    @media (max-width: 1000px) {
+      .certificado-preview {
+        transform-origin: top left;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="max-w-7xl mx-auto px-4 py-8">
+
+    <!-- ================================================= -->
+    <!-- CABEÇALHO                                         -->
+    <!-- ================================================= -->
+
+    <div class="bg-white rounded-xl shadow-md border border-gray-200 p-6 mb-6">
+
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+
+        <div>
+
+          <h1 class="text-3xl font-bold text-gray-800 flex items-center gap-3">
+
+            <i class="fas fa-palette text-purple-600"></i>
+
+            Editar Modelo de Certificado
+
+          </h1>
+
+          <p class="text-gray-600 mt-2">
+
+            Modelo:
+
+            <strong class="text-purple-700">
+              <%= modelo.nome %>
+            </strong>
+
+          </p>
+
+          <% if (feiraAtual) { %>
+
+            <p class="text-sm text-gray-500 mt-1">
+
+              Feira:
+              <strong>
+                <%= feiraAtual.nome %>
+              </strong>
+
+            </p>
+
+          <% } %>
+
+          <% if (escola && escola.nome) { %>
+
+            <p class="text-sm text-gray-500">
+
+              Escola:
+              <%= escola.nome %>
+
+            </p>
+
+          <% } %>
+
+        </div>
+
+
+        <div class="flex flex-wrap gap-2">
+
+          <a
+            href="/admin/certificados/modelos<%= modelo.feira ? '?feiraId=' + modelo.feira : '' %>"
+            class="inline-flex items-center bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg transition"
+          >
+
+            <i class="fas fa-arrow-left mr-2"></i>
+            Voltar
+
+          </a>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- MENSAGENS                                         -->
+    <!-- ================================================= -->
+
+    <% if (success_msg && success_msg.length > 0) { %>
+
+      <div class="mb-6 bg-green-100 border border-green-300 text-green-800 px-4 py-3 rounded-lg">
+
+        <i class="fas fa-check-circle mr-2"></i>
+
+        <%= success_msg[0] %>
+
+      </div>
+
+    <% } %>
+
+
+    <% if (error_msg && error_msg.length > 0) { %>
+
+      <div class="mb-6 bg-red-100 border border-red-300 text-red-800 px-4 py-3 rounded-lg">
+
+        <i class="fas fa-exclamation-circle mr-2"></i>
+
+        <%= error_msg[0] %>
+
+      </div>
+
+    <% } %>
+
+
+    <!-- ================================================= -->
+    <!-- GRID PRINCIPAL                                    -->
+    <!-- ================================================= -->
+
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+
+
+      <!-- ================================================= -->
+      <!-- PAINEL DE CONFIGURAÇÃO                            -->
+      <!-- ================================================= -->
+
+      <div class="xl:col-span-1">
+
+        <div class="bg-white rounded-xl shadow-md border border-gray-200 p-6">
+
+          <h2 class="text-xl font-bold text-gray-800 mb-5 flex items-center">
+
+            <i class="fas fa-sliders-h text-purple-600 mr-2"></i>
+
+            Configurações do Modelo
+
+          </h2>
+
+
+          <form
+            action="/admin/certificados/modelos/<%= modelo._id %>/editar"
+            method="POST"
+            class="space-y-5"
+          >
+
+
+            <!-- NOME -->
+            <div>
+
+              <label
+                for="nome"
+                class="block text-sm font-semibold text-gray-700 mb-2"
+              >
+                Nome do modelo
+              </label>
+
+              <input
+                type="text"
+                id="nome"
+                name="nome"
+                value="<%= modelo.nome %>"
+                required
+                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              >
+
+            </div>
+
+
+            <!-- TIPO -->
+            <div>
+
+              <label
+                for="tipo"
+                class="block text-sm font-semibold text-gray-700 mb-2"
+              >
+                Tipo de certificado
+              </label>
+
+              <select
+                id="tipo"
+                name="tipo"
+                required
+                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              >
+
+                <option
+                  value="estudante"
+                  <%= modelo.tipo === 'estudante' ? 'selected' : '' %>
+                >
+                  Estudante
+                </option>
+
+                <option
+                  value="orientador"
+                  <%= modelo.tipo === 'orientador' ? 'selected' : '' %>
+                >
+                  Orientador
+                </option>
+
+                <option
+                  value="coorientador"
+                  <%= modelo.tipo === 'coorientador' ? 'selected' : '' %>
+                >
+                  Coorientador
+                </option>
+
+                <option
+                  value="avaliador"
+                  <%= modelo.tipo === 'avaliador' ? 'selected' : '' %>
+                >
+                  Avaliador
+                </option>
+
+                <option
+                  value="geral"
+                  <%= modelo.tipo === 'geral' ? 'selected' : '' %>
+                >
+                  Geral
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <!-- ORIENTAÇÃO -->
+            <div>
+
+              <label
+                for="orientacao"
+                class="block text-sm font-semibold text-gray-700 mb-2"
+              >
+                Orientação da página
+              </label>
+
+              <select
+                id="orientacao"
+                name="orientacao"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              >
+
+                <option
+                  value="paisagem"
+                  <%= modelo.orientacao === 'paisagem' ? 'selected' : '' %>
+                >
+                  Paisagem
+                </option>
+
+                <option
+                  value="retrato"
+                  <%= modelo.orientacao === 'retrato' ? 'selected' : '' %>
+                >
+                  Retrato
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <!-- ATIVO -->
+            <div class="flex items-center">
+
+              <input
+                type="checkbox"
+                id="ativo"
+                name="ativo"
+                class="h-5 w-5 text-purple-600 border-gray-300 rounded"
+                <%= modelo.ativo ? 'checked' : '' %>
+              >
+
+              <label
+                for="ativo"
+                class="ml-2 text-sm font-semibold text-gray-700"
+              >
+                Modelo ativo
+              </label>
+
+            </div>
+
+
+            <!-- SALVAR -->
+            <div class="pt-3">
+
+              <button
+                type="submit"
+                class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 px-5 rounded-lg shadow-md transition"
+              >
+
+                <i class="fas fa-save mr-2"></i>
+
+                Salvar Configurações
+
+              </button>
+
+            </div>
+
+          </form>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- ELEMENTOS DO CERTIFICADO                           -->
+        <!-- ================================================= -->
+
+        <div class="bg-white rounded-xl shadow-md border border-gray-200 p-6 mt-6">
+
+          <h2 class="text-xl font-bold text-gray-800 mb-4">
+
+            <i class="fas fa-shapes text-blue-600 mr-2"></i>
+
+            Elementos
+
+          </h2>
+
+          <p class="text-sm text-gray-500 mb-5">
+
+            Em breve você poderá inserir e posicionar os elementos
+            diretamente sobre o certificado.
+
+          </p>
+
+
+          <div class="grid grid-cols-2 gap-3">
+
+
+            <!-- TEXTO -->
+            <button
+              type="button"
+              disabled
+              class="border border-gray-200 rounded-lg p-3 text-center bg-gray-100 text-gray-500 cursor-not-allowed"
+            >
+
+              <i class="fas fa-font text-xl mb-2"></i>
+
+              <div class="text-sm font-semibold">
+                Texto
+              </div>
+
+            </button>
+
+
+            <!-- NOME -->
+            <button
+              type="button"
+              disabled
+              class="border border-gray-200 rounded-lg p-3 text-center bg-gray-100 text-gray-500 cursor-not-allowed"
+            >
+
+              <i class="fas fa-user text-xl mb-2"></i>
+
+              <div class="text-sm font-semibold">
+                Participante
+              </div>
+
+            </button>
+
+
+            <!-- LOGO -->
+            <button
+              type="button"
+              disabled
+              class="border border-gray-200 rounded-lg p-3 text-center bg-gray-100 text-gray-500 cursor-not-allowed"
+            >
+
+              <i class="fas fa-image text-xl mb-2"></i>
+
+              <div class="text-sm font-semibold">
+                Logo
+              </div>
+
+            </button>
+
+
+            <!-- ASSINATURA -->
+            <button
+              type="button"
+              disabled
+              class="border border-gray-200 rounded-lg p-3 text-center bg-gray-100 text-gray-500 cursor-not-allowed"
+            >
+
+              <i class="fas fa-signature text-xl mb-2"></i>
+
+              <div class="text-sm font-semibold">
+                Assinatura
+              </div>
+
+            </button>
+
+
+            <!-- FUNDO -->
+            <button
+              type="button"
+              disabled
+              class="border border-gray-200 rounded-lg p-3 text-center bg-gray-100 text-gray-500 cursor-not-allowed"
+            >
+
+              <i class="fas fa-images text-xl mb-2"></i>
+
+              <div class="text-sm font-semibold">
+                Fundo
+              </div>
+
+            </button>
+
+
+            <!-- QR CODE -->
+            <button
+              type="button"
+              disabled
+              class="border border-gray-200 rounded-lg p-3 text-center bg-gray-100 text-gray-500 cursor-not-allowed"
+            >
+
+              <i class="fas fa-qrcode text-xl mb-2"></i>
+
+              <div class="text-sm font-semibold">
+                QR Code
+              </div>
+
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- PRÉ-VISUALIZAÇÃO                                  -->
+      <!-- ================================================= -->
+
+      <div class="xl:col-span-2">
+
+        <div class="bg-white rounded-xl shadow-md border border-gray-200 p-6">
+
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-5">
+
+            <div>
+
+              <h2 class="text-xl font-bold text-gray-800">
+
+                <i class="fas fa-eye text-blue-600 mr-2"></i>
+
+                Pré-visualização
+
+              </h2>
+
+              <p class="text-sm text-gray-500 mt-1">
+                Exemplo aproximado de como o certificado ficará.
+              </p>
+
+            </div>
+
+
+            <span class="text-xs font-semibold bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full">
+
+              Editor visual em desenvolvimento
+
+            </span>
+
+          </div>
+
+
+          <div class="certificado-preview-wrapper">
+
+            <div
+              id="certificadoPreview"
+              class="certificado-preview <%= modelo.orientacao === 'retrato' ? 'certificado-retrato' : 'certificado-paisagem' %>"
+              <% if (modelo.fundoUrl) { %>
+                style="background-image: url('<%= modelo.fundoUrl %>');"
+              <% } %>
+            >
+
+              <div class="preview-conteudo">
+
+                <% if (escola && escola.logo) { %>
+
+                  <img
+                    src="<%= escola.logo %>"
+                    alt="Logo da escola"
+                    style="max-height: 90px; max-width: 180px; margin-bottom: 25px;"
+                  >
+
+                <% } %>
+
+
+                <div class="preview-titulo">
+
+                  CERTIFICADO
+
+                </div>
+
+
+                <div class="preview-texto">
+
+                  Certificamos que
+
+                  <span class="preview-nome">
+
+                    NOME DO PARTICIPANTE
+
+                  </span>
+
+                  participou da
+
+                  <strong>
+
+                    <%= feiraAtual ? feiraAtual.nome : 'Feira de Ciências' %>
+
+                  </strong>.
+
+                </div>
+
+
+                <% if (escola && escola.nome) { %>
+
+                  <div class="mt-10 text-lg text-gray-600">
+
+                    <%= escola.nome %>
+
+                  </div>
+
+                <% } %>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- LEGENDA -->
+          <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+
+            <div class="flex items-start">
+
+              <i class="fas fa-info-circle text-blue-500 mt-1 mr-3"></i>
+
+              <div>
+
+                <p class="font-semibold text-blue-800">
+
+                  Próxima etapa
+
+                </p>
+
+                <p class="text-sm text-blue-700 mt-1">
+
+                  Nesta área será possível clicar em elementos como
+                  nome do participante, textos, logos e assinaturas,
+                  posicioná-los livremente no certificado e alterar
+                  fonte, tamanho, cor e alinhamento.
+
+                </p>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <script>
+
+    document.addEventListener('DOMContentLoaded', function () {
+
+      const orientacao =
+        document.getElementById('orientacao');
+
+      const preview =
+        document.getElementById('certificadoPreview');
+
+
+      if (
+        orientacao &&
+        preview
+      ) {
+
+        orientacao.addEventListener(
+          'change',
+          function () {
+
+            preview.classList.remove(
+              'certificado-paisagem',
+              'certificado-retrato'
+            );
+
+
+            if (
+              this.value === 'retrato'
+            ) {
+
+              preview.classList.add(
+                'certificado-retrato'
+              );
+
+            } else {
+
+              preview.classList.add(
+                'certificado-paisagem'
+              );
+
+            }
+
+          }
+        );
+      }
+
+    });
+
+  </script>
+
+</body>
+</html>
