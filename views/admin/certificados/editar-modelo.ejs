@@ -103,8 +103,46 @@
 
 .elemento-texto-conteudo {
   width: 100%;
+  height: 100%;
   white-space: pre-wrap;
   word-break: break-word;
+  overflow: hidden;
+
+  display: flex;
+  align-items: center;
+}
+
+/* ===================================================== */
+/* ALÇA PARA REDIMENSIONAR                               */
+/* ===================================================== */
+
+.resize-handle {
+  position: absolute;
+
+  width: 14px;
+  height: 14px;
+
+  right: -7px;
+  bottom: -7px;
+
+  background: #7c3aed;
+  border: 2px solid #ffffff;
+  border-radius: 3px;
+
+  cursor: nwse-resize;
+
+  z-index: 40;
+
+  display: none;
+
+  touch-action: none;
+
+  box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+}
+
+/* Só mostra a alça quando o elemento estiver selecionado */
+.elemento-certificado.selecionado .resize-handle {
+  display: block;
 }
 
 /* O conteúdo de exemplo não deve impedir o arraste */
@@ -1571,17 +1609,30 @@ function criarElementoTextoVisual(elemento) {
   div.appendChild(
     conteudo
   );
+// =====================================================
+// ALÇA DE REDIMENSIONAMENTO
+// =====================================================
 
+const alca =
+  document.createElement('div');
+
+alca.className =
+  'resize-handle';
+
+alca.title =
+  'Arraste para redimensionar';
+
+div.appendChild(
+  alca
+);
 
   certificadoPreview.appendChild(
     div
   );
 
-
   prepararElementoTexto(
     div
   );
-
 
   selecionarElementoTexto(
     div
@@ -1755,7 +1806,43 @@ function prepararElementoTexto(elemento) {
   );
 
 
+  // =====================================================
+  // GARANTIR ALÇA DE REDIMENSIONAMENTO
+  // =====================================================
+
+  let alca =
+    elemento.querySelector(
+      '.resize-handle'
+    );
+
+
+  if (!alca) {
+
+    alca =
+      document.createElement(
+        'div'
+      );
+
+    alca.className =
+      'resize-handle';
+
+    alca.title =
+      'Arraste para redimensionar';
+
+    elemento.appendChild(
+      alca
+    );
+  }
+
+
+  // Permite mover
   ativarArraste(
+    elemento
+  );
+
+
+  // Permite redimensionar
+  ativarRedimensionamento(
     elemento
   );
 }
@@ -1778,16 +1865,26 @@ document
 function ativarArraste(elemento) {
 
   elemento.addEventListener(
-    'pointerdown',
-    function (event) {
+  'pointerdown',
+  function (event) {
 
-      if (
-        event.button !== undefined &&
-        event.button !== 0
-      ) {
-        return;
-      }
+    // Se clicou na alça de redimensionamento,
+    // não iniciar o arraste do elemento inteiro.
+    if (
+      event.target.closest(
+        '.resize-handle'
+      )
+    ) {
+      return;
+    }
 
+
+    if (
+      event.button !== undefined &&
+      event.button !== 0
+    ) {
+      return;
+    }
 
       event.preventDefault();
 
@@ -1934,6 +2031,231 @@ function ativarArraste(elemento) {
       elemento.addEventListener(
         'pointercancel',
         finalizar
+      );
+    }
+  );
+}
+
+// =====================================================
+// REDIMENSIONAR ELEMENTO
+// =====================================================
+
+function ativarRedimensionamento(
+  elemento
+) {
+
+  const alca =
+    elemento.querySelector(
+      '.resize-handle'
+    );
+
+
+  if (!alca) {
+    return;
+  }
+
+
+  alca.addEventListener(
+    'pointerdown',
+    function (event) {
+
+      event.preventDefault();
+      event.stopPropagation();
+
+
+      selecionarElementoTexto(
+        elemento
+      );
+
+
+      alca.setPointerCapture(
+        event.pointerId
+      );
+
+
+      // Posição inicial do mouse
+      const inicioX =
+        event.clientX;
+
+      const inicioY =
+        event.clientY;
+
+
+      // Dimensões atuais do elemento
+      const larguraInicial =
+        elemento.offsetWidth;
+
+      const alturaInicial =
+        elemento.offsetHeight;
+
+
+      // Posição atual do elemento dentro da folha
+      const esquerda =
+        parseInt(
+          elemento.style.left,
+          10
+        ) || 0;
+
+      const topo =
+        parseInt(
+          elemento.style.top,
+          10
+        ) || 0;
+
+
+      // =================================================
+      // MOVER ALÇA
+      // =================================================
+
+      function redimensionar(
+        eventMove
+      ) {
+
+        const diferencaX =
+          eventMove.clientX -
+          inicioX;
+
+        const diferencaY =
+          eventMove.clientY -
+          inicioY;
+
+
+        let novaLargura =
+          larguraInicial +
+          diferencaX;
+
+        let novaAltura =
+          alturaInicial +
+          diferencaY;
+
+
+        // -----------------------------------------------
+        // TAMANHO MÍNIMO
+        // -----------------------------------------------
+
+        novaLargura =
+          Math.max(
+            80,
+            novaLargura
+          );
+
+        novaAltura =
+          Math.max(
+            30,
+            novaAltura
+          );
+
+
+        // -----------------------------------------------
+        // NÃO DEIXAR SAIR DO CERTIFICADO
+        // -----------------------------------------------
+
+        const larguraMaxima =
+          certificadoPreview.clientWidth -
+          esquerda;
+
+        const alturaMaxima =
+          certificadoPreview.clientHeight -
+          topo;
+
+
+        novaLargura =
+          Math.min(
+            novaLargura,
+            larguraMaxima
+          );
+
+        novaAltura =
+          Math.min(
+            novaAltura,
+            alturaMaxima
+          );
+
+
+        // -----------------------------------------------
+        // APLICAR VISUALMENTE
+        // -----------------------------------------------
+
+        elemento.style.width =
+          `${Math.round(
+            novaLargura
+          )}px`;
+
+        elemento.style.height =
+          `${Math.round(
+            novaAltura
+          )}px`;
+      }
+
+
+      // =================================================
+      // FINALIZAR E SALVAR
+      // =================================================
+
+      async function finalizarResize() {
+
+        alca.removeEventListener(
+          'pointermove',
+          redimensionar
+        );
+
+        alca.removeEventListener(
+          'pointerup',
+          finalizarResize
+        );
+
+        alca.removeEventListener(
+          'pointercancel',
+          finalizarResize
+        );
+
+
+        const novaLargura =
+          elemento.offsetWidth;
+
+        const novaAltura =
+          elemento.offsetHeight;
+
+
+        try {
+
+          await atualizarElemento(
+            elemento.dataset.elementoId,
+            {
+              largura:
+                novaLargura,
+
+              altura:
+                novaAltura
+            }
+          );
+
+
+        } catch (erro) {
+
+          console.error(
+            'Erro ao salvar tamanho do elemento:',
+            erro
+          );
+        }
+      }
+
+
+      alca.addEventListener(
+        'pointermove',
+        redimensionar
+      );
+
+
+      alca.addEventListener(
+        'pointerup',
+        finalizarResize
+      );
+
+
+      alca.addEventListener(
+        'pointercancel',
+        finalizarResize
       );
     }
   );
