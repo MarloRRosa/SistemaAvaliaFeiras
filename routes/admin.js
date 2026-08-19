@@ -11,7 +11,13 @@ const Criterio = require('../models/Criterio');
 const Avaliador = require('../models/Avaliador');
 const Avaliacao = require('../models/Avaliacao');
 const Admin = require('../models/Admin');
+
+// Models do módulo de Certificados
+const ModeloCertificado = require('../models/ModeloCertificado');
+const CertificadoEmitido = require('../models/CertificadoEmitido');
+
 const PIN_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+
 const PreCadastroAvaliador = require('../models/PreCadastroAvaliador');
 const ConfiguracaoFormularioPreCadastro = require('../models/ConfiguracaoFormularioPreCadastro');
 
@@ -437,6 +443,274 @@ router.post('/resetar-senha/:token', async (req, res) => {
     });
   }
 });
+
+// ===========================================
+// ROTAS - MODELOS DE CERTIFICADO
+// ===========================================
+
+// -------------------------------------------
+// LISTAR MODELOS DA ESCOLA / FEIRA
+// -------------------------------------------
+
+router.get(
+  '/certificados/modelos',
+  verificarAdminEscola,
+  async (req, res) => {
+    try {
+      const escolaId =
+        req.session.adminEscola.escolaId;
+      const feiraId =
+        req.query.feiraId;
+      let feiraAtual = null;
+      if (
+        feiraId &&
+        mongoose.Types.ObjectId.isValid(feiraId)
+      ) {
+        feiraAtual =
+          await Feira.findOne({
+            _id: feiraId,
+            escolaId
+          }).lean();
+      } else {
+        feiraAtual =
+          await Feira.findOne({
+            status: 'ativa',
+            escolaId
+          }).lean();
+      }
+      if (!feiraAtual) {
+        req.flash(
+          'error_msg',
+          'Nenhuma feira encontrada para gerenciar certificados.'
+        );
+        return res.redirect(
+          '/admin/dashboard?tab=certificados'
+        );
+      }
+      const modelos =
+        await ModeloCertificado.find({
+          escolaId,
+          feira: feiraAtual._id
+        })
+          .sort({
+            createdAt: -1
+          })
+          .lean();
+      const escola =
+        await Escola.findById(
+          escolaId
+        ).lean();
+      return res.render(
+        'admin/certificados/modelos',
+        {
+          titulo:
+            'Modelos de Certificado',
+          layout: false,
+          escola,
+          feiraAtual,
+          modelos,
+          success_msg:
+            req.flash('success_msg'),
+          error_msg:
+            req.flash('error_msg')
+        }
+      );
+    } catch (err) {
+      console.error(
+        'Erro ao carregar modelos de certificado:',
+        err
+      );
+      req.flash(
+        'error_msg',
+        'Erro ao carregar modelos de certificado. ' +
+        err.message
+      );
+      return res.redirect(
+        '/admin/dashboard?tab=certificados'
+      );
+    }
+  }
+);
+
+// -------------------------------------------
+// CRIAR MODELO
+// -------------------------------------------
+router.post(
+  '/certificados/modelos',
+  verificarAdminEscola,
+  async (req, res) => {
+    try {
+      const escolaId =
+        req.session.adminEscola.escolaId;
+      const {
+        nome,
+        tipo,
+        orientacao,
+        feiraId
+      } = req.body;
+      if (!nome || !nome.trim()) {
+        req.flash(
+          'error_msg',
+          'Informe o nome do modelo.'
+        );
+        return res.redirect(
+          '/admin/certificados/modelos'
+        );
+      }
+      if (
+        !tipo ||
+        ![
+          'estudante',
+          'orientador',
+          'coorientador',
+          'avaliador',
+          'geral'
+        ].includes(tipo)
+      ) {
+        req.flash(
+          'error_msg',
+          'Tipo de certificado inválido.'
+        );
+        return res.redirect(
+          '/admin/certificados/modelos'
+        );
+      }
+      let feiraAtual = null;
+      if (
+        feiraId &&
+        mongoose.Types.ObjectId.isValid(feiraId)
+      ) {
+        feiraAtual =
+          await Feira.findOne({
+            _id: feiraId,
+            escolaId
+          });
+      } else {
+        feiraAtual =
+          await Feira.findOne({
+            status: 'ativa',
+            escolaId
+          });
+      }
+      if (!feiraAtual) {
+        req.flash(
+          'error_msg',
+          'Nenhuma feira válida encontrada.'
+        );
+        return res.redirect(
+          '/admin/dashboard?tab=certificados'
+        );
+      }
+      const novoModelo =
+        new ModeloCertificado({
+          nome:
+            nome.trim(),
+          tipo,
+          escolaId,
+          feira:
+            feiraAtual._id,
+          orientacao:
+            orientacao === 'retrato'
+              ? 'retrato'
+              : 'paisagem',
+          tamanhoPagina:
+            'A4',
+          fundoUrl:
+            '',
+          elementos:
+            [],
+          ativo:
+            true
+        });
+      await novoModelo.save();
+      req.flash(
+        'success_msg',
+        'Modelo de certificado criado com sucesso!'
+      );
+      return res.redirect(
+        `/admin/certificados/modelos?feiraId=${feiraAtual._id}`
+      );
+    } catch (err) {
+      console.error(
+        'Erro ao criar modelo de certificado:',
+        err
+      );
+      req.flash(
+        'error_msg',
+        'Erro ao criar modelo de certificado. ' +
+        err.message
+      );
+      return res.redirect(
+        '/admin/certificados/modelos'
+      );
+    }
+  }
+);
+// -------------------------------------------
+// EXCLUIR MODELO
+// -------------------------------------------
+router.post(
+  '/certificados/modelos/:id/excluir',
+  verificarAdminEscola,
+  async (req, res) => {
+    try {
+      const escolaId =
+        req.session.adminEscola.escolaId;
+      const { id } =
+        req.params;
+      if (
+        !id ||
+        !mongoose.Types.ObjectId.isValid(id)
+      ) {
+        req.flash(
+          'error_msg',
+          'ID do modelo inválido.'
+        );
+        return res.redirect(
+          '/admin/certificados/modelos'
+        );
+      }
+      const modelo =
+        await ModeloCertificado.findOne({
+          _id: id,
+          escolaId
+        });
+      if (!modelo) {
+        req.flash(
+          'error_msg',
+          'Modelo não encontrado ou não pertence à sua escola.'
+        );
+        return res.redirect(
+          '/admin/certificados/modelos'
+        );
+      }
+      await ModeloCertificado.deleteOne({
+        _id: id,
+        escolaId
+      });
+      req.flash(
+        'success_msg',
+        'Modelo excluído com sucesso!'
+      );
+      return res.redirect(
+        `/admin/certificados/modelos?feiraId=${modelo.feira}`
+      );
+    } catch (err) {
+      console.error(
+        'Erro ao excluir modelo de certificado:',
+        err
+      );
+      req.flash(
+        'error_msg',
+        'Erro ao excluir modelo de certificado. ' +
+        err.message
+      );
+      return res.redirect(
+        '/admin/certificados/modelos'
+      );
+    }
+  }
+);
 
 // ===========================================
 // ROTAS DE RELATÓRIOS (PDF) - COM PUPPETEER
