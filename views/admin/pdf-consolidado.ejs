@@ -83,40 +83,51 @@
         }
 
         /* Larguras específicas das colunas */
-        .projetos-table th:nth-child(1), /* POSIÇÃO */
-        .projetos-table td:nth-child(1) {
-            width: 8%;
-            text-align: center;
-            font-weight: bold;
-        }
+        .projetos-table th:nth-child(1),
+.projetos-table td:nth-child(1) {
+    width: 7%;
+    text-align: center;
+    font-weight: bold;
+}
 
-        .projetos-table th:nth-child(2), /* PROJETO */
-        .projetos-table td:nth-child(2) {
-            width: 25%;
-            text-align: left;
-            font-weight: 500;
-        }
+/* ESTANDE */
+.projetos-table th:nth-child(2),
+.projetos-table td:nth-child(2) {
+    width: 8%;
+    text-align: center;
+    font-weight: bold;
+}
 
-        .projetos-table th:nth-child(3), /* Nº AVALIAÇÕES */
-        .projetos-table td:nth-child(3) {
-            width: 10%;
-            text-align: center;
-        }
+/* PROJETO */
+.projetos-table th:nth-child(3),
+.projetos-table td:nth-child(3) {
+    width: 23%;
+    text-align: left;
+    font-weight: 500;
+}
 
-        /* Coluna dos critérios específicos do projeto */
+/* Nº AVALIAÇÕES */
 .projetos-table th:nth-child(4),
 .projetos-table td:nth-child(4) {
+    width: 10%;
+    text-align: center;
+}
+
+/* CRITÉRIOS */
+.projetos-table th:nth-child(5),
+.projetos-table td:nth-child(5) {
     width: 37%;
     text-align: left;
 }
 
-        .projetos-table th:last-child, /* MÉDIA GERAL */
-        .projetos-table td:last-child {
-            width: 10%;
-            text-align: center;
-            font-weight: bold;
-            background-color: #fff3cd !important;
-        }
+/* MÉDIA GERAL */
+.projetos-table th:nth-child(6),
+.projetos-table td:nth-child(6) {
+    width: 10%;
+    text-align: center;
+    font-weight: bold;
+    background-color: #fff3cd !important;
+}
 
         /* Alinhamentos específicos */
         .text-center {
@@ -199,12 +210,13 @@
                 <table class="projetos-table">
     <thead>
         <tr>
-            <th class="text-center">POSIÇÃO</th>
-            <th>PROJETO</th>
-            <th class="text-center">Nº AVAL.</th>
-            <th>CRITÉRIOS DO PROJETO</th>
-            <th class="text-center">MÉDIA GERAL</th>
-        </tr>
+    <th class="text-center">POSIÇÃO</th>
+    <th class="text-center">ESTANDE</th>
+    <th>PROJETO</th>
+    <th class="text-center">Nº AVAL.</th>
+    <th>CRITÉRIOS DO PROJETO</th>
+    <th class="text-center">MÉDIA GERAL</th>
+</tr>
     </thead>
 
     <tbody>
@@ -215,16 +227,38 @@
 
             <tr>
 
-                <!-- POSIÇÃO -->
-                <td class="text-center posicao">
-                    <%= (index + 1) %>º
-                </td>
+                <tr>
 
+    <!-- POSIÇÃO -->
+    <td class="text-center posicao">
+        <%= (index + 1) %>º
+    </td>
 
-                <!-- PROJETO -->
-                <td>
-                    <%= projeto.titulo %>
-                </td>
+    <!-- ESTANDE -->
+    <td class="text-center">
+        <% if (
+            projeto.numeroEstande !== undefined &&
+            projeto.numeroEstande !== null &&
+            projeto.numeroEstande !== ''
+        ) { %>
+
+            <strong>
+                <%= projeto.numeroEstande %>
+            </strong>
+
+        <% } else { %>
+
+            <span style="color:#999;">
+                -
+            </span>
+
+        <% } %>
+    </td>
+
+    <!-- PROJETO -->
+    <td>
+        <%= projeto.titulo %>
+    </td>
 
 
                 <!-- Nº AVALIAÇÕES -->
