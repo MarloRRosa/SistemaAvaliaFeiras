@@ -4792,189 +4792,304 @@ router.get('/relatorio-consolidado/pdf', verificarAdminEscola, async (req, res) 
 
 
         // =====================================================
-        // CLASSIFICAÇÃO / RANKING
-        // =====================================================
-        //
-        // 1º maior nota geral
-        //
-        // Em empate:
-        // critérios com ordemDesempate > 0.
-        //
-        // IMPORTANTE:
-        // Um critério somente participa do desempate entre
-        // dois projetos quando pertence aos DOIS projetos.
-        // =====================================================
+// CLASSIFICAÇÃO / ORDENAÇÃO
+// =====================================================
+//
+// REGRA:
+//
+// 1. Se os projetos ainda NÃO possuem nota:
+//    ordenar pelo número do estande.
+//
+// 2. Se possuem nota:
+//    ordenar pela maior média geral.
+//
+// 3. Em empate:
+//    aplicar ordemDesempate.
+//
+// 4. Persistindo o empate:
+//    ordenar pelo número do estande.
+//
+// 5. Sem número de estande:
+//    ordenar alfabeticamente pelo título.
+//
+// Isso permite que o relatório seja útil tanto antes
+// da avaliação quanto depois da avaliação.
+// =====================================================
 
-        Object
-            .keys(relatorioFinalPorProjeto)
-            .forEach(categoria => {
+function compararPorEstandeOuTitulo(a, b) {
 
-                relatorioFinalPorProjeto[
-                    categoria
-                ].sort((a, b) => {
+    const estandeA =
+        a.numeroEstande !== undefined &&
+        a.numeroEstande !== null &&
+        a.numeroEstande !== ''
+            ? Number(a.numeroEstande)
+            : null;
 
-
-                    // =========================================
-                    // 1. NOTA FINAL
-                    // =========================================
-
-                    const notaA =
-                        parseFloat(
-                            a.mediaGeral
-                        );
-
-                    const notaB =
-                        parseFloat(
-                            b.mediaGeral
-                        );
-
-
-                    if (
-                        !isNaN(notaA) &&
-                        !isNaN(notaB)
-                    ) {
-
-                        if (notaB !== notaA) {
-                            return notaB - notaA;
-                        }
-
-                    } else if (
-                        !isNaN(notaA)
-                    ) {
-
-                        return -1;
-
-                    } else if (
-                        !isNaN(notaB)
-                    ) {
-
-                        return 1;
-                    }
+    const estandeB =
+        b.numeroEstande !== undefined &&
+        b.numeroEstande !== null &&
+        b.numeroEstande !== ''
+            ? Number(b.numeroEstande)
+            : null;
 
 
-                    // =========================================
-                    // 2. CRITÉRIOS DE DESEMPATE
-                    // =========================================
+    // Ambos possuem estande
+    if (
+        estandeA !== null &&
+        estandeB !== null
+    ) {
 
-                    const criteriosA =
-                        Array.isArray(a.criterios)
-                            ? a.criterios
-                            : [];
-
-                    const criteriosB =
-                        Array.isArray(b.criterios)
-                            ? b.criterios
-                            : [];
+        if (estandeA !== estandeB) {
+            return estandeA - estandeB;
+        }
+    }
 
 
-                    const idsA =
-                        new Set(
-                            criteriosA.map(
-                                criterio =>
-                                    String(
-                                        criterio._id ||
-                                        criterio
-                                    )
-                            )
-                        );
+    // Somente A possui estande
+    if (
+        estandeA !== null &&
+        estandeB === null
+    ) {
+        return -1;
+    }
 
 
-                    const idsB =
-                        new Set(
-                            criteriosB.map(
-                                criterio =>
-                                    String(
-                                        criterio._id ||
-                                        criterio
-                                    )
-                            )
-                        );
+    // Somente B possui estande
+    if (
+        estandeA === null &&
+        estandeB !== null
+    ) {
+        return 1;
+    }
 
 
-                    /*
-                     * Montamos a ordem de desempate considerando
-                     * os critérios configurados na feira, porém
-                     * abaixo somente usamos os que pertencem
-                     * AOS DOIS projetos.
-                     */
-
-                    const criteriosDesempate =
-                        criteriosOficiais
-                            .filter(
-                                criterio =>
-                                    Number(
-                                        criterio.ordemDesempate
-                                    ) > 0
-                            )
-                            .sort(
-                                (x, y) =>
-                                    Number(
-                                        x.ordemDesempate
-                                    ) -
-                                    Number(
-                                        y.ordemDesempate
-                                    )
-                            );
+    // Mesmo estande ou nenhum estande:
+    // desempata alfabeticamente pelo título
+    return String(a.titulo || '')
+        .localeCompare(
+            String(b.titulo || ''),
+            'pt-BR',
+            {
+                numeric: true,
+                sensitivity: 'base'
+            }
+        );
+}
 
 
-                    for (
-                        const criterio
-                        of criteriosDesempate
-                    ) {
+Object
+    .keys(relatorioFinalPorProjeto)
+    .forEach(categoria => {
 
-                        const criterioId =
+        relatorioFinalPorProjeto[
+            categoria
+        ].sort((a, b) => {
+
+            // =========================================
+            // NOTAS GERAIS
+            // =========================================
+
+            const notaA =
+                parseFloat(
+                    a.mediaGeral
+                );
+
+            const notaB =
+                parseFloat(
+                    b.mediaGeral
+                );
+
+
+            const temNotaA =
+                !isNaN(notaA);
+
+            const temNotaB =
+                !isNaN(notaB);
+
+
+            // =========================================
+            // 1. NENHUM DOS DOIS POSSUI NOTA
+            //
+            // Neste caso não existe classificação ainda.
+            // Usamos a ordem física dos estandes.
+            // =========================================
+
+            if (
+                !temNotaA &&
+                !temNotaB
+            ) {
+
+                return compararPorEstandeOuTitulo(
+                    a,
+                    b
+                );
+            }
+
+
+            // =========================================
+            // 2. SOMENTE UM POSSUI NOTA
+            //
+            // Projeto já avaliado fica antes.
+            // =========================================
+
+            if (
+                temNotaA &&
+                !temNotaB
+            ) {
+                return -1;
+            }
+
+
+            if (
+                !temNotaA &&
+                temNotaB
+            ) {
+                return 1;
+            }
+
+
+            // =========================================
+            // 3. OS DOIS POSSUEM NOTA
+            //
+            // Maior nota primeiro.
+            // =========================================
+
+            if (
+                notaB !== notaA
+            ) {
+
+                return (
+                    notaB -
+                    notaA
+                );
+            }
+
+
+            // =========================================
+            // 4. CRITÉRIOS DE DESEMPATE
+            // =========================================
+
+            const criteriosA =
+                Array.isArray(a.criterios)
+                    ? a.criterios
+                    : [];
+
+
+            const criteriosB =
+                Array.isArray(b.criterios)
+                    ? b.criterios
+                    : [];
+
+
+            const idsA =
+                new Set(
+                    criteriosA.map(
+                        criterio =>
                             String(
-                                criterio._id
-                            );
+                                criterio._id ||
+                                criterio
+                            )
+                    )
+                );
 
 
-                        // O critério só pode desempatar se
-                        // pertencer aos dois projetos.
-                        if (
-                            !idsA.has(criterioId) ||
-                            !idsB.has(criterioId)
-                        ) {
-
-                            continue;
-                        }
-
-
-                        const notaCriterioA =
-                            parseFloat(
-                                a.mediasCriterios[
-                                    criterioId
-                                ]
-                            );
+            const idsB =
+                new Set(
+                    criteriosB.map(
+                        criterio =>
+                            String(
+                                criterio._id ||
+                                criterio
+                            )
+                    )
+                );
 
 
-                        const notaCriterioB =
-                            parseFloat(
-                                b.mediasCriterios[
-                                    criterioId
-                                ]
-                            );
+            const criteriosDesempate =
+                criteriosOficiais
+                    .filter(
+                        criterio =>
+                            Number(
+                                criterio.ordemDesempate
+                            ) > 0
+                    )
+                    .sort(
+                        (x, y) =>
+                            Number(
+                                x.ordemDesempate
+                            ) -
+                            Number(
+                                y.ordemDesempate
+                            )
+                    );
 
 
-                        if (
-                            !isNaN(notaCriterioA) &&
-                            !isNaN(notaCriterioB) &&
-                            notaCriterioA !==
-                                notaCriterioB
-                        ) {
+            for (
+                const criterio
+                of criteriosDesempate
+            ) {
 
-                            return (
-                                notaCriterioB -
-                                notaCriterioA
-                            );
-                        }
-                    }
+                const criterioId =
+                    String(
+                        criterio._id
+                    );
 
 
-                    // Persistindo o empate,
-                    // mantém a ordem existente.
-                    return 0;
-                });
-            });
+                // Só usa o critério quando pertence
+                // aos dois projetos comparados.
+                if (
+                    !idsA.has(criterioId) ||
+                    !idsB.has(criterioId)
+                ) {
+
+                    continue;
+                }
+
+
+                const notaCriterioA =
+                    parseFloat(
+                        a.mediasCriterios[
+                            criterioId
+                        ]
+                    );
+
+
+                const notaCriterioB =
+                    parseFloat(
+                        b.mediasCriterios[
+                            criterioId
+                        ]
+                    );
+
+
+                if (
+                    !isNaN(notaCriterioA) &&
+                    !isNaN(notaCriterioB) &&
+                    notaCriterioA !==
+                        notaCriterioB
+                ) {
+
+                    return (
+                        notaCriterioB -
+                        notaCriterioA
+                    );
+                }
+            }
+
+
+            // =========================================
+            // 5. EMPATE TOTAL
+            //
+            // Utiliza o estande como último desempate
+            // de organização.
+            // =========================================
+
+            return compararPorEstandeOuTitulo(
+                a,
+                b
+            );
+        });
+    });
 
 
         // =====================================================
