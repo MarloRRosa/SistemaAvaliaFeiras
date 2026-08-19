@@ -91,33 +91,119 @@
   <table class="min-w-full bg-white shadow-sm rounded-lg">
     <thead>
       <tr>
-        <th class="py-3 px-4 uppercase font-semibold text-sm text-gray-600">
-          Projeto
-        </th>
 
-        <th class="py-3 px-4 uppercase font-semibold text-sm text-gray-600 text-center">
-          Nº Avaliações
-        </th>
+  <th class="py-3 px-4 uppercase font-semibold text-sm text-gray-600 text-center">
+    Estande
+  </th>
 
-        <th class="py-3 px-4 uppercase font-semibold text-sm text-gray-600">
-          Critérios do Projeto
-        </th>
+  <th class="py-3 px-4 uppercase font-semibold text-sm text-gray-600">
+    Projeto
+  </th>
 
-        <th class="py-3 px-4 uppercase font-semibold text-sm text-gray-600 text-center">
-          Média Geral
-        </th>
-      </tr>
+  <th class="py-3 px-4 uppercase font-semibold text-sm text-gray-600 text-center">
+    Nº Avaliações
+  </th>
+
+  <th class="py-3 px-4 uppercase font-semibold text-sm text-gray-600">
+    Critérios do Projeto
+  </th>
+
+  <th class="py-3 px-4 uppercase font-semibold text-sm text-gray-600 text-center">
+    Média Geral
+  </th>
+
+</tr>
     </thead>
 
     <tbody>
-      <% relatorioFinalPorProjeto[categoria].forEach(projeto => { %>
+      <%
+  const projetosOrdenadosCategoria =
+    [...relatorioFinalPorProjeto[categoria]]
+      .sort((a, b) => {
+
+        const numeroA =
+          a.numeroEstande !== undefined &&
+          a.numeroEstande !== null &&
+          a.numeroEstande !== ''
+            ? Number(a.numeroEstande)
+            : null;
+
+        const numeroB =
+          b.numeroEstande !== undefined &&
+          b.numeroEstande !== null &&
+          b.numeroEstande !== ''
+            ? Number(b.numeroEstande)
+            : null;
+
+
+        // Os dois possuem estande
+        if (numeroA !== null && numeroB !== null) {
+
+          if (numeroA !== numeroB) {
+            return numeroA - numeroB;
+          }
+
+          return String(a.titulo || '')
+            .localeCompare(
+              String(b.titulo || ''),
+              'pt-BR',
+              { numeric: true }
+            );
+        }
+
+
+        // Somente A possui número
+        if (numeroA !== null && numeroB === null) {
+          return -1;
+        }
+
+
+        // Somente B possui número
+        if (numeroA === null && numeroB !== null) {
+          return 1;
+        }
+
+
+        // Nenhum possui número
+        return String(a.titulo || '')
+          .localeCompare(
+            String(b.titulo || ''),
+            'pt-BR',
+            { numeric: true }
+          );
+      });
+%>
+
+<% projetosOrdenadosCategoria.forEach(projeto => { %>
 
         <tr class="hover:bg-gray-50">
 
-          <!-- PROJETO -->
-          <td class="py-3 px-4 text-gray-700 font-medium">
-            <%= projeto.titulo %>
-          </td>
+  <!-- NÚMERO DO ESTANDE -->
+  <td class="py-3 px-4 text-center">
+
+    <% if (
+        projeto.numeroEstande !== undefined &&
+        projeto.numeroEstande !== null &&
+        projeto.numeroEstande !== ''
+    ) { %>
+
+      <span class="inline-flex items-center justify-center min-w-8 px-2 py-1 rounded-md bg-blue-100 text-blue-800 font-bold">
+        <%= projeto.numeroEstande %>
+      </span>
+
+    <% } else { %>
+
+      <span class="text-gray-400">-</span>
+
+    <% } %>
+
+  </td>
+
+
+  <!-- PROJETO -->
+  <td class="py-3 px-4 text-gray-700 font-medium">
+    <%= projeto.titulo %>
+  </td>
 
 
           <!-- Nº DE AVALIAÇÕES -->
