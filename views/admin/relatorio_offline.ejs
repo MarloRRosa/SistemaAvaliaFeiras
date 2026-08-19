@@ -1,410 +1,734 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Relatório de Avaliação - <%= feira.nome %></title>
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>
+    Relatório de Avaliação - <%= feira.nome %>
+  </title>
+
   <style>
+
     body {
-      font-family: 'Arial', sans-serif;
+      font-family: Arial, sans-serif;
       font-size: 11px;
-      margin: 25px; /* Margem padrão para o documento */
+      margin: 25px;
       color: #333;
     }
+
+
+    /* ===================================================== */
+    /* CAPA                                                  */
+    /* ===================================================== */
+
     header {
       text-align: center;
       margin-bottom: 20px;
       border-bottom: 2px solid #ccc;
       padding-bottom: 10px;
-      /* page-break-after: always; /* Opcional: Garante que o cabeçalho fique em sua própria página, ou que o conteúdo comece em uma nova */
     }
+
+
     h1 {
-    font-size: 48px; /* Usando pixels para um tamanho fixo */
-}
-    h2, h3, h4 {
+      font-size: 48px;
+      margin-bottom: 15px;
+    }
+
+
+    h2,
+    h3,
+    h4 {
       color: #2c3e50;
       margin-top: 0;
       margin-bottom: 10px;
     }
+
+
+    .avaliador-info {
+      text-align: center;
+      font-style: italic;
+      margin-bottom: 15px;
+      font-size: 20px;
+    }
+
+
+    /* ===================================================== */
+    /* PROJETOS                                              */
+    /* ===================================================== */
+
     .section {
       margin-bottom: 25px;
       padding: 15px;
+
       border: 1px solid #eee;
       border-radius: 8px;
+
       background-color: #f9f9f9;
-      /* Ajuste para evitar quebrar seções muito grandes */
-      page-break-inside: avoid; /* Mantém a seção unida, se possível */
+
+      page-break-inside: avoid;
       break-inside: avoid;
     }
+
+
     .project-wrapper {
       margin-bottom: 30px;
-      page-break-inside: avoid; /* Tenta manter todo o projeto junto */
+
+      page-break-inside: avoid;
       break-inside: avoid;
-      /* Adiciona uma quebra de página antes de cada novo projeto (você já tem isso no EJS, mas aqui reforça a regra CSS) */
-      /* page-break-before: always; */ 
     }
-    /* Para o primeiro projeto não ter uma quebra de página inicial desnecessária */
-    /* .project-wrapper:first-of-type {
-        page-break-before: auto;
-    } */
+
 
     .project-details p {
       margin-bottom: 5px;
     }
+
+
+    /* ===================================================== */
+    /* CRITÉRIOS                                             */
+    /* ===================================================== */
+
     .criteria-group {
       margin-bottom: 20px;
+
       background-color: #fff;
+
       padding: 12px;
+
       border: 1px solid #ddd;
       border-radius: 6px;
-      
-      /* ESTES SÃO OS PONTOS MAIS IMPORTANTES PARA CRITÉRIOS */
-      page-break-inside: avoid; /* Tenta evitar quebrar um critério no meio */
-      break-inside: avoid;
-      page-break-after: auto; /* Não força quebra depois de cada critério */
 
-      /* Adicionando um mínimo de altura para quebra, se necessário. */
-      /* Isso é mais avançado e pode exigir testes. */
-      /* min-height: 120px; /* Exemplo: se um critério for menor que 120px, ele provavelmente não será quebrado */
+      page-break-inside: avoid;
+      break-inside: avoid;
+
+      page-break-after: auto;
     }
+
+
     .criteria-title {
       font-weight: bold;
       font-size: 13px;
       margin-bottom: 4px;
     }
+
+
     .criteria-description {
       font-size: 11px;
       margin-bottom: 6px;
       color: #666;
     }
+
+
     .radio-scale {
       display: flex;
       gap: 8px;
       margin: 6px 0;
     }
+
+
     .radio-scale label {
       display: flex;
       flex-direction: column;
       align-items: center;
       font-size: 10px;
     }
+
+
     .radio-scale input[type="radio"] {
       margin-top: 2px;
     }
+
+
+    /* ===================================================== */
+    /* CAMPOS PARA PREENCHIMENTO                             */
+    /* ===================================================== */
+
     .input-box {
       border: 1px dashed #999;
+
       min-height: 20px;
+
       padding: 4px;
       margin-top: 4px;
+
       background-color: #fff;
+
       box-sizing: border-box;
+
       line-height: 1.2;
+
       width: 100%;
     }
+
+
     .notes-input-box {
-      min-height: 40px; /* Aumentado um pouco para ter mais visibilidade */
+      min-height: 40px;
     }
-    .total-score-box {
-      min-height: 25px;
-      width: 80px;
-      display: inline-block;
-      vertical-align: middle;
-      margin-left: 5px;
-      border: 1px dashed #999;
-      padding: 4px;
-    }
+
+
     .general-comments-box {
       min-height: 80px;
+
       width: 100%;
+
       border: 1px dashed #999;
+
       padding: 4px;
-      page-break-inside: avoid; /* Tenta manter a caixa de comentários gerais unida */
+
+      box-sizing: border-box;
+
+      page-break-inside: avoid;
       break-inside: avoid;
     }
+
+
+    /* ===================================================== */
+    /* QUEBRA DE PÁGINA                                      */
+    /* ===================================================== */
+
     .page-break {
-      page-break-before: always; /* Força uma nova página */
+      page-break-before: always;
+      break-before: page;
     }
-    .avaliador-info {
-      text-align: right;
-      font-style: italic;
-      margin-bottom: 15px;
-      font-size: 12px;
-    }
+
+
+    /* ===================================================== */
+    /* ASSINATURA                                            */
+    /* ===================================================== */
+
     .assinatura-area {
       margin-top: 50px;
+
       text-align: center;
-      page-break-inside: avoid; /* Mantém a área de assinatura unida */
+
+      page-break-inside: avoid;
       break-inside: avoid;
-      page-break-before: avoid; /* Evita uma quebra de página imediatamente antes, se houver espaço */
     }
+
+
     .assinatura-line {
       border-bottom: 1px solid #000;
+
       width: 250px;
-      margin: 0 auto 5px auto;
+
+      margin:
+        0 auto 5px auto;
     }
 
-    /* Regras específicas para impressão/PDF */
+
+    /* ===================================================== */
+    /* IMPRESSÃO                                             */
+    /* ===================================================== */
+
     @media print {
+
       body {
-        margin: 15mm; /* Margens em milímetros, mais precisas para impressão */
-      }
-      header {
-        position: relative; /* ou fixed */
-        top: 0;
-        left: 0;
-        right: 0;
-        /* height: auto; /* Defina uma altura se for fixo */
-        /* background-color: white; /* Garante que não haja transparência */
+        margin: 15mm;
       }
 
-      /* Esta regra é mais agressiva e garante que NENHUM elemento com .criteria-group seja cortado.
-         Se um critério não couber na página atual, ele será movido para a próxima. */
+
       .criteria-group {
-        page-break-after: auto; /* Não força quebra depois de cada critério */
-        page-break-before: auto; /* Não força quebra antes de cada critério */
-        orphans: 3; /* Impede que uma linha fique sozinha no final de uma página */
-        widows: 3;  /* Impede que uma linha fique sozinha no início de uma página */
+        page-break-after: auto;
+        page-break-before: auto;
+
+        orphans: 3;
+        widows: 3;
       }
 
-      /* Tenta mover um critério para a próxima página se ele for cortado */
-      .criteria-group:not(:first-child) { /* Aplica a todos menos o primeiro critério */
-          margin-top: 15px; /* Adiciona um pouco de espaço entre critérios */
+
+      .criteria-group:not(:first-child) {
+        margin-top: 15px;
       }
     }
+
   </style>
 </head>
+
+
 <body>
-<%
-  const exibirSomenteCapa =
-    typeof somenteCapa !== 'undefined'
-      ? somenteCapa
-      : false;
-%>
+
+  <%
+    /*
+     * Compatibilidade:
+     *
+     * - a nova rota envia somenteCapa;
+     * - a rota individual antiga pode não enviar.
+     *
+     * Portanto, se não existir, consideramos false.
+     */
+
+    const exibirSomenteCapa =
+      (
+        typeof somenteCapa !== 'undefined'
+      )
+        ? Boolean(somenteCapa)
+        : false;
+  %>
+
+
+  <!-- ===================================================== -->
+  <!-- CAPA                                                  -->
+  <!-- ===================================================== -->
+
   <header>
-  <h1>Relatório de Avaliação</h1>
-  <h2 style="font-size: 40px;"> <%= feira.nome %></h2>
-  <p style="font-size: 34px;"><%= formatarData(feira.inicioFeira) %> à <%= formatarData(feira.fimFeira) %></p>
 
-  <% if (escola.logo) { %>
-    <img src="<%= escola.logo %>" alt="Logo da Escola" style="max-height: 180px; max-width: 300px; margin-bottom: 10px;">
-  <% } %>
+    <h1>
+      Relatório de Avaliação
+    </h1>
 
-  <% if (avaliador) { %>
-    <div class="avaliador-info" style="font-size: 20px; text-align: center;">Relatório para Avaliador: <strong><%= avaliador.nome %></strong></div>
 
-    <% if (avaliador.qrcode) { %>
-      <div style="text-align: center; margin-bottom: 20px; font-size: 15px;">
-        <p><strong>PIN de Acesso:</strong> <%= avaliador.pin %></p>
-        <img src="<%= avaliador.qrcode %>" alt="QR Code de acesso" style="height: 180px; width: 180px;">
-        <p style="font-size: 10px; color: #555;">Escaneie este código para acessar a tela de avaliação.</p>
-      </div>
+    <h2 style="font-size: 40px;">
+      <%= feira.nome %>
+    </h2>
+
+
+    <p style="font-size: 34px;">
+
+      <%= formatarData(feira.inicioFeira) %>
+
+      à
+
+      <%= formatarData(feira.fimFeira) %>
+
+    </p>
+
+
+    <!-- LOGO DA ESCOLA -->
+
+    <% if (escola && escola.logo) { %>
+
+      <img
+        src="<%= escola.logo %>"
+        alt="Logo da Escola"
+        style="
+          max-height: 180px;
+          max-width: 300px;
+          margin-bottom: 10px;
+        "
+      >
+
     <% } %>
-  <% } %>
-</header>
 
-  <% if (projetos.length === 0) { %>
-    <div class="section">
-      <p>Nenhum projeto encontrado para esta feira<%= avaliador ? ' e avaliador.' : '.' %></p>
-    </div>
-  <% } else { %>
-    <% projetos.forEach((projeto, index) => { %>
-      <% if (index > 0) { %><% if (!exibirSomenteCapa) { %>
 
-  <% if (projetos.length === 0) { %>
+    <!-- AVALIADOR -->
 
-    <div class="section">
-      <p>
-        Nenhum projeto encontrado para esta feira
-        <%= avaliador ? ' e avaliador.' : '.' %>
-      </p>
-    </div>
+    <% if (avaliador) { %>
 
-  <% } else { %>
+      <div class="avaliador-info">
 
-    <% projetos.forEach((projeto, index) => { %>
+        Relatório para Avaliador:
 
-      <!--
-        Sempre inicia cada projeto em uma nova página.
-        Como a capa vem antes, o primeiro projeto também
-        precisa começar em outra página.
-      -->
+        <strong>
+          <%= avaliador.nome %>
+        </strong>
+
+      </div>
+
+
+      <!-- PIN -->
+
+      <% if (avaliador.pin) { %>
+
+        <p style="font-size: 15px;">
+
+          <strong>
+            PIN de Acesso:
+          </strong>
+
+          <%= avaliador.pin %>
+
+        </p>
+
+      <% } %>
+
+
+      <!-- QR CODE -->
+
+      <% if (avaliador.qrcode) { %>
+
+        <div
+          style="
+            text-align: center;
+            margin-bottom: 20px;
+          "
+        >
+
+          <img
+            src="<%= avaliador.qrcode %>"
+            alt="QR Code de acesso"
+            style="
+              height: 180px;
+              width: 180px;
+            "
+          >
+
+          <p
+            style="
+              font-size: 10px;
+              color: #555;
+            "
+          >
+
+            Escaneie este código para acessar
+            a tela de avaliação.
+
+          </p>
+
+        </div>
+
+      <% } %>
+
+    <% } %>
+
+  </header>
+
+
+  <!-- ===================================================== -->
+  <!-- RELATÓRIO COMPLETO                                    -->
+  <!-- Só aparece quando NÃO for solicitado "Somente capa"   -->
+  <!-- ===================================================== -->
+
+  <% if (!exibirSomenteCapa) { %>
+
+
+    <!-- =================================================== -->
+    <!-- NENHUM PROJETO                                     -->
+    <!-- =================================================== -->
+
+    <% if (!projetos || projetos.length === 0) { %>
+
       <div class="page-break"></div>
 
-      <div class="project-wrapper">
+      <div class="section">
 
-        <div class="section">
+        <p>
 
-          <h3>
-            Projeto:
-            <%= projeto.titulo %>
-          </h3>
+          Nenhum projeto encontrado para esta feira
 
-          <div class="project-details">
+          <%= avaliador
+                ? ' e avaliador.'
+                : '.'
+          %>
 
-            <% if (
-              projeto.numeroEstande !== undefined &&
-              projeto.numeroEstande !== null &&
-              projeto.numeroEstande !== ''
-            ) { %>
+        </p>
+
+      </div>
+
+
+    <% } else { %>
+
+
+      <!-- ================================================= -->
+      <!-- PROJETOS                                          -->
+      <!-- ================================================= -->
+
+      <% projetos.forEach((projeto, index) => { %>
+
+
+        <!--
+          A capa ocupa a primeira página.
+          Cada projeto começa em uma nova página.
+        -->
+
+        <div class="page-break"></div>
+
+
+        <div class="project-wrapper">
+
+          <div class="section">
+
+
+            <!-- TÍTULO -->
+
+            <h3>
+              Projeto:
+              <%= projeto.titulo %>
+            </h3>
+
+
+            <!-- DADOS DO PROJETO -->
+
+            <div class="project-details">
+
+
+              <!-- Nº ESTANDE -->
+
+              <%
+                const possuiNumeroEstande =
+                  projeto.numeroEstande !== undefined &&
+                  projeto.numeroEstande !== null &&
+                  projeto.numeroEstande !== '';
+              %>
+
+
+              <% if (possuiNumeroEstande) { %>
+
+                <p>
+
+                  <strong>
+                    Nº do Estande:
+                  </strong>
+
+                  <%= projeto.numeroEstande %>
+
+                </p>
+
+              <% } %>
+
+
+              <!-- ESCOLA -->
 
               <p>
-                <strong>Nº do Estande:</strong>
-                <%= projeto.numeroEstande %>
+
+                <strong>
+                  Escola:
+                </strong>
+
+                <%= projeto.escolaNome || 'N/A' %>
+
+              </p>
+
+
+              <!-- ALUNOS -->
+
+              <p>
+
+                <strong>
+                  Alunos:
+                </strong>
+
+                <%= projeto.alunos || 'N/A' %>
+
+              </p>
+
+
+              <!-- ORIENTADOR -->
+
+              <p>
+
+                <strong>
+                  Orientador:
+                </strong>
+
+                <%= projeto.orientador || 'N/A' %>
+
+              </p>
+
+
+              <!-- COORIENTADOR -->
+
+              <p>
+
+                <strong>
+                  Coorientador:
+                </strong>
+
+                <%= projeto.coorientador || 'N/A' %>
+
+              </p>
+
+
+              <!-- CATEGORIA -->
+
+              <p>
+
+                <strong>
+                  Categoria:
+                </strong>
+
+                <% if (
+                  projeto.categoria &&
+                  projeto.categoria.nome
+                ) { %>
+
+                  <%= projeto.categoria.nome %>
+
+                <% } else { %>
+
+                  N/A
+
+                <% } %>
+
+              </p>
+
+
+              <!-- RESUMO -->
+
+              <p>
+
+                <strong>
+                  Resumo:
+                </strong>
+
+                <%= projeto.resumo || projeto.descricao || 'N/A' %>
+
+              </p>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- CRITÉRIOS                                         -->
+            <!-- ================================================= -->
+
+            <h4>
+              Critérios de Avaliação:
+            </h4>
+
+
+            <% if (
+              projeto.criteriosAvaliacao &&
+              Array.isArray(projeto.criteriosAvaliacao) &&
+              projeto.criteriosAvaliacao.length > 0
+            ) { %>
+
+
+              <% projeto.criteriosAvaliacao.forEach((criterio) => { %>
+
+
+                <div class="criteria-group">
+
+
+                  <!-- NOME -->
+
+                  <div class="criteria-title">
+                    <%= criterio.nome %>
+                  </div>
+
+
+                  <!-- DESCRIÇÃO -->
+
+                  <% if (criterio.descricao) { %>
+
+                    <div class="criteria-description">
+
+                      <%= criterio.descricao %>
+
+                    </div>
+
+                  <% } %>
+
+
+                  <!-- OBSERVAÇÃO -->
+
+                  <% if (criterio.observacao) { %>
+
+                    <div class="criteria-description">
+
+                      <em>
+                        Obs:
+                      </em>
+
+                      <%= criterio.observacao %>
+
+                    </div>
+
+                  <% } %>
+
+
+                  <!-- NOTAS -->
+
+                  <div class="radio-scale">
+
+                    <% for (let nota = 5; nota <= 10; nota++) { %>
+
+                      <label>
+
+                        <span>
+                          <%= nota %>
+                        </span>
+
+                        <input
+                          type="radio"
+                          name="criterio_<%= projeto._id %>_<%= criterio._id %>"
+                          value="<%= nota %>"
+                        >
+
+                      </label>
+
+                    <% } %>
+
+                  </div>
+
+
+                  <!-- OBSERVAÇÃO MANUAL -->
+
+                  <div
+                    class="input-box notes-input-box"
+                  ></div>
+
+                </div>
+
+              <% }); %>
+
+
+            <% } else { %>
+
+              <p>
+
+                Nenhum critério de avaliação
+                encontrado para este projeto.
+
               </p>
 
             <% } %>
 
-            <p>
-              <strong>Escola:</strong>
-              <%= projeto.escolaNome || 'N/A' %>
-            </p>
 
-            <p>
-              <strong>Alunos:</strong>
-              <%= projeto.alunos || 'N/A' %>
-            </p>
+            <!-- ================================================= -->
+            <!-- COMENTÁRIOS                                       -->
+            <!-- ================================================= -->
 
-            <p>
-              <strong>Orientador:</strong>
-              <%= projeto.orientador || 'N/A' %>
-            </p>
+            <h4 style="margin-top: 20px;">
 
-            <p>
-              <strong>Coorientador:</strong>
-              <%= projeto.coorientador || 'N/A' %>
-            </p>
+              Comentários Gerais do Avaliador
+              para este Projeto:
 
-            <p>
-              <strong>Categoria:</strong>
-              <%= projeto.categoria
-                    ? projeto.categoria.nome
-                    : 'N/A'
-              %>
-            </p>
+            </h4>
 
-            <p>
-              <strong>Resumo:</strong>
-              <%= projeto.resumo || 'N/A' %>
-            </p>
+
+            <div class="general-comments-box"></div>
 
           </div>
 
-
-          <h4>
-            Critérios de Avaliação:
-          </h4>
-
-
-          <% if (
-            projeto.criteriosAvaliacao &&
-            projeto.criteriosAvaliacao.length > 0
-          ) { %>
-
-
-            <% projeto.criteriosAvaliacao.forEach(criterio => { %>
-
-              <div class="criteria-group">
-
-                <div class="criteria-title">
-                  <%= criterio.nome %>
-                </div>
-
-
-                <% if (criterio.descricao) { %>
-
-                  <div class="criteria-description">
-                    <%= criterio.descricao %>
-                  </div>
-
-                <% } %>
-
-
-                <% if (criterio.observacao) { %>
-
-                  <div class="criteria-description">
-
-                    <em>Obs:</em>
-
-                    <%= criterio.observacao %>
-
-                  </div>
-
-                <% } %>
-
-
-                <div class="radio-scale">
-
-                  <% for (let i = 5; i <= 10; i++) { %>
-
-                    <label>
-
-                      <span>
-                        <%= i %>
-                      </span>
-
-                      <input
-                        type="radio"
-                        name="criterio_<%= projeto._id %>_<%= criterio._id %>"
-                        value="<%= i %>"
-                      >
-
-                    </label>
-
-                  <% } %>
-
-                </div>
-
-
-                <div
-                  class="input-box notes-input-box"
-                ></div>
-
-              </div>
-
-            <% }); %>
-
-
-          <% } else { %>
-
-            <p>
-              Nenhum critério de avaliação encontrado para este projeto.
-            </p>
-
-          <% } %>
-
-
-          <h4 style="margin-top: 20px;">
-            Comentários Gerais do Avaliador para este Projeto:
-          </h4>
-
-          <div class="general-comments-box"></div>
-
         </div>
+
+      <% }); %>
+
+    <% } %>
+
+
+    <!-- =================================================== -->
+    <!-- ASSINATURA                                          -->
+    <!-- =================================================== -->
+
+    <% if (avaliador) { %>
+
+      <div class="assinatura-area">
+
+        <div class="assinatura-line"></div>
+
+        <p>
+
+          Assinatura do Avaliador:
+
+          <strong>
+            <%= avaliador.nome %>
+          </strong>
+
+        </p>
 
       </div>
 
-    <% }); %>
+    <% } %>
+
 
   <% } %>
 
 
-  <!-- =================================================== -->
-  <!-- ASSINATURA                                          -->
-  <!-- =================================================== -->
-
-  <div class="assinatura-area">
-
-    <div class="assinatura-line"></div>
-
-    <p>
-      Assinatura do Avaliador:
-      <strong>
-        <%= avaliador.nome %>
-      </strong>
-    </p>
-
-  </div>
-
-<% } %>
 </body>
 </html>
