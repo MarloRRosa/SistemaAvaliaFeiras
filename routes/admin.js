@@ -731,6 +731,435 @@ router.get(
   }
 );
 
+// ============================================================
+// CERTIFICADOS - PRÉ-VISUALIZAR MODELO COM DADOS REAIS
+// ============================================================
+
+router.get(
+    '/certificados/modelos/:id/visualizar',
+    verificarAdminEscola,
+    async (req, res) => {
+
+        try {
+
+            const escolaId =
+                req.session.adminEscola.escolaId;
+
+            const { id } =
+                req.params;
+
+            const {
+                projetoId,
+                participante,
+                avaliadorId
+            } = req.query;
+
+
+            // =================================================
+            // VALIDAR MODELO
+            // =================================================
+
+            if (
+                !id ||
+                !mongoose.Types.ObjectId.isValid(id)
+            ) {
+
+                req.flash(
+                    'error_msg',
+                    'Modelo de certificado inválido.'
+                );
+
+                return res.redirect(
+                    '/admin/certificados/modelos'
+                );
+            }
+
+
+            // =================================================
+            // MODELO
+            // =================================================
+
+            const modelo =
+                await ModeloCertificado.findOne({
+                    _id: id,
+                    escolaId
+                }).lean();
+
+
+            if (!modelo) {
+
+                req.flash(
+                    'error_msg',
+                    'Modelo de certificado não encontrado.'
+                );
+
+                return res.redirect(
+                    '/admin/certificados/modelos'
+                );
+            }
+
+
+            // =================================================
+            // FEIRA
+            // =================================================
+
+            const feira =
+                await Feira.findOne({
+                    _id:
+                        modelo.feira,
+
+                    escolaId
+                }).lean();
+
+
+            if (!feira) {
+
+                req.flash(
+                    'error_msg',
+                    'Feira do certificado não encontrada.'
+                );
+
+                return res.redirect(
+                    '/admin/certificados/modelos'
+                );
+            }
+
+
+            // =================================================
+            // ESCOLA
+            // =================================================
+
+            const escola =
+                await Escola.findById(
+                    escolaId
+                ).lean();
+
+
+            // =================================================
+            // PROJETOS DA FEIRA
+            // =================================================
+
+            const projetos =
+                await Projeto.find({
+                    feira:
+                        feira._id,
+
+                    escolaId
+                })
+                    .populate('categoria')
+                    .sort({
+                        numeroEstande: 1,
+                        titulo: 1
+                    })
+                    .lean();
+
+
+            // =================================================
+            // PROJETO PARA TESTE
+            // =================================================
+
+            let projetoSelecionado =
+                null;
+
+
+            if (
+                projetoId &&
+                mongoose.Types.ObjectId.isValid(
+                    projetoId
+                )
+            ) {
+
+                projetoSelecionado =
+                    projetos.find(
+                        projeto =>
+                            String(
+                                projeto._id
+                            ) ===
+                            String(
+                                projetoId
+                            )
+                    ) || null;
+            }
+
+
+            // Se não escolheu um projeto,
+            // usamos o primeiro disponível.
+
+            if (
+                !projetoSelecionado &&
+                projetos.length > 0
+            ) {
+
+                projetoSelecionado =
+                    projetos[0];
+            }
+
+
+            // =================================================
+            // PARTICIPANTES DO PROJETO
+            // =================================================
+
+            let participantes =
+                [];
+
+
+            if (
+                projetoSelecionado &&
+                Array.isArray(
+                    projetoSelecionado.alunos
+                )
+            ) {
+
+                participantes =
+                    projetoSelecionado.alunos
+                        .map(aluno => {
+
+                            if (
+                                typeof aluno === 'string'
+                            ) {
+
+                                return aluno.trim();
+                            }
+
+
+                            if (
+                                aluno &&
+                                typeof aluno === 'object'
+                            ) {
+
+                                return String(
+                                    aluno.nome ||
+                                    aluno.name ||
+                                    ''
+                                ).trim();
+                            }
+
+
+                            return '';
+                        })
+                        .filter(Boolean);
+            }
+
+
+            // =================================================
+            // PARTICIPANTE SELECIONADO
+            // =================================================
+
+            let participanteSelecionado =
+                participante
+                    ? String(
+                        participante
+                    ).trim()
+                    : '';
+
+
+            if (
+                !participanteSelecionado &&
+                participantes.length > 0
+            ) {
+
+                participanteSelecionado =
+                    participantes[0];
+            }
+
+
+            // =================================================
+            // AVALIADORES
+            // =================================================
+
+            const avaliadores =
+                await Avaliador.find({
+                    feira:
+                        feira._id,
+
+                    escolaId
+                })
+                    .sort({
+                        nome: 1
+                    })
+                    .lean();
+
+
+            let avaliadorSelecionado =
+                null;
+
+
+            if (
+                avaliadorId &&
+                mongoose.Types.ObjectId.isValid(
+                    avaliadorId
+                )
+            ) {
+
+                avaliadorSelecionado =
+                    avaliadores.find(
+                        avaliador =>
+                            String(
+                                avaliador._id
+                            ) ===
+                            String(
+                                avaliadorId
+                            )
+                    ) || null;
+            }
+
+
+            if (
+                modelo.tipo === 'avaliador' &&
+                !avaliadorSelecionado &&
+                avaliadores.length > 0
+            ) {
+
+                avaliadorSelecionado =
+                    avaliadores[0];
+            }
+
+
+            // =================================================
+            // PARTICIPANTE CONFORME TIPO DO MODELO
+            // =================================================
+
+            if (
+                modelo.tipo === 'orientador' &&
+                projetoSelecionado
+            ) {
+
+                participanteSelecionado =
+                    projetoSelecionado.orientador ||
+                    'NOME DO ORIENTADOR';
+            }
+
+
+            if (
+                modelo.tipo === 'coorientador' &&
+                projetoSelecionado
+            ) {
+
+                participanteSelecionado =
+                    projetoSelecionado.coorientador ||
+                    'NOME DO COORIENTADOR';
+            }
+
+
+            if (
+                modelo.tipo === 'avaliador' &&
+                avaliadorSelecionado
+            ) {
+
+                participanteSelecionado =
+                    avaliadorSelecionado.nome;
+            }
+
+
+            // =================================================
+            // SUBSTITUIR CAMPOS AUTOMÁTICOS
+            // =================================================
+
+            const elementosResolvidos =
+                Array.isArray(
+                    modelo.elementos
+                )
+                    ? modelo.elementos.map(
+                        elemento => {
+
+                            const elementoNovo =
+                                {
+                                    ...elemento
+                                };
+
+
+                            if (
+                                elemento.tipo === 'campo'
+                            ) {
+
+                                elementoNovo.texto =
+                                    resolverCampoCertificado(
+                                        elemento.campo,
+                                        {
+                                            participante:
+                                                participanteSelecionado,
+
+                                            projeto:
+                                                projetoSelecionado,
+
+                                            feira,
+
+                                            escola,
+
+                                            avaliador:
+                                                avaliadorSelecionado
+                                        }
+                                    );
+                            }
+
+
+                            return elementoNovo;
+                        }
+                    )
+                    : [];
+
+
+            // =================================================
+            // RENDERIZAR
+            // =================================================
+
+            return res.render(
+                'admin/certificados/visualizar-modelo',
+                {
+
+                    titulo:
+                        'Pré-visualização do Certificado',
+
+                    layout:
+                        false,
+
+                    modelo: {
+                        ...modelo,
+                        elementos:
+                            elementosResolvidos
+                    },
+
+                    feira,
+
+                    escola,
+
+                    projetos,
+
+                    participantes,
+
+                    avaliadores,
+
+                    projetoSelecionado,
+
+                    participanteSelecionado,
+
+                    avaliadorSelecionado
+                }
+            );
+
+
+        } catch (err) {
+
+            console.error(
+                'Erro ao visualizar certificado:',
+                err
+            );
+
+
+            req.flash(
+                'error_msg',
+                'Erro ao gerar pré-visualização do certificado. ' +
+                err.message
+            );
+
+
+            return res.redirect(
+                '/admin/certificados/modelos'
+            );
+        }
+    }
+);
+
 // -------------------------------------------
 // EDITAR MODELO - SALVAR
 // -------------------------------------------
