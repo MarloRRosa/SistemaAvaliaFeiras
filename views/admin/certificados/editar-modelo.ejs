@@ -2380,13 +2380,15 @@ function selecionarElementoTexto(elemento) {
     'selecionado'
   );
 
-
   elementoSelecionado =
     elemento;
 const ehCampoAutomatico =
   elemento.dataset.tipo ===
   'campo';
 
+const ehTextoInteligente =
+  elemento.dataset.tipo ===
+  'textoInteligente';
 
 if (ehCampoAutomatico) {
 
@@ -2465,6 +2467,26 @@ if (ehCampoAutomatico) {
       .add('hidden');
   }
 }
+// =====================================================
+// TEXTO INTELIGENTE
+// =====================================================
+
+if (ehTextoInteligente) {
+
+  elementoTextoConteudo.disabled =
+    true;
+
+  elementoTextoConteudo.classList.add(
+    'bg-purple-50',
+    'cursor-not-allowed'
+  );
+
+} else {
+
+  elementoTextoConteudo.classList.remove(
+    'bg-purple-50'
+  );
+}
 
   const conteudo =
     elemento.querySelector(
@@ -2475,13 +2497,43 @@ if (ehCampoAutomatico) {
   elementoTextoId.value =
     elemento.dataset.elementoId;
 
+  if (ehTextoInteligente) {
+
+  const partes =
+    conteudo
+      ? conteudo.querySelectorAll('span')
+      : [];
+
+  let textoEditor = '';
+
+  partes.forEach(parte => {
+
+    if (
+      parte.classList.contains(
+        'chip-campo-dinamico'
+      )
+    ) {
+
+      textoEditor +=
+        `[${parte.textContent.trim()}]`;
+
+    } else {
+
+      textoEditor +=
+        parte.textContent;
+    }
+  });
+
+  elementoTextoConteudo.value =
+    textoEditor.trim();
+
+} else {
 
   elementoTextoConteudo.value =
     conteudo
-      ? conteudo.textContent
+      ? conteudo.textContent.trim()
       : '';
-
-
+}
   elementoTamanhoFonte.value =
     parseInt(
       elemento.style.fontSize,
@@ -2493,12 +2545,9 @@ if (ehCampoAutomatico) {
     rgbParaHex(
       elemento.style.color
     );
-
-
   elementoAlinhamento.value =
     elemento.style.textAlign ||
     'center';
-
 
   textoNegrito =
     elemento.style.fontWeight ===
@@ -2506,22 +2555,14 @@ if (ehCampoAutomatico) {
     Number(
       elemento.style.fontWeight
     ) >= 600;
-
-
   textoItalico =
     elemento.style.fontStyle ===
     'italic';
-
-
   atualizarEstadoBotoesTexto();
-
-
   painelTexto.classList.remove(
     'hidden'
   );
 }
-
-
 // =====================================================
 // PREPARAR ELEMENTO EXISTENTE
 // =====================================================
