@@ -509,97 +509,260 @@
           </p>
 
 
-          <div class="grid grid-cols-2 gap-3">
+          <%
+            // =================================================
+            // CAMPOS AUTOMÁTICOS DISPONÍVEIS POR TIPO
+            // =================================================
 
+            const tipoModeloAtual =
+              modelo.tipo || 'geral';
 
+            const camposBase = [
+              {
+                campo: 'nomeParticipante',
+                label:
+                  tipoModeloAtual === 'estudante'
+                    ? 'Estudante'
+                    : tipoModeloAtual === 'orientador'
+                      ? 'Orientador'
+                      : tipoModeloAtual === 'coorientador'
+                        ? 'Coorientador'
+                        : tipoModeloAtual === 'avaliador'
+                          ? 'Avaliador'
+                          : 'Participante',
+                icon: 'fa-user',
+                cor: 'blue'
+              },
+              {
+                campo: 'nomeFeira',
+                label: 'Feira',
+                icon: 'fa-calendar-days',
+                cor: 'indigo'
+              },
+              {
+                campo: 'nomeEscola',
+                label: 'Escola',
+                icon: 'fa-school',
+                cor: 'indigo'
+              }
+            ];
 
-            <!-- TEXTO -->
-<button
-  type="button"
-  id="btnAdicionarTexto"
-  class="border border-blue-200 rounded-lg p-3 text-center bg-blue-50 text-blue-700 hover:bg-blue-100 hover:border-blue-300 transition"
->
-  <i class="fas fa-font text-xl mb-2"></i>
+            const camposProjeto = [
+              {
+                campo: 'tituloProjeto',
+                label: 'Projeto',
+                icon: 'fa-lightbulb',
+                cor: 'cyan'
+              },
+              {
+                campo: 'categoria',
+                label: 'Categoria',
+                icon: 'fa-tags',
+                cor: 'cyan'
+              },
+              {
+                campo: 'turma',
+                label: 'Turma',
+                icon: 'fa-users',
+                cor: 'cyan'
+              },
+              {
+                campo: 'numeroEstande',
+                label: 'Estande',
+                icon: 'fa-hashtag',
+                cor: 'cyan'
+              },
+              {
+                campo: 'orientador',
+                label: 'Orientador',
+                icon: 'fa-user-tie',
+                cor: 'emerald'
+              },
+              {
+                campo: 'coorientador',
+                label: 'Coorientador',
+                icon: 'fa-user-graduate',
+                cor: 'emerald'
+              }
+            ];
 
-  <div class="text-sm font-semibold">
-    Texto
-  </div>
-</button>
+            let camposAutomaticosDisponiveis =
+              [...camposBase];
 
+            if (
+              tipoModeloAtual === 'estudante' ||
+              tipoModeloAtual === 'orientador' ||
+              tipoModeloAtual === 'coorientador' ||
+              tipoModeloAtual === 'geral'
+            ) {
+              camposAutomaticosDisponiveis.push(
+                ...camposProjeto
+              );
+            }
+          %>
 
-<!-- PARTICIPANTE -->
-<button
-  type="button"
-  id="btnAdicionarParticipante"
-  class="border border-blue-200 rounded-lg p-3 text-center bg-blue-50 text-blue-700 hover:bg-blue-100 hover:border-blue-300 transition"
->
-  <i class="fas fa-user text-xl mb-2"></i>
+          <!-- ================================================= -->
+          <!-- TEXTO LIVRE                                      -->
+          <!-- ================================================= -->
 
-  <div class="text-sm font-semibold">
-    Participante
-  </div>
-</button>
+          <div class="mb-5">
 
+            <p class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">
+              Texto livre
+            </p>
 
-<!-- LOGO -->
-<button
-  type="button"
-  disabled
-  class="border border-gray-200 rounded-lg p-3 text-center bg-gray-100 text-gray-500 cursor-not-allowed"
->
-  <i class="fas fa-image text-xl mb-2"></i>
-
-  <div class="text-sm font-semibold">
-    Logo
-  </div>
-</button>
-
-
-<!-- ASSINATURA -->
-<button
-  type="button"
-  disabled
-  class="border border-gray-200 rounded-lg p-3 text-center bg-gray-100 text-gray-500 cursor-not-allowed"
->
-  <i class="fas fa-signature text-xl mb-2"></i>
-
-  <div class="text-sm font-semibold">
-    Assinatura
-  </div>
-</button>
-
-
-            <!-- FUNDO -->
-<button
-  type="button"
-  id="btnConfigurarFundo"
-  class="border border-purple-200 rounded-lg p-3 text-center bg-purple-50 text-purple-700 hover:bg-purple-100 hover:border-purple-300 transition"
->
-  <i class="fas fa-images text-xl mb-2"></i>
-
-  <div class="text-sm font-semibold">
-    Fundo
-  </div>
-</button>
-
-
-            <!-- QR CODE -->
             <button
               type="button"
-              disabled
-              class="border border-gray-200 rounded-lg p-3 text-center bg-gray-100 text-gray-500 cursor-not-allowed"
+              id="btnAdicionarTexto"
+              class="w-full border border-blue-200 rounded-lg p-3 text-center bg-blue-50 text-blue-700 hover:bg-blue-100 hover:border-blue-300 transition"
             >
-
-              <i class="fas fa-qrcode text-xl mb-2"></i>
+              <i class="fas fa-font text-xl mb-2"></i>
 
               <div class="text-sm font-semibold">
-                QR Code
+                Adicionar Texto
               </div>
-
             </button>
 
           </div>
 
+
+          <!-- ================================================= -->
+          <!-- CAMPOS AUTOMÁTICOS                               -->
+          <!-- ================================================= -->
+
+          <div class="mb-5">
+
+            <div class="flex items-center justify-between gap-3 mb-3">
+
+              <p class="text-xs font-bold text-gray-500 uppercase tracking-wide">
+                Campos automáticos
+              </p>
+
+              <span class="text-xs text-blue-600">
+                Preenchidos na emissão
+              </span>
+
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+
+              <% camposAutomaticosDisponiveis.forEach(item => { %>
+
+                <button
+                  type="button"
+                  class="btn-campo-automatico border rounded-lg p-3 text-center transition
+                    <%= item.cor === 'emerald'
+                      ? 'border-green-200 bg-green-50 text-green-700 hover:bg-green-100 hover:border-green-300'
+                      : item.cor === 'cyan'
+                        ? 'border-cyan-200 bg-cyan-50 text-cyan-700 hover:bg-cyan-100 hover:border-cyan-300'
+                        : item.cor === 'indigo'
+                          ? 'border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 hover:border-indigo-300'
+                          : 'border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 hover:border-blue-300'
+                    %>"
+                  data-campo="<%= item.campo %>"
+                  data-label="<%= item.label %>"
+                >
+
+                  <i class="fas <%= item.icon %> text-xl mb-2"></i>
+
+                  <div class="text-sm font-semibold">
+                    <%= item.label %>
+                  </div>
+
+                </button>
+
+              <% }); %>
+
+            </div>
+
+            <div class="mt-3 bg-blue-50 border border-blue-100 rounded-lg p-3">
+
+              <p class="text-xs text-blue-700 leading-relaxed">
+                Os campos automáticos mostram um texto de exemplo no editor.
+                Ao gerar o certificado, o sistema substituirá pelo dado real
+                do estudante, orientador, avaliador, projeto, feira ou escola.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <!-- ================================================= -->
+          <!-- IMAGENS E OUTROS                                 -->
+          <!-- ================================================= -->
+
+          <div>
+
+            <p class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">
+              Imagens e outros
+            </p>
+
+            <div class="grid grid-cols-2 gap-3">
+
+              <!-- LOGO -->
+              <button
+                type="button"
+                disabled
+                title="Será habilitado na próxima etapa"
+                class="border border-gray-200 rounded-lg p-3 text-center bg-gray-100 text-gray-500 cursor-not-allowed"
+              >
+                <i class="fas fa-image text-xl mb-2"></i>
+
+                <div class="text-sm font-semibold">
+                  Logo
+                </div>
+              </button>
+
+
+              <!-- ASSINATURA -->
+              <button
+                type="button"
+                disabled
+                title="Será habilitado na próxima etapa"
+                class="border border-gray-200 rounded-lg p-3 text-center bg-gray-100 text-gray-500 cursor-not-allowed"
+              >
+                <i class="fas fa-signature text-xl mb-2"></i>
+
+                <div class="text-sm font-semibold">
+                  Assinatura
+                </div>
+              </button>
+
+
+              <!-- FUNDO -->
+              <button
+                type="button"
+                id="btnConfigurarFundo"
+                class="border border-purple-200 rounded-lg p-3 text-center bg-purple-50 text-purple-700 hover:bg-purple-100 hover:border-purple-300 transition"
+              >
+                <i class="fas fa-images text-xl mb-2"></i>
+
+                <div class="text-sm font-semibold">
+                  Fundo
+                </div>
+              </button>
+
+
+              <!-- QR CODE -->
+              <button
+                type="button"
+                disabled
+                title="Será habilitado na próxima etapa"
+                class="border border-gray-200 rounded-lg p-3 text-center bg-gray-100 text-gray-500 cursor-not-allowed"
+              >
+                <i class="fas fa-qrcode text-xl mb-2"></i>
+
+                <div class="text-sm font-semibold">
+                  QR Code
+                </div>
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
         </div>
 <!-- ===================================================== -->
 <!-- PROPRIEDADES DO TEXTO                                 -->
@@ -1487,6 +1650,110 @@ const avisoCampoAutomatico =
 
 const nomeCampoAutomatico =
   document.getElementById('nomeCampoAutomatico');
+
+const botoesCamposAutomaticos =
+  document.querySelectorAll(
+    '.btn-campo-automatico'
+  );
+
+
+// =====================================================
+// ADICIONAR QUALQUER CAMPO AUTOMÁTICO
+// =====================================================
+
+botoesCamposAutomaticos.forEach(
+  botao => {
+
+    botao.addEventListener(
+      'click',
+      async function () {
+
+        const campo =
+          this.dataset.campo;
+
+        const label =
+          this.dataset.label ||
+          'campo automático';
+
+
+        if (!campo) {
+          return;
+        }
+
+
+        try {
+
+          this.disabled =
+            true;
+
+
+          const body =
+            new URLSearchParams();
+
+
+          body.append(
+            'campo',
+            campo
+          );
+
+
+          const resposta =
+            await fetch(
+              `/admin/certificados/modelos/${modeloCertificadoId}/elementos/campo`,
+              {
+                method:
+                  'POST',
+
+                headers: {
+                  'Content-Type':
+                    'application/x-www-form-urlencoded;charset=UTF-8'
+                },
+
+                body
+              }
+            );
+
+
+          const resultado =
+            await resposta.json();
+
+
+          if (!resultado.sucesso) {
+
+            throw new Error(
+              resultado.mensagem ||
+              `Não foi possível adicionar ${label}.`
+            );
+          }
+
+
+          criarElementoTextoVisual(
+            resultado.elemento
+          );
+
+
+        } catch (erro) {
+
+          console.error(
+            'Erro ao adicionar campo automático:',
+            erro
+          );
+
+
+          alert(
+            erro.message
+          );
+
+
+        } finally {
+
+          this.disabled =
+            false;
+        }
+      }
+    );
+  }
+);
 
 
 let elementoSelecionado = null;
