@@ -444,6 +444,152 @@ router.post('/resetar-senha/:token', async (req, res) => {
   }
 });
 
+// ============================================================
+// CERTIFICADOS - RESOLVER CAMPOS AUTOMÁTICOS
+// ============================================================
+
+function resolverCampoCertificado(
+    campo,
+    contexto = {}
+) {
+
+    const {
+        participante = '',
+        projeto = null,
+        feira = null,
+        escola = null,
+        avaliador = null
+    } = contexto;
+
+
+    switch (campo) {
+
+        // =====================================================
+        // PARTICIPANTE
+        // =====================================================
+
+        case 'nomeParticipante':
+
+            return (
+                participante ||
+                avaliador?.nome ||
+                'NOME DO PARTICIPANTE'
+            );
+
+
+        // =====================================================
+        // FEIRA
+        // =====================================================
+
+        case 'nomeFeira':
+
+            return (
+                feira?.nome ||
+                'NOME DA FEIRA'
+            );
+
+
+        // =====================================================
+        // ESCOLA
+        // =====================================================
+
+        case 'nomeEscola':
+
+            return (
+                escola?.nome ||
+                'NOME DA ESCOLA'
+            );
+
+
+        // =====================================================
+        // PROJETO
+        // =====================================================
+
+        case 'tituloProjeto':
+
+            return (
+                projeto?.titulo ||
+                'TÍTULO DO PROJETO'
+            );
+
+
+        // =====================================================
+        // CATEGORIA
+        // =====================================================
+
+        case 'categoria':
+
+            return (
+                projeto?.categoria?.nome ||
+                'CATEGORIA'
+            );
+
+
+        // =====================================================
+        // TURMA
+        // =====================================================
+
+        case 'turma':
+
+            return (
+                projeto?.turma ||
+                'TURMA'
+            );
+
+
+        // =====================================================
+        // ORIENTADOR
+        // =====================================================
+
+        case 'orientador':
+
+            return (
+                projeto?.orientador ||
+                'NOME DO ORIENTADOR'
+            );
+
+
+        // =====================================================
+        // COORIENTADOR
+        // =====================================================
+
+        case 'coorientador':
+
+            return (
+                projeto?.coorientador ||
+                'NOME DO COORIENTADOR'
+            );
+
+
+        // =====================================================
+        // ESTANDE
+        // =====================================================
+
+        case 'numeroEstande':
+
+            if (
+                projeto?.numeroEstande !== undefined &&
+                projeto?.numeroEstande !== null &&
+                projeto?.numeroEstande !== ''
+            ) {
+
+                return String(
+                    projeto.numeroEstande
+                );
+            }
+
+            return '-';
+
+
+        // =====================================================
+        // CAMPO NÃO RECONHECIDO
+        // =====================================================
+
+        default:
+
+            return '';
+    }
+}
 // ===========================================
 // ROTAS - MODELOS DE CERTIFICADO
 // ===========================================
