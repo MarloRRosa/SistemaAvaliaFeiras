@@ -77,6 +77,31 @@
       margin: 20px 0;
       color: #111827;
     }
+
+.elemento-texto-inteligente
+.elemento-texto-conteudo {
+
+  display:
+    block;
+
+  height:
+    auto;
+
+  min-height:
+    100%;
+
+  line-height:
+    1.4;
+
+  white-space:
+    normal;
+
+  overflow-wrap:
+    break-word;
+
+  word-break:
+    normal;
+}
 /* ===================================================== */
 /* ELEMENTOS VISUAIS DO CERTIFICADO                      */
 /* ===================================================== */
@@ -144,6 +169,32 @@
 
   display: flex;
   align-items: center;
+}
+/* ===================================================== */
+/* CAMPOS DENTRO DO TEXTO INTELIGENTE                    */
+/* ===================================================== */
+
+.chip-campo-dinamico {
+  display: inline;
+
+  padding: 2px 5px;
+
+  border-radius: 4px;
+
+  background:
+    rgba(37, 99, 235, 0.10);
+
+  border:
+    1px solid rgba(37, 99, 235, 0.25);
+
+  color:
+    #1d4ed8;
+
+  box-decoration-break:
+    clone;
+
+  -webkit-box-decoration-break:
+    clone;
 }
 
 /* ===================================================== */
@@ -1003,7 +1054,8 @@
       ? modelo.elementos.filter(
           el =>
             el.tipo === 'texto' ||
-            el.tipo === 'campo'
+            el.tipo === 'campo' ||
+            el.tipo === 'textoInteligente'
         )
       : [];
 %>
@@ -1011,7 +1063,18 @@
 <% elementosEditaveis.forEach(elemento => { %>
 
  <div
-  class="elemento-certificado elemento-texto <%= elemento.tipo === 'campo' ? 'campo-automatico' : '' %>"
+  class="
+  elemento-certificado
+  elemento-texto
+  <%= elemento.tipo === 'campo'
+    ? 'campo-automatico'
+    : ''
+  %>
+  <%= elemento.tipo === 'textoInteligente'
+    ? 'elemento-texto-inteligente'
+    : ''
+  %>
+"
   data-elemento-id="<%= elemento._id %>"
   data-tipo="<%= elemento.tipo %>"
   data-campo="<%= elemento.campo || '' %>"
@@ -1040,8 +1103,96 @@
   >
 
     <div class="elemento-texto-conteudo">
-      <%= elemento.texto || 'Digite seu texto' %>
-    </div>
+
+  <% if (elemento.tipo === 'textoInteligente') { %>
+
+    <% if (
+      Array.isArray(elemento.conteudo) &&
+      elemento.conteudo.length > 0
+    ) { %>
+
+      <% elemento.conteudo.forEach(parte => { %>
+
+        <% if (parte.tipo === 'texto') { %>
+
+          <span
+            style="
+              font-weight: <%= parte.negrito ? '700' : 'inherit' %>;
+              font-style: <%= parte.italico ? 'italic' : 'inherit' %>;
+              text-decoration: <%= parte.sublinhado ? 'underline' : 'none' %>;
+              color: <%= parte.cor || 'inherit' %>;
+            "
+          >
+            <%= parte.texto || '' %>
+          </span>
+
+        <% } else if (parte.tipo === 'campo') { %>
+
+          <span
+            class="chip-campo-dinamico"
+            data-campo="<%= parte.campo %>"
+            style="
+              font-weight: <%= parte.negrito ? '700' : 'inherit' %>;
+              font-style: <%= parte.italico ? 'italic' : 'inherit' %>;
+              text-decoration: <%= parte.sublinhado ? 'underline' : 'none' %>;
+              color: <%= parte.cor || 'inherit' %>;
+            "
+          >
+
+            <%
+              const nomesCamposEditor = {
+                nomeParticipante:
+                  'Nome do estudante',
+
+                nomeFeira:
+                  'Nome da feira',
+
+                nomeEscola:
+                  'Nome da escola',
+
+                tituloProjeto:
+                  'Título do projeto',
+
+                categoria:
+                  'Categoria',
+
+                turma:
+                  'Turma',
+
+                orientador:
+                  'Orientador',
+
+                coorientador:
+                  'Coorientador',
+
+                numeroEstande:
+                  'Número do estande'
+              };
+            %>
+
+            <%= nomesCamposEditor[parte.campo] || parte.campo %>
+
+          </span>
+
+        <% } %>
+
+      <% }) %>
+
+    <% } else { %>
+
+      <span>
+        Digite seu texto
+      </span>
+
+    <% } %>
+
+  <% } else { %>
+
+    <%= elemento.texto || 'Digite seu texto' %>
+
+  <% } %>
+
+</div>
 
   </div>
 
