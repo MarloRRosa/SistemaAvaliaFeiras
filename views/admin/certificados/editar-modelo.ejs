@@ -656,28 +656,38 @@
           <!-- ================================================= -->
           <!-- TEXTO LIVRE                                      -->
           <!-- ================================================= -->
-
           <div class="mb-5">
-
-            <p class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">
-              Texto livre
-            </p>
-
-            <button
-              type="button"
-              id="btnAdicionarTexto"
-              class="w-full border border-blue-200 rounded-lg p-3 text-center bg-blue-50 text-blue-700 hover:bg-blue-100 hover:border-blue-300 transition"
-            >
-              <i class="fas fa-font text-xl mb-2"></i>
-
-              <div class="text-sm font-semibold">
-                Adicionar Texto
-              </div>
-            </button>
-
-          </div>
-
-
+  <p class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">
+    Textos
+  </p>
+  <div class="grid grid-cols-1 gap-3">
+    <!-- TEXTO INTELIGENTE -->
+    <button
+      type="button"
+      id="btnAdicionarTextoInteligente"
+      class="w-full border border-purple-200 rounded-lg p-3 text-center bg-purple-50 text-purple-700 hover:bg-purple-100 hover:border-purple-300 transition"
+    >
+      <i class="fas fa-wand-magic-sparkles text-xl mb-2"></i>
+      <div class="text-sm font-semibold">
+        Adicionar Texto Inteligente
+      </div>
+      <div class="text-xs mt-1 text-purple-600">
+        Misture texto e dados automáticos
+      </div>
+    </button>
+    <!-- TEXTO SIMPLES -->
+    <button
+      type="button"
+      id="btnAdicionarTexto"
+      class="w-full border border-blue-200 rounded-lg p-3 text-center bg-blue-50 text-blue-700 hover:bg-blue-100 hover:border-blue-300 transition"
+    >
+      <i class="fas fa-font text-xl mb-2"></i>
+      <div class="text-sm font-semibold">
+        Adicionar Texto Simples
+      </div>
+    </button>
+  </div>
+</div>
           <!-- ================================================= -->
           <!-- CAMPOS AUTOMÁTICOS                               -->
           <!-- ================================================= -->
@@ -1763,40 +1773,32 @@ document.addEventListener('DOMContentLoaded', function () {
 
 const modeloCertificadoId =
   '<%= modelo._id %>';
-
 const btnAdicionarTexto =
   document.getElementById('btnAdicionarTexto');
-
+const btnAdicionarTextoInteligente =
+  document.getElementById(
+    'btnAdicionarTextoInteligente'
+  );
 const painelTexto =
   document.getElementById('painelTexto');
-
 const elementoTextoId =
   document.getElementById('elementoTextoId');
-
 const elementoTextoConteudo =
   document.getElementById('elementoTextoConteudo');
-
 const elementoTamanhoFonte =
   document.getElementById('elementoTamanhoFonte');
-
 const elementoCor =
   document.getElementById('elementoCor');
-
 const elementoAlinhamento =
   document.getElementById('elementoAlinhamento');
-
 const btnTextoNegrito =
   document.getElementById('btnTextoNegrito');
-
 const btnTextoItalico =
   document.getElementById('btnTextoItalico');
-
 const btnExcluirElemento =
   document.getElementById('btnExcluirElemento');
-
 const btnAdicionarParticipante =
   document.getElementById('btnAdicionarParticipante');
-
 const avisoCampoAutomatico =
   document.getElementById('avisoCampoAutomatico');
 
@@ -1974,87 +1976,198 @@ async function atualizarElemento(
 // =====================================================
 
 function criarElementoTextoVisual(elemento) {
-
   const div =
     document.createElement('div');
-
-
   div.className =
     'elemento-certificado elemento-texto';
-
-
   div.dataset.elementoId =
     elemento._id;
-
-
   div.dataset.tipo =
-  elemento.tipo || 'texto';
-
-div.dataset.campo =
-  elemento.campo || '';
-
-
-if (
-  elemento.tipo === 'campo'
-) {
-
-  div.classList.add(
-    'campo-automatico'
-  );
-}
-
-
+    elemento.tipo || 'texto';
+  div.dataset.campo =
+    elemento.campo || '';
+  // =====================================================
+  // CLASSES ESPECIAIS
+  // =====================================================
+  if (
+    elemento.tipo === 'campo'
+  ) {
+    div.classList.add(
+      'campo-automatico'
+    );
+  }
+  if (
+    elemento.tipo === 'textoInteligente'
+  ) {
+    div.classList.add(
+      'elemento-texto-inteligente'
+    );
+  }
+  // =====================================================
+  // POSIÇÃO E TAMANHO
+  // =====================================================
   div.style.left =
     `${elemento.x || 0}px`;
-
   div.style.top =
     `${elemento.y || 0}px`;
-
   div.style.width =
     `${elemento.largura || 340}px`;
-
   div.style.height =
     `${elemento.altura || 50}px`;
-
+  // =====================================================
+  // FORMATAÇÃO
+  // =====================================================
   div.style.fontFamily =
     elemento.fonte || 'Arial';
-
   div.style.fontSize =
     `${elemento.tamanhoFonte || 24}px`;
-
   div.style.fontWeight =
     elemento.negrito
       ? 'bold'
       : 'normal';
-
   div.style.fontStyle =
     elemento.italico
       ? 'italic'
       : 'normal';
-
   div.style.color =
     elemento.cor || '#000000';
-
   div.style.textAlign =
     elemento.alinhamento || 'center';
-
-
+  // =====================================================
+  // CONTEÚDO
+  // =====================================================
   const conteudo =
     document.createElement('div');
-
-
   conteudo.className =
     'elemento-texto-conteudo';
-
-
-  conteudo.textContent =
-    elemento.texto ||
-    'Digite seu texto';
-
-
+  // =====================================================
+  // TEXTO INTELIGENTE
+  // =====================================================
+  if (
+    elemento.tipo === 'textoInteligente'
+  ) {
+    if (
+      Array.isArray(elemento.conteudo) &&
+      elemento.conteudo.length > 0
+    ) {
+      elemento.conteudo.forEach(
+        parte => {
+          const span =
+            document.createElement('span');
+          // =============================================
+          // TEXTO NORMAL
+          // =============================================
+          if (
+            parte.tipo === 'texto'
+          ) {
+            span.textContent =
+              parte.texto || '';
+          }
+          // =============================================
+          // CAMPO DINÂMICO
+          // =============================================
+          else if (
+            parte.tipo === 'campo'
+          ) {
+            const nomesCamposEditor = {
+              nomeParticipante:
+                'Nome do estudante',
+              nomeFeira:
+                'Nome da feira',
+              nomeEscola:
+                'Nome da escola',
+              tituloProjeto:
+                'Título do projeto',
+              categoria:
+                'Categoria',
+              turma:
+                'Turma',
+              orientador:
+                'Orientador',
+              coorientador:
+                'Coorientador',
+              numeroEstande:
+                'Número do estande'
+            };
+            span.classList.add(
+              'chip-campo-dinamico'
+            );
+            span.dataset.campo =
+              parte.campo || '';
+            span.textContent =
+              nomesCamposEditor[
+                parte.campo
+              ] ||
+              parte.campo ||
+              'Campo';
+          }
+          // =============================================
+          // FORMATAÇÃO DA PARTE
+          // =============================================
+          span.style.fontWeight =
+            parte.negrito
+              ? '700'
+              : 'inherit';
+          span.style.fontStyle =
+            parte.italico
+              ? 'italic'
+              : 'inherit';
+          span.style.textDecoration =
+            parte.sublinhado
+              ? 'underline'
+             : 'none';
+          span.style.color =
+            parte.cor ||
+            'inherit';
+          conteudo.appendChild(
+            span
+          );
+        }
+      );
+    } else {
+      conteudo.textContent =
+        'Digite seu texto';
+    }
+  }
+  // =====================================================
+  // TEXTO / CAMPO ANTIGO
+  // =====================================================
+  else {
+    conteudo.textContent =
+      elemento.texto ||
+      'Digite seu texto';
+  }
   div.appendChild(
     conteudo
   );
+  // =====================================================
+  // ALÇA DE REDIMENSIONAMENTO
+  // =====================================================
+  const alca =
+    document.createElement('div');
+  alca.className =
+    'resize-handle';
+  alca.title =
+    'Arraste para redimensionar';
+  div.appendChild(
+    alca
+  );
+  // =====================================================
+  // INSERIR NO CERTIFICADO
+  // =====================================================
+  certificadoPreview.appendChild(
+    div
+  );
+  // =====================================================
+  // PREPARAR COMPORTAMENTOS
+  // =====================================================
+  prepararElementoTexto(
+    div
+  );
+  selecionarElementoTexto(
+    div
+  );
+}
 // =====================================================
 // ALÇA DE REDIMENSIONAMENTO
 // =====================================================
@@ -2082,6 +2195,50 @@ div.appendChild(
 
   selecionarElementoTexto(
     div
+  );
+}
+// =====================================================
+// ADICIONAR TEXTO INTELIGENTE
+// =====================================================
+if (btnAdicionarTextoInteligente) {
+  btnAdicionarTextoInteligente.addEventListener(
+    'click',
+    async function () {
+      try {
+        btnAdicionarTextoInteligente.disabled =
+          true;
+        const resposta =
+          await fetch(
+            `/admin/certificados/modelos/${modeloCertificadoId}/elementos/texto-inteligente`,
+            {
+              method:
+                'POST'
+            }
+          );
+        const resultado =
+          await resposta.json();
+        if (!resultado.sucesso) {
+          throw new Error(
+            resultado.mensagem ||
+            'Não foi possível adicionar o texto inteligente.'
+          );
+        }
+        criarElementoTextoVisual(
+          resultado.elemento
+        );
+      } catch (erro) {
+        console.error(
+          'Erro ao adicionar texto inteligente:',
+          erro
+        );
+        alert(
+          erro.message
+        );
+      } finally {
+        btnAdicionarTextoInteligente.disabled =
+          false;
+      }
+    }
   );
 }
 
