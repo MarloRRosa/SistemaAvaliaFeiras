@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title><%= titulo %></title>
+
   <style>
     body {
       font-family: 'Arial', sans-serif;
@@ -20,14 +21,34 @@
       padding-bottom: 10px;
     }
 
+    .categoria-section {
+      margin-bottom: 35px;
+    }
+
+    .categoria-header {
+      font-size: 17px;
+      color: #0056b3;
+      margin: 0 0 15px 0;
+      padding: 8px 12px;
+      background-color: #e6f2ff;
+      border-left: 4px solid #0056b3;
+      border-radius: 4px;
+      font-weight: bold;
+
+      page-break-after: avoid;
+      break-after: avoid;
+    }
+
     .projeto-section {
-      margin-bottom: 30px;
+      margin-bottom: 25px;
       padding: 15px;
       border: 1px solid #ddd;
       border-radius: 5px;
       background-color: #f9f9f9;
       box-shadow: 2px 2px 5px rgba(0,0,0,0.05);
+
       page-break-inside: avoid;
+      break-inside: avoid;
     }
 
     .projeto-header {
@@ -35,9 +56,43 @@
       color: #007bff;
       margin-top: 0;
       margin-bottom: 10px;
+
       display: flex;
       justify-content: space-between;
       align-items: center;
+
+      gap: 10px;
+    }
+
+    .projeto-titulo-area {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .estande-badge {
+      display: inline-block;
+      background-color: #0056b3;
+      color: #fff;
+      font-size: 11px;
+      font-weight: bold;
+      padding: 3px 7px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    .sem-estande {
+      background-color: #999;
+    }
+
+    .avaliador-status {
+      font-size: 11px;
+      color: #555;
+      background-color: #e9ecef;
+      padding: 4px 8px;
+      border-radius: 12px;
+      white-space: nowrap;
     }
 
     .projeto-info {
@@ -61,6 +116,7 @@
       border: 1px solid #e0e0e0;
       padding: 8px 10px;
       text-align: left;
+      vertical-align: middle;
     }
 
     .avaliadores-table thead th {
@@ -75,16 +131,16 @@
     }
 
     .avaliadores-table td:nth-child(1) {
-        width: 50%;
+      width: 45%;
     }
 
     .avaliadores-table td:nth-child(2) {
-        width: 30%;
+      width: 35%;
     }
 
     .avaliadores-table td:nth-child(3) {
-        width: 20%;
-        white-space: nowrap;
+      width: 20%;
+      white-space: nowrap;
     }
 
     .no-avaliadores {
@@ -96,80 +152,340 @@
       background-color: #eee;
       border-radius: 4px;
     }
+
+    @media print {
+      .categoria-header {
+        page-break-after: avoid;
+        break-after: avoid;
+      }
+
+      .projeto-section {
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+    }
   </style>
 </head>
+
 <body>
+
   <h1><%= titulo %></h1>
 
-  <% projetos.forEach(p => { %>
-    <div class="projeto-section">
-      <h2 class="projeto-header">
-  <%= p.titulo %>
+  <%
+    // =====================================================
+    // AGRUPAR PROJETOS POR CATEGORIA
+    // =====================================================
 
-  <span class="avaliador-status">
-    <%= p.statusProjeto || 'Não Avaliado' %>
-  </span>
-</h2>
+    const projetosPorCategoria = {};
 
-<div class="projeto-info">
-  <p>
-    Total de critérios:
-    <strong><%= p.totalCriterios || 0 %></strong>
-    |
-    Avaliadores:
-    <strong><%= p.totalAvaliadores || 0 %></strong>
-    |
-    Avaliados:
-    <strong><%= p.totalAvaliados || 0 %></strong>
-    |
-    Em avaliação:
-    <strong><%= p.totalEmAvaliacao || 0 %></strong>
-    |
-    Pendentes:
-    <strong><%= p.totalPendentes || 0 %></strong>
-  </p>
-</div>
+    (projetos || []).forEach(projeto => {
 
-      <% if (p.avaliadores.length > 0) { %>
-        <table class="avaliadores-table">
-          <thead>
-            <tr>
-  <th>Nome do Avaliador</th>
-  <th>Email</th>
-  <th>Status</th>
-</tr>
-          </thead>
-          <tbody>
-           <% p.avaliadores.forEach(av => { %>
-  <tr>
-    <td><%= av.nome %></td>
+      const nomeCategoria =
+        projeto.categoria &&
+        projeto.categoria.nome
+          ? projeto.categoria.nome
+          : 'Sem Categoria';
 
-    <td><%= av.email %></td>
+      if (!projetosPorCategoria[nomeCategoria]) {
+        projetosPorCategoria[nomeCategoria] = [];
+      }
 
-    <td>
-      <strong>
-        <%= av.status || 'Pendente' %>
-      </strong>
+      projetosPorCategoria[nomeCategoria].push(projeto);
+    });
 
-      <% if (
-          av.totalCriterios !== undefined &&
-          av.criteriosRespondidos !== undefined
-      ) { %>
-        <br>
 
-        <small>
-          <%= av.criteriosRespondidos %>/<%= av.totalCriterios %> critérios
-        </small>
-      <% } %>
-    </td>
-  </tr>
-<% }) %>
-          </tbody>
-        </table>
-      <% } else { %>
-        <p class="no-avaliadores"><em>Nenhum avaliador atribuído.</em></p>
-      <% } %>
-    </div>
-  <% }) %>
+    // =====================================================
+    // ORDENAR CATEGORIAS
+    // =====================================================
+
+    const categoriasOrdenadas =
+      Object
+        .keys(projetosPorCategoria)
+        .sort((a, b) =>
+          a.localeCompare(
+            b,
+            'pt-BR',
+            {
+              numeric: true
+            }
+          )
+        );
+  %>
+
+
+  <% categoriasOrdenadas.forEach(nomeCategoria => { %>
+
+    <section class="categoria-section">
+
+      <h2 class="categoria-header">
+        <%= nomeCategoria %>
+      </h2>
+
+
+      <%
+        // =================================================
+        // ORDENAR PROJETOS DA CATEGORIA
+        //
+        // 1. Com estande primeiro
+        // 2. Menor número de estande
+        // 3. Sem estande depois
+        // 4. Em empate, título
+        // =================================================
+
+        const projetosOrdenados =
+          [...projetosPorCategoria[nomeCategoria]]
+            .sort((a, b) => {
+
+              const estandeA =
+                a.numeroEstande !== undefined &&
+                a.numeroEstande !== null &&
+                a.numeroEstande !== ''
+                  ? Number(a.numeroEstande)
+                  : null;
+
+              const estandeB =
+                b.numeroEstande !== undefined &&
+                b.numeroEstande !== null &&
+                b.numeroEstande !== ''
+                  ? Number(b.numeroEstande)
+                  : null;
+
+
+              // Ambos têm estande
+              if (
+                estandeA !== null &&
+                estandeB !== null
+              ) {
+
+                if (estandeA !== estandeB) {
+                  return estandeA - estandeB;
+                }
+
+                return String(a.titulo || '')
+                  .localeCompare(
+                    String(b.titulo || ''),
+                    'pt-BR',
+                    {
+                      numeric: true
+                    }
+                  );
+              }
+
+
+              // Só A tem estande
+              if (
+                estandeA !== null &&
+                estandeB === null
+              ) {
+                return -1;
+              }
+
+
+              // Só B tem estande
+              if (
+                estandeA === null &&
+                estandeB !== null
+              ) {
+                return 1;
+              }
+
+
+              // Nenhum tem estande
+              return String(a.titulo || '')
+                .localeCompare(
+                  String(b.titulo || ''),
+                  'pt-BR',
+                  {
+                    numeric: true
+                  }
+                );
+            });
+      %>
+
+
+      <% projetosOrdenados.forEach(p => { %>
+
+        <div class="projeto-section">
+
+          <h2 class="projeto-header">
+
+            <span class="projeto-titulo-area">
+
+              <% if (
+                p.numeroEstande !== undefined &&
+                p.numeroEstande !== null &&
+                p.numeroEstande !== ''
+              ) { %>
+
+                <span class="estande-badge">
+                  Estande <%= p.numeroEstande %>
+                </span>
+
+              <% } else { %>
+
+                <span class="estande-badge sem-estande">
+                  Sem estande
+                </span>
+
+              <% } %>
+
+
+              <span>
+                <%= p.titulo %>
+              </span>
+
+            </span>
+
+
+            <span class="avaliador-status">
+              <%= p.statusProjeto || 'Não Avaliado' %>
+            </span>
+
+          </h2>
+
+
+          <div class="projeto-info">
+
+            <p>
+
+              Total de critérios:
+              <strong>
+                <%= p.totalCriterios || 0 %>
+              </strong>
+
+              |
+
+              Avaliadores:
+              <strong>
+                <%= p.totalAvaliadores || 0 %>
+              </strong>
+
+              |
+
+              Avaliados:
+              <strong>
+                <%= p.totalAvaliados || 0 %>
+              </strong>
+
+              |
+
+              Em avaliação:
+              <strong>
+                <%= p.totalEmAvaliacao || 0 %>
+              </strong>
+
+              |
+
+              Pendentes:
+              <strong>
+                <%= p.totalPendentes || 0 %>
+              </strong>
+
+            </p>
+
+          </div>
+
+
+          <% if (
+            p.avaliadores &&
+            p.avaliadores.length > 0
+          ) { %>
+
+            <table class="avaliadores-table">
+
+              <thead>
+
+                <tr>
+
+                  <th>
+                    Nome do Avaliador
+                  </th>
+
+                  <th>
+                    Email
+                  </th>
+
+                  <th>
+                    Status
+                  </th>
+
+                </tr>
+
+              </thead>
+
+
+              <tbody>
+
+                <% p.avaliadores.forEach(av => { %>
+
+                  <tr>
+
+                    <td>
+                      <%= av.nome %>
+                    </td>
+
+                    <td>
+                      <%= av.email %>
+                    </td>
+
+                    <td>
+
+                      <strong>
+                        <%= av.status || 'Pendente' %>
+                      </strong>
+
+
+                      <% if (
+                        av.totalCriterios !== undefined &&
+                        av.criteriosRespondidos !== undefined
+                      ) { %>
+
+                        <br>
+
+                        <small>
+                          <%= av.criteriosRespondidos %>/<%= av.totalCriterios %>
+                          critérios
+                        </small>
+
+                      <% } %>
+
+                    </td>
+
+                  </tr>
+
+                <% }); %>
+
+              </tbody>
+
+            </table>
+
+
+          <% } else { %>
+
+            <p class="no-avaliadores">
+
+              Nenhum avaliador atribuído.
+
+            </p>
+
+          <% } %>
+
+        </div>
+
+      <% }); %>
+
+    </section>
+
+  <% }); %>
+
+
+  <% if (categoriasOrdenadas.length === 0) { %>
+
+    <p class="no-avaliadores">
+      Nenhum projeto encontrado.
+    </p>
+
+  <% } %>
+
 </body>
 </html>
