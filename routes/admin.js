@@ -1639,7 +1639,242 @@ router.post(
         }
     }
 );
+// ============================================================
+// CERTIFICADOS - ADICIONAR TEXTO INTELIGENTE
+// ============================================================
 
+router.post(
+    '/certificados/modelos/:id/elementos/texto-inteligente',
+    verificarAdminEscola,
+    async (req, res) => {
+
+        try {
+
+            const escolaId =
+                req.session.adminEscola.escolaId;
+
+            const { id } =
+                req.params;
+
+
+            // =================================================
+            // VALIDAR MODELO
+            // =================================================
+
+            if (
+                !mongoose.Types.ObjectId.isValid(id)
+            ) {
+
+                return res.status(400).json({
+                    sucesso: false,
+                    mensagem:
+                        'ID do modelo inválido.'
+                });
+            }
+
+
+            // =================================================
+            // BUSCAR MODELO
+            // =================================================
+
+            const modelo =
+                await ModeloCertificado.findOne({
+                    _id: id,
+                    escolaId
+                });
+
+
+            if (!modelo) {
+
+                return res.status(404).json({
+                    sucesso: false,
+                    mensagem:
+                        'Modelo de certificado não encontrado.'
+                });
+            }
+
+
+            // =================================================
+            // CRIAR TEXTO INTELIGENTE
+            // =================================================
+
+            modelo.elementos.push({
+
+                tipo:
+                    'textoInteligente',
+
+                // Texto simples continua vazio.
+                texto:
+                    '',
+
+                // Campo simples também continua vazio.
+                campo:
+                    '',
+
+                // Conteúdo interno do bloco.
+                conteudo: [
+                    {
+                        tipo:
+                            'texto',
+
+                        texto:
+                            'Certificamos que '
+                    },
+
+                    {
+                        tipo:
+                            'campo',
+
+                        campo:
+                            'nomeParticipante',
+
+                        negrito:
+                            true
+                    },
+
+                    {
+                        tipo:
+                            'texto',
+
+                        texto:
+                            ' participou da '
+                    },
+
+                    {
+                        tipo:
+                            'campo',
+
+                        campo:
+                            'nomeFeira',
+
+                        negrito:
+                            true
+                    },
+
+                    {
+                        tipo:
+                            'texto',
+
+                        texto:
+                            ', apresentando o projeto '
+                    },
+
+                    {
+                        tipo:
+                            'campo',
+
+                        campo:
+                            'tituloProjeto',
+
+                        italico:
+                            true
+                    },
+
+                    {
+                        tipo:
+                            'texto',
+
+                        texto:
+                            '.'
+                    }
+                ],
+
+
+                // =================================================
+                // POSIÇÃO INICIAL
+                // =================================================
+
+                x:
+                    100,
+
+                y:
+                    220,
+
+
+                // =================================================
+                // TAMANHO INICIAL
+                // =================================================
+
+                largura:
+                    640,
+
+                altura:
+                    150,
+
+
+                // =================================================
+                // FORMATAÇÃO
+                // =================================================
+
+                fonte:
+                    'Arial',
+
+                tamanhoFonte:
+                    20,
+
+                negrito:
+                    false,
+
+                italico:
+                    false,
+
+                alinhamento:
+                    'center',
+
+                cor:
+                    '#000000',
+
+                ordem:
+                    modelo.elementos.length
+            });
+
+
+            // =================================================
+            // SALVAR
+            // =================================================
+
+            await modelo.save();
+
+
+            const novoElemento =
+                modelo.elementos[
+                    modelo.elementos.length - 1
+                ];
+
+
+            // =================================================
+            // RETORNAR
+            // =================================================
+
+            return res.json({
+
+                sucesso:
+                    true,
+
+                elemento:
+                    novoElemento
+            });
+
+
+        } catch (err) {
+
+            console.error(
+                'Erro ao adicionar texto inteligente ao certificado:',
+                err
+            );
+
+
+            return res.status(500).json({
+
+                sucesso:
+                    false,
+
+                mensagem:
+                    'Erro ao adicionar texto inteligente ao certificado.'
+            });
+        }
+    }
+);
 // ============================================================
 // CERTIFICADOS - ADICIONAR ELEMENTO DE TEXTO
 // ============================================================
