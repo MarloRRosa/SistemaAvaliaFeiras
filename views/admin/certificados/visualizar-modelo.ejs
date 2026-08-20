@@ -1,0 +1,1674 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title><%= titulo %></title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    >
+
+
+    <style>
+
+        body {
+            background:
+                linear-gradient(
+                    135deg,
+                    #f3f4f6 0%,
+                    #e5e7eb 100%
+                );
+        }
+
+
+        /* =====================================================
+           ÁREA DA PRÉ-VISUALIZAÇÃO
+           ===================================================== */
+
+        .certificado-wrapper {
+
+            width: 100%;
+
+            overflow: auto;
+
+            padding:
+                20px 0 30px 0;
+        }
+
+
+        .certificado-area {
+
+            position: relative;
+
+            margin:
+                0 auto;
+
+            background-color:
+                #ffffff;
+
+            background-position:
+                center;
+
+            background-repeat:
+                no-repeat;
+
+            overflow:
+                hidden;
+
+            box-shadow:
+                0 15px 40px
+                rgba(0, 0, 0, 0.18);
+
+            border:
+                1px solid #d1d5db;
+
+            flex-shrink:
+                0;
+        }
+
+
+        /* A4 PAISAGEM */
+
+        .certificado-paisagem {
+
+            width:
+                842px;
+
+            height:
+                595px;
+        }
+
+
+        /* A4 RETRATO */
+
+        .certificado-retrato {
+
+            width:
+                595px;
+
+            height:
+                842px;
+        }
+
+
+        /* =====================================================
+           ELEMENTOS DO CERTIFICADO
+           ===================================================== */
+
+        .certificado-elemento {
+
+            position:
+                absolute;
+
+            display:
+                flex;
+
+            box-sizing:
+                border-box;
+
+            overflow:
+                hidden;
+
+            white-space:
+                normal;
+
+            word-break:
+                break-word;
+
+            overflow-wrap:
+                anywhere;
+
+            line-height:
+                1.15;
+
+            align-items:
+                center;
+        }
+
+
+        /* =====================================================
+           AVISO
+           ===================================================== */
+
+        .preview-badge {
+
+            display:
+                inline-flex;
+
+            align-items:
+                center;
+
+            gap:
+                6px;
+
+            padding:
+                6px 12px;
+
+            border-radius:
+                9999px;
+
+            background:
+                #dbeafe;
+
+            color:
+                #1d4ed8;
+
+            font-size:
+                12px;
+
+            font-weight:
+                600;
+        }
+
+
+        /* =====================================================
+           MOBILE
+           ===================================================== */
+
+        @media (
+            max-width: 900px
+        ) {
+
+            .certificado-wrapper {
+
+                justify-content:
+                    flex-start;
+            }
+        }
+
+
+        /* =====================================================
+           IMPRESSÃO
+           ===================================================== */
+
+        @media print {
+
+            body {
+
+                background:
+                    white !important;
+
+                margin:
+                    0;
+
+                padding:
+                    0;
+            }
+
+
+            .nao-imprimir {
+
+                display:
+                    none !important;
+            }
+
+
+            .certificado-wrapper {
+
+                padding:
+                    0;
+
+                overflow:
+                    visible;
+            }
+
+
+            .certificado-area {
+
+                box-shadow:
+                    none;
+
+                border:
+                    none;
+
+                margin:
+                    0 auto;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body class="min-h-screen text-gray-800">
+
+
+    <!-- =====================================================
+         CABEÇALHO
+         ===================================================== -->
+
+    <div
+        class="
+            nao-imprimir
+            max-w-7xl
+            mx-auto
+            px-4
+            pt-8
+        "
+    >
+
+        <div
+            class="
+                bg-white
+                rounded-xl
+                shadow-md
+                border
+                border-gray-200
+                p-6
+                mb-6
+            "
+        >
+
+            <div
+                class="
+                    flex
+                    flex-col
+                    lg:flex-row
+                    lg:items-center
+                    lg:justify-between
+                    gap-4
+                "
+            >
+
+                <div>
+
+                    <h1
+                        class="
+                            text-2xl
+                            md:text-3xl
+                            font-bold
+                            text-gray-800
+                            flex
+                            items-center
+                            gap-3
+                        "
+                    >
+
+                        <i
+                            class="
+                                fas
+                                fa-eye
+                                text-blue-600
+                            "
+                        ></i>
+
+                        Pré-visualização do Certificado
+
+                    </h1>
+
+
+                    <p
+                        class="
+                            text-gray-600
+                            mt-2
+                        "
+                    >
+
+                        Modelo:
+
+                        <strong
+                            class="
+                                text-purple-700
+                            "
+                        >
+
+                            <%= modelo.nome %>
+
+                        </strong>
+
+                    </p>
+
+
+                    <% if (feira) { %>
+
+                        <p
+                            class="
+                                text-sm
+                                text-gray-500
+                                mt-1
+                            "
+                        >
+
+                            Feira:
+
+                            <strong>
+
+                                <%= feira.nome %>
+
+                            </strong>
+
+                        </p>
+
+                    <% } %>
+
+
+                    <% if (
+                        escola &&
+                        escola.nome
+                    ) { %>
+
+                        <p
+                            class="
+                                text-sm
+                                text-gray-500
+                            "
+                        >
+
+                            Escola:
+
+                            <%= escola.nome %>
+
+                        </p>
+
+                    <% } %>
+
+                </div>
+
+
+                <div
+                    class="
+                        flex
+                        flex-wrap
+                        gap-2
+                    "
+                >
+
+                    <a
+                        href="/admin/certificados/modelos/<%= modelo._id %>/editar"
+                        class="
+                            inline-flex
+                            items-center
+                            bg-yellow-500
+                            hover:bg-yellow-600
+                            text-white
+                            font-semibold
+                            py-2
+                            px-4
+                            rounded-lg
+                            transition
+                        "
+                    >
+
+                        <i
+                            class="
+                                fas
+                                fa-edit
+                                mr-2
+                            "
+                        ></i>
+
+                        Voltar ao Editor
+
+                    </a>
+
+
+                    <a
+                        href="/admin/certificados/modelos?feiraId=<%= modelo.feira %>"
+                        class="
+                            inline-flex
+                            items-center
+                            bg-gray-600
+                            hover:bg-gray-700
+                            text-white
+                            font-semibold
+                            py-2
+                            px-4
+                            rounded-lg
+                            transition
+                        "
+                    >
+
+                        <i
+                            class="
+                                fas
+                                fa-arrow-left
+                                mr-2
+                            "
+                        ></i>
+
+                        Modelos
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         SELEÇÃO DOS DADOS REAIS
+         ===================================================== -->
+
+    <div
+        class="
+            nao-imprimir
+            max-w-7xl
+            mx-auto
+            px-4
+        "
+    >
+
+        <div
+            class="
+                bg-white
+                rounded-xl
+                shadow-md
+                border
+                border-gray-200
+                p-6
+                mb-6
+            "
+        >
+
+            <div
+                class="
+                    flex
+                    items-center
+                    justify-between
+                    gap-4
+                    mb-5
+                "
+            >
+
+                <div>
+
+                    <h2
+                        class="
+                            text-xl
+                            font-bold
+                            text-gray-800
+                        "
+                    >
+
+                        <i
+                            class="
+                                fas
+                                fa-database
+                                text-purple-600
+                                mr-2
+                            "
+                        ></i>
+
+                        Dados para a Prévia
+
+                    </h2>
+
+
+                    <p
+                        class="
+                            text-sm
+                            text-gray-500
+                            mt-1
+                        "
+                    >
+
+                        Selecione um registro real da feira
+                        para testar o certificado.
+
+                    </p>
+
+                </div>
+
+
+                <span
+                    class="preview-badge"
+                >
+
+                    <i
+                        class="
+                            fas
+                            fa-check-circle
+                        "
+                    ></i>
+
+                    Dados reais
+
+                </span>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 MODELO DE AVALIADOR
+                 ================================================= -->
+
+            <% if (
+                modelo.tipo === 'avaliador'
+            ) { %>
+
+
+                <form
+                    method="GET"
+                    action="/admin/certificados/modelos/<%= modelo._id %>/visualizar"
+                    class="
+                        grid
+                        grid-cols-1
+                        md:grid-cols-3
+                        gap-4
+                        items-end
+                    "
+                >
+
+
+                    <div
+                        class="
+                            md:col-span-2
+                        "
+                    >
+
+                        <label
+                            for="avaliadorId"
+                            class="
+                                block
+                                text-sm
+                                font-semibold
+                                text-gray-700
+                                mb-2
+                            "
+                        >
+
+                            Avaliador
+
+                        </label>
+
+
+                        <select
+                            id="avaliadorId"
+                            name="avaliadorId"
+                            class="
+                                w-full
+                                border
+                                border-gray-300
+                                rounded-lg
+                                px-3
+                                py-2
+                                focus:outline-none
+                                focus:ring-2
+                                focus:ring-purple-500
+                            "
+                        >
+
+                            <% if (
+                                avaliadores &&
+                                avaliadores.length > 0
+                            ) { %>
+
+
+                                <% avaliadores.forEach(
+                                    avaliador => {
+                                %>
+
+                                    <option
+                                        value="<%= avaliador._id %>"
+                                        <% if (
+                                            avaliadorSelecionado &&
+                                            String(avaliadorSelecionado._id) ===
+                                            String(avaliador._id)
+                                        ) { %>
+                                            selected
+                                        <% } %>
+                                    >
+
+                                        <%= avaliador.nome %>
+
+                                        <% if (
+                                            avaliador.email
+                                        ) { %>
+
+                                            -
+                                            <%= avaliador.email %>
+
+                                        <% } %>
+
+                                    </option>
+
+                                <% }) %>
+
+
+                            <% } else { %>
+
+                                <option value="">
+
+                                    Nenhum avaliador encontrado
+
+                                </option>
+
+                            <% } %>
+
+                        </select>
+
+                    </div>
+
+
+                    <div>
+
+                        <button
+                            type="submit"
+                            class="
+                                w-full
+                                bg-purple-600
+                                hover:bg-purple-700
+                                text-white
+                                font-semibold
+                                py-2
+                                px-4
+                                rounded-lg
+                                transition
+                            "
+                        >
+
+                            <i
+                                class="
+                                    fas
+                                    fa-sync-alt
+                                    mr-2
+                                "
+                            ></i>
+
+                            Atualizar Prévia
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+
+            <% } else { %>
+
+
+
+                <!-- =================================================
+                     MODELOS BASEADOS EM PROJETO
+                     ================================================= -->
+
+                <form
+                    id="formPreview"
+                    method="GET"
+                    action="/admin/certificados/modelos/<%= modelo._id %>/visualizar"
+                    class="
+                        grid
+                        grid-cols-1
+                        md:grid-cols-2
+                        lg:grid-cols-4
+                        gap-4
+                        items-end
+                    "
+                >
+
+
+                    <!-- PROJETO -->
+
+                    <div
+                        class="
+                            lg:col-span-2
+                        "
+                    >
+
+                        <label
+                            for="projetoId"
+                            class="
+                                block
+                                text-sm
+                                font-semibold
+                                text-gray-700
+                                mb-2
+                            "
+                        >
+
+                            Projeto
+
+                        </label>
+
+
+                        <select
+                            id="projetoId"
+                            name="projetoId"
+                            class="
+                                w-full
+                                border
+                                border-gray-300
+                                rounded-lg
+                                px-3
+                                py-2
+                                focus:outline-none
+                                focus:ring-2
+                                focus:ring-purple-500
+                            "
+                        >
+
+
+                            <% if (
+                                projetos &&
+                                projetos.length > 0
+                            ) { %>
+
+
+                                <% projetos.forEach(
+                                    projeto => {
+                                %>
+
+                                    <option
+                                        value="<%= projeto._id %>"
+                                        <% if (
+                                            projetoSelecionado &&
+                                            String(projetoSelecionado._id) ===
+                                            String(projeto._id)
+                                        ) { %>
+                                            selected
+                                        <% } %>
+                                    >
+
+                                        <% if (
+                                            projeto.numeroEstande !== undefined &&
+                                            projeto.numeroEstande !== null &&
+                                            projeto.numeroEstande !== ''
+                                        ) { %>
+
+                                            Estande
+                                            <%= projeto.numeroEstande %>
+                                            -
+
+                                        <% } %>
+
+                                        <%= projeto.titulo %>
+
+                                    </option>
+
+                                <% }) %>
+
+
+                            <% } else { %>
+
+                                <option value="">
+
+                                    Nenhum projeto encontrado
+
+                                </option>
+
+                            <% } %>
+
+                        </select>
+
+                    </div>
+
+
+
+                    <!-- =================================================
+                         PARTICIPANTE - SOMENTE ESTUDANTE
+                         ================================================= -->
+
+                    <% if (
+                        modelo.tipo === 'estudante'
+                    ) { %>
+
+
+                        <div>
+
+                            <label
+                                for="participante"
+                                class="
+                                    block
+                                    text-sm
+                                    font-semibold
+                                    text-gray-700
+                                    mb-2
+                                "
+                            >
+
+                                Participante
+
+                            </label>
+
+
+                            <% if (
+                                participantes &&
+                                participantes.length > 0
+                            ) { %>
+
+
+                                <select
+                                    id="participante"
+                                    name="participante"
+                                    class="
+                                        w-full
+                                        border
+                                        border-gray-300
+                                        rounded-lg
+                                        px-3
+                                        py-2
+                                        focus:outline-none
+                                        focus:ring-2
+                                        focus:ring-purple-500
+                                    "
+                                >
+
+
+                                    <% participantes.forEach(
+                                        nomeParticipante => {
+                                    %>
+
+                                        <option
+                                            value="<%= nomeParticipante %>"
+                                            <% if (
+                                                participanteSelecionado ===
+                                                nomeParticipante
+                                            ) { %>
+                                                selected
+                                            <% } %>
+                                        >
+
+                                            <%= nomeParticipante %>
+
+                                        </option>
+
+                                    <% }) %>
+
+
+                                </select>
+
+
+                            <% } else { %>
+
+
+                                <input
+                                    type="text"
+                                    id="participante"
+                                    name="participante"
+                                    value="<%= participanteSelecionado || '' %>"
+                                    placeholder="Nome do participante"
+                                    class="
+                                        w-full
+                                        border
+                                        border-gray-300
+                                        rounded-lg
+                                        px-3
+                                        py-2
+                                        focus:outline-none
+                                        focus:ring-2
+                                        focus:ring-purple-500
+                                    "
+                                >
+
+
+                            <% } %>
+
+                        </div>
+
+
+                    <% } else { %>
+
+
+                        <!-- =================================================
+                             ORIENTADOR / COORIENTADOR / GERAL
+                             ================================================= -->
+
+                        <div>
+
+                            <label
+                                class="
+                                    block
+                                    text-sm
+                                    font-semibold
+                                    text-gray-700
+                                    mb-2
+                                "
+                            >
+
+                                Participante utilizado
+
+                            </label>
+
+
+                            <div
+                                class="
+                                    border
+                                    border-gray-200
+                                    bg-gray-50
+                                    rounded-lg
+                                    px-3
+                                    py-2
+                                    text-gray-700
+                                    min-h-[42px]
+                                "
+                            >
+
+                                <%= participanteSelecionado || '-' %>
+
+                            </div>
+
+                        </div>
+
+
+                    <% } %>
+
+
+
+                    <!-- ATUALIZAR -->
+
+                    <div>
+
+                        <button
+                            type="submit"
+                            class="
+                                w-full
+                                bg-purple-600
+                                hover:bg-purple-700
+                                text-white
+                                font-semibold
+                                py-2
+                                px-4
+                                rounded-lg
+                                transition
+                            "
+                        >
+
+                            <i
+                                class="
+                                    fas
+                                    fa-sync-alt
+                                    mr-2
+                                "
+                            ></i>
+
+                            Atualizar Prévia
+
+                        </button>
+
+                    </div>
+
+
+                </form>
+
+
+                <!-- AVISO IMPORTANTE PARA ESTUDANTES -->
+
+                <% if (
+                    modelo.tipo === 'estudante'
+                ) { %>
+
+                    <div
+                        class="
+                            mt-4
+                            bg-blue-50
+                            border
+                            border-blue-200
+                            text-blue-800
+                            rounded-lg
+                            px-4
+                            py-3
+                            text-sm
+                        "
+                    >
+
+                        <i
+                            class="
+                                fas
+                                fa-info-circle
+                                mr-2
+                            "
+                        ></i>
+
+                        Ao trocar o projeto, clique em
+                        <strong>Atualizar Prévia</strong>.
+                        A lista de participantes será
+                        carregada novamente conforme o
+                        projeto selecionado.
+
+                    </div>
+
+                <% } %>
+
+
+            <% } %>
+
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         CERTIFICADO
+         ===================================================== -->
+
+    <div
+        class="
+            max-w-7xl
+            mx-auto
+            px-4
+            pb-10
+        "
+    >
+
+        <div
+            class="
+                bg-white
+                rounded-xl
+                shadow-md
+                border
+                border-gray-200
+                p-4
+                md:p-6
+            "
+        >
+
+
+            <div
+                class="
+                    nao-imprimir
+                    flex
+                    flex-col
+                    md:flex-row
+                    md:items-center
+                    md:justify-between
+                    gap-3
+                    mb-5
+                "
+            >
+
+                <div>
+
+                    <h2
+                        class="
+                            text-xl
+                            font-bold
+                            text-gray-800
+                        "
+                    >
+
+                        <i
+                            class="
+                                fas
+                                fa-certificate
+                                text-purple-600
+                                mr-2
+                            "
+                        ></i>
+
+                        Resultado
+
+                    </h2>
+
+
+                    <p
+                        class="
+                            text-sm
+                            text-gray-500
+                            mt-1
+                        "
+                    >
+
+                        Esta visualização usa as posições e
+                        formatações salvas no editor.
+
+                    </p>
+
+                </div>
+
+
+                <div
+                    class="
+                        flex
+                        flex-wrap
+                        gap-2
+                    "
+                >
+
+
+                    <span
+                        class="
+                            inline-flex
+                            items-center
+                            bg-gray-100
+                            text-gray-700
+                            text-sm
+                            font-semibold
+                            px-3
+                            py-2
+                            rounded-lg
+                        "
+                    >
+
+                        <i
+                            class="
+                                fas
+                                fa-file-alt
+                                mr-2
+                            "
+                        ></i>
+
+                        A4
+                        <%= modelo.orientacao === 'retrato'
+                            ? 'Retrato'
+                            : 'Paisagem'
+                        %>
+
+                    </span>
+
+
+                    <button
+                        type="button"
+                        onclick="window.print()"
+                        class="
+                            inline-flex
+                            items-center
+                            bg-blue-600
+                            hover:bg-blue-700
+                            text-white
+                            font-semibold
+                            py-2
+                            px-4
+                            rounded-lg
+                            transition
+                        "
+                    >
+
+                        <i
+                            class="
+                                fas
+                                fa-print
+                                mr-2
+                            "
+                        ></i>
+
+                        Testar Impressão
+
+                    </button>
+
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 ÁREA A4
+                 ================================================= -->
+
+            <div
+                class="
+                    certificado-wrapper
+                "
+            >
+
+
+                <div
+                    id="certificadoPreview"
+                    class="
+                        certificado-area
+                        <%= modelo.orientacao === 'retrato'
+                            ? 'certificado-retrato'
+                            : 'certificado-paisagem'
+                        %>
+                    "
+                    style="
+                        <% if (
+                            modelo.fundoUrl
+                        ) { %>
+
+                            background-image:
+                                url('<%= modelo.fundoUrl %>');
+
+                        <% } %>
+
+                        <% if (
+                            modelo.ajusteFundo === 'conter'
+                        ) { %>
+
+                            background-size:
+                                contain;
+
+                        <% } else if (
+                            modelo.ajusteFundo === 'esticar'
+                        ) { %>
+
+                            background-size:
+                                100% 100%;
+
+                        <% } else { %>
+
+                            background-size:
+                                cover;
+
+                        <% } %>
+                    "
+                >
+
+
+
+                    <!-- =========================================
+                         ELEMENTOS
+                         ========================================= -->
+
+                    <% if (
+                        Array.isArray(modelo.elementos) &&
+                        modelo.elementos.length > 0
+                    ) { %>
+
+
+                        <%
+                            const elementosOrdenados =
+                                [...modelo.elementos]
+                                    .sort(
+                                        (a, b) =>
+                                            Number(a.ordem || 0) -
+                                            Number(b.ordem || 0)
+                                    );
+                        %>
+
+
+                        <% elementosOrdenados.forEach(
+                            elemento => {
+                        %>
+
+
+                            <% if (
+                                elemento.tipo === 'texto' ||
+                                elemento.tipo === 'campo'
+                            ) { %>
+
+
+                                <div
+                                    class="
+                                        certificado-elemento
+                                    "
+                                    style="
+                                        left:
+                                            <%= Number(elemento.x || 0) %>px;
+
+                                        top:
+                                            <%= Number(elemento.y || 0) %>px;
+
+                                        width:
+                                            <%= Number(elemento.largura || 200) %>px;
+
+                                        height:
+                                            <%= Number(elemento.altura || 50) %>px;
+
+                                        font-family:
+                                            '<%= elemento.fonte || 'Arial' %>',
+                                            Arial,
+                                            sans-serif;
+
+                                        font-size:
+                                            <%= Number(elemento.tamanhoFonte || 24) %>px;
+
+                                        font-weight:
+                                            <%= elemento.negrito
+                                                ? '700'
+                                                : '400'
+                                            %>;
+
+                                        font-style:
+                                            <%= elemento.italico
+                                                ? 'italic'
+                                                : 'normal'
+                                            %>;
+
+                                        color:
+                                            <%= elemento.cor || '#000000' %>;
+
+                                        text-align:
+                                            <%= elemento.alinhamento || 'center' %>;
+
+                                        justify-content:
+                                            <%= elemento.alinhamento === 'left'
+                                                ? 'flex-start'
+                                                : elemento.alinhamento === 'right'
+                                                    ? 'flex-end'
+                                                    : 'center'
+                                            %>;
+                                    "
+                                >
+
+                                    <%= elemento.texto || '' %>
+
+                                </div>
+
+
+                            <% } %>
+
+
+                        <% }) %>
+
+
+                    <% } else { %>
+
+
+                        <div
+                            style="
+                                position: absolute;
+                                inset: 0;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                color: #9ca3af;
+                                font-family: Arial, sans-serif;
+                                font-size: 20px;
+                                text-align: center;
+                                padding: 40px;
+                            "
+                        >
+
+                            Este modelo ainda não possui
+                            elementos configurados.
+
+                        </div>
+
+
+                    <% } %>
+
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 INFORMAÇÕES DO TESTE
+                 ================================================= -->
+
+            <div
+                class="
+                    nao-imprimir
+                    mt-5
+                    grid
+                    grid-cols-1
+                    md:grid-cols-2
+                    lg:grid-cols-4
+                    gap-3
+                "
+            >
+
+
+                <% if (
+                    participanteSelecionado
+                ) { %>
+
+                    <div
+                        class="
+                            bg-gray-50
+                            border
+                            border-gray-200
+                            rounded-lg
+                            p-3
+                        "
+                    >
+
+                        <div
+                            class="
+                                text-xs
+                                uppercase
+                                font-semibold
+                                text-gray-500
+                            "
+                        >
+
+                            Participante
+
+                        </div>
+
+                        <div
+                            class="
+                                font-semibold
+                                text-gray-800
+                                mt-1
+                            "
+                        >
+
+                            <%= participanteSelecionado %>
+
+                        </div>
+
+                    </div>
+
+                <% } %>
+
+
+
+                <% if (
+                    projetoSelecionado
+                ) { %>
+
+                    <div
+                        class="
+                            bg-gray-50
+                            border
+                            border-gray-200
+                            rounded-lg
+                            p-3
+                        "
+                    >
+
+                        <div
+                            class="
+                                text-xs
+                                uppercase
+                                font-semibold
+                                text-gray-500
+                            "
+                        >
+
+                            Projeto
+
+                        </div>
+
+                        <div
+                            class="
+                                font-semibold
+                                text-gray-800
+                                mt-1
+                            "
+                        >
+
+                            <%= projetoSelecionado.titulo %>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div
+                        class="
+                            bg-gray-50
+                            border
+                            border-gray-200
+                            rounded-lg
+                            p-3
+                        "
+                    >
+
+                        <div
+                            class="
+                                text-xs
+                                uppercase
+                                font-semibold
+                                text-gray-500
+                            "
+                        >
+
+                            Categoria
+
+                        </div>
+
+                        <div
+                            class="
+                                font-semibold
+                                text-gray-800
+                                mt-1
+                            "
+                        >
+
+                            <%= projetoSelecionado.categoria &&
+                                projetoSelecionado.categoria.nome
+                                    ? projetoSelecionado.categoria.nome
+                                    : '-'
+                            %>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div
+                        class="
+                            bg-gray-50
+                            border
+                            border-gray-200
+                            rounded-lg
+                            p-3
+                        "
+                    >
+
+                        <div
+                            class="
+                                text-xs
+                                uppercase
+                                font-semibold
+                                text-gray-500
+                            "
+                        >
+
+                            Estande
+
+                        </div>
+
+                        <div
+                            class="
+                                font-semibold
+                                text-gray-800
+                                mt-1
+                            "
+                        >
+
+                            <% if (
+                                projetoSelecionado.numeroEstande !== undefined &&
+                                projetoSelecionado.numeroEstande !== null &&
+                                projetoSelecionado.numeroEstande !== ''
+                            ) { %>
+
+                                <%= projetoSelecionado.numeroEstande %>
+
+                            <% } else { %>
+
+                                -
+
+                            <% } %>
+
+                        </div>
+
+                    </div>
+
+                <% } %>
+
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         JAVASCRIPT
+         ===================================================== -->
+
+    <script>
+
+        document.addEventListener(
+            'DOMContentLoaded',
+            function () {
+
+                const projetoSelect =
+                    document.getElementById(
+                        'projetoId'
+                    );
+
+
+                /*
+                 * Quando trocarmos o projeto,
+                 * enviamos imediatamente a seleção.
+                 *
+                 * Isso é especialmente importante
+                 * para estudantes, pois o backend
+                 * precisa carregar os alunos
+                 * pertencentes ao novo projeto.
+                 */
+
+                if (projetoSelect) {
+
+                    projetoSelect.addEventListener(
+                        'change',
+                        function () {
+
+                            const form =
+                                document.getElementById(
+                                    'formPreview'
+                                );
+
+
+                            if (form) {
+
+                                /*
+                                 * Remove o participante antigo
+                                 * da URL quando muda o projeto.
+                                 */
+
+                                const participante =
+                                    document.getElementById(
+                                        'participante'
+                                    );
+
+
+                                if (
+                                    participante &&
+                                    participante.tagName ===
+                                    'SELECT'
+                                ) {
+
+                                    participante.disabled =
+                                        true;
+                                }
+
+
+                                form.submit();
+                            }
+                        }
+                    );
+                }
+
+            }
+        );
+
+    </script>
+
+
+</body>
+
+</html>
