@@ -5630,394 +5630,653 @@ router.get('/resumo-avaliadores/pdf', verificarAdminEscola, async (req, res) => 
 });
 
 // Relatório Resumo avaliadores por projetos
-router.get('/resumo-projetos/pdf', verificarAdminEscola, async (req, res) => {
-    try {
-        const escolaId = req.session.adminEscola.escolaId;
+// ============================================================
+// ROTA: RESUMO DE PROJETOS / AVALIADORES POR PROJETO
+// ============================================================
 
-        // =====================================================
-        // FEIRA ATIVA
-        // =====================================================
+router.get(
+    '/resumo-projetos/pdf',
+    verificarAdminEscola,
+    async (req, res) => {
 
-        const feiraAtual = await Feira.findOne({
-            status: 'ativa',
-            escolaId
-        });
+        try {
 
-        if (!feiraAtual) {
-            req.flash(
-                'error_msg',
-                'Nenhuma feira ativa para esta escola para gerar o relatório de resumo de projetos.'
+            const escolaId =
+                req.session.adminEscola.escolaId;
+
+
+            // =================================================
+            // FEIRA ATIVA
+            // =================================================
+
+            const feiraAtual =
+                await Feira.findOne({
+                    status: 'ativa',
+                    escolaId
+                });
+
+
+            if (!feiraAtual) {
+
+                req.flash(
+                    'error_msg',
+                    'Nenhuma feira ativa para esta escola para gerar o relatório de resumo de projetos.'
+                );
+
+
+                if (!res.headersSent) {
+
+                    return res.redirect(
+                        '/admin/dashboard?tab=relatorios'
+                    );
+                }
+
+
+                return;
+            }
+
+
+            // =================================================
+            // BUSCAR PROJETOS
+            //
+            // IMPORTANTE:
+            // - criterios precisam estar populados;
+            // - categoria precisa estar populada;
+            // - numeroEstande já pertence ao próprio Projeto.
+            // =================================================
+
+            const projetos =
+                await Projeto.find({
+                    feira:
+                        feiraAtual._id,
+
+                    escolaId
+                })
+                    .populate('criterios')
+                    .populate('categoria')
+                    .lean();
+
+
+            // =================================================
+            // BUSCAR AVALIADORES
+            // =================================================
+
+            const avaliadores =
+                await Avaliador.find({
+                    feira:
+                        feiraAtual._id,
+
+                    escolaId
+                }).lean();
+
+
+            // =================================================
+            // BUSCAR AVALIAÇÕES
+            // =================================================
+
+            const avaliacoes =
+                await Avaliacao.find({
+                    feira:
+                        feiraAtual._id,
+
+                    escolaId
+                }).lean();
+
+
+            // =================================================
+            // MONTAR RESUMO POR PROJETO
+            // =================================================
+
+            const resumoProjetos =
+                projetos.map(projeto => {
+
+
+                    // =========================================
+                    // CRITÉRIOS DESTE PROJETO
+                    // =========================================
+
+                    const criteriosProjeto =
+                        Array.isArray(
+                            projeto.criterios
+                        )
+                            ? projeto.criterios
+                            : [];
+
+
+                    const idsCriteriosProjeto =
+                        new Set(
+
+                            criteriosProjeto.map(
+                                criterio =>
+                                    String(
+                                        criterio._id ||
+                                        criterio
+                                    )
+                            )
+
+                        );
+
+
+                    // =========================================
+                    // AVALIADORES ATRIBUÍDOS AO PROJETO
+                    // =========================================
+
+                    const avaliadoresDoProjeto =
+                        avaliadores.filter(
+                            avaliador => {
+
+
+                                if (
+                                    !Array.isArray(
+                                        avaliador.projetosAtribuidos
+                                    )
+                                ) {
+
+                                    return false;
+                                }
+
+
+                                return (
+                                    avaliador
+                                        .projetosAtribuidos
+                                        .some(
+                                            projetoId =>
+                                                String(
+                                                    projetoId
+                                                ) ===
+                                                String(
+                                                    projeto._id
+                                                )
+                                        )
+                                );
+
+                            }
+                        );
+
+
+                    // =========================================
+                    // DETALHES DE CADA AVALIADOR
+                    // =========================================
+
+                    const avaliadoresDetalhes =
+                        avaliadoresDoProjeto.map(
+                            avaliador => {
+
+
+                                const avaliacao =
+                                    avaliacoes.find(
+                                        avaliacaoAtual =>
+                                            String(
+                                                avaliacaoAtual.projeto
+                                            ) ===
+                                            String(
+                                                projeto._id
+                                            ) &&
+                                            String(
+                                                avaliacaoAtual.avaliador
+                                            ) ===
+                                            String(
+                                                avaliador._id
+                                            )
+                                    );
+
+
+                                // =============================
+                                // CRITÉRIOS RESPONDIDOS
+                                // =============================
+
+                                const criteriosRespondidos =
+                                    new Set();
+
+
+                                if (
+                                    avaliacao &&
+                                    Array.isArray(
+                                        avaliacao.itens
+                                    )
+                                ) {
+
+
+                                    for (
+                                        const item
+                                        of avaliacao.itens
+                                    ) {
+
+
+                                        if (!item.criterio) {
+                                            continue;
+                                        }
+
+
+                                        const criterioId =
+                                            String(
+                                                item.criterio
+                                            );
+
+
+                                        // Ignora critérios que não
+                                        // pertencem ao projeto.
+                                        if (
+                                            !idsCriteriosProjeto.has(
+                                                criterioId
+                                            )
+                                        ) {
+
+                                            continue;
+                                        }
+
+
+                                        const nota =
+                                            Number(
+                                                item.nota
+                                            );
+
+
+                                        if (
+                                            item.nota !== undefined &&
+                                            item.nota !== null &&
+                                            item.nota !== '' &&
+                                            !Number.isNaN(
+                                                nota
+                                            ) &&
+                                            nota >= 5 &&
+                                            nota <= 10
+                                        ) {
+
+                                            criteriosRespondidos.add(
+                                                criterioId
+                                            );
+                                        }
+                                    }
+                                }
+
+
+                                // =============================
+                                // STATUS DO AVALIADOR
+                                // =============================
+
+                                let status =
+                                    'Pendente';
+
+
+                                const avaliacaoCompleta =
+                                    idsCriteriosProjeto.size > 0 &&
+                                    criteriosRespondidos.size ===
+                                        idsCriteriosProjeto.size;
+
+
+                                if (
+                                    avaliacaoCompleta
+                                ) {
+
+                                    status =
+                                        '✅ Avaliado';
+
+                                } else if (
+                                    criteriosRespondidos.size > 0
+                                ) {
+
+                                    status =
+                                        '🟠 Em avaliação';
+                                }
+
+
+                                return {
+
+                                    nome:
+                                        avaliador.nome,
+
+                                    email:
+                                        avaliador.email,
+
+                                    status,
+
+                                    criteriosRespondidos:
+                                        criteriosRespondidos.size,
+
+                                    totalCriterios:
+                                        idsCriteriosProjeto.size
+                                };
+
+                            }
+                        );
+
+
+                    // =========================================
+                    // STATUS GERAL DO PROJETO
+                    // =========================================
+
+                    const totalAvaliadores =
+                        avaliadoresDetalhes.length;
+
+
+                    const totalAvaliados =
+                        avaliadoresDetalhes.filter(
+                            avaliador =>
+                                avaliador.status ===
+                                '✅ Avaliado'
+                        ).length;
+
+
+                    const totalEmAvaliacao =
+                        avaliadoresDetalhes.filter(
+                            avaliador =>
+                                avaliador.status ===
+                                '🟠 Em avaliação'
+                        ).length;
+
+
+                    const totalPendentes =
+                        avaliadoresDetalhes.filter(
+                            avaliador =>
+                                avaliador.status ===
+                                'Pendente'
+                        ).length;
+
+
+                    let statusProjeto =
+                        'Não Avaliado';
+
+
+                    if (
+                        totalAvaliadores === 0
+                    ) {
+
+                        statusProjeto =
+                            'Sem avaliadores';
+
+                    } else if (
+                        totalAvaliados ===
+                        totalAvaliadores
+                    ) {
+
+                        statusProjeto =
+                            '✅ Avaliado';
+
+                    } else if (
+                        totalAvaliados > 0 ||
+                        totalEmAvaliacao > 0
+                    ) {
+
+                        statusProjeto =
+                            '🟠 Em avaliação';
+                    }
+
+
+                    // =========================================
+                    // CATEGORIA
+                    // =========================================
+
+                    const categoriaNome =
+                        projeto.categoria &&
+                        projeto.categoria.nome
+                            ? projeto.categoria.nome
+                            : 'Sem Categoria';
+
+
+                    // =========================================
+                    // NÚMERO DO ESTANDE
+                    // =========================================
+
+                    const numeroEstande =
+                        projeto.numeroEstande !== undefined &&
+                        projeto.numeroEstande !== null &&
+                        projeto.numeroEstande !== ''
+                            ? projeto.numeroEstande
+                            : null;
+
+
+                    // =========================================
+                    // RETORNO DO PROJETO
+                    //
+                    // IMPORTANTE:
+                    // agora preservamos categoria e estande.
+                    // =========================================
+
+                    return {
+
+                        _id:
+                            projeto._id,
+
+                        titulo:
+                            projeto.titulo,
+
+                        turma:
+                            projeto.turma,
+
+                        numeroEstande,
+
+                        categoria:
+                            projeto.categoria || null,
+
+                        categoriaNome,
+
+                        totalCriterios:
+                            idsCriteriosProjeto.size,
+
+                        totalAvaliadores,
+
+                        totalAvaliados,
+
+                        totalEmAvaliacao,
+
+                        totalPendentes,
+
+                        statusProjeto,
+
+                        avaliadores:
+                            avaliadoresDetalhes
+                    };
+
+                });
+
+
+            // =================================================
+            // ORDENAR:
+            //
+            // 1. Categoria
+            // 2. Projetos com estande primeiro
+            // 3. Número do estande
+            // 4. Título como desempate
+            // =================================================
+
+            resumoProjetos.sort(
+                (a, b) => {
+
+
+                    // =========================================
+                    // CATEGORIA
+                    // =========================================
+
+                    const categoriaA =
+                        String(
+                            a.categoriaNome ||
+                            'Sem Categoria'
+                        );
+
+
+                    const categoriaB =
+                        String(
+                            b.categoriaNome ||
+                            'Sem Categoria'
+                        );
+
+
+                    const comparacaoCategoria =
+                        categoriaA.localeCompare(
+                            categoriaB,
+                            'pt-BR',
+                            {
+                                numeric: true
+                            }
+                        );
+
+
+                    if (
+                        comparacaoCategoria !== 0
+                    ) {
+
+                        return (
+                            comparacaoCategoria
+                        );
+                    }
+
+
+                    // =========================================
+                    // ESTANDE
+                    // =========================================
+
+                    const estandeA =
+                        a.numeroEstande !== null &&
+                        a.numeroEstande !== ''
+                            ? Number(
+                                a.numeroEstande
+                            )
+                            : null;
+
+
+                    const estandeB =
+                        b.numeroEstande !== null &&
+                        b.numeroEstande !== ''
+                            ? Number(
+                                b.numeroEstande
+                            )
+                            : null;
+
+
+                    // Ambos possuem estande
+                    if (
+                        estandeA !== null &&
+                        estandeB !== null
+                    ) {
+
+
+                        if (
+                            estandeA !== estandeB
+                        ) {
+
+                            return (
+                                estandeA -
+                                estandeB
+                            );
+                        }
+
+
+                        return String(
+                            a.titulo || ''
+                        ).localeCompare(
+                            String(
+                                b.titulo || ''
+                            ),
+                            'pt-BR',
+                            {
+                                numeric: true
+                            }
+                        );
+                    }
+
+
+                    // Somente A possui
+                    if (
+                        estandeA !== null &&
+                        estandeB === null
+                    ) {
+
+                        return -1;
+                    }
+
+
+                    // Somente B possui
+                    if (
+                        estandeA === null &&
+                        estandeB !== null
+                    ) {
+
+                        return 1;
+                    }
+
+
+                    // Nenhum possui
+                    return String(
+                        a.titulo || ''
+                    ).localeCompare(
+                        String(
+                            b.titulo || ''
+                        ),
+                        'pt-BR',
+                        {
+                            numeric: true
+                        }
+                    );
+
+                }
             );
 
+
+            // =================================================
+            // ESCOLA
+            // =================================================
+
+            const escola =
+                await Escola.findById(
+                    escolaId
+                ).lean() || {
+
+                    nome:
+                        'Nome da Escola'
+                };
+
+
+            // =================================================
+            // GERAR PDF
+            // =================================================
+
+            await generatePdfReport(
+                req,
+                res,
+                'pdf-resumo-projetos',
+                {
+
+                    titulo:
+                        'Resumo de Projetos',
+
+                    nomeFeira:
+                        feiraAtual.nome,
+
+                    projetos:
+                        resumoProjetos,
+
+                    escola
+                },
+                `resumo-projetos_${feiraAtual.nome}`
+            );
+
+
+        } catch (error) {
+
+
+            console.error(
+                'Erro ao gerar PDF de resumo de projetos:',
+                error
+            );
+
+
             if (!res.headersSent) {
+
+                req.flash(
+                    'error_msg',
+                    'Erro ao gerar PDF de resumo de projetos. Detalhes: ' +
+                    error.message
+                );
+
+
                 return res.redirect(
                     '/admin/dashboard?tab=relatorios'
                 );
             }
         }
-
-
-        // =====================================================
-        // BUSCAR PROJETOS
-        //
-        // Precisamos dos critérios de cada projeto para saber
-        // corretamente se cada avaliador concluiu a avaliação.
-        // =====================================================
-
-        const projetos = await Projeto.find({
-            feira: feiraAtual._id,
-            escolaId
-        })
-            .populate('criterios')
-            .lean();
-
-
-        // =====================================================
-        // BUSCAR AVALIADORES
-        // =====================================================
-
-        const avaliadores = await Avaliador.find({
-            feira: feiraAtual._id,
-            escolaId
-        }).lean();
-
-
-        // =====================================================
-        // BUSCAR AVALIAÇÕES
-        // =====================================================
-
-        const avaliacoes = await Avaliacao.find({
-            feira: feiraAtual._id,
-            escolaId
-        }).lean();
-
-
-        // =====================================================
-        // MONTAR RESUMO POR PROJETO
-        // =====================================================
-
-        const resumoProjetos = projetos.map(projeto => {
-
-            // -------------------------------------------------
-            // CRITÉRIOS DESTE PROJETO
-            // -------------------------------------------------
-
-            const criteriosProjeto =
-                Array.isArray(projeto.criterios)
-                    ? projeto.criterios
-                    : [];
-
-
-            const idsCriteriosProjeto =
-                new Set(
-                    criteriosProjeto.map(criterio =>
-                        String(
-                            criterio._id ||
-                            criterio
-                        )
-                    )
-                );
-
-
-            // -------------------------------------------------
-            // AVALIADORES ATRIBUÍDOS AO PROJETO
-            // -------------------------------------------------
-
-            const avaliadoresDoProjeto =
-                avaliadores.filter(avaliador => {
-
-                    if (
-                        !Array.isArray(
-                            avaliador.projetosAtribuidos
-                        )
-                    ) {
-                        return false;
-                    }
-
-
-                    return avaliador.projetosAtribuidos.some(
-                        projetoId =>
-                            String(projetoId) ===
-                            String(projeto._id)
-                    );
-                });
-
-
-            // -------------------------------------------------
-            // DETALHES DE CADA AVALIADOR
-            // -------------------------------------------------
-
-            const avaliadoresDetalhes =
-                avaliadoresDoProjeto.map(avaliador => {
-
-                    const avaliacao =
-                        avaliacoes.find(a =>
-                            String(a.projeto) ===
-                                String(projeto._id) &&
-                            String(a.avaliador) ===
-                                String(avaliador._id)
-                        );
-
-
-                    // -----------------------------------------
-                    // CRITÉRIOS RESPONDIDOS
-                    // -----------------------------------------
-
-                    const criteriosRespondidos =
-                        new Set();
-
-
-                    if (
-                        avaliacao &&
-                        Array.isArray(
-                            avaliacao.itens
-                        )
-                    ) {
-
-                        for (
-                            const item
-                            of avaliacao.itens
-                        ) {
-
-                            if (!item.criterio) {
-                                continue;
-                            }
-
-
-                            const criterioId =
-                                String(
-                                    item.criterio
-                                );
-
-
-                            // Ignorar critérios que não pertencem
-                            // ao projeto.
-                            if (
-                                !idsCriteriosProjeto.has(
-                                    criterioId
-                                )
-                            ) {
-                                continue;
-                            }
-
-
-                            const nota =
-                                Number(item.nota);
-
-
-                            if (
-                                item.nota !== undefined &&
-                                item.nota !== null &&
-                                item.nota !== '' &&
-                                !Number.isNaN(nota) &&
-                                nota >= 5 &&
-                                nota <= 10
-                            ) {
-
-                                criteriosRespondidos.add(
-                                    criterioId
-                                );
-                            }
-                        }
-                    }
-
-
-                    // -----------------------------------------
-                    // STATUS
-                    // -----------------------------------------
-
-                    let status =
-                        'Pendente';
-
-
-                    const avaliacaoCompleta =
-                        idsCriteriosProjeto.size > 0 &&
-                        criteriosRespondidos.size ===
-                            idsCriteriosProjeto.size;
-
-
-                    if (avaliacaoCompleta) {
-
-                        status =
-                            '✅ Avaliado';
-
-                    } else if (
-                        criteriosRespondidos.size > 0
-                    ) {
-
-                        status =
-                            '🟠 Em avaliação';
-                    }
-
-
-                    return {
-
-                        nome:
-                            avaliador.nome,
-
-                        email:
-                            avaliador.email,
-
-                        status,
-
-                        criteriosRespondidos:
-                            criteriosRespondidos.size,
-
-                        totalCriterios:
-                            idsCriteriosProjeto.size
-                    };
-                });
-
-
-            // =================================================
-            // STATUS GERAL DO PROJETO
-            // =================================================
-
-            const totalAvaliadores =
-                avaliadoresDetalhes.length;
-
-
-            const totalAvaliados =
-                avaliadoresDetalhes.filter(
-                    avaliador =>
-                        avaliador.status ===
-                        '✅ Avaliado'
-                ).length;
-
-
-            const totalEmAvaliacao =
-                avaliadoresDetalhes.filter(
-                    avaliador =>
-                        avaliador.status ===
-                        '🟠 Em avaliação'
-                ).length;
-
-
-            const totalPendentes =
-                avaliadoresDetalhes.filter(
-                    avaliador =>
-                        avaliador.status ===
-                        'Pendente'
-                ).length;
-
-
-            let statusProjeto =
-                'Não Avaliado';
-
-
-            if (totalAvaliadores === 0) {
-
-                statusProjeto =
-                    'Sem avaliadores';
-
-            } else if (
-                totalAvaliados ===
-                totalAvaliadores
-            ) {
-
-                statusProjeto =
-                    '✅ Avaliado';
-
-            } else if (
-                totalAvaliados > 0 ||
-                totalEmAvaliacao > 0
-            ) {
-
-                statusProjeto =
-                    '🟠 Em avaliação';
-            }
-
-
-            // =================================================
-            // RETORNO DO PROJETO
-            // =================================================
-
-            return {
-
-                titulo:
-                    projeto.titulo,
-
-                turma:
-                    projeto.turma,
-
-                totalCriterios:
-                    idsCriteriosProjeto.size,
-
-                totalAvaliadores,
-
-                totalAvaliados,
-
-                totalEmAvaliacao,
-
-                totalPendentes,
-
-                statusProjeto,
-
-                avaliadores:
-                    avaliadoresDetalhes
-            };
-        });
-
-
-        // =====================================================
-        // ESCOLA
-        // =====================================================
-
-        const escola =
-            await Escola.findById(
-                escolaId
-            ).lean() || {
-                nome: 'Nome da Escola'
-            };
-
-
-        // =====================================================
-        // GERAR PDF
-        // =====================================================
-
-        await generatePdfReport(
-            req,
-            res,
-            'pdf-resumo-projetos',
-            {
-                titulo:
-                    'Resumo de Projetos',
-
-                nomeFeira:
-                    feiraAtual.nome,
-
-                projetos:
-                    resumoProjetos,
-
-                escola
-            },
-            `resumo-projetos_${feiraAtual.nome}`
-        );
-
-
-    } catch (error) {
-
-        console.error(
-            'Erro ao gerar PDF de resumo de projetos:',
-            error
-        );
-
-
-        if (!res.headersSent) {
-
-            req.flash(
-                'error_msg',
-                'Erro ao gerar PDF de resumo de projetos. Detalhes: ' +
-                error.message
-            );
-
-
-            return res.redirect(
-                '/admin/dashboard?tab=relatorios'
-            );
-        }
     }
-});
+);
 
 
 // ROTA: Relatório Consolidado da Feira
