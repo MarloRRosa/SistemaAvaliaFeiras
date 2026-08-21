@@ -2936,7 +2936,7 @@ router.get('/dashboard', verificarAdminEscola, async (req, res) => {
         const categoriasFetched = feiraAtual ? await Categoria.find({ feira: feiraAtual._id, escolaId: escolaId }).lean() : []; // USANDO escolaId AQUI
         const criteriosOficiais = feiraAtual ? await Criterio.find({ feira: feiraAtual._id, escolaId: escolaId }).lean() : []; // USANDO escolaId AQUI
         const avaliadoresFetched = feiraAtual ? await Avaliador.find({ feira: feiraAtual._id, escolaId: escolaId }).populate('projetosAtribuidos').lean() : []; // USANDO escolaId AQUI
-        const avaliacoesFetched = feiraAtual ? await Avaliacao.find({ feira: feiraAtual._id, escolaId: escolaId }).lean() : []; // USANDO escolaId AQUI
+        const avaliacoesFetched = feiraAtual ? await Avaliacao.find({ feira: feiraAtual._id, escolaId: escolaId, status: { $ne: 'anulada' } }).lean() : [];
 
         let projetosPorCategoria = {};
         if (feiraAtual && projetosFetched) {
@@ -3804,6 +3804,304 @@ router.post('/avaliadores/:id/excluir', verificarAdminEscola, async (req, res) =
   res.redirect('/admin/dashboard?tab=avaliadores');
 });
 
+// ============================================================
+// ANULAR / RESTAURAR AVALIAÇÃO
+// ============================================================
+//
+// IMPORTANTE:
+// - A avaliação NÃO é excluída do banco.
+// - Apenas recebe status "anulada".
+// - Mantemos notas, comentários e todo o histórico.
+// - Apenas administradores da própria escola podem alterar.
+// ============================================================
+
+
+// ------------------------------------------------------------
+// ANULAR AVALIAÇÃO
+// ------------------------------------------------------------
+router.post(
+  '/avaliacoes/:id/anular',
+  verificarAdminEscola,
+  async (req, res) => {
+
+    const { id } = req.params;
+    const { motivoAnulacao } = req.body;
+
+    const escolaId =
+      req.session.adminEscola.escolaId;
+
+    const adminId =
+      req.session.adminEscola.id;
+
+    // --------------------------------------------------------
+    // VALIDAR ID DA AVALIAÇÃO
+    // --------------------------------------------------------
+    if (
+      !id ||
+      !mongoose.Types.ObjectId.isValid(id)
+    ) {
+      req.flash(
+        'error_msg',
+        'ID da avaliação inválido.'
+      );
+
+      return res.redirect(
+        '/admin/dashboard?tab=relatorios'
+      );
+    }
+
+    // --------------------------------------------------------
+    // MOTIVO É OBRIGATÓRIO
+    // --------------------------------------------------------
+    if (
+      !motivoAnulacao ||
+      !String(motivoAnulacao).trim()
+    ) {
+      req.flash(
+        'error_msg',
+        'Informe o motivo da anulação da avaliação.'
+      );
+
+      return res.redirect(
+        '/admin/dashboard?tab=relatorios'
+      );
+    }
+
+    try {
+
+      // ------------------------------------------------------
+      // BUSCAR AVALIAÇÃO
+      //
+      // O escolaId garante que um administrador nunca possa
+      // alterar uma avaliação pertencente a outra escola.
+      // ------------------------------------------------------
+      const avaliacao =
+        await Avaliacao.findOne({
+          _id: id,
+          escolaId
+        });
+
+      if (!avaliacao) {
+
+        req.flash(
+          'error_msg',
+          'Avaliação não encontrada ou não pertence à sua escola.'
+        );
+
+        return res.redirect(
+          '/admin/dashboard?tab=relatorios'
+        );
+      }
+
+
+      // ------------------------------------------------------
+      // EVITAR ANULAR NOVAMENTE
+      // ------------------------------------------------------
+      if (avaliacao.status === 'anulada') {
+
+        req.flash(
+          'error_msg',
+          'Esta avaliação já está anulada.'
+        );
+
+        return res.redirect(
+          '/admin/dashboard?tab=relatorios'
+        );
+      }
+
+
+      // ------------------------------------------------------
+      // ANULAR SEM EXCLUIR
+      // ------------------------------------------------------
+      avaliacao.status =
+        'anulada';
+
+      avaliacao.anuladaEm =
+        new Date();
+
+      avaliacao.motivoAnulacao =
+        String(motivoAnulacao).trim();
+
+      avaliacao.anuladaPor = {
+        tipo: 'Admin',
+        usuarioId: adminId
+      };
+
+
+      // ------------------------------------------------------
+      // SALVAR
+      // ------------------------------------------------------
+      await avaliacao.save();
+
+
+      console.log(
+        `Avaliação ${avaliacao._id} anulada pelo Admin ${adminId}.`
+      );
+
+
+      req.flash(
+        'success_msg',
+        'Avaliação anulada com sucesso. O registro foi mantido no histórico.'
+      );
+
+      return res.redirect(
+        '/admin/dashboard?tab=relatorios'
+      );
+
+
+    } catch (err) {
+
+      console.error(
+        'Erro ao anular avaliação:',
+        err
+      );
+
+      req.flash(
+        'error_msg',
+        'Erro ao anular avaliação. Detalhes: ' +
+        err.message
+      );
+
+      return res.redirect(
+        '/admin/dashboard?tab=relatorios'
+      );
+    }
+  }
+);
+
+
+// ------------------------------------------------------------
+// RESTAURAR AVALIAÇÃO ANULADA
+// ------------------------------------------------------------
+router.post(
+  '/avaliacoes/:id/restaurar',
+  verificarAdminEscola,
+  async (req, res) => {
+
+    const { id } =
+      req.params;
+
+    const escolaId =
+      req.session.adminEscola.escolaId;
+
+
+    // --------------------------------------------------------
+    // VALIDAR ID
+    // --------------------------------------------------------
+    if (
+      !id ||
+      !mongoose.Types.ObjectId.isValid(id)
+    ) {
+
+      req.flash(
+        'error_msg',
+        'ID da avaliação inválido.'
+      );
+
+      return res.redirect(
+        '/admin/dashboard?tab=relatorios'
+      );
+    }
+
+
+    try {
+
+      // ------------------------------------------------------
+      // BUSCAR AVALIAÇÃO DA PRÓPRIA ESCOLA
+      // ------------------------------------------------------
+      const avaliacao =
+        await Avaliacao.findOne({
+          _id: id,
+          escolaId
+        });
+
+
+      if (!avaliacao) {
+
+        req.flash(
+          'error_msg',
+          'Avaliação não encontrada ou não pertence à sua escola.'
+        );
+
+        return res.redirect(
+          '/admin/dashboard?tab=relatorios'
+        );
+      }
+
+
+      // ------------------------------------------------------
+      // VERIFICAR SE REALMENTE ESTÁ ANULADA
+      // ------------------------------------------------------
+      if (avaliacao.status !== 'anulada') {
+
+        req.flash(
+          'error_msg',
+          'Esta avaliação não está anulada.'
+        );
+
+        return res.redirect(
+          '/admin/dashboard?tab=relatorios'
+        );
+      }
+
+
+      // ------------------------------------------------------
+      // RESTAURAR
+      // ------------------------------------------------------
+      avaliacao.status =
+        'valida';
+
+      avaliacao.anuladaEm =
+        null;
+
+      avaliacao.motivoAnulacao =
+        '';
+
+      avaliacao.anuladaPor =
+        undefined;
+
+
+      // ------------------------------------------------------
+      // SALVAR
+      // ------------------------------------------------------
+      await avaliacao.save();
+
+
+      console.log(
+        `Avaliação ${avaliacao._id} restaurada.`
+      );
+
+
+      req.flash(
+        'success_msg',
+        'Avaliação restaurada com sucesso e voltou a ser considerada válida.'
+      );
+
+      return res.redirect(
+        '/admin/dashboard?tab=relatorios'
+      );
+
+
+    } catch (err) {
+
+      console.error(
+        'Erro ao restaurar avaliação:',
+        err
+      );
+
+      req.flash(
+        'error_msg',
+        'Erro ao restaurar avaliação. Detalhes: ' +
+        err.message
+      );
+
+      return res.redirect(
+        '/admin/dashboard?tab=relatorios'
+      );
+    }
+  }
+);
+
 router.get('/formulario-pre-cadastro/configurar', verificarAdminEscola, async (req, res) => {
   const escolaId = req.session.adminEscola.escolaId;
   let configuracao = await ConfiguracaoFormularioPreCadastro.findOne({ escolaId });
@@ -4472,30 +4770,24 @@ router.delete('/criterios/:id/excluir', verificarAdminEscola, async (req, res) =
 router.get('/resultados-finais/pdf', verificarAdminEscola, async (req, res) => {
     try {
         const escolaId = req.session.adminEscola.escolaId;
-
         const feiraAtual = await Feira.findOne({
             status: 'ativa',
             escolaId
         });
-
         if (!feiraAtual) {
             req.flash(
                 'error_msg',
                 'Nenhuma feira ativa para esta escola para gerar o relatório de resultados finais.'
             );
-
             if (!res.headersSent) {
                 return res.redirect(
                     '/admin/dashboard?tab=relatorios'
                 );
             }
         }
-
-
         // =====================================================
         // BUSCAR PROJETOS COM CRITÉRIOS
         // =====================================================
-
         const projetos = await Projeto.find({
             feira: feiraAtual._id,
             escolaId
@@ -4503,20 +4795,15 @@ router.get('/resultados-finais/pdf', verificarAdminEscola, async (req, res) => {
             .populate('categoria')
             .populate('criterios')
             .lean();
-
-
         const avaliacoes = await Avaliacao.find({
             feira: feiraAtual._id,
-            escolaId
+            escolaId,
+            status: { $ne: 'anulada' }
         }).lean();
-
-
         // =====================================================
         // CALCULAR RESULTADO DE CADA PROJETO
         // =====================================================
-
         for (const projeto of projetos) {
-
             const avaliacoesDoProjeto =
                 avaliacoes.filter(avaliacao =>
                     avaliacao.projeto &&
@@ -5325,56 +5612,43 @@ router.get('/avaliacoes/pdf', verificarAdminEscola, async (req, res) => {
         }
     }
 });
-
-
 // Rota para PDF de Projetos Sem Avaliação
 router.get('/projetos-sem-avaliacao/pdf', verificarAdminEscola, async (req, res) => {
     try {
         const escolaId = req.session.adminEscola.escolaId;
-
         const feiraAtual = await Feira.findOne({
             status: 'ativa',
             escolaId
         });
-
         if (!feiraAtual) {
             req.flash(
                 'error_msg',
                 'Nenhuma feira ativa para esta escola para gerar o relatório de projetos sem avaliação.'
             );
-
             if (!res.headersSent) {
                 return res.redirect(
                     '/admin/dashboard?tab=relatorios'
                 );
             }
         }
-
-
         // =====================================================
         // BUSCAR PROJETOS COM SEUS CRITÉRIOS
         // =====================================================
-
         const projetos = await Projeto.find({
             feira: feiraAtual._id,
             escolaId
         })
             .populate('criterios')
             .lean();
-
-
         const avaliacoes = await Avaliacao.find({
             feira: feiraAtual._id,
-            escolaId
+            escolaId,
+            status: { $ne: 'anulada' }
         }).lean();
-
-
         const avaliadores = await Avaliador.find({
             feira: feiraAtual._id,
             escolaId
         }).lean();
-
-
         // =====================================================
         // MONTAR RELATÓRIO
         // =====================================================
@@ -5653,43 +5927,34 @@ router.get('/projetos-sem-avaliacao/pdf', verificarAdminEscola, async (req, res)
                 'Erro ao gerar PDF de projetos sem avaliação. Detalhes: ' +
                 error.message
             );
-
-
             return res.redirect(
                 '/admin/dashboard?tab=relatorios'
             );
         }
     }
 });
-
 // Rota para PDF de Ranking por Categoria
 router.get('/ranking-categorias/pdf', verificarAdminEscola, async (req, res) => {
     try {
         const escolaId = req.session.adminEscola.escolaId;
-
         const feiraAtual = await Feira.findOne({
             status: 'ativa',
             escolaId
         });
-
         if (!feiraAtual) {
             req.flash(
                 'error_msg',
                 'Nenhuma feira ativa para esta escola para gerar o ranking por categoria.'
             );
-
             if (!res.headersSent) {
                 return res.redirect(
                     '/admin/dashboard?tab=relatorios'
                 );
             }
         }
-
-
         // =====================================================
         // BUSCAR PROJETOS COM SEUS CRITÉRIOS
         // =====================================================
-
         const projetos = await Projeto.find({
             feira: feiraAtual._id,
             escolaId
@@ -5697,14 +5962,11 @@ router.get('/ranking-categorias/pdf', verificarAdminEscola, async (req, res) => 
             .populate('categoria')
             .populate('criterios')
             .lean();
-
-
         const avaliacoes = await Avaliacao.find({
             feira: feiraAtual._id,
-            escolaId
+            escolaId,
+            status: { $ne: 'anulada' }
         }).lean();
-
-
         // Categorias na ordem definida pelo admin
         const categorias = await Categoria.find({
             feira: feiraAtual._id,
@@ -5712,8 +5974,6 @@ router.get('/ranking-categorias/pdf', verificarAdminEscola, async (req, res) => 
         })
             .sort({ ordem: 1 })
             .lean();
-
-
         // =====================================================
         // CALCULAR RESULTADO DE CADA PROJETO
         // =====================================================
@@ -6120,44 +6380,34 @@ router.get('/ranking-categorias/pdf', verificarAdminEscola, async (req, res) => 
                 'Erro ao gerar PDF de ranking por categoria. Detalhes: ' +
                 error.message
             );
-
-
             return res.redirect(
                 '/admin/dashboard?tab=relatorios'
             );
         }
     }
 });
-
-
 // Rota para PDF de Resumo de Avaliadores
 router.get('/resumo-avaliadores/pdf', verificarAdminEscola, async (req, res) => {
     try {
         const escolaId = req.session.adminEscola.escolaId;
-
         const feiraAtual = await Feira.findOne({
             status: 'ativa',
             escolaId
         });
-
         if (!feiraAtual) {
             req.flash(
                 'error_msg',
                 'Nenhuma feira ativa para esta escola para gerar o relatório de resumo de avaliadores.'
             );
-
             if (!res.headersSent) {
                 return res.redirect(
                     '/admin/dashboard?tab=relatorios'
                 );
             }
         }
-
-
         // =====================================================
         // BUSCAR AVALIADORES COM PROJETOS ATRIBUÍDOS
         // =====================================================
-
         const avaliadores = await Avaliador.find({
             feira: feiraAtual._id,
             escolaId
@@ -6169,38 +6419,26 @@ router.get('/resumo-avaliadores/pdf', verificarAdminEscola, async (req, res) => 
                 }
             })
             .lean();
-
-
         const avaliacoes = await Avaliacao.find({
             feira: feiraAtual._id,
-            escolaId
+            escolaId,
+            status: { $ne: 'anulada' }
         }).lean();
-
-
         // =====================================================
         // MONTAR RESUMO
         // =====================================================
-
         const resumoAvaliadores =
             avaliadores.map(avaliador => {
-
                 const projetosAtribuidos =
                     Array.isArray(
                         avaliador.projetosAtribuidos
                     )
                         ? avaliador.projetosAtribuidos
                         : [];
-
-
                 const totalAtribuidos =
                     projetosAtribuidos.length;
-
-
                 let totalAvaliados = 0;
-
                 const projetosAvaliadosDetalhes = [];
-
-
                 // -------------------------------------------------
                 // ANALISAR CADA PROJETO ATRIBUÍDO
                 // -------------------------------------------------
@@ -6443,100 +6681,73 @@ router.get('/resumo-avaliadores/pdf', verificarAdminEscola, async (req, res) => 
 // ============================================================
 // ROTA: RESUMO DE PROJETOS / AVALIADORES POR PROJETO
 // ============================================================
-
 router.get(
     '/resumo-projetos/pdf',
     verificarAdminEscola,
     async (req, res) => {
-
         try {
-
             const escolaId =
                 req.session.adminEscola.escolaId;
-
-
             // =================================================
             // FEIRA ATIVA
             // =================================================
-
             const feiraAtual =
                 await Feira.findOne({
                     status: 'ativa',
                     escolaId
                 });
-
-
             if (!feiraAtual) {
-
                 req.flash(
                     'error_msg',
                     'Nenhuma feira ativa para esta escola para gerar o relatório de resumo de projetos.'
                 );
-
-
                 if (!res.headersSent) {
-
                     return res.redirect(
                         '/admin/dashboard?tab=relatorios'
                     );
                 }
-
-
                 return;
             }
-
-
             // =================================================
             // BUSCAR PROJETOS
-            //
             // IMPORTANTE:
             // - criterios precisam estar populados;
             // - categoria precisa estar populada;
             // - numeroEstande já pertence ao próprio Projeto.
             // =================================================
-
             const projetos =
                 await Projeto.find({
                     feira:
                         feiraAtual._id,
-
                     escolaId
                 })
                     .populate('criterios')
                     .populate('categoria')
                     .lean();
-
-
             // =================================================
             // BUSCAR AVALIADORES
-            // =================================================
-
+           // =================================================
             const avaliadores =
                 await Avaliador.find({
                     feira:
                         feiraAtual._id,
-
                     escolaId
                 }).lean();
-
-
             // =================================================
             // BUSCAR AVALIAÇÕES
             // =================================================
-
             const avaliacoes =
                 await Avaliacao.find({
-                    feira:
-                        feiraAtual._id,
-
-                    escolaId
-                }).lean();
-
-
+                feira:
+                feiraAtual._id,
+                escolaId,
+                status: {
+                    $ne: 'anulada'
+                        }
+            }).lean();
             // =================================================
             // MONTAR RESUMO POR PROJETO
             // =================================================
-
             const resumoProjetos =
                 projetos.map(projeto => {
 
@@ -7087,49 +7298,38 @@ router.get(
         }
     }
 );
-
-
 // ROTA: Relatório Consolidado da Feira
 router.get('/relatorio-consolidado/pdf', verificarAdminEscola, async (req, res) => {
     try {
         const escolaId = req.session.adminEscola.escolaId;
-
         const feiraAtual = await Feira.findOne({
             status: 'ativa',
             escolaId
         });
-
         if (!feiraAtual) {
             req.flash(
                 'error_msg',
                 'Nenhuma feira ativa encontrada.'
             );
-
             return res.redirect(
                 '/admin/dashboard?tab=relatorios'
             );
         }
-
-
         // =====================================================
         // BUSCAR DADOS
         // =====================================================
-        //
         // IMPORTANTE:
         // projeto.criterios precisa estar populado porque:
-        //
         // - cada projeto possui seus próprios critérios;
         // - precisamos do peso;
         // - precisamos da ordemDesempate.
         // =====================================================
-
         const [
             projetos,
             avaliacoes,
             categorias,
             criteriosOficiais
         ] = await Promise.all([
-
             Projeto.find({
                 feira: feiraAtual._id,
                 escolaId
@@ -7137,17 +7337,15 @@ router.get('/relatorio-consolidado/pdf', verificarAdminEscola, async (req, res) 
                 .populate('categoria')
                 .populate('criterios')
                 .lean(),
-
             Avaliacao.find({
                 feira: feiraAtual._id,
-                escolaId
+                escolaId,
+                status: { $ne: 'anulada' }
             }).lean(),
-
             Categoria.find({
                 feira: feiraAtual._id,
                 escolaId
             }).lean(),
-
             // Mantemos essa consulta porque a VIEW do relatório
             // pode utilizar criteriosOficiais para cabeçalhos.
             Criterio.find({
@@ -7160,17 +7358,11 @@ router.get('/relatorio-consolidado/pdf', verificarAdminEscola, async (req, res) 
                 })
                 .lean()
         ]);
-
-
         // =====================================================
         // MONTAR RESULTADO POR CATEGORIA
         // =====================================================
-
         const relatorioFinalPorProjeto = {};
-
-
         for (const projeto of projetos) {
-
             // -------------------------------------------------
             // Avaliações exclusivamente deste projeto
             // -------------------------------------------------
