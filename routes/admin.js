@@ -2937,6 +2937,7 @@ router.get('/dashboard', verificarAdminEscola, async (req, res) => {
         const criteriosOficiais = feiraAtual ? await Criterio.find({ feira: feiraAtual._id, escolaId: escolaId }).lean() : []; // USANDO escolaId AQUI
         const avaliadoresFetched = feiraAtual ? await Avaliador.find({ feira: feiraAtual._id, escolaId: escolaId }).populate('projetosAtribuidos').lean() : []; // USANDO escolaId AQUI
         const avaliacoesFetched = feiraAtual ? await Avaliacao.find({ feira: feiraAtual._id, escolaId: escolaId, status: { $ne: 'anulada' } }).lean() : [];
+        const avaliacoesHistorico = feiraAtual ? await Avaliacao.find({ feira: feiraAtual._id, escolaId: escolaId }).populate('avaliador').populate('projeto').sort({ createdAt: -1 }).lean(): [];
 
         let projetosPorCategoria = {};
         if (feiraAtual && projetosFetched) {
@@ -3430,6 +3431,7 @@ const mensagens = await Mensagem.find({ autorId: req.session.adminEscola.id })
   criterios: criteriosOficiais,
   avaliadores: avaliadoresFetched,
   avaliacoes: avaliacoesFetched,
+  avaliacoesHistorico,
   projetosPorCategoria,
   avaliacoesPorAvaliadorCount,
   mediaAvaliacaoPorCriterio,
