@@ -4304,6 +4304,279 @@ router.post(
   }
 );
 
+// ============================================================
+// GERENCIAR AVALIAÇÕES - TELA PRINCIPAL
+// ============================================================
+//
+// Esta rota:
+// - lista avaliações da feira atual;
+// - inclui válidas e anuladas;
+// - permite filtrar por avaliador;
+// - permite filtrar por projeto;
+// - permite filtrar por status;
+// - mantém o histórico completo.
+// ============================================================
+
+router.get(
+  '/avaliacoes/gerenciar',
+  verificarAdminEscola,
+  async (req, res) => {
+
+    try {
+
+      const escolaId =
+        req.session.adminEscola.escolaId;
+
+      // --------------------------------------------------------
+      // FILTROS RECEBIDOS PELA URL
+      // --------------------------------------------------------
+
+      const {
+        avaliadorId,
+        projetoId,
+        status
+      } = req.query;
+
+
+      // --------------------------------------------------------
+      // BUSCAR FEIRA ATIVA DA ESCOLA
+      // --------------------------------------------------------
+
+      const feiraAtual =
+        await Feira.findOne({
+          status: 'ativa',
+          escolaId
+        }).lean();
+
+
+      if (!feiraAtual) {
+
+        req.flash(
+          'error_msg',
+          'Nenhuma feira ativa encontrada para gerenciar avaliações.'
+        );
+
+        return res.redirect(
+          '/admin/dashboard?tab=relatorios'
+        );
+      }
+
+
+      // --------------------------------------------------------
+      // MONTAR FILTRO DAS AVALIAÇÕES
+      // --------------------------------------------------------
+
+      const filtroAvaliacoes = {
+        feira: feiraAtual._id,
+        escolaId
+      };
+
+
+      // --------------------------------------------------------
+      // FILTRAR POR AVALIADOR
+      // --------------------------------------------------------
+
+      if (
+        avaliadorId &&
+        mongoose.Types.ObjectId.isValid(avaliadorId)
+      ) {
+
+        filtroAvaliacoes.avaliador =
+          avaliadorId;
+      }
+
+
+      // --------------------------------------------------------
+      // FILTRAR POR PROJETO
+      // --------------------------------------------------------
+
+      if (
+        projetoId &&
+        mongoose.Types.ObjectId.isValid(projetoId)
+      ) {
+
+        filtroAvaliacoes.projeto =
+          projetoId;
+      }
+
+
+      // --------------------------------------------------------
+      // FILTRAR POR STATUS
+      // --------------------------------------------------------
+      //
+      // "valida":
+      // também inclui avaliações antigas sem campo status.
+      //
+      // "anulada":
+      // somente avaliações explicitamente anuladas.
+      // --------------------------------------------------------
+
+      if (status === 'anulada') {
+
+        filtroAvaliacoes.status =
+          'anulada';
+
+      } else if (status === 'valida') {
+
+        filtroAvaliacoes.status = {
+          $ne: 'anulada'
+        };
+      }
+
+
+      // --------------------------------------------------------
+      // BUSCAR AVALIAÇÕES
+      // --------------------------------------------------------
+
+      const avaliacoes =
+        await Avaliacao.find(
+          filtroAvaliacoes
+        )
+          .populate('avaliador')
+          .populate('projeto')
+          .sort({
+            createdAt: -1
+          })
+          .lean();
+
+
+      // --------------------------------------------------------
+      // BUSCAR AVALIADORES PARA O FILTRO
+      // --------------------------------------------------------
+
+      const avaliadores =
+        await Avaliador.find({
+          feira: feiraAtual._id,
+          escolaId
+        })
+          .sort({
+            nome: 1
+          })
+          .lean();
+
+
+      // --------------------------------------------------------
+      // BUSCAR PROJETOS PARA O FILTRO
+      // --------------------------------------------------------
+
+      const projetos =
+        await Projeto.find({
+          feira: feiraAtual._id,
+          escolaId
+        })
+          .sort({
+            numeroEstande: 1,
+            titulo: 1
+          })
+          .lean();
+
+
+      // --------------------------------------------------------
+      // CONTADORES
+      // --------------------------------------------------------
+
+      const totalAvaliacoes =
+        await Avaliacao.countDocuments({
+          feira: feiraAtual._id,
+          escolaId
+        });
+
+
+      const totalAnuladas =
+        await Avaliacao.countDocuments({
+          feira: feiraAtual._id,
+          escolaId,
+          status: 'anulada'
+        });
+
+
+      const totalValidas =
+        totalAvaliacoes -
+        totalAnuladas;
+
+
+      // --------------------------------------------------------
+      // RENDER
+      // --------------------------------------------------------
+
+      return res.render(
+        'admin/avaliacoes/gerenciar',
+        {
+
+          titulo:
+            'Gerenciar Avaliações',
+
+          layout:
+            false,
+
+          feiraAtual,
+
+          avaliacoes,
+
+          avaliadores,
+
+          projetos,
+
+          filtros: {
+            avaliadorId:
+              avaliadorId || '',
+
+            projetoId:
+              projetoId || '',
+
+            status:
+              status || ''
+          },
+
+          totais: {
+            total:
+              totalAvaliacoes,
+
+            validas:
+              totalValidas,
+
+            anuladas:
+              totalAnuladas
+          },
+
+          usuarioLogado:
+            req.session.adminEscola,
+
+          success_msg:
+            req.flash(
+              'success_msg'
+            ),
+
+          error_msg:
+            req.flash(
+              'error_msg'
+            )
+        }
+      );
+
+
+    } catch (err) {
+
+      console.error(
+        'Erro ao carregar gerenciamento de avaliações:',
+        err
+      );
+
+
+      req.flash(
+        'error_msg',
+        'Erro ao carregar o gerenciamento de avaliações. Detalhes: ' +
+        err.message
+      );
+
+
+      return res.redirect(
+        '/admin/dashboard?tab=relatorios'
+      );
+    }
+  }
+);
+
 router.get('/formulario-pre-cadastro/configurar', verificarAdminEscola, async (req, res) => {
   const escolaId = req.session.adminEscola.escolaId;
   let configuracao = await ConfiguracaoFormularioPreCadastro.findOne({ escolaId });
