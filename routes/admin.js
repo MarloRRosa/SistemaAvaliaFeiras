@@ -5719,10 +5719,11 @@ router.get('/avaliacoes/pdf', verificarAdminEscola, async (req, res) => {
         // específicos de cada projeto.
         // =====================================================
 
-        const avaliacoes = await Avaliacao.find({
-            feira: feiraAtual._id,
-            escolaId
-        })
+       const avaliacoes = await Avaliacao.find({
+    feira: feiraAtual._id,
+    escolaId,
+    status: { $ne: 'anulada' }
+})
             .populate('avaliador')
             .populate({
                 path: 'projeto',
