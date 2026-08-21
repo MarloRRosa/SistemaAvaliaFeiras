@@ -3698,126 +3698,331 @@ router.post('/avaliadores', verificarAdminEscola, async (req, res) => {
 });
 
 router.put('/avaliadores/:id', verificarAdminEscola, async (req, res) => {
+
   const { id } = req.params;
   const ativo = req.body.ativo === 'on';
   const { nome, email, projetosAtribuidos } = req.body;
   const escolaId = req.session.adminEscola.escolaId;
 
-  if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-    req.flash('error_msg', 'ID do avaliador inválido para edição.');
-    return res.redirect('/admin/dashboard?tab=avaliadores');
-  }
 
-  try {
-    const projetos = Array.isArray(projetosAtribuidos)
-      ? projetosAtribuidos.filter(Boolean)
-      : projetosAtribuidos
-        ? [projetosAtribuidos]
-        : [];
+  // ============================================================
+  // VALIDAR ID
+  // ============================================================
 
-    const avaliadorAtualizado = await Avaliador.findOneAndUpdate(
-      { _id: id, escolaId },
-      {
-        nome,
-        email,
-        projetosAtribuidos: projetos,
-        ativo
-      },
-      { new: true }
+  if (
+    !id ||
+    !mongoose.Types.ObjectId.isValid(id)
+  ) {
+
+    req.flash(
+      'error_msg',
+      'ID do avaliador inválido para edição.'
     );
 
-    if (!avaliadorAtualizado) {
-      req.flash('error_msg', 'Avaliador não encontrado ou não pertence à sua escola.');
-    } else {
-      req.flash('success_msg', 'Avaliador atualizado com sucesso.');
-    }
-  } catch (err) {
-    console.error('Erro ao atualizar avaliador:', err);
-    req.flash('error_msg', 'Erro ao atualizar avaliador. Detalhes: ' + err.message);
+    return res.redirect(
+      '/admin/dashboard?tab=avaliadores'
+    );
   }
 
-  res.redirect('/admin/dashboard?tab=avaliadores');
-});
-
-router.post('/avaliadores/reset-pin/:id', verificarAdminEscola, async (req, res) => {
-  const { id } = req.params;
-  const adminEscolaId = req.session.adminEscola.escolaId;
-
-  if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-    req.flash('error_msg', 'ID do avaliador inválido para redefinição de PIN.');
-    return res.redirect('/admin/dashboard?tab=avaliadores');
-  }
 
   try {
-    const avaliador = await Avaliador.findOne({ _id: id, escolaId: adminEscolaId });
-    if (!avaliador) {
-      req.flash('error_msg', 'Avaliador não encontrado ou não pertence a esta escola.');
-      return res.redirect('/admin/dashboard?tab=avaliadores');
+
+    // ==========================================================
+    // BUSCAR AVALIADOR ATUAL
+    // ==========================================================
+
+    const avaliadorAtual =
+      await Avaliador.findOne({
+        _id: id,
+        escolaId
+      });
+
+    if (!avaliadorAtual) {
+
+      req.flash(
+        'error_msg',
+        'Avaliador não encontrado ou não pertence à sua escola.'
+      );
+
+      return res.redirect(
+        '/admin/dashboard?tab=avaliadores'
+      );
     }
 
-    const newPin = await generateUniquePin(6);
-    avaliador.pin = newPin;
-    avaliador.ativo = true;
 
-    const baseUrl = process.env.APP_URL || 'http://localhost:3000';
-    const url = `${baseUrl}/avaliador/acesso-direto/${newPin}`;
-    const qrcode = await QRCode.toDataURL(url);
-    avaliador.qrcode = qrcode;
+    // ==========================================================
+    // NORMALIZAR NOVA LISTA DE PROJETOS
+    // ==========================================================
 
-    await avaliador.save();
+    const projetos =
+      Array.isArray(projetosAtribuidos)
+        ? projetosAtribuidos.filter(Boolean)
+        : projetosAtribuidos
+          ? [projetosAtribuidos]
+          : [];
 
-    const emailSent = await sendResetPinEmail(avaliador);
 
-    if (emailSent) {
-      req.flash('success_msg', `PIN do avaliador ${avaliador.nome} redefinido e enviado por e-mail com sucesso.`);
+    // ==========================================================
+    // IDENTIFICAR PROJETOS QUE ESTÃO SENDO RETIRADOS
+    // ==========================================================
+
+    const projetosAtuais =
+      Array.isArray(avaliadorAtual.projetosAtribuidos)
+        ? avaliadorAtual.projetosAtribuidos.map(
+            projetoId => String(projetoId)
+          )
+        : [];
+
+
+    const novosProjetos =
+      projetos.map(
+        projetoId => String(projetoId)
+      );
+
+
+    const projetosRemovidos =
+      projetosAtuais.filter(
+        projetoId =>
+          !novosProjetos.includes(projetoId)
+      );
+
+
+    // ==========================================================
+    // VERIFICAR SE ALGUM PROJETO REMOVIDO POSSUI
+    // AVALIAÇÃO VÁLIDA
+    // ==========================================================
+    //
+    // Importante:
+    //
+    // avaliações antigas podem não possuir "status".
+    // Por isso usamos $ne: 'anulada'.
+    //
+    // Assim:
+    //
+    // - avaliação antiga = válida
+    // - status "valida" = válida
+    // - status "anulada" = pode remover o projeto
+    // ==========================================================
+
+    if (projetosRemovidos.length > 0) {
+
+      const avaliacoesExistentes =
+        await Avaliacao.find({
+          avaliador: id,
+
+          projeto: {
+            $in: projetosRemovidos
+          },
+
+          escolaId,
+
+          status: {
+            $ne: 'anulada'
+          }
+        })
+        .populate('projeto')
+        .lean();
+
+
+      // ========================================================
+      // EXISTE AVALIAÇÃO VÁLIDA:
+      // NÃO PERMITIR RETIRAR O PROJETO
+      // ========================================================
+
+      if (
+        avaliacoesExistentes &&
+        avaliacoesExistentes.length > 0
+      ) {
+
+        const nomesProjetos =
+          avaliacoesExistentes
+            .map(avaliacao => {
+
+              if (
+                avaliacao.projeto &&
+                avaliacao.projeto.titulo
+              ) {
+
+                return avaliacao.projeto.titulo;
+              }
+
+              return 'Projeto já avaliado';
+            })
+            .join(', ');
+
+
+        req.flash(
+          'error_msg',
+          `Não foi possível retirar o avaliador "${avaliadorAtual.nome}" do(s) projeto(s): ${nomesProjetos}. ` +
+          'Existe uma avaliação válida registrada. ' +
+          'Se essa avaliação não deve participar dos resultados, anule-a primeiro em Relatórios > Gerenciar Avaliações.'
+        );
+
+
+        return res.redirect(
+          '/admin/dashboard?tab=avaliadores'
+        );
+      }
+    }
+
+
+    // ==========================================================
+    // NENHUMA AVALIAÇÃO VÁLIDA IMPEDE A ALTERAÇÃO
+    // ==========================================================
+
+    const avaliadorAtualizado =
+      await Avaliador.findOneAndUpdate(
+        {
+          _id: id,
+          escolaId
+        },
+        {
+          nome,
+          email,
+          projetosAtribuidos: projetos,
+          ativo
+        },
+        {
+          new: true
+        }
+      );
+
+
+    if (!avaliadorAtualizado) {
+
+      req.flash(
+        'error_msg',
+        'Avaliador não encontrado ou não pertence à sua escola.'
+      );
+
     } else {
-      req.flash('error_msg', `PIN do avaliador ${avaliador.nome} redefinido, mas falha ao enviar e-mail.`);
-    }
 
-    res.redirect('/admin/dashboard?tab=avaliadores');
+      req.flash(
+        'success_msg',
+        'Avaliador atualizado com sucesso.'
+      );
+    }
+    return res.redirect(
+      '/admin/dashboard?tab=avaliadores'
+    );
   } catch (err) {
-    console.error('Erro ao redefinir PIN do avaliador:', err);
-    req.flash('error_msg', 'Erro ao redefinir PIN do avaliador. Detalhes: ' + err.message);
-    res.redirect('/admin/dashboard?tab=avaliadores');
+
+    console.error(
+      'Erro ao atualizar avaliador:',
+      err
+    );
+    req.flash(
+      'error_msg',
+      'Erro ao atualizar avaliador. Detalhes: ' +
+      err.message
+    );
+    return res.redirect(
+      '/admin/dashboard?tab=avaliadores'
+    );
   }
 });
 
 router.post('/avaliadores/:id/excluir', verificarAdminEscola, async (req, res) => {
   const { id } = req.params;
   const escolaId = req.session.adminEscola.escolaId;
-
-  if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-    req.flash('error_msg', 'ID do avaliador inválido para exclusão.');
-    return res.redirect('/admin/dashboard?tab=avaliadores');
+  // ============================================================
+  // VALIDAR ID
+  // ============================================================
+  if (
+    !id ||
+    !mongoose.Types.ObjectId.isValid(id)
+  ) {
+    req.flash(
+      'error_msg',
+      'ID do avaliador inválido para exclusão.'
+    );
+    return res.redirect(
+      '/admin/dashboard?tab=avaliadores'
+    );
   }
-
   try {
-    const resultado = await Avaliador.deleteOne({ _id: id, escolaId });
-    if (resultado.deletedCount === 0) {
-      req.flash('error_msg', 'Avaliador não encontrado ou não pertence à sua escola.');
-    } else {
-      req.flash('success_msg', 'Avaliador excluído com sucesso.');
+    // ==========================================================
+    // LOCALIZAR O AVALIADOR
+    // ==========================================================
+    const avaliador =
+      await Avaliador.findOne({
+        _id: id,
+        escolaId
+      });
+    if (!avaliador) {
+      req.flash(
+        'error_msg',
+        'Avaliador não encontrado ou não pertence à sua escola.'
+      );
+      return res.redirect(
+        '/admin/dashboard?tab=avaliadores'
+      );
     }
+    // ==========================================================
+    // PROTEGER HISTÓRICO DE AVALIAÇÕES
+    // ==========================================================
+    // Se existe qualquer avaliação vinculada a este avaliador,
+    // NÃO permitimos sua exclusão.
+    // Isso preserva:
+    // - nome do avaliador;
+    // - autoria da avaliação;
+    // - histórico;
+    // - auditoria;
+    // - avaliações anuladas.
+    // ==========================================================
+    const possuiAvaliacao =
+      await Avaliacao.exists({
+        avaliador: id,
+        escolaId
+      });
+    if (possuiAvaliacao) {
+      req.flash(
+        'error_msg',
+        `O avaliador "${avaliador.nome}" não pode ser excluído porque possui avaliações registradas. ` +
+        'Você pode desativá-lo ou remover seus projetos atribuídos sem apagar o histórico.'
+      );
+      return res.redirect(
+        '/admin/dashboard?tab=avaliadores'
+      );
+    }
+    // ==========================================================
+    // SEM AVALIAÇÕES: EXCLUSÃO PERMITIDA
+    // ==========================================================
+    await Avaliador.deleteOne({
+      _id: id,
+      escolaId
+    });
+    req.flash(
+      'success_msg',
+      'Avaliador excluído com sucesso.'
+    );
+    return res.redirect(
+      '/admin/dashboard?tab=avaliadores'
+    );
   } catch (err) {
-    console.error('Erro ao excluir avaliador:', err);
-    req.flash('error_msg', 'Erro ao excluir avaliador. Detalhes: ' + err.message);
+    console.error(
+      'Erro ao excluir avaliador:',
+      err
+    );
+    req.flash(
+      'error_msg',
+      'Erro ao excluir avaliador. Detalhes: ' +
+      err.message
+    );
+    return res.redirect(
+      '/admin/dashboard?tab=avaliadores'
+    );
   }
-
-  res.redirect('/admin/dashboard?tab=avaliadores');
 });
-
 // ============================================================
 // ANULAR / RESTAURAR AVALIAÇÃO
 // ============================================================
-//
 // IMPORTANTE:
 // - A avaliação NÃO é excluída do banco.
 // - Apenas recebe status "anulada".
 // - Mantemos notas, comentários e todo o histórico.
 // - Apenas administradores da própria escola podem alterar.
 // ============================================================
-
-
 // ------------------------------------------------------------
 // ANULAR AVALIAÇÃO
 // ------------------------------------------------------------
@@ -3825,16 +4030,12 @@ router.post(
   '/avaliacoes/:id/anular',
   verificarAdminEscola,
   async (req, res) => {
-
     const { id } = req.params;
     const { motivoAnulacao } = req.body;
-
     const escolaId =
       req.session.adminEscola.escolaId;
-
     const adminId =
       req.session.adminEscola.id;
-
     // --------------------------------------------------------
     // VALIDAR ID DA AVALIAÇÃO
     // --------------------------------------------------------
@@ -3846,12 +4047,10 @@ router.post(
         'error_msg',
         'ID da avaliação inválido.'
       );
-
       return res.redirect(
         '/admin/dashboard?tab=relatorios'
       );
     }
-
     // --------------------------------------------------------
     // MOTIVO É OBRIGATÓRIO
     // --------------------------------------------------------
