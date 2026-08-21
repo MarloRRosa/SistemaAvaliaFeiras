@@ -184,7 +184,8 @@ const feiraDoAvaliador = await Feira.findById(
                     avaliador: avaliadorData._id,
                     projeto: projeto._id,
                     feira: projeto.feira,
-                    escolaId: projeto.escolaId
+                    escolaId: projeto.escolaId,
+                    status: { $ne: 'anulada' }
                 }).lean();
                 let criteriosAvaliados = 0;
                 if (avaliacao && Array.isArray(avaliacao.itens)) {
@@ -403,58 +404,61 @@ router.get(
             // ------------------------------------------------
 
             const avaliacaoExistente =
-                await Avaliacao.findOne({
-                    avaliador: avaliadorData._id,
-                    projeto: projetoId,
-                    feira: projeto.feira,
-                    escolaId: projeto.escolaId
-                }).populate('itens.criterio');
-
+               await Avaliacao.findOne({
+                avaliador: avaliadorData._id,
+                projeto: projetoId,
+                feira: projeto.feira,
+                escolaId: projeto.escolaId
+            }).populate('itens.criterio');
+// ------------------------------------------------
+// PROTEGER AVALIAÇÃO ANULADA
+// ------------------------------------------------
+// Se a avaliação foi anulada administrativamente,
+// ela permanece no banco apenas como histórico.
+// O avaliador não pode abrir essa avaliação para
+// editar ou sobrescrever o registro anulado.
+// ------------------------------------------------
+if (
+    avaliacaoExistente &&
+    avaliacaoExistente.status === 'anulada'
+) {
+    req.flash(
+        'error_msg',
+        'Esta avaliação foi anulada administrativamente e não pode mais ser editada.'
+    );
+    return res.redirect(
+        '/avaliador/dashboard'
+    );
+}
             // ------------------------------------------------
             // RENDER
             // ------------------------------------------------
-
             res.render('avaliador/avaliar_projeto', {
-
                 titulo: `Avaliar: ${projeto.titulo}`,
-
                 projeto,
-
                 criterios,
-
                 avaliador: avaliadorData,
-
                 avaliacaoExistente,
-
                 layout: 'layouts/public',
-
                 error_msg: req.flash('error_msg'),
-
                 success_msg: req.flash('success_msg')
             });
-
         } catch (err) {
-
             console.error(
                 'Erro ao carregar página de avaliação:',
                 err
             );
-
             if (!res.headersSent) {
-
                 req.flash(
                     'error_msg',
                     'Erro ao carregar a página de avaliação do projeto. Detalhes: ' +
                     err.message
                 );
-
                 return res.redirect('/avaliador/dashboard');
             }
         }
     }
 );
-
-
 // ============================================================
 // SALVAR AVALIAÇÃO
 // ============================================================
@@ -462,7 +466,6 @@ router.get(
 // Somente critérios presentes em projeto.criterios podem ser
 // avaliados e salvos.
 // ============================================================
-
 router.post(
     '/avaliar/:projetoId',
     verificarAvaliador,
@@ -592,7 +595,6 @@ router.post(
             // ------------------------------------------------
             // BUSCAR AVALIAÇÃO EXISTENTE
             // ------------------------------------------------
-
             let avaliacaoExistente =
                 await Avaliacao.findOne({
                     avaliador: avaliadorData._id,
@@ -600,7 +602,18 @@ router.post(
                     feira: projeto.feira,
                     escolaId: projeto.escolaId
                 });
-
+            if (
+                avaliacaoExistente &&
+                avaliacaoExistente.status === 'anulada'
+                ) {
+            req.flash(
+            'error_msg',
+            'Esta avaliação foi anulada administrativamente e não pode ser alterada.'
+            );
+    return res.redirect(
+        '/avaliador/dashboard'
+    );
+}
             // ------------------------------------------------
             // CRIAR NOVA AVALIAÇÃO
             // ------------------------------------------------
@@ -942,23 +955,26 @@ router.post(
                 // ------------------------------------------------
                 // BUSCAR AVALIAÇÃO DESTE PROJETO
                 // ------------------------------------------------
+const avaliacao =
+    await Avaliacao.findOne({
 
-                const avaliacao =
-                    await Avaliacao.findOne({
+        avaliador:
+            avaliadorData._id,
 
-                        avaliador:
-                            avaliadorData._id,
+        projeto:
+            projeto._id,
 
-                        projeto:
-                            projeto._id,
+        feira:
+            projeto.feira,
 
-                        feira:
-                            projeto.feira,
+        escolaId:
+            projeto.escolaId,
 
-                        escolaId:
-                            projeto.escolaId
-                    }).lean();
+        status: {
+            $ne: 'anulada'
+        }
 
+    }).lean();
                 // ------------------------------------------------
                 // PROJETO SEM CRITÉRIOS
                 // ------------------------------------------------
