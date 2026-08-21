@@ -676,11 +676,26 @@
                                 <!-- POSIÇÃO                       -->
                                 <!-- ============================= -->
 
-                                <td class="col-posicao posicao">
+                               <td class="col-posicao posicao">
 
-                                    <%= index + 1 %>º
+    <% if (
+        projeto.mediaGeral !== undefined &&
+        projeto.mediaGeral !== null &&
+        projeto.mediaGeral !== '' &&
+        projeto.mediaGeral !== '-'
+    ) { %>
 
-                                </td>
+        <%= index + 1 %>º
+
+    <% } else { %>
+
+        <span style="color:#999;">
+            —
+        </span>
+
+    <% } %>
+
+</td>
 
 
                                 <!-- ============================= -->
@@ -870,11 +885,9 @@
 
 
         <p class="no-data-message">
-
-            Nenhum projeto avaliado para gerar
-            o relatório consolidado.
-
-        </p>
+    Nenhum projeto encontrado para gerar
+    o relatório consolidado.
+</p>
 
 
     <% } %>
