@@ -4049,7 +4049,7 @@ router.post(
         'ID da avaliação inválido.'
       );
       return res.redirect(
-        '/admin/dashboard?tab=relatorios'
+        '/admin/avaliacoes/gerenciar'
       );
     }
     // --------------------------------------------------------
@@ -4065,7 +4065,7 @@ router.post(
       );
 
       return res.redirect(
-        '/admin/dashboard?tab=relatorios'
+        '/admin/avaliacoes/gerenciar'
       );
     }
 
@@ -4091,7 +4091,7 @@ router.post(
         );
 
         return res.redirect(
-          '/admin/dashboard?tab=relatorios'
+          '/admin/avaliacoes/gerenciar'
         );
       }
 
@@ -4107,7 +4107,7 @@ router.post(
         );
 
         return res.redirect(
-          '/admin/dashboard?tab=relatorios'
+          '/admin/avaliacoes/gerenciar'
         );
       }
 
@@ -4147,7 +4147,7 @@ router.post(
       );
 
       return res.redirect(
-        '/admin/dashboard?tab=relatorios'
+        '/admin/avaliacoes/gerenciar'
       );
 
 
@@ -4165,7 +4165,7 @@ router.post(
       );
 
       return res.redirect(
-        '/admin/dashboard?tab=relatorios'
+        '/admin/avaliacoes/gerenciar'
       );
     }
   }
@@ -4201,7 +4201,7 @@ router.post(
       );
 
       return res.redirect(
-        '/admin/dashboard?tab=relatorios'
+        '/admin/avaliacoes/gerenciar'
       );
     }
 
@@ -4226,7 +4226,7 @@ router.post(
         );
 
         return res.redirect(
-          '/admin/dashboard?tab=relatorios'
+          '/admin/avaliacoes/gerenciar'
         );
       }
 
@@ -4242,7 +4242,7 @@ router.post(
         );
 
         return res.redirect(
-          '/admin/dashboard?tab=relatorios'
+          '/admin/avaliacoes/gerenciar'
         );
       }
 
@@ -4280,7 +4280,7 @@ router.post(
       );
 
       return res.redirect(
-        '/admin/dashboard?tab=relatorios'
+        '/admin/avaliacoes/gerenciar'
       );
 
 
@@ -4298,7 +4298,7 @@ router.post(
       );
 
       return res.redirect(
-        '/admin/dashboard?tab=relatorios'
+        '/admin/avaliacoes/gerenciar'
       );
     }
   }
@@ -4357,7 +4357,7 @@ router.get(
         );
 
         return res.redirect(
-          '/admin/dashboard?tab=relatorios'
+          '/admin/avaliacoes/gerenciar'
         );
       }
 
@@ -4571,7 +4571,7 @@ router.get(
 
 
       return res.redirect(
-        '/admin/dashboard?tab=relatorios'
+        '/admin/avaliacoes/gerenciar'
       );
     }
   }
