@@ -2912,6 +2912,7 @@ router.get('/dashboard', verificarAdminEscola, async (req, res) => {
         criterios: [],
         avaliadores: [],
         avaliacoes: [],
+        avaliacoesHistorico: [],
         projetosPorCategoria: {},
         avaliacoesPorAvaliadorCount: {},
         mediaAvaliacaoPorCriterio: {},
