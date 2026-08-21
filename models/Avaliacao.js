@@ -28,31 +28,79 @@ const AvaliacaoSchema = new mongoose.Schema({
     ref: 'Avaliador',
     required: true
   },
+
   // RESTAURADO: Campo 'projeto' como estava originalmente
   projeto: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Projeto',
     required: true
   },
+
   feira: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Feira',
     required: true
   },
-  escolaId: { // NOME DO CAMPO ALTERADO PARA 'escolaId' para padronização
+
+  escolaId: {
+    // NOME DO CAMPO ALTERADO PARA 'escolaId' para padronização
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Escola',
     required: true
   },
+
   itens: [itemAvaliacaoSchema],
+
   finalizadaPorAvaliador: {
     type: Boolean,
     default: false
+  },
+
+  // =========================================================
+  // CONTROLE DE VALIDADE DA AVALIAÇÃO
+  // =========================================================
+  // Avaliações antigas que não possuem este campo continuam
+  // sendo consideradas válidas pelo sistema.
+  status: {
+    type: String,
+    enum: ['valida', 'anulada'],
+    default: 'valida'
+  },
+
+  // Data em que a avaliação foi anulada
+  anuladaEm: {
+    type: Date,
+    default: null
+  },
+
+  // Motivo informado pelo administrador ou superadministrador
+  motivoAnulacao: {
+    type: String,
+    trim: true,
+    default: ''
+  },
+
+  // Registro de quem realizou a anulação
+  anuladaPor: {
+    tipo: {
+      type: String,
+      enum: ['Admin', 'SuperAdmin'],
+      default: undefined
+    },
+
+    usuarioId: {
+      type: mongoose.Schema.Types.ObjectId,
+      default: undefined
+    }
   }
+
 }, { timestamps: true });
 
 // MANTIDO: O índice com os nomes de campo que o MongoDB está esperando
 // (avaliador e projeto, sem 'Id' no final)
-AvaliacaoSchema.index({ avaliador: 1, projeto: 1 }, { unique: true });
+AvaliacaoSchema.index(
+  { avaliador: 1, projeto: 1 },
+  { unique: true }
+);
 
 module.exports = mongoose.model('Avaliacao', AvaliacaoSchema);
