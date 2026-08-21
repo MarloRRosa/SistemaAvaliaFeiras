@@ -268,9 +268,26 @@
 
 
           <!-- MÉDIA GERAL -->
-          <td class="py-3 px-4 text-gray-800 font-bold text-center">
-            <%= projeto.mediaGeral %>
-          </td>
+<td class="py-3 px-4 text-gray-800 font-bold text-center">
+
+  <% if (
+      projeto.numAvaliacoes > 0 &&
+      projeto.mediaGeral !== undefined &&
+      projeto.mediaGeral !== null &&
+      projeto.mediaGeral !== ''
+  ) { %>
+
+    <%= projeto.mediaGeral %>
+
+  <% } else { %>
+
+    <span class="text-gray-400 italic">
+      N/A
+    </span>
+
+  <% } %>
+
+</td>
 
         </tr>
 
