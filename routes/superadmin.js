@@ -338,7 +338,8 @@ router.get('/dashboard', verificarSuperAdmin, async (req, res) => {
 
           const avaliacoes = await Avaliacao.find({
             feira: feiraAtual._id,
-            escola: selectedEscolaId
+            escola: selectedEscolaId,
+            status: { $ne: 'anulada' }
           }).lean();
 
           const avaliadores = await Avaliador.find({
@@ -419,7 +420,6 @@ router.get('/dashboard', verificarSuperAdmin, async (req, res) => {
       ]);
 
       let rankingPorCategoria = {};
-
       for (const categoria of categorias) {
         const projetosDaCategoria = await Projeto.find({ categoria: categoria._id }).lean();
         let projetosComRanking = [];
@@ -495,7 +495,8 @@ router.get('/dashboard', verificarSuperAdmin, async (req, res) => {
             for (const projetoId of avaliador.projetosAtribuidos) {
               const avaliacao = await Avaliacao.findOne({
                 avaliador: avaliador._id,
-                projeto: projetoId
+                projeto: projetoId,
+                status: { $ne: 'anulada' }
               }).lean();
 
               if (avaliacao && avaliacao.itens.length > 0) {
@@ -579,7 +580,10 @@ router.get('/dashboard', verificarSuperAdmin, async (req, res) => {
           const categoriaNome = proj.categoria?.nome || 'Sem Categoria';
           if (!categoriasMap[categoriaNome]) categoriasMap[categoriaNome] = [];
 
-          const avaliacoesDoProjeto = await Avaliacao.find({ projeto: proj._id }).lean();
+         const avaliacoesDoProjeto = await Avaliacao.find({
+          projeto: proj._id,
+          status: { $ne: 'anulada' }
+        }).lean();
           const criteriosOficiaisProjeto = await Criterio.find({
             _id: { $in: proj.criterios }
           }).lean();
