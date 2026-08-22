@@ -5691,7 +5691,8 @@ router.get('/resultados-finais/pdf', verificarAdminEscola, async (req, res) => {
 router.get('/avaliacoes/pdf', verificarAdminEscola, async (req, res) => {
     try {
         const escolaId = req.session.adminEscola.escolaId;
-
+        const identificarAvaliadores =
+            req.query.identificar === 'true';
         const feiraAtual = await Feira.findOne({
             status: 'ativa',
             escolaId
@@ -5710,16 +5711,7 @@ router.get('/avaliacoes/pdf', verificarAdminEscola, async (req, res) => {
             }
         }
 
-
-        // =====================================================
-        // BUSCAR AVALIAÇÕES
-        //
-        // Importante:
-        // além da categoria, precisamos popular os critérios
-        // específicos de cada projeto.
-        // =====================================================
-
-       const avaliacoes = await Avaliacao.find({
+        const avaliacoes = await Avaliacao.find({
     feira: feiraAtual._id,
     escolaId,
     status: { $ne: 'anulada' }
@@ -5737,91 +5729,62 @@ router.get('/avaliacoes/pdf', verificarAdminEscola, async (req, res) => {
                 ]
             })
             .lean();
-
-
         // =====================================================
         // PREPARAR AVALIAÇÕES PARA O RELATÓRIO
         // =====================================================
 
         const avaliacoesParaRelatorio = [];
-
-
         for (const avaliacao of avaliacoes) {
-
             const projeto =
                 avaliacao.projeto;
-
-
             // Se o projeto foi removido, mantemos uma proteção
             // para não quebrar a geração do relatório.
             if (!projeto) {
-
                 avaliacoesParaRelatorio.push({
                     ...avaliacao,
-
                     projeto: {
                         titulo:
                             'Projeto removido',
-
                         categoria:
                             null,
-
                         criterios:
                             []
                     },
-
                     avaliador:
                         avaliacao.avaliador || {
                             nome:
                                 'Avaliador Removido',
-
                             email:
                                 '-'
                         },
-
                     notasComNomesDeCriterio:
                         [],
-
                     statusAvaliacao:
                         'Projeto removido',
-
                     criteriosRespondidos:
                         0,
-
                     totalCriterios:
                         0
                 });
-
                 continue;
             }
-
-
             // =================================================
             // CRITÉRIOS DO PRÓPRIO PROJETO
             // =================================================
-
             const criteriosProjeto =
                 Array.isArray(projeto.criterios)
                     ? projeto.criterios
                     : [];
-
-
             const criteriosMap = {};
-
-
             criteriosProjeto.forEach(criterio => {
-
                 const criterioId =
                     String(
                         criterio._id ||
                         criterio
                     );
-
-
                 criteriosMap[
                     criterioId
                 ] = {
-
                     nome:
                         criterio.nome ||
                         'Critério',
@@ -6046,24 +6009,25 @@ router.get('/avaliacoes/pdf', verificarAdminEscola, async (req, res) => {
         // =====================================================
 
         await generatePdfReport(
-            req,
-            res,
-            'pdf-avaliacoes',
-            {
-                titulo:
-                    'Avaliações Completas',
+    req,
+    res,
+    'pdf-avaliacoes',
+    {
+        titulo:
+            'Avaliações Completas',
 
-                nomeFeira:
-                    feiraAtual.nome,
+        nomeFeira:
+            feiraAtual.nome,
 
-                avaliacoes:
-                    avaliacoesParaRelatorio,
+        avaliacoes:
+            avaliacoesParaRelatorio,
 
-                escola
-            },
-            `avaliacoes_${feiraAtual.nome}`
-        );
+        identificarAvaliadores,
 
+        escola
+    },
+    `avaliacoes_${feiraAtual.nome}`
+);
 
     } catch (error) {
 
