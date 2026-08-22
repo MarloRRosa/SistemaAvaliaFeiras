@@ -112,10 +112,31 @@
       <% projetoData.avaliacoes.forEach(avaliacao => { %>
         <div class="avaliacao-section">
           <div class="avaliacao-details">
-            <p>Avaliador: <strong>
-              <%= avaliacao.avaliador && avaliacao.avaliador.nome ? avaliacao.avaliador.nome : 'Avaliador Removido' %>
-              (<%= avaliacao.avaliador && avaliacao.avaliador.email ? avaliacao.avaliador.email : '-' %>)
-            </strong></p>
+            <% if (identificarAvaliadores) { %>
+
+  <p>
+    Avaliador:
+    <strong>
+      <%= avaliacao.avaliador && avaliacao.avaliador.nome
+          ? avaliacao.avaliador.nome
+          : 'Avaliador Removido' %>
+
+      (<%= avaliacao.avaliador && avaliacao.avaliador.email
+          ? avaliacao.avaliador.email
+          : '-' %>)
+    </strong>
+  </p>
+
+<% } else { %>
+
+  <p>
+    Avaliador:
+    <strong>
+      Avaliador <%= projetoData.avaliacoes.indexOf(avaliacao) + 1 %>
+    </strong>
+  </p>
+
+<% } %>
             <p>Data da Avaliação: <strong><%= formatarData(avaliacao.createdAt) %></strong></p>
            <p>
   Status:
