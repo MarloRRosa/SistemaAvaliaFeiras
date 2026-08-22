@@ -1646,18 +1646,41 @@ document.getElementById('selecionarTodosAvaliadores')?.addEventListener('change'
             <h4 class="text-lg font-semibold text-gray-800">Relatório Consolidado</h4>
             <p class="text-sm text-gray-600">Gera um relatório detalhado de projetos e avaliações.</p>
         </a>
-        <a href="/admin/avaliacoes/pdf" target="_blank" 
-   class="relative block p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out text-center">
+        <div
+    class="relative block p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out text-center border border-blue-300"
+>
+    <i class="fas fa-comments text-blue-600 text-4xl mb-3"></i>
 
-    <!-- Selo de Novidade -->
-    <span class="absolute top-2 right-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">
-        Novidade
-    </span>
+    <h4 class="text-lg font-semibold text-gray-800">
+        Relatório com Feedback
+    </h4>
 
-    <i class="fas fa-file-alt text-blue-600 text-4xl mb-3"></i>
-    <h4 class="text-lg font-semibold text-gray-800">Relatório com Feedback</h4>
-    <p class="text-sm text-gray-600">Gera um PDF com detalhes de todas as avaliações e Feedback.</p>
-</a>
+    <p class="text-sm text-gray-600 mb-4">
+        Gere o relatório detalhado das avaliações com ou sem identificação dos avaliadores.
+    </p>
+
+    <div class="flex flex-col gap-2">
+
+        <a
+            href="/admin/avaliacoes/pdf?identificar=false"
+            target="_blank"
+            class="inline-flex items-center justify-center bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-md"
+        >
+            <i class="fas fa-user-secret mr-2"></i>
+            Sem identificação
+        </a>
+
+        <a
+            href="/admin/avaliacoes/pdf?identificar=true"
+            target="_blank"
+            class="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md"
+        >
+            <i class="fas fa-user mr-2"></i>
+            Com identificação
+        </a>
+
+    </div>
+</div>
 
         <a href="/admin/projetos-sem-avaliacao/pdf" target="_blank" class="block p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out text-center">
             <i class="fas fa-exclamation-triangle text-orange-600 text-4xl mb-3"></i>
