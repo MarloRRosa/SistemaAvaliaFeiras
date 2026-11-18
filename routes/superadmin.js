@@ -468,6 +468,8 @@ router.get('/dashboard', verificarSuperAdmin, async (req, res) => {
         }
       }
     } else if (activeTab === 'ranking-projetos') {
+      // Carrega projetos, avaliações e critérios em lote para evitar consultas
+      // repetidas dentro dos loops (N+1 queries).
       const categorias = await Criterio.aggregate([
         { $match: { feira: { $ne: null } } },
         { $group: { _id: '$categoriaId', nome: { $first: '$categoria.nome' } } },
@@ -483,128 +485,154 @@ router.get('/dashboard', verificarSuperAdmin, async (req, res) => {
         { $project: { _id: 1, nome: '$categoriaInfo.nome' } }
       ]);
 
-      let rankingPorCategoria = {};
+      const categoriaIds = categorias.map(c => c._id).filter(Boolean);
+      const projetos = categoriaIds.length
+        ? await Projeto.find({ categoria: { $in: categoriaIds } }).lean()
+        : [];
+      const projetoIds = projetos.map(p => p._id);
+      const [avaliacoes, criterios] = projetoIds.length
+        ? await Promise.all([
+            Avaliacao.find({ projeto: { $in: projetoIds } }).lean(),
+            Criterio.find({ _id: { $in: projetos.flatMap(p => p.criterios || []) } }).lean()
+          ])
+        : [[], []];
+
+      const avaliacoesPorProjeto = new Map();
+      for (const avaliacao of avaliacoes) {
+        const key = String(avaliacao.projeto);
+        if (!avaliacoesPorProjeto.has(key)) avaliacoesPorProjeto.set(key, []);
+        avaliacoesPorProjeto.get(key).push(avaliacao);
+      }
+      const criteriosPorId = new Map(criterios.map(c => [String(c._id), c]));
+      const projetosPorCategoria = new Map();
+      for (const projeto of projetos) {
+        const key = String(projeto.categoria);
+        if (!projetosPorCategoria.has(key)) projetosPorCategoria.set(key, []);
+        projetosPorCategoria.get(key).push(projeto);
+      }
+
+      const rankingPorCategoria = {};
       for (const categoria of categorias) {
-        const projetosDaCategoria = await Projeto.find({ categoria: categoria._id }).lean();
-        let projetosComRanking = [];
+        const projetosDaCategoria = projetosPorCategoria.get(String(categoria._id)) || [];
+        const projetosComRanking = [];
 
         for (const projeto of projetosDaCategoria) {
-          const avaliacoesDoProjeto = await Avaliacao.find({ projeto: projeto._id }).lean();
+          const avaliacoesDoProjeto = avaliacoesPorProjeto.get(String(projeto._id)) || [];
+          if (avaliacoesDoProjeto.length === 0) continue;
 
-          if (avaliacoesDoProjeto.length > 0) {
-            let totalPontuacao = 0;
-            let totalPesos = 0;
+          const criteriosOficiaisProjeto = (projeto.criterios || [])
+            .map(id => criteriosPorId.get(String(id)))
+            .filter(Boolean);
+          const notasPorCriterio = new Map();
+          criteriosOficiaisProjeto.forEach(crit => notasPorCriterio.set(String(crit._id), []));
 
-            const criteriosOficiaisProjeto = await Criterio.find({
-              _id: { $in: projeto.criterios }
-            }).lean();
-
-            let notasPorCriterio = {};
-            criteriosOficiaisProjeto.forEach(crit => {
-              notasPorCriterio[crit._id.toString()] = [];
-            });
-
-            avaliacoesDoProjeto.forEach(aval => {
-              aval.itens.forEach(item => {
-                if (
-                  item.nota !== undefined &&
-                  item.nota !== null &&
-                  notasPorCriterio[String(item.criterio)]
-                ) {
-                  notasPorCriterio[String(item.criterio)].push(item.nota);
-                }
-              });
-            });
-
-            criteriosOficiaisProjeto.forEach(crit => {
-              const notasDoCriterio = notasPorCriterio[String(crit._id)];
-              if (notasDoCriterio.length > 0) {
-                const mediaCriterio =
-                  notasDoCriterio.reduce((sum, current) => sum + current, 0) /
-                  notasDoCriterio.length;
-                totalPontuacao += mediaCriterio * crit.peso;
-                totalPesos += crit.peso;
-              }
-            });
-
-            let mediaGeral = 0;
-            if (totalPesos > 0) {
-              mediaGeral = (totalPontuacao / totalPesos).toFixed(2);
+          for (const avaliacao of avaliacoesDoProjeto) {
+            for (const item of (avaliacao.itens || [])) {
+              const notas = notasPorCriterio.get(String(item.criterio));
+              if (notas && item.nota !== undefined && item.nota !== null) notas.push(item.nota);
             }
-
-            projetosComRanking.push({
-              titulo: projeto.titulo,
-              mediaGeral: parseFloat(mediaGeral),
-              numAvaliacoes: avaliacoesDoProjeto.length
-            });
           }
+
+          let totalPontuacao = 0;
+          let totalPesos = 0;
+          for (const criterio of criteriosOficiaisProjeto) {
+            const notas = notasPorCriterio.get(String(criterio._id)) || [];
+            if (notas.length > 0) {
+              const mediaCriterio = notas.reduce((sum, nota) => sum + nota, 0) / notas.length;
+              totalPontuacao += mediaCriterio * criterio.peso;
+              totalPesos += criterio.peso;
+            }
+          }
+
+          const mediaGeral = totalPesos > 0 ? (totalPontuacao / totalPesos).toFixed(2) : '0.00';
+          projetosComRanking.push({
+            titulo: projeto.titulo,
+            mediaGeral: parseFloat(mediaGeral),
+            numAvaliacoes: avaliacoesDoProjeto.length
+          });
         }
         rankingPorCategoria[categoria.nome || 'Sem Categoria'] = projetosComRanking;
       }
-
       dataForTab.rankingProjetosPorCategoria = rankingPorCategoria;
     } else if (activeTab === 'resumo-avaliadores') {
-      let resumoAvaliadores = [];
-      for (const escola of escolasCadastradas) {
-        const avaliadoresDaEscola = await Avaliador.find({ escolaId: escola._id }).lean();
+      // Busca todos os avaliadores, projetos atribuídos, avaliações e critérios
+      // em lotes. Mantém a mesma regra de avaliação completa usada anteriormente.
+      const escolaIds = escolasCadastradas.map(escola => escola._id);
+      const avaliadores = escolaIds.length
+        ? await Avaliador.find({ escolaId: { $in: escolaIds } }).lean()
+        : [];
+      const projetosAtribuidosIds = [...new Set(
+        avaliadores.flatMap(av => (av.projetosAtribuidos || []).map(id => String(id)))
+      )];
+      const [projetosAtribuidos, avaliacoes] = projetosAtribuidosIds.length
+        ? await Promise.all([
+            Projeto.find({ _id: { $in: projetosAtribuidosIds } }).lean(),
+            Avaliacao.find({
+              avaliador: { $in: avaliadores.map(av => av._id) },
+              projeto: { $in: projetosAtribuidosIds },
+              status: { $ne: 'anulada' }
+            }).lean()
+          ])
+        : [[], []];
 
-        let avaliadoresFormatados = [];
-        for (const avaliador of avaliadoresDaEscola) {
-          const numProjetosAtribuidos = avaliador.projetosAtribuidos
-            ? avaliador.projetosAtribuidos.length
-            : 0;
+      const projetoPorId = new Map(projetosAtribuidos.map(p => [String(p._id), p]));
+      const avaliacaoPorPar = new Map(
+        avaliacoes.map(a => [`${String(a.avaliador)}:${String(a.projeto)}`, a])
+      );
+      const feiraIds = [...new Set(projetosAtribuidos.map(p => p.feira ? String(p.feira) : null).filter(Boolean))];
+      const criteriosDaEscola = feiraIds.length && escolaIds.length
+        ? await Criterio.find({ feira: { $in: feiraIds }, escolaId: { $in: escolaIds } }).lean()
+        : [];
+      const totalCriteriosPorEscolaFeira = new Map();
+      for (const criterio of criteriosDaEscola) {
+        const key = `${String(criterio.escolaId)}:${String(criterio.feira)}`;
+        totalCriteriosPorEscolaFeira.set(key, (totalCriteriosPorEscolaFeira.get(key) || 0) + 1);
+      }
 
+      const avaliadoresPorEscola = new Map();
+      for (const avaliador of avaliadores) {
+        const key = String(avaliador.escolaId);
+        if (!avaliadoresPorEscola.has(key)) avaliadoresPorEscola.set(key, []);
+        avaliadoresPorEscola.get(key).push(avaliador);
+      }
+
+      const resumoAvaliadores = escolasCadastradas.map(escola => {
+        const avaliadoresDaEscola = avaliadoresPorEscola.get(String(escola._id)) || [];
+        const avaliadoresFormatados = avaliadoresDaEscola.map(avaliador => {
+          const projetosIds = avaliador.projetosAtribuidos || [];
           let numAvaliacoesCompletas = 0;
-          if (numProjetosAtribuidos > 0) {
-            for (const projetoId of avaliador.projetosAtribuidos) {
-              const avaliacao = await Avaliacao.findOne({
-                avaliador: avaliador._id,
-                projeto: projetoId,
-                status: { $ne: 'anulada' }
-              }).lean();
 
-              if (avaliacao && avaliacao.itens.length > 0) {
-                const projetoDetalhes = await Projeto.findById(projetoId).lean();
-                if (projetoDetalhes && projetoDetalhes.feira) {
-                  const criteriosDaFeira = await Criterio.find({
-                    feira: projetoDetalhes.feira,
-                    escolaId: escola._id
-                  }).lean();
+          for (const projetoId of projetosIds) {
+            const projeto = projetoPorId.get(String(projetoId));
+            const avaliacao = avaliacaoPorPar.get(`${String(avaliador._id)}:${String(projetoId)}`);
+            if (!avaliacao || !Array.isArray(avaliacao.itens) || avaliacao.itens.length === 0) continue;
+            if (!projeto || !projeto.feira) continue;
 
-                  const totalCriteriosFeira = criteriosDaFeira.length;
-                  const criteriosAvaliadosComNota = avaliacao.itens.filter(
-                    item =>
-                      item.nota !== undefined &&
-                      item.nota !== null &&
-                      item.nota >= 5 &&
-                      item.nota <= 10
-                  ).length;
+            const totalCriteriosFeira = totalCriteriosPorEscolaFeira.get(
+              `${String(escola._id)}:${String(projeto.feira)}`
+            ) || 0;
+            const criteriosAvaliadosComNota = avaliacao.itens.filter(item =>
+              item.nota !== undefined && item.nota !== null && item.nota >= 5 && item.nota <= 10
+            ).length;
 
-                  if (totalCriteriosFeira > 0 && criteriosAvaliadosComNota === totalCriteriosFeira) {
-                    numAvaliacoesCompletas++;
-                  } else if (totalCriteriosFeira === 0 && avaliacao.itens.length > 0) {
-                    numAvaliacoesCompletas++;
-                  }
-                }
-              }
+            if (totalCriteriosFeira > 0 && criteriosAvaliadosComNota === totalCriteriosFeira) {
+              numAvaliacoesCompletas++;
+            } else if (totalCriteriosFeira === 0 && avaliacao.itens.length > 0) {
+              numAvaliacoesCompletas++;
             }
           }
 
-          avaliadoresFormatados.push({
+          return {
             nome: avaliador.nome,
             email: avaliador.email,
             status: avaliador.ativo ? 'Ativo' : 'Inativo',
-            totalAtribuidos: numProjetosAtribuidos,
+            totalAtribuidos: projetosIds.length,
             totalAvaliados: numAvaliacoesCompletas
-          });
-        }
-
-        resumoAvaliadores.push({
-          escolaNome: escola.nome,
-          avaliadores: avaliadoresFormatados
+          };
         });
-      }
 
+        return { escolaNome: escola.nome, avaliadores: avaliadoresFormatados };
+      });
       dataForTab.resumoAvaliadoresPorEscola = resumoAvaliadores;
     } else if (activeTab === 'feedback') {
       const { categoria, periodo, dataInicio, dataFim } = req.query;
@@ -631,58 +659,70 @@ router.get('/dashboard', verificarSuperAdmin, async (req, res) => {
       const feedbacks = await Feedback.find(filtro).sort({ criadoEm: -1 }).lean();
       dataForTab.feedbacks = feedbacks;
     } else if (activeTab === 'relatorio-projetos') {
-      let projetosPorEscola = [];
+      // Carrega projetos, avaliações e critérios em lote para todas as escolas.
+      const escolaIds = escolasCadastradas.map(escola => escola._id);
+      const projetos = escolaIds.length
+        ? await Projeto.find({ escolaId: { $in: escolaIds } }).populate('categoria').lean()
+        : [];
+      const projetoIds = projetos.map(proj => proj._id);
+      const criterioIds = [...new Set(projetos.flatMap(proj => (proj.criterios || []).map(id => String(id))))];
+      const [avaliacoes, criterios] = projetoIds.length
+        ? await Promise.all([
+            Avaliacao.find({ projeto: { $in: projetoIds }, status: { $ne: 'anulada' } }).lean(),
+            Criterio.find({ _id: { $in: criterioIds } }).lean()
+          ])
+        : [[], []];
 
-      for (const escola of escolasCadastradas) {
-        const projetos = await Projeto.find({ escolaId: escola._id })
-          .populate('categoria')
-          .lean();
+      const avaliacoesPorProjeto = new Map();
+      for (const avaliacao of avaliacoes) {
+        const key = String(avaliacao.projeto);
+        if (!avaliacoesPorProjeto.has(key)) avaliacoesPorProjeto.set(key, []);
+        avaliacoesPorProjeto.get(key).push(avaliacao);
+      }
+      const criteriosPorId = new Map(criterios.map(criterio => [String(criterio._id), criterio]));
+      const projetosPorEscolaMap = new Map();
+      for (const projeto of projetos) {
+        const key = String(projeto.escolaId);
+        if (!projetosPorEscolaMap.has(key)) projetosPorEscolaMap.set(key, []);
+        projetosPorEscolaMap.get(key).push(projeto);
+      }
 
+      const projetosPorEscola = escolasCadastradas.map(escola => {
+        const projetosDaEscola = projetosPorEscolaMap.get(String(escola._id)) || [];
         const categoriasMap = {};
 
-        for (const proj of projetos) {
+        for (const proj of projetosDaEscola) {
           const categoriaNome = proj.categoria?.nome || 'Sem Categoria';
           if (!categoriasMap[categoriaNome]) categoriasMap[categoriaNome] = [];
 
-         const avaliacoesDoProjeto = await Avaliacao.find({
-          projeto: proj._id,
-          status: { $ne: 'anulada' }
-        }).lean();
-          const criteriosOficiaisProjeto = await Criterio.find({
-            _id: { $in: proj.criterios }
-          }).lean();
-
-          let mediasCriterios = {};
-          let nomesCriterios = {};
+          const avaliacoesDoProjeto = avaliacoesPorProjeto.get(String(proj._id)) || [];
+          const criteriosOficiaisProjeto = (proj.criterios || [])
+            .map(id => criteriosPorId.get(String(id)))
+            .filter(Boolean);
+          const mediasCriterios = {};
+          const nomesCriterios = {};
           let totalPontuacao = 0;
           let totalPesos = 0;
 
-          criteriosOficiaisProjeto.forEach(crit => {
-            const critIdStr = crit._id.toString();
-            mediasCriterios[critIdStr] = 'N/A';
-            nomesCriterios[critIdStr] = crit.nome;
-          });
-
-          criteriosOficiaisProjeto.forEach(crit => {
+          for (const criterio of criteriosOficiaisProjeto) {
+            const criterioId = String(criterio._id);
+            mediasCriterios[criterioId] = 'N/A';
+            nomesCriterios[criterioId] = criterio.nome;
             const notas = [];
-            avaliacoesDoProjeto.forEach(aval => {
-              aval.itens.forEach(item => {
-                if (String(item.criterio) === String(crit._id) && item.nota != null) {
-                  notas.push(item.nota);
-                }
-              });
-            });
-
+            for (const avaliacao of avaliacoesDoProjeto) {
+              for (const item of (avaliacao.itens || [])) {
+                if (String(item.criterio) === criterioId && item.nota != null) notas.push(item.nota);
+              }
+            }
             if (notas.length > 0) {
               const mediaCriterio = notas.reduce((a, b) => a + b, 0) / notas.length;
-              mediasCriterios[crit._id.toString()] = mediaCriterio.toFixed(2);
-              totalPontuacao += mediaCriterio * crit.peso;
-              totalPesos += crit.peso;
+              mediasCriterios[criterioId] = mediaCriterio.toFixed(2);
+              totalPontuacao += mediaCriterio * criterio.peso;
+              totalPesos += criterio.peso;
             }
-          });
+          }
 
           const mediaGeral = totalPesos > 0 ? (totalPontuacao / totalPesos).toFixed(2) : 'N/A';
-
           categoriasMap[categoriaNome].push({
             titulo: proj.titulo,
             turma: proj.turma,
@@ -693,17 +733,14 @@ router.get('/dashboard', verificarSuperAdmin, async (req, res) => {
             mediaGeral
           });
         }
-
-        projetosPorEscola.push({
-          escolaNome: escola.nome,
-          categorias: categoriasMap
-        });
-      }
-
+        return { escolaNome: escola.nome, categorias: categoriasMap };
+      });
       dataForTab.projetosPorEscola = projetosPorEscola;
     }
 
-    const mensagens = await Mensagem.find({}).sort({ data: -1 }).lean();
+    const mensagens = activeTab === 'mensagens'
+      ? await Mensagem.find({}).sort({ data: -1 }).lean()
+      : [];
 
     res.render('superadmin/dashboard', {
       titulo: 'Painel Super Admin',
