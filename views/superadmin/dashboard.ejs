@@ -561,6 +561,46 @@
             border-radius: .85rem;
             box-shadow: none;
         }
+        /* A tabela de escolas deve caber no painel em telas de desktop. */
+        .schools-table {
+            width: 100%;
+            min-width: 0;
+            table-layout: fixed;
+        }
+        .schools-table th,
+        .schools-table td {
+            padding: .75rem .55rem;
+            white-space: normal;
+            overflow-wrap: anywhere;
+            font-size: .82rem;
+        }
+        .schools-table th:nth-child(1) { width: 17%; }
+        .schools-table th:nth-child(2) { width: 27%; }
+        .schools-table th:nth-child(3) { width: 8%; }
+        .schools-table th:nth-child(4) { width: 9%; }
+        .schools-table th:nth-child(5) { width: 9%; }
+        .schools-table th:nth-child(6) { width: 12%; }
+        .schools-table th:nth-child(7) { width: 18%; }
+        .schools-table td:nth-child(7) > div {
+            flex-wrap: wrap;
+            gap: .3rem;
+        }
+        .schools-table .action-btn {
+            width: 2rem;
+            height: 2rem;
+            flex: 0 0 2rem;
+        }
+        @media (max-width: 1100px) {
+            .schools-table {
+                min-width: 780px;
+                table-layout: auto;
+            }
+            .schools-table th,
+            .schools-table td {
+                white-space: nowrap;
+                padding: .7rem .65rem;
+            }
+        }
         .modern-table th { white-space: nowrap; }
         .modern-table td { border-bottom-color: #e8edf4; }
         .modern-table tbody tr:last-child td { border-bottom: 0; }
@@ -946,7 +986,7 @@ function toggleDatasPersonalizadas(valor) {
                 
                 <% if (typeof escolasDetalhes !== 'undefined' && escolasDetalhes.length > 0) { %>
                     <div class="overflow-x-auto">
-                        <table class="modern-table">
+                        <table class="modern-table schools-table">
                             <thead>
                                 <tr>
                                     <th>Nome da Escola</th>
