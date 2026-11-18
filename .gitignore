@@ -1,1 +1,14 @@
+# Variáveis de ambiente
 .env
+.env.*
+email.env
+
+# MongoDB Compass
+compass-connections*.json
+
+# Dependências
+node_modules/
+
+# Logs
+*.log
+npm-debug.log*
