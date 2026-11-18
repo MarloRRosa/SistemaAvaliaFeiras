@@ -907,18 +907,28 @@ router.post('/escolas/:id/editar', verificarSuperAdmin, async (req, res) => {
   }
 
   try {
+    // Não grave null no CNPJ: índices únicos podem tratar null como um valor
+    // duplicável. Quando o campo estiver vazio, remova-o do documento.
+    const dadosAtualizacao = {
+      nome: nome.trim(),
+      endereco: endereco || null,
+      telefone: telefone || null,
+      email: email || null,
+      descricao: descricao || null,
+      diretor: diretor || null,
+      responsavel: responsavel || null
+    };
+    const cnpjNormalizado = typeof cnpj === 'string' ? cnpj.trim() : '';
+
+    if (cnpjNormalizado) {
+      dadosAtualizacao.cnpj = cnpjNormalizado;
+    } else {
+      dadosAtualizacao.$unset = { cnpj: 1 };
+    }
+
     const updatedEscola = await Escola.findByIdAndUpdate(
       req.params.id,
-      {
-        nome: nome.trim(),
-        cnpj: cnpj || null,
-        endereco: endereco || null,
-        telefone: telefone || null,
-        email: email || null,
-        descricao: descricao || null,
-        diretor: diretor || null,
-        responsavel: responsavel || null
-      },
+      dadosAtualizacao,
       { new: true, runValidators: true }
     );
 
