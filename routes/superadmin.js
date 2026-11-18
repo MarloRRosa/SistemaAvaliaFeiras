@@ -177,75 +177,56 @@ router.get('/login', (req, res) => {
 router.post('/login', async (req, res) => {
   const { email, senha } = req.body;
 
-  console.log('--- Tentativa de Login Super Admin ---');
-  console.log('E-mail recebido:', email);
-
-  if (!email || !senha) {
-    console.log('Campos vazios.');
+  if (!email || !senha || typeof email !== 'string' || typeof senha !== 'string') {
     req.flash('error_msg', 'Por favor, preencha todos os campos.');
-    res.render('superadmin/login', {
+    return res.render('superadmin/login', {
       titulo: 'Login Super Admin',
-      layout: 'layouts/public',
+      layout: false,
       error_msg: req.flash('error_msg'),
       success_msg: req.flash('success_msg')
     });
-    return;
   }
 
   try {
-    const emailLowerCase = email.toLowerCase();
-    console.log('E-mail para busca no BD (lowercase):', emailLowerCase);
-
+    const emailLowerCase = email.trim().toLowerCase();
     const superAdmin = await SuperAdmin.findOne({ email: emailLowerCase });
-    console.log('Super Admin encontrado:', superAdmin ? superAdmin.email : 'Nenhum');
 
-    if (!superAdmin) {
-      console.log('Super Admin não encontrado.');
+    // A mesma mensagem é usada para e-mail inexistente ou senha incorreta.
+    if (!superAdmin || !(await bcrypt.compare(senha, superAdmin.senha))) {
       req.flash('error_msg', 'Credenciais inválidas.');
-      res.render('superadmin/login', {
+      return res.render('superadmin/login', {
         titulo: 'Login Super Admin',
         layout: false,
         error_msg: req.flash('error_msg'),
         success_msg: req.flash('success_msg')
       });
-      return;
     }
 
-    const isMatch = await bcrypt.compare(senha, superAdmin.senha);
-    console.log('Comparação de senha (isMatch):', isMatch);
-
-    if (!isMatch) {
-      console.log('Senha incorreta.');
-      req.flash('error_msg', 'Credenciais inválidas.');
-      res.render('superadmin/login', {
-        titulo: 'Login Super Admin',
-        layout: 'layouts/public',
-        error_msg: req.flash('error_msg'),
-        success_msg: req.flash('success_msg')
-      });
-      return;
-    }
-
-    req.session.superAdminId = superAdmin._id.toString();
-    console.log('ID do Super Admin atribuído à sessão (string):', req.session.superAdminId);
-
-    req.session.save(err => {
+    // Evita fixação de sessão: cria um ID novo após autenticação.
+    req.session.regenerate(err => {
       if (err) {
-        console.error('Erro ao salvar a sessão após login:', err);
-        req.flash('error_msg', 'Ocorreu um erro ao persistir a sessão. Tente novamente.');
+        console.error('Falha ao regenerar sessão do Super Admin:', err.message);
+        req.flash('error_msg', 'Não foi possível iniciar sua sessão. Tente novamente.');
         return res.redirect('/superadmin/login');
       }
-      console.log('Sessão salva com sucesso. Redirecionando para dashboard.');
-      req.flash('success_msg', 'Bem-vindo ao Painel Super Admin!');
-      res.redirect('/superadmin/dashboard');
+
+      req.session.superAdminId = superAdmin._id.toString();
+      req.session.save(saveErr => {
+        if (saveErr) {
+          console.error('Falha ao salvar sessão do Super Admin:', saveErr.message);
+          return req.session.destroy(() => res.redirect('/superadmin/login'));
+        }
+        req.flash('success_msg', 'Bem-vindo ao Painel Super Admin!');
+        return res.redirect('/superadmin/dashboard');
+      });
     });
   } catch (err) {
-    console.error('Erro no login do Super Admin (catch geral):', err);
+    console.error('Erro no login do Super Admin:', err.message);
     if (!res.headersSent) {
       req.flash('error_msg', 'Ocorreu um erro ao tentar fazer login. Tente novamente.');
-      res.render('superadmin/login', {
+      return res.render('superadmin/login', {
         titulo: 'Login Super Admin',
-        layout: 'layouts/public',
+        layout: false,
         error_msg: req.flash('error_msg'),
         success_msg: req.flash('success_msg')
       });
@@ -253,16 +234,99 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// Rota para logout do Super Admin
-router.get('/logout', verificarSuperAdmin, (req, res) => {
+// Logout. O GET é mantido temporariamente para compatibilidade com o link atual
+// do painel; o formulário do novo layout deverá usar POST.
+function encerrarSessaoSuperAdmin(req, res) {
   req.session.destroy(err => {
     if (err) {
-      console.error('Erro ao destruir sessão:', err);
+      console.error('Erro ao destruir sessão do Super Admin:', err.message);
       return res.redirect('/superadmin/login?error=logout_failed');
     }
     res.clearCookie('connect.sid');
-    res.redirect('/superadmin/login?message=logout_success');
+    return res.redirect('/superadmin/login?message=logout_success');
   });
+}
+
+router.get('/logout', verificarSuperAdmin, encerrarSessaoSuperAdmin);
+router.post('/logout', verificarSuperAdmin, encerrarSessaoSuperAdmin);
+
+// Alteração da senha do próprio Super Admin.
+// O formulário correspondente está disponível no modal do dashboard.ejs.
+router.post('/conta/alterar-senha', verificarSuperAdmin, async (req, res) => {
+  const { senhaAtual, novaSenha, confirmarSenha } = req.body;
+  const retorno = '/superadmin/dashboard';
+
+  if (
+    typeof senhaAtual !== 'string' ||
+    typeof novaSenha !== 'string' ||
+    typeof confirmarSenha !== 'string' ||
+    !senhaAtual || !novaSenha || !confirmarSenha
+  ) {
+    req.flash('error_msg', 'Preencha todos os campos para alterar a senha.');
+    return res.redirect(retorno);
+  }
+
+  if (novaSenha.length < 12) {
+    req.flash('error_msg', 'A nova senha deve ter pelo menos 12 caracteres.');
+    return res.redirect(retorno);
+  }
+
+  if (novaSenha !== confirmarSenha) {
+    req.flash('error_msg', 'A confirmação da nova senha não confere.');
+    return res.redirect(retorno);
+  }
+
+  if (senhaAtual === novaSenha) {
+    req.flash('error_msg', 'A nova senha deve ser diferente da senha atual.');
+    return res.redirect(retorno);
+  }
+
+  try {
+    const superAdmin = await SuperAdmin.findById(req.session.superAdminId);
+    if (!superAdmin) {
+      req.flash('error_msg', 'Conta Super Admin não encontrada. Faça login novamente.');
+      return req.session.destroy(() => res.redirect('/superadmin/login'));
+    }
+
+    const senhaAtualValida = await bcrypt.compare(senhaAtual, superAdmin.senha);
+    if (!senhaAtualValida) {
+      req.flash('error_msg', 'A senha atual está incorreta.');
+      return res.redirect(retorno);
+    }
+
+    const id = superAdmin._id.toString();
+    const senhaHasheada = await hashPassword(novaSenha);
+
+    // Encerra as sessões existentes antes de persistir a nova senha.
+    // O connect-mongodb-session guarda os dados como objeto em "session".
+    await mongoose.connection.collection('sessions').deleteMany({
+      'session.superAdminId': id
+    });
+
+    superAdmin.senha = senhaHasheada;
+    await superAdmin.save();
+
+    req.session.regenerate(err => {
+      if (err) {
+        console.error('Senha alterada, mas não foi possível recriar a sessão:', err.message);
+        return res.redirect('/superadmin/login?message=Senha%20alterada.%20Entre%20novamente.');
+      }
+
+      req.session.superAdminId = id;
+      req.session.save(saveErr => {
+        if (saveErr) {
+          console.error('Senha alterada, mas não foi possível salvar a nova sessão:', saveErr.message);
+          return req.session.destroy(() => res.redirect('/superadmin/login'));
+        }
+        req.flash('success_msg', 'Senha alterada com sucesso. As sessões anteriores foram encerradas.');
+        return res.redirect(retorno);
+      });
+    });
+  } catch (err) {
+    console.error('Erro ao alterar senha do Super Admin:', err.message);
+    req.flash('error_msg', 'Não foi possível alterar a senha. Tente novamente.');
+    return res.redirect(retorno);
+  }
 });
 
 // ========================================================================
@@ -661,7 +725,7 @@ router.get('/dashboard', verificarSuperAdmin, async (req, res) => {
   } catch (err) {
     console.error('Erro ao carregar dashboard do Super Admin:', err);
     if (!res.headersSent) {
-      req.flash('error_msg', 'Erro ao carregar o dashboard. Detalhes: ' + err.message);
+      req.flash('error_msg', 'Erro ao carregar o painel. Tente novamente.');
       res.redirect('/superadmin/login');
     }
   }
@@ -866,9 +930,8 @@ router.post('/escolas/:id/editar', verificarSuperAdmin, async (req, res) => {
     let adminEscola = await Admin.findOne({ escolaId: req.params.id });
 
     if (!adminEscola) {
-      const hashedPassword = novaSenhaAdmin
-        ? await hashPassword(novaSenhaAdmin)
-        : await hashPassword(generateTemporaryPassword());
+      const senhaTemporaria = novaSenhaAdmin ? null : generateTemporaryPassword();
+      const hashedPassword = await hashPassword(novaSenhaAdmin || senhaTemporaria);
 
       adminEscola = new Admin({
         nome: adminNome.trim(),
@@ -880,9 +943,17 @@ router.post('/escolas/:id/editar', verificarSuperAdmin, async (req, res) => {
       });
       await adminEscola.save();
 
-      req.flash('success_msg', `Escola atualizada e novo administrador principal (${adminEmail.trim()}) criado com sucesso!`);
       if (!novaSenhaAdmin) {
-        req.flash('success_msg', req.flash('success_msg') + ` Uma senha temporária foi gerada e deverá ser comunicada.`);
+        const appUrl = process.env.APP_URL || 'http://localhost:3000';
+        const emailEnviado = await sendAdminTemporaryPasswordEmail(adminEscola, senhaTemporaria, appUrl);
+
+        if (emailEnviado) {
+          req.flash('success_msg', `Escola atualizada e novo administrador principal (${adminEmail.trim()}) criado. A senha provisória foi enviada ao e-mail cadastrado.`);
+        } else {
+          req.flash('error_msg', `O administrador (${adminEmail.trim()}) foi criado, mas não foi possível enviar a senha provisória. Verifique as configurações de e-mail e redefina a senha antes de liberar o acesso.`);
+        }
+      } else {
+        req.flash('success_msg', `Escola atualizada e novo administrador principal (${adminEmail.trim()}) criado com sucesso!`);
       }
     } else {
       adminEscola.nome = adminNome.trim();
@@ -985,9 +1056,9 @@ router.post('/escolas/:escolaId/reset-admin-password', verificarSuperAdmin, asyn
     const appUrl = process.env.APP_URL || 'http://localhost:3000';
     const emailSent = await sendAdminTemporaryPasswordEmail(adminEscola, novaSenhaProvisoria, appUrl);
 
-    let successMessage = `Senha do admin da escola "${escola.nome}" redefinida com sucesso! A nova senha provisória para <strong>${adminEscola.email}</strong> é: <strong>${novaSenhaProvisoria}</strong>.`;
+    let successMessage = `Senha do administrador da escola "${escola.nome}" redefinida. A senha provisória foi enviada por e-mail quando possível.`;
     if (!emailSent) {
-      successMessage += ' <em>(Não foi possível enviar o e-mail de notificação. Verifique as configurações de e-mail.)</em>';
+      successMessage += ' Não foi possível enviar o e-mail de notificação. Verifique as configurações de e-mail antes de orientar o acesso.';
     }
 
     req.flash('success_msg', successMessage);
@@ -1137,10 +1208,10 @@ router.post('/solicitacoes/:id/aprovar', verificarSuperAdmin, async (req, res) =
     solicitacao.processadoPor = req.session.superAdminId;
     await solicitacao.save();
 
-    console.log(`Solicitação APROVADA: Senha Provisória para ${solicitacao.emailContato}: ${senhaProvisoria}`);
+    console.log(`Solicitação aprovada para ${solicitacao.emailContato}.`);
     req.flash(
       'success_msg',
-      `Solicitação de acesso aprovada com sucesso! Uma escola (${novaEscola.nome}) e um administrador foram criados. A senha provisória do administrador (${solicitacao.emailContato}) é: <strong>${senhaProvisoria}</strong>.`
+      `Solicitação aprovada! A escola (${novaEscola.nome}) e o administrador foram criados. A senha provisória foi encaminhada por e-mail quando possível.`
     );
 
     const appUrl = process.env.APP_URL || 'http://localhost:3000';
