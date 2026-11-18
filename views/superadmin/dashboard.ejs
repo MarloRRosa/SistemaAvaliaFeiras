@@ -511,6 +511,83 @@
             .stat-icon { width: 2.8rem; height: 2.8rem; font-size: 1.15rem; }
             .modern-table th, .modern-table td { padding: .65rem .7rem; white-space: nowrap; }
         }
+        /* Refinamento visual: cartões destacados e tabelas com rolagem clara */
+        .stat-card {
+            border: 1px solid #dbe4f0;
+            box-shadow: 0 5px 16px rgba(15, 23, 42, .075), 0 1px 3px rgba(15, 23, 42, .04);
+        }
+        .stat-card:hover {
+            border-color: #bfdbfe;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, .11);
+        }
+        .tab-content {
+            border-color: #d9e2ef;
+            box-shadow: 0 8px 26px rgba(15, 23, 42, .075), 0 1px 3px rgba(15, 23, 42, .035);
+        }
+        .admin-navigation {
+            border-color: #d9e2ef;
+            box-shadow: 0 7px 22px rgba(15, 23, 42, .07);
+        }
+        /* A tabela mantém todas as colunas; em telas estreitas, rola dentro do próprio painel. */
+        .tab-content .overflow-x-auto {
+            display: block;
+            width: 100%;
+            max-width: 100%;
+            overflow-x: auto !important;
+            overflow-y: hidden;
+            overscroll-behavior-x: contain;
+            border: 1px solid #dbe4f0;
+            border-radius: .85rem;
+            background: #fff;
+            box-shadow: 0 4px 13px rgba(15, 23, 42, .055);
+            scrollbar-width: thin;
+            scrollbar-color: #94a3b8 #eef2f7;
+        }
+        .tab-content .overflow-x-auto::-webkit-scrollbar { height: 10px; }
+        .tab-content .overflow-x-auto::-webkit-scrollbar-track {
+            background: #eef2f7;
+            border-radius: 999px;
+        }
+        .tab-content .overflow-x-auto::-webkit-scrollbar-thumb {
+            background: #a8b5c7;
+            border: 2px solid #eef2f7;
+            border-radius: 999px;
+        }
+        .modern-table {
+            width: 100%;
+            min-width: 900px;
+            margin-top: 0;
+            border: 0;
+            border-radius: .85rem;
+            box-shadow: none;
+        }
+        .modern-table th { white-space: nowrap; }
+        .modern-table td { border-bottom-color: #e8edf4; }
+        .modern-table tbody tr:last-child td { border-bottom: 0; }
+        .modern-table tbody tr:hover { transform: none; }
+        .action-btn {
+            width: 2.35rem;
+            height: 2.35rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #e2e8f0;
+            border-radius: .65rem;
+            box-shadow: 0 2px 6px rgba(15, 23, 42, .07);
+            transition: background .18s ease, box-shadow .18s ease, transform .18s ease;
+        }
+        .action-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 12px rgba(15, 23, 42, .11);
+        }
+        .bloco-escola, .bloco-escola-avaliadores {
+            border: 1px solid #dbe4f0 !important;
+            box-shadow: 0 4px 14px rgba(15, 23, 42, .055);
+        }
+        @media (max-width: 680px) {
+            .modern-table { min-width: 820px; }
+            .tab-content .overflow-x-auto { border-radius: .7rem; }
+        }
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
         }
