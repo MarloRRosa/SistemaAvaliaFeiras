@@ -382,11 +382,144 @@
             border-left-color: var(--primary-red);
             color: #991b1b;
         }
+
+
+        /* ===== Super Admin: layout profissional e responsivo ===== */
+        :root {
+            --admin-ink: #172554;
+            --admin-muted: #64748b;
+            --admin-border: #e2e8f0;
+            --admin-canvas: #f4f7fb;
+            --admin-surface: #ffffff;
+        }
+        body {
+            background: var(--admin-canvas) !important;
+            color: #1e293b;
+        }
+        .admin-shell {
+            display: grid;
+            grid-template-columns: 238px minmax(0, 1fr);
+            grid-template-rows: auto auto 1fr;
+            align-items: start;
+            gap: 1.25rem;
+            max-width: 1560px !important;
+        }
+        .main-header {
+            grid-column: 1 / -1;
+            margin: 0;
+            padding: 1.5rem 1.75rem;
+            border: 1px solid var(--admin-border);
+            border-radius: 1.15rem;
+            background: rgba(255,255,255,.96);
+            box-shadow: 0 8px 28px rgba(15,23,42,.06);
+        }
+        .main-header h1 { color: var(--admin-ink); letter-spacing: -.035em; }
+        .admin-navigation {
+            grid-column: 1;
+            grid-row: 3;
+            position: sticky;
+            top: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: .4rem;
+            width: 100%;
+            padding: .8rem;
+            margin: 0;
+            border: 1px solid var(--admin-border);
+            border-radius: 1rem;
+            background: #fff;
+            box-shadow: 0 5px 20px rgba(15,23,42,.045);
+        }
+        .tab-button {
+            width: 100%;
+            justify-content: flex-start;
+            margin: 0;
+            padding: .85rem .95rem;
+            border: 1px solid transparent;
+            border-radius: .7rem;
+            color: #475569;
+            background: transparent;
+            text-align: left;
+            box-shadow: none;
+            transform: none;
+        }
+        .tab-button::before { display: none; }
+        .tab-button:hover {
+            color: #1d4ed8;
+            background: #eff6ff;
+            border-color: #dbeafe;
+            box-shadow: none;
+            transform: none;
+        }
+        .tab-button.active {
+            color: #fff;
+            background: linear-gradient(135deg, #2563eb, #1e40af);
+            border-color: #2563eb;
+            box-shadow: 0 5px 12px rgba(37,99,235,.2);
+            transform: none;
+        }
+        .tab-content {
+            grid-column: 2;
+            grid-row: 3;
+            min-width: 0;
+            padding: clamp(1rem, 2.2vw, 2rem);
+            border: 1px solid var(--admin-border);
+            border-radius: 1rem;
+            background: var(--admin-surface);
+            box-shadow: 0 7px 24px rgba(15,23,42,.055);
+        }
+        .tab-content::before { height: 3px; opacity: .85; }
+        .stat-card {
+            min-height: 150px;
+            border-radius: 1rem;
+            box-shadow: 0 4px 14px rgba(15,23,42,.055);
+        }
+        .stat-card:hover { transform: translateY(-2px); }
+        .modern-table { box-shadow: none; border: 1px solid var(--admin-border); }
+        .modern-table th { background: #f8fafc; color: #475569; }
+        .modern-table td, .modern-table th { padding: .85rem 1rem; }
+        .header-btn { justify-content: center; }
+        .flash-message { grid-column: 1 / -1; }
+        .tab-content h2 { color: var(--admin-ink); letter-spacing: -.02em; }
+        .tab-content .overflow-x-auto { max-width: 100%; }
+        @media (max-width: 900px) {
+            .admin-shell { grid-template-columns: 190px minmax(0,1fr); gap: 1rem; }
+            .main-header { padding: 1.25rem; }
+            .main-header h1 { font-size: 1.8rem; }
+            .tab-button { padding: .75rem .7rem; font-size: .82rem; }
+        }
+        @media (max-width: 680px) {
+            main.p-6, main.md\:p-8 { padding: .85rem !important; }
+            .admin-shell { display: flex; flex-direction: column; gap: .85rem; }
+            .main-header { width: 100%; padding: 1.1rem; }
+            .main-header > div { gap: .75rem; }
+            .main-header h1 { font-size: 1.55rem; }
+            .main-header p { font-size: .95rem; }
+            .main-header .header-btn { width: 100%; }
+            .main-header form { width: 100%; }
+            .admin-navigation {
+                position: static;
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0,1fr));
+                width: 100%;
+                padding: .55rem;
+            }
+            .tab-button { justify-content: flex-start; white-space: normal; font-size: .78rem; padding: .7rem .55rem; }
+            .tab-content { width: 100%; padding: 1rem; }
+            .tab-content h2 { font-size: 1.35rem; }
+            .stat-card { min-height: 125px; padding: 1rem; }
+            .stat-icon { width: 2.8rem; height: 2.8rem; font-size: 1.15rem; }
+            .modern-table th, .modern-table td { padding: .65rem .7rem; white-space: nowrap; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+        }
+
     </style>
 </head>
 <body class="bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen">
     <main class="p-6 md:p-8">
-        <div class="max-w-7xl mx-auto">
+        <div class="admin-shell max-w-7xl mx-auto">
             <!-- Header Principal -->
             <div class="main-header animate-fade-in-up">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
@@ -438,7 +571,7 @@
             <% } %>
 
             <!-- Navegação por Abas -->
-            <div class="flex flex-wrap mb-8 animate-fade-in-up" style="animation-delay: 0.2s;">
+            <nav class="admin-navigation animate-fade-in-up" aria-label="Navegação do Super Admin" style="animation-delay: 0.2s;">
                 <button class="tab-button <%= activeTab === 'visao-geral' ? 'active' : '' %>" data-tab="visao-geral">
                     <i class="fas fa-chart-line mr-2"></i>Visão Geral
                 </button>
@@ -466,7 +599,7 @@
                 <button class="tab-button <%= activeTab === 'feedback' ? 'active' : '' %>" data-tab="feedback">
                     <i class="fas fa-comment-dots mr-2"></i>Feedback
                 </button>
-            </div>
+            </nav>
 
 <!-- ABA: FEEDBACK -->
 <div class="tab-content p-6 bg-white rounded-lg shadow-inner border border-gray-200 <%= activeTab === 'feedback' ? '' : 'hidden' %>" id="feedback-tab" role="tabpanel" aria-labelledby="feedback-tab-button">
@@ -1154,6 +1287,7 @@ function toggleDatasPersonalizadas(valor) {
             const filtroAvaliadores = document.getElementById('escolaFiltroAvaliadores');
             const blocosAvaliadores = document.querySelectorAll('.bloco-escola-avaliadores');
 
+            if (!filtroAvaliadores) return;
             filtroAvaliadores.addEventListener('change', () => {
                 const escolaSelecionada = filtroAvaliadores.value;
 
@@ -1274,6 +1408,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const filtroSelect = document.getElementById('escolaFiltro');
     const blocosEscolas = document.querySelectorAll('#relatorio-projetos-tab > div.mb-6');
 
+    if (!filtroSelect) return;
     filtroSelect.addEventListener('change', () => {
         const valorSelecionado = filtroSelect.value;
 
@@ -1322,9 +1457,12 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById('changePasswordModal').classList.add('hidden');
         }
 
-        document.getElementById('changePasswordModal').addEventListener('click', function(e) {
-            if (e.target === this) closeChangePasswordModal();
-        });
+        const changePasswordModal = document.getElementById('changePasswordModal');
+        if (changePasswordModal) {
+            changePasswordModal.addEventListener('click', function(e) {
+                if (e.target === this) closeChangePasswordModal();
+            });
+        }
 
         function confirmResetAdminPassword(escolaId, escolaNome, adminEmail) {
             document.getElementById('escolaNomeReset').textContent = escolaNome;
@@ -1338,11 +1476,12 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         // Fechar modal clicando fora dele
-        document.getElementById('resetAdminPasswordModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeResetAdminPasswordModal();
-            }
-        });
+        const resetAdminPasswordModal = document.getElementById('resetAdminPasswordModal');
+        if (resetAdminPasswordModal) {
+            resetAdminPasswordModal.addEventListener('click', function(e) {
+                if (e.target === this) closeResetAdminPasswordModal();
+            });
+        }
 //filtros feedback
          function toggleDatasPersonalizadas(valor) {
     const datasDiv = document.getElementById('datasPersonalizadas');
