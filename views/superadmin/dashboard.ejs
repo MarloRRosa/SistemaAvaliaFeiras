@@ -399,10 +399,16 @@
                             <i class="fas fa-plus"></i>
                             Nova Escola
                         </a>
-                        <a href="/superadmin/logout" class="header-btn btn-danger-modern">
-                            <i class="fas fa-sign-out-alt"></i>
-                            Sair
-                        </a>
+                        <button type="button" onclick="openChangePasswordModal()" class="header-btn btn-primary-modern">
+                            <i class="fas fa-key"></i>
+                            Alterar senha
+                        </button>
+                        <form method="POST" action="/superadmin/logout" class="inline">
+                            <button type="submit" class="header-btn btn-danger-modern">
+                                <i class="fas fa-sign-out-alt"></i>
+                                Sair
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -1200,6 +1206,37 @@ function toggleDatasPersonalizadas(valor) {
   <% } %>
 </div>
 
+    <!-- Modal para alteração da senha do próprio Super Admin -->
+    <div id="changePasswordModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 modern-modal hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md modal-content-modern">
+            <div class="text-center mb-6">
+                <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 mb-4">
+                    <i class="fas fa-shield-alt text-blue-600 text-2xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-2">Alterar minha senha</h3>
+                <p class="text-sm text-gray-600">Use uma senha exclusiva com pelo menos 12 caracteres.</p>
+            </div>
+            <form method="POST" action="/superadmin/conta/alterar-senha" class="space-y-4">
+                <div>
+                    <label for="senhaAtual" class="block text-sm font-semibold text-gray-700 mb-1">Senha atual</label>
+                    <input id="senhaAtual" name="senhaAtual" type="password" autocomplete="current-password" required class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                </div>
+                <div>
+                    <label for="novaSenha" class="block text-sm font-semibold text-gray-700 mb-1">Nova senha</label>
+                    <input id="novaSenha" name="novaSenha" type="password" minlength="12" autocomplete="new-password" required class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                </div>
+                <div>
+                    <label for="confirmarSenha" class="block text-sm font-semibold text-gray-700 mb-1">Confirme a nova senha</label>
+                    <input id="confirmarSenha" name="confirmarSenha" type="password" minlength="12" autocomplete="new-password" required class="w-full border border-gray-300 rounded-lg px-3 py-2">
+                </div>
+                <div class="flex justify-end gap-3 pt-2">
+                    <button type="button" onclick="closeChangePasswordModal()" class="px-5 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">Cancelar</button>
+                    <button type="submit" class="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Salvar nova senha</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Modal para Confirmação de Redefinição de Senha -->
     <div id="resetAdminPasswordModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 modern-modal hidden flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md modal-content-modern">
@@ -1213,7 +1250,7 @@ function toggleDatasPersonalizadas(valor) {
                 <p class="text-gray-700 mb-4">Tem certeza que deseja redefinir a senha do administrador principal da escola <strong id="escolaNomeReset" class="text-blue-600"></strong>?</p>
                 <p class="text-sm text-gray-600 bg-yellow-50 p-3 rounded-lg border border-yellow-200">
                     <i class="fas fa-exclamation-triangle text-yellow-600 mr-2"></i>
-                    Uma nova senha provisória será gerada e exibida para você. Você deve passá-la ao administrador.
+Uma nova senha provisória será gerada e enviada ao e-mail cadastrado do administrador. Se o envio falhar, será necessário verificar as configurações de e-mail antes de orientar o acesso.
                 </p>
                 <p class="text-sm text-gray-500 mt-2">Email: <span id="adminEmailReset" class="font-semibold"></span></p>
             </div>
@@ -1277,10 +1314,22 @@ document.addEventListener("DOMContentLoaded", () => {
             if (activeButton) activeButton.classList.add('active');
         }
 
+        function openChangePasswordModal() {
+            document.getElementById('changePasswordModal').classList.remove('hidden');
+        }
+
+        function closeChangePasswordModal() {
+            document.getElementById('changePasswordModal').classList.add('hidden');
+        }
+
+        document.getElementById('changePasswordModal').addEventListener('click', function(e) {
+            if (e.target === this) closeChangePasswordModal();
+        });
+
         function confirmResetAdminPassword(escolaId, escolaNome, adminEmail) {
             document.getElementById('escolaNomeReset').textContent = escolaNome;
             document.getElementById('adminEmailReset').textContent = adminEmail;
-            document.getElementById('resetAdminPasswordForm').action = `/superadmin/escolas/${escolaId}/reset-password`;
+            document.getElementById('resetAdminPasswordForm').action = `/superadmin/escolas/${escolaId}/reset-admin-password`;
             document.getElementById('resetAdminPasswordModal').classList.remove('hidden');
         }
 
